@@ -1,0 +1,299 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: bkgatewayservices.gateway.bk.tencent.com
+spec:
+  group: gateway.bk.tencent.com
+  names:
+    kind: BkGatewayService
+    listKind: BkGatewayServiceList
+    plural: bkgatewayservices
+    singular: bkgatewayservice
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: BkGatewayService is the Schema for the bkgatewayservices API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: BkGatewayServiceSpec defines the desired state of BkGatewayService
+            properties:
+              desc:
+                type: string
+              enableWebsocket:
+                type: boolean
+              id:
+                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                  Important: Run "make" to regenerate code after modifying this file'
+                nullable: true
+                type: string
+              name:
+                type: string
+              plugins:
+                items:
+                  description: BkGatewayPlugin ...
+                  properties:
+                    config:
+                      description: Config parameter of plugin
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    name:
+                      description: Name name of plugin
+                      type: string
+                  type: object
+                nullable: true
+                type: array
+              rewrite:
+                description: BkGatewayRewrite ...
+                properties:
+                  enabled:
+                    description: Enabled if rewrite is enabled
+                    type: boolean
+                  headers:
+                    additionalProperties:
+                      type: string
+                    description: Headers headers for rewrite
+                    type: object
+                type: object
+              upstream:
+                description: BkGatewayUpstreamConfig upstream config for bk gateway
+                properties:
+                  checks:
+                    description: UpstreamHealthCheck defines the active and/or passive
+                      health check for an Upstream, with the upstream health check
+                      feature, pods can be kicked out or joined in quickly, if the
+                      feedback of Kubernetes liveness/readiness probe is long.
+                    nullable: true
+                    properties:
+                      active:
+                        description: UpstreamActiveHealthCheck defines the active
+                          kind of upstream health check.
+                        nullable: true
+                        properties:
+                          concurrency:
+                            nullable: true
+                            type: integer
+                          healthy:
+                            description: UpstreamActiveHealthCheckHealthy defines
+                              the conditions to judge whether an upstream node is
+                              healthy with the active manner.
+                            nullable: true
+                            properties:
+                              httpStatuses:
+                                items:
+                                  type: integer
+                                nullable: true
+                                type: array
+                              interval:
+                                nullable: true
+                                type: integer
+                              successes:
+                                nullable: true
+                                type: integer
+                            type: object
+                          host:
+                            nullable: true
+                            type: string
+                          httpPath:
+                            nullable: true
+                            type: string
+                          httpsVerifyCertificate:
+                            nullable: true
+                            type: boolean
+                          port:
+                            format: int32
+                            nullable: true
+                            type: integer
+                          reqHeaders:
+                            items:
+                              type: string
+                            nullable: true
+                            type: array
+                          timeout:
+                            nullable: true
+                            type: integer
+                          type:
+                            type: string
+                          unhealthy:
+                            description: UpstreamActiveHealthCheckUnhealthy defines
+                              the conditions to judge whether an upstream node is
+                              unhealthy with the active manager.
+                            nullable: true
+                            properties:
+                              httpFailures:
+                                nullable: true
+                                type: integer
+                              httpStatuses:
+                                items:
+                                  type: integer
+                                nullable: true
+                                type: array
+                              interval:
+                                nullable: true
+                                type: integer
+                              tcpFailures:
+                                nullable: true
+                                type: integer
+                              timeouts:
+                                nullable: true
+                                type: integer
+                            type: object
+                        type: object
+                      passive:
+                        description: UpstreamPassiveHealthCheck defines the passive
+                          kind of upstream health check.
+                        nullable: true
+                        properties:
+                          healthy:
+                            description: UpstreamPassiveHealthCheckHealthy defines
+                              the conditions to judge whether an upstream node is
+                              healthy with the passive manner.
+                            nullable: true
+                            properties:
+                              httpStatuses:
+                                items:
+                                  type: integer
+                                nullable: true
+                                type: array
+                              successes:
+                                nullable: true
+                                type: integer
+                            type: object
+                          type:
+                            type: string
+                          unhealthy:
+                            description: UpstreamPassiveHealthCheckUnhealthy defines
+                              the conditions to judge whether an upstream node is
+                              unhealthy with the passive manager.
+                            nullable: true
+                            properties:
+                              httpFailures:
+                                nullable: true
+                                type: integer
+                              httpStatuses:
+                                items:
+                                  type: integer
+                                nullable: true
+                                type: array
+                              tcpFailures:
+                                nullable: true
+                                type: integer
+                              timeouts:
+                                nullable: true
+                                type: integer
+                            type: object
+                        type: object
+                    type: object
+                  discoveryType:
+                    nullable: true
+                    type: string
+                  externalDiscoveryConfig:
+                    nullable: true
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  externalDiscoveryType:
+                    nullable: true
+                    type: string
+                  hashOn:
+                    nullable: true
+                    type: string
+                  key:
+                    nullable: true
+                    type: string
+                  nodes:
+                    items:
+                      description: BkGatewayNode node of upstream
+                      properties:
+                        host:
+                          type: string
+                        port:
+                          type: integer
+                        priority:
+                          type: integer
+                        weight:
+                          type: integer
+                      type: object
+                    nullable: true
+                    type: array
+                  passHost:
+                    nullable: true
+                    type: string
+                  retries:
+                    nullable: true
+                    type: integer
+                  retryTimeout:
+                    nullable: true
+                    type: integer
+                  scheme:
+                    nullable: true
+                    type: string
+                  serviceName:
+                    nullable: true
+                    type: string
+                  timeout:
+                    description: UpstreamTimeout is settings for the read, send and
+                      connect to the upstream.
+                    nullable: true
+                    properties:
+                      connect:
+                        anyOf:
+                        - type: integer
+                        - type: string
+                        nullable: true
+                        x-kubernetes-int-or-string: true
+                      read:
+                        anyOf:
+                        - type: integer
+                        - type: string
+                        nullable: true
+                        x-kubernetes-int-or-string: true
+                      send:
+                        anyOf:
+                        - type: integer
+                        - type: string
+                        nullable: true
+                        x-kubernetes-int-or-string: true
+                    type: object
+                  tlsEnable:
+                    nullable: true
+                    type: boolean
+                  type:
+                    nullable: true
+                    type: string
+                  upstreamHost:
+                    nullable: true
+                    type: string
+                type: object
+            type: object
+          status:
+            description: BkGatewayServiceStatus defines the observed state of BkGatewayService
+            properties:
+              message:
+                description: Message message for bk gateway service
+                type: string
+              status:
+                description: Status status for bk gateway service
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

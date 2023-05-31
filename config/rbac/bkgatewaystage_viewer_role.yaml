@@ -1,0 +1,20 @@
+# permissions for end users to view bkgatewaystages.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: bkgatewaystage-viewer-role
+rules:
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
+  - bkgatewaystages
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
+  - bkgatewaystages/status
+  verbs:
+  - get

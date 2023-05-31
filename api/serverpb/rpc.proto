@@ -1,0 +1,178 @@
+syntax = "proto3";
+package serverpb;
+option go_package = "api/serverpb";
+// for grpc-gateway
+import "google/api/annotations.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/empty.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "validate/validate.proto";
+
+service Resources {
+  rpc Sync(SyncRequest) returns (SyncResponse) {
+    option (google.api.http) = {
+      post: "/v1/resources/sync"
+      body: "*"
+    };
+  }
+  
+  rpc Diff(DiffRequest) returns (DiffResponse) {
+    option (google.api.http) = {
+      post: "/v1/resources/diff"
+      body: "*"
+    };
+  }
+  
+  rpc List(ListRequest) returns (ListResponse) {
+    option (google.api.http) = {
+      post: "/v1/resources/list"
+      body: "*"
+    };
+  }
+
+  rpc Healthz(google.protobuf.Empty) returns (HealthzResponse) {
+    option (google.api.http) = {
+      get: "/healthz"
+    };
+  }
+
+  rpc GetLeader(google.protobuf.Empty) returns (GetLeaderResponse) {
+    option (google.api.http) = {
+      get: "/leader"
+    };
+  }
+}
+
+message SyncRequest {
+  string gateway = 1[(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title: "gateway", 
+    description: "网关名"
+  }];
+  string stage = 2[(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title: "stage", 
+    description: "环境名"
+  }];
+  bool all = 3[(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title: "all", 
+    description: "所有网关环境"
+  }];
+}
+
+message SyncResponse {
+  uint32 code = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title : "code",
+    description : "返回错误码"
+  }];
+  string message = 2[(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title : "message",
+    description : "返回错误信息"
+  }];
+}
+
+message ResourceIdentity {
+  oneof resource_identity {
+    int64 resource_id = 1;
+    string resource_name = 2;
+  }
+}
+
+message DiffRequest {
+  string gateway = 1[(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title: "gateway", 
+    description: "网关名"
+  }];
+  string stage = 2[(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title: "stage", 
+    description: "环境名"
+  }];
+  ResourceIdentity resource = 3;
+  bool all = 4[(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title: "all", 
+    description: "所有网关环境"
+  }];
+}
+
+message DiffResponse {
+  uint32 code = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title : "code",
+    description : "返回错误码"
+  }];
+  string message = 2[(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title : "message",
+    description : "返回错误信息"
+  }];
+  map<string, StageScopedApisixResources> data = 3[(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title : "message",
+    description : "diff 内容，以gateway/stage为key"
+  }];
+}
+
+message DiffResult {
+  StageScopedApisixResources put = 1;
+  StageScopedApisixResources delete = 2;
+  StageScopedApisixResources diff = 3;
+}
+
+message ListRequest {
+  string gateway = 1[(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title: "gateway", 
+    description: "网关名"
+  }];
+  string stage = 2[(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title: "stage", 
+    description: "环境名"
+  }];
+  ResourceIdentity resource = 3;
+  bool all = 4[(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title: "all", 
+    description: "所有网关环境"
+  }];
+}
+
+message ListResponse {
+  uint32 code = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title : "code",
+    description : "返回错误码"
+  }];
+  string message = 2[(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title : "message",
+    description : "返回错误信息"
+  }];
+  map<string, StageScopedApisixResources> data = 3[(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title : "message",
+    description : "apisix 资源内容，以gateway/stage为key"
+  }];
+}
+
+message GetLeaderResponse {
+  uint32 code = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title : "code",
+    description : "返回错误码"
+  }];
+  string message = 2[(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title : "message",
+    description : "返回错误信息"
+  }];
+  string data = 3[(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title : "data",
+    description : "leader 实例名"
+  }];
+}
+
+message HealthzResponse {
+  uint32 code = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title : "code",
+    description : "返回错误码"
+  }];
+  string message = 2[(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    title : "message",
+    description : "返回错误信息"
+  }];
+}
+
+message StageScopedApisixResources {
+  google.protobuf.Struct routes=1;
+  google.protobuf.Struct services=2;
+  google.protobuf.Struct plugin_metadata=3;
+  google.protobuf.Struct ssl=4;
+}

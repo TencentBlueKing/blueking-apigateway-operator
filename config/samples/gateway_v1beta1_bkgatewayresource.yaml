@@ -1,0 +1,6 @@
+apiVersion: gateway.bk.tencent.com/v1beta1
+kind: BkGatewayResource
+metadata:
+  name: bkgatewayresource-sample
+spec:
+  # TODO(user): Add fields here

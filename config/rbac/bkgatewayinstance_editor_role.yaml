@@ -1,0 +1,24 @@
+# permissions for end users to edit bkgatewayinstances.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: bkgatewayinstance-editor-role
+rules:
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
+  - bkgatewayinstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
+  - bkgatewayinstances/status
+  verbs:
+  - get

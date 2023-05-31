@@ -1,0 +1,354 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.6.0
+  creationTimestamp: null
+  name: bkgatewayresources.gateway.bk.tencent.com
+spec:
+  group: gateway.bk.tencent.com
+  names:
+    kind: BkGatewayResource
+    listKind: BkGatewayResourceList
+    plural: bkgatewayresources
+    singular: bkgatewayresource
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: BkGatewayResource is the Schema for the bkgatewayresources API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: BkGatewayResourceSpec ..
+          properties:
+            desc:
+              type: string
+            enableWebsocket:
+              type: boolean
+            id:
+              anyOf:
+              - type: integer
+              - type: string
+              nullable: true
+              x-kubernetes-int-or-string: true
+            matchSubPath:
+              type: boolean
+            methods:
+              items:
+                type: string
+              type: array
+            name:
+              description: just adapt for bkapigateway
+              type: string
+            plugins:
+              items:
+                description: BkGatewayPlugin ...
+                properties:
+                  config:
+                    description: Config parameter of plugin
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  name:
+                    description: Name name of plugin
+                    type: string
+                type: object
+              nullable: true
+              type: array
+            protocol:
+              type: string
+            rewrite:
+              description: BkGatewayResourceHTTPRewrite ...
+              properties:
+                enabled:
+                  type: boolean
+                headers:
+                  additionalProperties:
+                    type: string
+                  type: object
+                method:
+                  type: string
+                path:
+                  type: string
+                serviceHeaders:
+                  type: string
+                stageHeaders:
+                  description: 'default: (priority low) resource header -> stage header
+                    -> service header'
+                  type: string
+              type: object
+            service:
+              type: string
+            timeout:
+              description: UpstreamTimeout is settings for the read, send and connect
+                to the upstream.
+              nullable: true
+              properties:
+                connect:
+                  anyOf:
+                  - type: integer
+                  - type: string
+                  nullable: true
+                  x-kubernetes-int-or-string: true
+                read:
+                  anyOf:
+                  - type: integer
+                  - type: string
+                  nullable: true
+                  x-kubernetes-int-or-string: true
+                send:
+                  anyOf:
+                  - type: integer
+                  - type: string
+                  nullable: true
+                  x-kubernetes-int-or-string: true
+              type: object
+            upstream:
+              description: BkGatewayUpstreamConfig upstream config for bk gateway
+              nullable: true
+              properties:
+                checks:
+                  description: UpstreamHealthCheck defines the active and/or passive
+                    health check for an Upstream, with the upstream health check feature,
+                    pods can be kicked out or joined in quickly, if the feedback of
+                    Kubernetes liveness/readiness probe is long.
+                  nullable: true
+                  properties:
+                    active:
+                      description: UpstreamActiveHealthCheck defines the active kind
+                        of upstream health check.
+                      nullable: true
+                      properties:
+                        concurrency:
+                          nullable: true
+                          type: integer
+                        healthy:
+                          description: UpstreamActiveHealthCheckHealthy defines the
+                            conditions to judge whether an upstream node is healthy
+                            with the active manner.
+                          nullable: true
+                          properties:
+                            httpStatuses:
+                              items:
+                                type: integer
+                              nullable: true
+                              type: array
+                            interval:
+                              nullable: true
+                              type: integer
+                            successes:
+                              nullable: true
+                              type: integer
+                          type: object
+                        host:
+                          nullable: true
+                          type: string
+                        httpPath:
+                          nullable: true
+                          type: string
+                        httpsVerifyCertificate:
+                          nullable: true
+                          type: boolean
+                        port:
+                          format: int32
+                          nullable: true
+                          type: integer
+                        reqHeaders:
+                          items:
+                            type: string
+                          nullable: true
+                          type: array
+                        timeout:
+                          nullable: true
+                          type: integer
+                        type:
+                          type: string
+                        unhealthy:
+                          description: UpstreamActiveHealthCheckUnhealthy defines
+                            the conditions to judge whether an upstream node is unhealthy
+                            with the active manager.
+                          nullable: true
+                          properties:
+                            httpFailures:
+                              nullable: true
+                              type: integer
+                            httpStatuses:
+                              items:
+                                type: integer
+                              nullable: true
+                              type: array
+                            interval:
+                              nullable: true
+                              type: integer
+                            tcpFailures:
+                              nullable: true
+                              type: integer
+                            timeouts:
+                              nullable: true
+                              type: integer
+                          type: object
+                      type: object
+                    passive:
+                      description: UpstreamPassiveHealthCheck defines the passive
+                        kind of upstream health check.
+                      nullable: true
+                      properties:
+                        healthy:
+                          description: UpstreamPassiveHealthCheckHealthy defines the
+                            conditions to judge whether an upstream node is healthy
+                            with the passive manner.
+                          nullable: true
+                          properties:
+                            httpStatuses:
+                              items:
+                                type: integer
+                              nullable: true
+                              type: array
+                            successes:
+                              nullable: true
+                              type: integer
+                          type: object
+                        type:
+                          type: string
+                        unhealthy:
+                          description: UpstreamPassiveHealthCheckUnhealthy defines
+                            the conditions to judge whether an upstream node is unhealthy
+                            with the passive manager.
+                          nullable: true
+                          properties:
+                            httpFailures:
+                              nullable: true
+                              type: integer
+                            httpStatuses:
+                              items:
+                                type: integer
+                              nullable: true
+                              type: array
+                            tcpFailures:
+                              nullable: true
+                              type: integer
+                            timeouts:
+                              nullable: true
+                              type: integer
+                          type: object
+                      type: object
+                  type: object
+                discoveryType:
+                  nullable: true
+                  type: string
+                externalDiscoveryConfig:
+                  nullable: true
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                externalDiscoveryType:
+                  nullable: true
+                  type: string
+                hashOn:
+                  nullable: true
+                  type: string
+                key:
+                  nullable: true
+                  type: string
+                nodes:
+                  items:
+                    description: BkGatewayNode node of upstream
+                    properties:
+                      host:
+                        type: string
+                      port:
+                        type: integer
+                      priority:
+                        type: integer
+                      weight:
+                        type: integer
+                    type: object
+                  nullable: true
+                  type: array
+                passHost:
+                  nullable: true
+                  type: string
+                retries:
+                  nullable: true
+                  type: integer
+                retryTimeout:
+                  nullable: true
+                  type: integer
+                scheme:
+                  nullable: true
+                  type: string
+                serviceName:
+                  nullable: true
+                  type: string
+                timeout:
+                  description: UpstreamTimeout is settings for the read, send and
+                    connect to the upstream.
+                  nullable: true
+                  properties:
+                    connect:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      nullable: true
+                      x-kubernetes-int-or-string: true
+                    read:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      nullable: true
+                      x-kubernetes-int-or-string: true
+                    send:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      nullable: true
+                      x-kubernetes-int-or-string: true
+                  type: object
+                tlsEnable:
+                  nullable: true
+                  type: boolean
+                type:
+                  nullable: true
+                  type: string
+                upstreamHost:
+                  nullable: true
+                  type: string
+              type: object
+            uri:
+              type: string
+          type: object
+        status:
+          description: BkGatewayResourceStatus defines the observed state of BkGatewayResource
+          properties:
+            message:
+              description: Message message for bk gateway stage
+              type: string
+            status:
+              description: Status status for bk gateway stage
+              type: string
+          type: object
+      type: object
+  version: v1beta1
+  versions:
+  - name: v1beta1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

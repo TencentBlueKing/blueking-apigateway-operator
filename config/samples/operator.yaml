@@ -1,0 +1,13 @@
+etcd-endpoints: 127.0.0.1:2379
+etcd-without-auth: true
+apisix-etcd-endpoints: 127.0.0.1:2379
+apisix-etcd-without-auth: true
+without-kube: true
+run-with-leader: true
+agent-mode: true
+permission-refresher-disable: true
+zap-log-level: 9
+default-gateway: micro-gateway
+default-stage: stag
+apisix-resource-flush-mode: diff
+apisix-resource-writer: etcd

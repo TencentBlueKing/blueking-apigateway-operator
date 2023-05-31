@@ -1,0 +1,4 @@
+permission-refresher-disable: true
+zap-log-level: 9
+default-gateway: micro-gateway
+default-stage: stag
