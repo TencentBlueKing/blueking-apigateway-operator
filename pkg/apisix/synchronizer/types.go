@@ -21,7 +21,7 @@ package synchronizer
 import (
 	"context"
 
-	"micro-gateway/pkg/apisix"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 )
 
 // RetrySyncFunc ...

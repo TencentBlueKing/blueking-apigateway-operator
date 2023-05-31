@@ -31,7 +31,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"micro-gateway/api/serverpb"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/api/serverpb"
 )
 
 // ResourcesClientWrapper ...

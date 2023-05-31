@@ -30,8 +30,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
-	gatewayv1beta1 "micro-gateway/api/v1beta1"
-	"micro-gateway/pkg/discovery-operator-frame/types"
+	gatewayv1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/types"
 )
 
 // BkGatewayResourceReconciler reconciles a BkGatewayResource object

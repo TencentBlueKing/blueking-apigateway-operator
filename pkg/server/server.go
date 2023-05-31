@@ -45,15 +45,15 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/types/known/structpb"
 
-	"micro-gateway/api/serverpb"
-	"micro-gateway/internal/tracer"
-	"micro-gateway/pkg/apisix"
-	"micro-gateway/pkg/apisix/synchronizer"
-	"micro-gateway/pkg/commiter"
-	"micro-gateway/pkg/config"
-	"micro-gateway/pkg/leaderelection"
-	"micro-gateway/pkg/logging"
-	"micro-gateway/pkg/registry"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/api/serverpb"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/internal/tracer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 )
 
 // Server ...

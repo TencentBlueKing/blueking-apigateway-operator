@@ -31,8 +31,8 @@ import (
 	k8stypes "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1beta1 "micro-gateway/api/v1beta1"
-	"micro-gateway/pkg/logging"
+	v1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 )
 
 /*

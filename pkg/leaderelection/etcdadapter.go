@@ -27,8 +27,8 @@ import (
 	"go.etcd.io/etcd/client/v3/concurrency"
 	"go.uber.org/zap"
 
-	"micro-gateway/pkg/config"
-	"micro-gateway/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 )
 
 // EtcdLeaderElector ...

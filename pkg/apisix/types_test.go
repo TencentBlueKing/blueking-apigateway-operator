@@ -25,7 +25,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"micro-gateway/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 )
 
 var _ = Describe("ApisixConfiguration", func() {

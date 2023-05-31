@@ -25,13 +25,13 @@ import (
 	"github.com/rotisserie/eris"
 	"go.uber.org/zap"
 
-	"micro-gateway/api/v1beta1"
-	"micro-gateway/pkg/apisix"
-	"micro-gateway/pkg/commiter/cert"
-	"micro-gateway/pkg/commiter/service"
-	"micro-gateway/pkg/config"
-	"micro-gateway/pkg/logging"
-	"micro-gateway/pkg/radixtree"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter/cert"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter/service"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/radixtree"
 )
 
 // UpstreamConfig ...

@@ -29,12 +29,12 @@ import (
 	"github.com/rotisserie/eris"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"micro-gateway/api/v1beta1"
-	"micro-gateway/pkg/apisix"
-	"micro-gateway/pkg/commiter/conversion/render"
-	"micro-gateway/pkg/config"
-	frametypes "micro-gateway/pkg/discovery-operator-frame/types"
-	"micro-gateway/pkg/utils"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter/conversion/render"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	frametypes "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/types"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 const (

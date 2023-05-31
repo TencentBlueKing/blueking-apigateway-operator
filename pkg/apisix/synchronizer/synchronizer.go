@@ -24,11 +24,11 @@ import (
 
 	"go.uber.org/zap"
 
-	"micro-gateway/pkg/apisix"
-	"micro-gateway/pkg/config"
-	cfg "micro-gateway/pkg/config"
-	"micro-gateway/pkg/logging"
-	"micro-gateway/pkg/utils"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	cfg "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 const (

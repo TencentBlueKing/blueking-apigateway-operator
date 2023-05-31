@@ -22,9 +22,8 @@ import (
 	"context"
 	"fmt"
 
-	"micro-gateway/api/serverpb"
-	"micro-gateway/pkg/client"
-
+	"github.com/TencentBlueKing/blueking-apigateway-operator/api/serverpb"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
 	"github.com/rotisserie/eris"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

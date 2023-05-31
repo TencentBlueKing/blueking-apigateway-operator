@@ -28,12 +28,12 @@ import (
 	"go.opentelemetry.io/otel"
 	"google.golang.org/grpc"
 
-	"micro-gateway/pkg/apisix/synchronizer"
-	"micro-gateway/pkg/apisix/synchronizer/etcd"
-	"micro-gateway/pkg/apisix/synchronizer/file"
-	"micro-gateway/pkg/config"
-	"micro-gateway/pkg/logging"
-	"micro-gateway/pkg/utils"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer/etcd"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer/file"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 const (

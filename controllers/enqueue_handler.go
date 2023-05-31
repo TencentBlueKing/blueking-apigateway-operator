@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"micro-gateway/pkg/registry"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 
 	"k8s.io/client-go/util/workqueue"
 	"sigs.k8s.io/controller-runtime/pkg/client"
