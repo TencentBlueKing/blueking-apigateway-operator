@@ -28,9 +28,9 @@ import (
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 
-	"micro-gateway/pkg/apisix"
-	"micro-gateway/pkg/apisix/synchronizer"
-	"micro-gateway/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 )
 
 // FileConfigStore ...

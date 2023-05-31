@@ -30,7 +30,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	ctrlZap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"micro-gateway/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 )
 
 var defaultLogger *zap.Logger

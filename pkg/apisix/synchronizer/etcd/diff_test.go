@@ -19,8 +19,8 @@
 package etcd
 
 import (
-	"micro-gateway/pkg/apisix"
-	"micro-gateway/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 
 	v1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
 	. "github.com/onsi/ginkgo/v2"

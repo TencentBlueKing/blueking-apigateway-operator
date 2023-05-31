@@ -18,7 +18,7 @@
 
 package commiter
 
-import "micro-gateway/pkg/metric"
+import "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 
 // ReportResourceConvertedMetric ...
 func ReportResourceConvertedMetric(gateway, stage, resType string, numbers int) {

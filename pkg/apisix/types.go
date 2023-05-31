@@ -26,8 +26,8 @@ import (
 	"github.com/rotisserie/eris"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"micro-gateway/api/v1beta1"
-	"micro-gateway/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 )
 
 // ApisixResource defines common function for apisix resources

@@ -25,9 +25,9 @@ import (
 
 	v1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
 
-	"micro-gateway/api/v1beta1"
-	"micro-gateway/pkg/apisix"
-	"micro-gateway/pkg/utils"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 // convertSSL convert ssl crd to apisix ssl object

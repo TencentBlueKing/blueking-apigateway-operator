@@ -19,7 +19,7 @@
 package options
 
 import (
-	"micro-gateway/pkg/discovery-operator-frame/types"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/types"
 
 	"go.uber.org/zap/zapcore"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"

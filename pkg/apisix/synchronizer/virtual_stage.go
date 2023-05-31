@@ -26,11 +26,11 @@ import (
 
 	apisixv1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
 
-	"micro-gateway/api/v1beta1"
-	"micro-gateway/pkg/apisix"
-	"micro-gateway/pkg/config"
-	"micro-gateway/pkg/logging"
-	"micro-gateway/pkg/utils"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 // HealthZRouteIDInner ...

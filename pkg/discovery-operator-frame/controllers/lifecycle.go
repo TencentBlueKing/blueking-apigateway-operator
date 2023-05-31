@@ -21,9 +21,9 @@ package controllers
 import (
 	"fmt"
 
-	gatewayv1beta1 "micro-gateway/api/v1beta1"
-	"micro-gateway/pkg/discovery-operator-frame/service"
-	frametypes "micro-gateway/pkg/discovery-operator-frame/types"
+	gatewayv1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/service"
+	frametypes "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/types"
 
 	"github.com/go-logr/logr"
 	"github.com/rotisserie/eris"

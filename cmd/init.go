@@ -32,13 +32,13 @@ import (
 
 	//+kubebuilder:scaffold:imports
 
-	"micro-gateway/internal/tracer"
-	"micro-gateway/pkg/agent"
-	"micro-gateway/pkg/apisix/synchronizer"
-	"micro-gateway/pkg/client"
-	"micro-gateway/pkg/commiter"
-	"micro-gateway/pkg/config"
-	"micro-gateway/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/internal/tracer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/agent"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 )
 
 var (

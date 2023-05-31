@@ -21,7 +21,7 @@ package client
 import (
 	"fmt"
 
-	"micro-gateway/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 )
 
 var (

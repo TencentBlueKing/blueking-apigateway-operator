@@ -30,9 +30,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	gatewayv1beta1 "micro-gateway/api/v1beta1"
-	"micro-gateway/internal/token"
-	"micro-gateway/pkg/registry"
+	gatewayv1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/internal/token"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 )
 
 // BkGatewayConfigReconciler reconciles a BkGatewayConfig object

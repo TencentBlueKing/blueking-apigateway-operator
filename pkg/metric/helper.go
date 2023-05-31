@@ -18,7 +18,7 @@
 
 package metric
 
-import "micro-gateway/pkg/apisix"
+import "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 
 // ReportResourceCountHelper ...
 func ReportResourceCountHelper(

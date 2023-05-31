@@ -37,11 +37,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	gatewayv1beta1 "micro-gateway/api/v1beta1"
-	"micro-gateway/pkg/discovery-operator-frame/controllers"
-	"micro-gateway/pkg/discovery-operator-frame/options"
-	"micro-gateway/pkg/discovery-operator-frame/types"
-	"micro-gateway/pkg/discovery-operator-frame/utils"
+	gatewayv1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/controllers"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/options"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/types"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/utils"
 )
 
 // DiscoveryOperator is interface for frame operator

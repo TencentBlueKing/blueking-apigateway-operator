@@ -22,7 +22,7 @@ import (
 	"sync"
 	"time"
 
-	"micro-gateway/pkg/registry"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 )
 
 // CacheTimer ...

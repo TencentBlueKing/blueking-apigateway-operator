@@ -28,10 +28,10 @@ import (
 	"time"
 	"unsafe"
 
-	"micro-gateway/api/v1beta1"
-	"micro-gateway/internal/tracer"
-	"micro-gateway/pkg/logging"
-	"micro-gateway/pkg/metric"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/internal/tracer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 
 	json "github.com/json-iterator/go"
 	"github.com/rotisserie/eris"

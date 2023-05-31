@@ -19,8 +19,8 @@
 package agent
 
 import (
-	"micro-gateway/pkg/metric"
-	"micro-gateway/pkg/registry"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 )
 
 // ReportBootstrapSyncingMetric ...
