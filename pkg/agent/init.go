@@ -21,8 +21,8 @@ package agent
 import (
 	"time"
 
-	"micro-gateway/pkg/agent/timer"
-	"micro-gateway/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/agent/timer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 )
 
 var commitTimeWindow time.Duration = 5 * time.Second

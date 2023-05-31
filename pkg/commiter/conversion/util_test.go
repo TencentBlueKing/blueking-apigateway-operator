@@ -21,8 +21,8 @@ package conversion
 import (
 	"net"
 
-	"micro-gateway/api/v1beta1"
-	"micro-gateway/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

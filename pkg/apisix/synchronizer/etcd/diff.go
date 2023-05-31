@@ -22,7 +22,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 
-	"micro-gateway/pkg/apisix"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 )
 
 type configDiffer struct{}

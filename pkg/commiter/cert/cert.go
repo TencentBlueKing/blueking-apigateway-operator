@@ -24,8 +24,8 @@ import (
 	"github.com/rotisserie/eris"
 	corev1 "k8s.io/api/core/v1"
 
-	"micro-gateway/api/v1beta1"
-	"micro-gateway/pkg/registry"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 )
 
 // TLSCertFetcher ...

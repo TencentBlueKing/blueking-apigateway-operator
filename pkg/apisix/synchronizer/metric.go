@@ -22,9 +22,9 @@ import (
 	"strings"
 	"time"
 
-	"micro-gateway/pkg/apisix"
-	"micro-gateway/pkg/logging"
-	"micro-gateway/pkg/metric"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 )
 
 // ReportApisixEtcdMetric ...

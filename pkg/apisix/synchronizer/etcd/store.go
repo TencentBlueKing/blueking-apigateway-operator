@@ -30,10 +30,10 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.uber.org/zap"
 
-	"micro-gateway/pkg/apisix"
-	"micro-gateway/pkg/apisix/synchronizer"
-	"micro-gateway/pkg/logging"
-	"micro-gateway/pkg/metric"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 )
 
 // EtcdConfigStore ...

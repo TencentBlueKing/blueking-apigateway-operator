@@ -26,8 +26,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"micro-gateway/internal/constant"
-	"micro-gateway/pkg/runner"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/internal/constant"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/runner"
 )
 
 // rootCmd represents the base command when called without any subcommands

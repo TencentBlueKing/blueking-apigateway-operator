@@ -30,10 +30,10 @@ import (
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 
-	"micro-gateway/pkg/apisix"
-	. "micro-gateway/pkg/apisix/synchronizer"
-	"micro-gateway/pkg/config"
-	"micro-gateway/pkg/utils"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
+	. "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 var _ = Describe("VirtualStage", func() {

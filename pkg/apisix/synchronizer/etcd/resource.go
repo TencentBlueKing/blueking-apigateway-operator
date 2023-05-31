@@ -30,8 +30,8 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.uber.org/zap"
 
-	"micro-gateway/pkg/apisix"
-	"micro-gateway/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 )
 
 const (

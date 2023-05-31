@@ -27,17 +27,17 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.uber.org/zap"
 
-	"micro-gateway/pkg/agent"
-	"micro-gateway/pkg/agent/timer"
-	"micro-gateway/pkg/apisix/synchronizer"
-	"micro-gateway/pkg/commiter"
-	"micro-gateway/pkg/config"
-	"micro-gateway/pkg/leaderelection"
-	"micro-gateway/pkg/logging"
-	"micro-gateway/pkg/metric"
-	"micro-gateway/pkg/radixtree"
-	"micro-gateway/pkg/registry"
-	"micro-gateway/pkg/server"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/agent"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/agent/timer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/radixtree"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/server"
 )
 
 // EtcdAgentRunner ...

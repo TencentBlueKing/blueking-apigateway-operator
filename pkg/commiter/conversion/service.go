@@ -19,8 +19,8 @@
 package conversion
 
 import (
-	"micro-gateway/api/v1beta1"
-	"micro-gateway/pkg/apisix"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 
 	apisixv1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
 	"github.com/rotisserie/eris"

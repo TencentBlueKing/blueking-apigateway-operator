@@ -28,13 +28,13 @@ import (
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
-	"micro-gateway/api/v1beta1"
-	"micro-gateway/pkg/agent/timer"
-	"micro-gateway/pkg/apisix/synchronizer"
-	"micro-gateway/pkg/config"
-	"micro-gateway/pkg/logging"
-	"micro-gateway/pkg/radixtree"
-	"micro-gateway/pkg/registry"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/agent/timer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/radixtree"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 )
 
 const (

@@ -25,7 +25,7 @@ import (
 	"strings"
 	"time"
 
-	"micro-gateway/pkg/utils"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 
 	"github.com/spf13/viper"
 )

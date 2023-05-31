@@ -33,9 +33,9 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"micro-gateway/internal/constant"
-	"micro-gateway/pkg/config"
-	"micro-gateway/pkg/utils"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/internal/constant"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 // InitTracing ...

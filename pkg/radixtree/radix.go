@@ -24,10 +24,10 @@ import (
 	"strings"
 	"sync"
 
-	v1beta1 "micro-gateway/api/v1beta1"
-	"micro-gateway/pkg/logging"
-	"micro-gateway/pkg/registry"
-	"micro-gateway/pkg/utils"
+	v1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 
 	"github.com/armon/go-radix"
 	"github.com/rotisserie/eris"

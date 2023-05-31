@@ -19,7 +19,7 @@
 package conversion
 
 import (
-	"micro-gateway/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 )
 
 var (

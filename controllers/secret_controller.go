@@ -21,7 +21,7 @@ package controllers
 import (
 	"context"
 
-	"micro-gateway/pkg/registry"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 
 	corev1 "k8s.io/api/core/v1"
 	k8scorev1 "k8s.io/api/core/v1"

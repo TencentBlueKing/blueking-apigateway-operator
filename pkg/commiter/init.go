@@ -19,8 +19,8 @@
 package commiter
 
 import (
-	"micro-gateway/pkg/commiter/conversion"
-	"micro-gateway/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter/conversion"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 )
 
 var (

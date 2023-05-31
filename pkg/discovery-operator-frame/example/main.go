@@ -23,10 +23,10 @@ import (
 	"fmt"
 	"time"
 
-	gatewayv1beta1 "micro-gateway/api/v1beta1"
-	frame "micro-gateway/pkg/discovery-operator-frame"
-	"micro-gateway/pkg/discovery-operator-frame/options"
-	"micro-gateway/pkg/discovery-operator-frame/types"
+	gatewayv1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	frame "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/options"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/types"
 
 	"go.uber.org/zap/zapcore"
 )

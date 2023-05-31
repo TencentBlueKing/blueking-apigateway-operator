@@ -26,7 +26,7 @@ import (
 	"github.com/rotisserie/eris"
 	"go.uber.org/zap"
 
-	"micro-gateway/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 )
 
 // Issuer issuer for jwt token

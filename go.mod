@@ -1,4 +1,4 @@
-module micro-gateway
+module github.com/TencentBlueKing/blueking-apigateway-operator
 
 go 1.20
 

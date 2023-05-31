@@ -25,10 +25,10 @@ import (
 	"sync"
 	"time"
 
-	gatewayv1beta1 "micro-gateway/api/v1beta1"
-	"micro-gateway/pkg/config"
-	"micro-gateway/pkg/discovery-operator-frame/types"
-	"micro-gateway/pkg/discovery-operator-frame/utils"
+	gatewayv1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/types"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/utils"
 
 	"github.com/go-logr/logr"
 	"github.com/rotisserie/eris"

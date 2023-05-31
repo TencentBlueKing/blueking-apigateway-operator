@@ -19,7 +19,7 @@
 package radixtree
 
 import (
-	"micro-gateway/pkg/registry"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 )
 
 // RadixTreeGetter ...
