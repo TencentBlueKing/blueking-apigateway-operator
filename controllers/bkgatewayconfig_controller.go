@@ -21,6 +21,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	k8stypes "k8s.io/apimachinery/pkg/types"
@@ -87,7 +88,7 @@ func (r *BkGatewayConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	return ctrl.Result{
 		Requeue: true,
 		// RequeueAfter: reportInterval,
-		RequeueAfter: 30,
+		RequeueAfter: 30 * time.Second,
 	}, nil
 }
 
