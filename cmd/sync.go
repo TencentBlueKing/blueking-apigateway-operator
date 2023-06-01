@@ -21,7 +21,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/api/protocol"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/api/handler"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
 
@@ -83,7 +83,7 @@ func (s *syncCommand) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// build request
-	req := &protocol.SyncReq{}
+	req := &handler.SyncReq{}
 	req.Gateway, _ = cmd.Flags().GetString("gateway")
 	req.Stage, _ = cmd.Flags().GetString("stage")
 	req.All, _ = cmd.Flags().GetBool("all")
@@ -101,7 +101,7 @@ func (s *syncCommand) RunE(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (s *syncCommand) validateRequest(req *protocol.SyncReq) error {
+func (s *syncCommand) validateRequest(req *handler.SyncReq) error {
 	if len(req.Gateway) == 0 && !req.All {
 		return eris.New("--gateway --stage, or --all should be set")
 	}

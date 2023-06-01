@@ -21,7 +21,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/api/protocol"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/api/handler"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
 
 	"github.com/rotisserie/eris"
@@ -82,18 +82,18 @@ func (d *diffCommand) RunE(cmd *cobra.Command, args []string) error {
 		logger.Error(err, "GetLeaderResourcesClient nil")
 		return err
 	}
-	req := &protocol.DiffReq{}
+	req := &handler.DiffReq{}
 	req.Gateway, _ = cmd.Flags().GetString("gateway")
 	req.Stage, _ = cmd.Flags().GetString("stage")
-	var resourceIdentity protocol.ResourceInfo
+	var resourceIdentity handler.ResourceInfo
 	resName, _ := cmd.Flags().GetString("resource_name")
 	resID, _ := cmd.Flags().GetInt64("resource_id")
 	if len(resName) != 0 {
-		resourceIdentity = protocol.ResourceInfo{
+		resourceIdentity = handler.ResourceInfo{
 			ResourceName: resName,
 		}
 	} else if resID >= 0 {
-		resourceIdentity = protocol.ResourceInfo{
+		resourceIdentity = handler.ResourceInfo{
 			ResourceId: resID,
 		}
 	}
@@ -117,14 +117,14 @@ func (d *diffCommand) RunE(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (d *diffCommand) formatedOutput(resp protocol.DiffResp, format string) error {
+func (d *diffCommand) formatedOutput(diffInfo handler.DiffInfo, format string) error {
 	switch format {
 	case "json":
-		return printJson(resp)
+		return printJson(diffInfo)
 	case "yaml":
-		return printYaml(resp)
+		return printYaml(diffInfo)
 	case "simple":
-		for stage, diffResources := range resp.Data {
+		for stage, diffResources := range diffInfo {
 			d.printResource(stage, "Route", diffResources.Routes)
 			d.printResource(stage, "Service", diffResources.Services)
 			d.printResource(stage, "PluginMetadata", diffResources.PluginMetadata)
@@ -144,7 +144,7 @@ func (d *diffCommand) printResource(stage, typeName string, fields map[string]in
 	}
 }
 
-func (d *diffCommand) validateRequest(req *protocol.DiffReq) error {
+func (d *diffCommand) validateRequest(req *handler.DiffReq) error {
 	if len(req.Gateway) == 0 && !req.All {
 		return eris.New("--gateway --stage, or --all should be set")
 	}

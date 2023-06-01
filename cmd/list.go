@@ -21,7 +21,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/api/protocol"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/api/handler"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
 
@@ -88,18 +88,18 @@ func (l *listCommand) RunE(cmd *cobra.Command, args []string) error {
 		logger.Error(err, "GetLeaderResourcesClient failed")
 		return err
 	}
-	req := &protocol.ListReq{}
+	req := &handler.ListReq{}
 	req.Gateway, _ = cmd.Flags().GetString("gateway")
 	req.Stage, _ = cmd.Flags().GetString("stage")
-	var resourceIdentity *protocol.ResourceInfo
+	var resourceIdentity *handler.ResourceInfo
 	resName, _ := cmd.Flags().GetString("resource_name")
 	resID, _ := cmd.Flags().GetInt64("resource_id")
 	if len(resName) != 0 {
-		resourceIdentity = &protocol.ResourceInfo{
+		resourceIdentity = &handler.ResourceInfo{
 			ResourceName: resName,
 		}
 	} else if resID >= 0 {
-		resourceIdentity = &protocol.ResourceInfo{
+		resourceIdentity = &handler.ResourceInfo{
 			ResourceId: resID,
 		}
 	}
@@ -124,14 +124,14 @@ func (l *listCommand) RunE(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (l *listCommand) formatedOutput(resp *protocol.ListResp, format string) error {
+func (l *listCommand) formatedOutput(listInfo handler.ListInfo, format string) error {
 	switch format {
 	case "json":
-		return printJson(resp)
+		return printJson(listInfo)
 	case "yaml":
-		return printYaml(resp)
+		return printYaml(listInfo)
 	case "simple":
-		for stage, listResources := range resp.Data {
+		for stage, listResources := range listInfo {
 			fmt.Printf("Stage: %s\n", stage)
 			l.printResource("Routes", listResources.Routes)
 			l.printResource("Services", listResources.Services)
@@ -152,7 +152,7 @@ func (l *listCommand) printResource(typeName string, fields map[string]interface
 	}
 }
 
-func (l *listCommand) validateRequest(req *protocol.ListReq) error {
+func (l *listCommand) validateRequest(req *handler.ListReq) error {
 	if len(req.Gateway) == 0 && !req.All {
 		return eris.New("--gateway --stage, or --all should be set")
 	}

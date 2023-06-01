@@ -19,7 +19,6 @@
 package utils
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -36,6 +35,15 @@ const (
 
 	SystemError = "InternalServerError"
 )
+
+type CommonResp struct {
+	Data  interface{} `json:"data"`
+	Error struct {
+		Code    string `json:"code"`
+		Message string `json:"message"`
+		System  string `json:"system"`
+	} `json:"error"`
+}
 
 // SuccessJSONResponse ...
 func SuccessJSONResponse(c *gin.Context, data interface{}) {
@@ -79,10 +87,3 @@ var (
 	ConflictJSONResponse        = NewErrorJSONResponse(ConflictError, http.StatusConflict)
 	TooManyRequestsJSONResponse = NewErrorJSONResponse(TooManyRequests, http.StatusTooManyRequests)
 )
-
-// SystemErrorJSONResponse ...
-func SystemErrorJSONResponse(c *gin.Context, err error) {
-	message := fmt.Sprintf("system error[request_id=%s]: %s", GetRequestID(c), err.Error())
-
-	BaseErrorJSONResponse(c, SystemError, message, http.StatusInternalServerError)
-}

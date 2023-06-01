@@ -34,7 +34,6 @@ import (
 )
 
 var defaultLogger *zap.Logger
-var apiLogger *zap.Logger
 
 // Init ...
 func Init(cfg *config.Config) {
@@ -62,8 +61,6 @@ func Init(cfg *config.Config) {
 	initControllerLogger(&cfg.Logger.Controller, options)
 
 	initSystemLogger(&cfg.Logger.Default, options)
-
-	initApiLogger(&cfg.Logger.Api, options)
 }
 
 func initControllerLogger(cfg *config.LogConfig, options []zap.Option) {
@@ -100,24 +97,6 @@ func initSystemLogger(cfg *config.LogConfig, options []zap.Option) {
 	)
 
 	defaultLogger = zap.New(core, options...)
-}
-
-func initApiLogger(cfg *config.LogConfig, options []zap.Option) {
-	writer, err := getWriter(cfg.Writer, cfg.Settings)
-	if err != nil {
-		panic(err)
-	}
-	w := zapcore.AddSync(writer)
-	// 设置日志级别
-	l := newZapLevel(cfg.Level)
-	encoderConfig := zap.NewProductionEncoderConfig()
-	encoderConfig.EncodeTime = timeEncoder
-	core := zapcore.NewCore(
-		zapcore.NewJSONEncoder(encoderConfig),
-		w,
-		l,
-	)
-	apiLogger = zap.New(core, options...)
 }
 
 func newZapLevel(levelStr string) zap.AtomicLevel {
@@ -175,11 +154,6 @@ func GetLogger() *zap.SugaredLogger {
 		return logger.Sugar()
 	}
 	return defaultLogger.Sugar()
-}
-
-// GetAPILogger ...
-func GetAPILogger() *zap.Logger {
-	return apiLogger
 }
 
 func timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {

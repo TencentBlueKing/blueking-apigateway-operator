@@ -15,33 +15,29 @@
  * We undertake not to change the open source license (MIT license) applicable
  * to the current version of the project delivered to anyone in the future.
  */
-package middleware
+
+package api
 
 import (
-	"net/http"
-	"net/http/httptest"
-	"testing"
-
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
-
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/api/handler"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
 )
 
-func TestAPILogger(t *testing.T) {
-	logging.Init(&config.Config{})
-
-	r := gin.Default()
-	r.Use(APILogger())
-	utils.NewTestRouter(r)
-
-	req, _ := http.NewRequest("GET", "/ping", nil)
-	req.Header.Set("content-type", "application/json")
-	w := httptest.NewRecorder()
-
-	r.ServeHTTP(w, req)
-
-	assert.Equal(t, 200, w.Code)
+func Register(
+	r *gin.RouterGroup,
+	leaderElector leaderelection.LeaderElector,
+	registry registry.Registry,
+	committer *commiter.Commiter,
+	apiSixConfStore synchronizer.ApisixConfigStore,
+) {
+	// register resource api
+	resourceApi := handler.NewResourceApi(leaderElector, registry, committer, apiSixConfStore)
+	r.GET("/leader", resourceApi.GetLeader)
+	r.POST("/resources/diff", resourceApi.Diff)
+	r.POST("/resources/list", resourceApi.List)
+	r.POST("/resources/sync", resourceApi.Sync)
 }

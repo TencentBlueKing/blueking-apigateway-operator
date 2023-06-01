@@ -193,7 +193,7 @@ func newDefaultConfig() *Config {
 	return &Config{
 		HttpServer: HttpServer{
 			BindPort: 6004,
-			ApiKey:   "apiKey",
+			ApiKey:   "DebugModel@bk",
 		},
 		KubeExtension: KubeExtension{
 			LeaderElectionType:          "leases",

@@ -16,60 +16,118 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package service
+package handler
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"reflect"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/api/protocol"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/internal/tracer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
-
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 	"github.com/google/go-cmp/cmp"
-	json "github.com/json-iterator/go"
-	"github.com/pingcap/errors"
 	"github.com/rotisserie/eris"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/trace"
-	"go.uber.org/zap"
+
+	"github.com/gin-gonic/gin"
 )
 
-type ResourceService struct {
+type ResourceHandler struct {
+	LeaderElector   leaderelection.LeaderElector
 	registry        registry.Registry
 	committer       *commiter.Commiter
 	apiSixConfStore synchronizer.ApisixConfigStore
-	logger          *zap.SugaredLogger
 }
 
-func NewResourceService(
+func NewResourceApi(
+	leaderElector leaderelection.LeaderElector,
 	registry registry.Registry,
 	committer *commiter.Commiter,
-	apiSixConfStore synchronizer.ApisixConfigStore) *ResourceService {
-	return &ResourceService{
+	apiSixConfStore synchronizer.ApisixConfigStore) *ResourceHandler {
+	return &ResourceHandler{
+		LeaderElector:   leaderElector,
 		registry:        registry,
 		committer:       committer,
 		apiSixConfStore: apiSixConfStore,
-		logger:          logging.GetLogger(),
 	}
 }
 
+// GetLeader ...
+func (r *ResourceHandler) GetLeader(c *gin.Context) {
+	if r.LeaderElector == nil {
+		utils.CommonErrorJSONResponse(c, utils.NotFoundError, "LeaderElector not found")
+		return
+	}
+	utils.SuccessJSONResponse(c, r.LeaderElector.Leader())
+}
+
 // Sync ...
-func (r *ResourceService) Sync(ctx context.Context, req protocol.SyncReq) error {
-	outgoingCtx, span := tracer.NewTracer("httpServer").Start(ctx, "httpServer/sync", trace.WithAttributes(
-		attribute.Bool("all", req.All),
-		attribute.String("gateway", req.Gateway),
-		attribute.String("stage", req.Stage),
-	))
-	defer span.End()
+func (r *ResourceHandler) Sync(c *gin.Context) {
+	var req SyncReq
+	if err := c.ShouldBindQuery(&req); err != nil {
+		utils.BadRequestErrorJSONResponse(c, utils.ValidationErrorMessage(err))
+		return
+	}
 	if !req.All {
-		r.committer.ForceCommit(outgoingCtx, []registry.StageInfo{
+		r.committer.ForceCommit(c, []registry.StageInfo{
+			{
+				GatewayName: req.Gateway,
+				StageName:   req.Stage,
+			},
+		})
+	}
+	stageList, err := r.registry.ListStages(c)
+	if err != nil {
+		utils.CommonErrorJSONResponse(c, utils.SystemError, err.Error())
+		return
+	}
+	r.committer.ForceCommit(c, stageList)
+	if err != nil {
+		utils.CommonErrorJSONResponse(c, utils.SystemError, err.Error())
+		return
+	}
+	utils.SuccessJSONResponse(c, "ok")
+}
+
+// Diff ...
+func (r *ResourceHandler) Diff(c *gin.Context) {
+	var req DiffReq
+	if err := c.ShouldBind(&req); err != nil {
+		utils.BadRequestErrorJSONResponse(c, utils.ValidationErrorMessage(err))
+		return
+	}
+	diff, err := r.DiffHandler(c, &req)
+	if err != nil {
+		utils.CommonErrorJSONResponse(c, utils.SystemError, err.Error())
+		return
+	}
+	utils.SuccessJSONResponse(c, diff)
+}
+
+// List ...
+func (r *ResourceHandler) List(c *gin.Context) {
+	var req ListReq
+	if err := c.ShouldBind(&req); err != nil {
+		utils.BadRequestErrorJSONResponse(c, utils.ValidationErrorMessage(err))
+		return
+	}
+	list, err := r.ListHandler(c, &req)
+	if err != nil {
+		utils.CommonErrorJSONResponse(c, utils.SystemError, err.Error())
+		return
+	}
+	utils.SuccessJSONResponse(c, list)
+}
+
+// SyncHandler ...
+func (r *ResourceHandler) SyncHandler(ctx context.Context, req SyncReq) error {
+	if !req.All {
+		r.committer.ForceCommit(ctx, []registry.StageInfo{
 			{
 				GatewayName: req.Gateway,
 				StageName:   req.Stage,
@@ -77,25 +135,17 @@ func (r *ResourceService) Sync(ctx context.Context, req protocol.SyncReq) error 
 		})
 		return nil
 	}
-	stageList, err := r.registry.ListStages(outgoingCtx)
+	stageList, err := r.registry.ListStages(ctx)
 	if err != nil {
-		span.RecordError(err)
 		return err
 	}
-	r.committer.ForceCommit(outgoingCtx, stageList)
+	r.committer.ForceCommit(ctx, stageList)
 	return nil
 }
 
-// Diff ...
-func (r *ResourceService) Diff(ctx context.Context, req *protocol.DiffReq) (protocol.DiffInfo, error) {
-	outgoingCtx, span := tracer.NewTracer("httpServer").Start(ctx, "httpServer/diff", trace.WithAttributes(
-		attribute.Bool("all", req.All),
-		attribute.String("gateway", req.Gateway),
-		attribute.String("stage", req.Stage),
-		attribute.String("resource", req.Resource.ToString()),
-	))
-	defer span.End()
-	resp := make(protocol.DiffInfo)
+// DiffHandler ...
+func (r *ResourceHandler) DiffHandler(ctx context.Context, req *DiffReq) (DiffInfo, error) {
+	resp := make(DiffInfo)
 	var err error
 	if !req.All {
 		si := registry.StageInfo{
@@ -104,10 +154,8 @@ func (r *ResourceService) Diff(ctx context.Context, req *protocol.DiffReq) (prot
 		}
 		stageKey := config.GenStagePrimaryKey(req.Gateway, req.Stage)
 		originalApiSixResources := r.apiSixConfStore.Get(stageKey)
-		apiSixResources, err := r.committer.ConvertEtcdKVToApisixConfiguration(outgoingCtx, si)
+		apiSixResources, err := r.committer.ConvertEtcdKVToApisixConfiguration(ctx, si)
 		if err != nil {
-			// TODO
-			span.RecordError(err)
 			return nil, err
 		}
 		resourceKey, err := r.getRouteIDByResourceIdentity(
@@ -125,20 +173,16 @@ func (r *ResourceService) Diff(ctx context.Context, req *protocol.DiffReq) (prot
 		resp[stageKey] = r.diffWithRouteID(originalApiSixResources, apiSixResources, resourceKey)
 		return resp, nil
 	}
-	stageList, err := r.registry.ListStages(outgoingCtx)
+	stageList, err := r.registry.ListStages(ctx)
 	if err != nil {
-		span.RecordError(err)
 		return nil, err
 	}
 	allApiSixResources := r.apiSixConfStore.GetAll()
 	for _, stage := range stageList {
 		stageKey := config.GenStagePrimaryKey(stage.GatewayName, stage.StageName)
-		apiSixResources, itemErr := r.committer.ConvertEtcdKVToApisixConfiguration(outgoingCtx, stage)
+		apiSixResources, itemErr := r.committer.ConvertEtcdKVToApisixConfiguration(ctx, stage)
 		if itemErr != nil {
-			err = errors.New(fmt.Sprintf("%s [stage %s failed: %s]", stage.StageName, stageKey, eris.ToString(err, true)))
-			span.RecordError(err, trace.WithAttributes(
-				attribute.String("stageKey", stageKey),
-			))
+			err = fmt.Errorf("%s [stage %s failed: %s]", stage.StageName, stageKey, eris.ToString(err, true))
 			continue
 		}
 		diffResult := r.diff(allApiSixResources[stageKey], apiSixResources)
@@ -149,15 +193,9 @@ func (r *ResourceService) Diff(ctx context.Context, req *protocol.DiffReq) (prot
 	return resp, nil
 }
 
-func (r *ResourceService) List(ctx context.Context, req *protocol.ListReq) (protocol.ListInfo, error) {
-	_, span := tracer.NewTracer("httpServer").Start(ctx, "httpServer/list", trace.WithAttributes(
-		attribute.Bool("all", req.All),
-		attribute.String("gateway", req.Gateway),
-		attribute.String("stage", req.Stage),
-		attribute.String("resource", req.Resource.ToString()),
-	))
-	defer span.End()
-	resp := make(protocol.ListInfo)
+// ListHandler ...
+func (r *ResourceHandler) ListHandler(ctx context.Context, req *ListReq) (ListInfo, error) {
+	resp := make(ListInfo)
 	if !req.All {
 		stageKey := config.GenStagePrimaryKey(req.Gateway, req.Stage)
 		apiSixRes := r.apiSixConfStore.Get(stageKey)
@@ -183,17 +221,16 @@ func (r *ResourceService) List(ctx context.Context, req *protocol.ListReq) (prot
 	stagedApiSixRes := r.apiSixConfStore.GetAll()
 	by, err := json.Marshal(stagedApiSixRes)
 	if err != nil {
-		span.RecordError(err)
 		return nil, err
 	}
 	_ = json.Unmarshal(by, &resp)
 	return resp, nil
 }
 
-func (r *ResourceService) diffWithRouteID(
+func (r *ResourceHandler) diffWithRouteID(
 	lhs, rhs *apisix.ApisixConfiguration,
-	routeID string) *protocol.StageScopedApiSixResources {
-	ret := &protocol.StageScopedApiSixResources{}
+	routeID string) *StageScopedApiSixResources {
+	ret := &StageScopedApiSixResources{}
 	ret.Routes = r.diffMap(lhs.Routes, rhs.Routes, routeID)
 	ret.Services = r.diffMap(lhs.Services, rhs.Services, "")
 	ret.PluginMetadata = r.diffMap(lhs.PluginMetadatas, rhs.PluginMetadatas, "")
@@ -201,8 +238,8 @@ func (r *ResourceService) diffWithRouteID(
 	return ret
 }
 
-func (r *ResourceService) diff(lhs, rhs *apisix.ApisixConfiguration) *protocol.StageScopedApiSixResources {
-	ret := &protocol.StageScopedApiSixResources{}
+func (r *ResourceHandler) diff(lhs, rhs *apisix.ApisixConfiguration) *StageScopedApiSixResources {
+	ret := &StageScopedApiSixResources{}
 	ret.Routes = r.diffMap(lhs.Routes, rhs.Routes, "")
 	ret.Services = r.diffMap(lhs.Services, rhs.Services, "")
 	ret.PluginMetadata = r.diffMap(lhs.PluginMetadatas, rhs.PluginMetadatas, "")
@@ -210,7 +247,7 @@ func (r *ResourceService) diff(lhs, rhs *apisix.ApisixConfiguration) *protocol.S
 	return ret
 }
 
-func (r *ResourceService) diffMap(lhs, rhs interface{}, id string) map[string]interface{} {
+func (r *ResourceHandler) diffMap(lhs, rhs interface{}, id string) map[string]interface{} {
 	lhsValue := reflect.ValueOf(lhs)
 	rhsValue := reflect.ValueOf(rhs)
 	diff := make(map[string]interface{})
@@ -248,10 +285,10 @@ func (r *ResourceService) diffMap(lhs, rhs interface{}, id string) map[string]in
 	return diff
 }
 
-func (r *ResourceService) getRouteIDByResourceIdentity(
+func (r *ResourceHandler) getRouteIDByResourceIdentity(
 	conf *apisix.ApisixConfiguration,
 	gateway, stage string,
-	resource *protocol.ResourceInfo,
+	resource *ResourceInfo,
 ) (string, error) {
 	if conf == nil || resource == nil {
 		return "", eris.New("resource id not found")
@@ -259,7 +296,7 @@ func (r *ResourceService) getRouteIDByResourceIdentity(
 	if resource.ResourceId != 0 {
 		return fmt.Sprintf("%s.%s.%d", gateway, stage, resource.ResourceId), nil
 	}
-	// fixme: labels的resource name 超过64不能被apisix从etcd读取, 从源头没有写入 pkg/conversion/resource_api.go:62
+	// fixme: labels的resource name 超过64不能被apisix从etcd读取, 从源头没有写入 pkg/conversion/resource_slz.go:62
 	for _, route := range conf.Routes {
 		if route.Metadata.Labels[config.BKAPIGatewayLabelKeyResourceName] == resource.ResourceName {
 			return route.ID, nil
@@ -268,7 +305,7 @@ func (r *ResourceService) getRouteIDByResourceIdentity(
 	return "", eris.New("resource id not found")
 }
 
-func (r *ResourceService) isDiffResultEmpty(result *protocol.StageScopedApiSixResources) bool {
+func (r *ResourceHandler) isDiffResultEmpty(result *StageScopedApiSixResources) bool {
 	if result == nil {
 		return true
 	}

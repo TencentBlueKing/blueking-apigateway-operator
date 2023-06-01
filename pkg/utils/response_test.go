@@ -20,7 +20,6 @@ package utils_test
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -85,14 +84,5 @@ var _ = Describe("Response", func() {
 		got := readResponse(w)
 		assert.Equal(GinkgoT(), utils.BadRequestError, got["error"].(map[string]interface{})["code"])
 		assert.Equal(GinkgoT(), "error", got["error"].(map[string]interface{})["message"])
-	})
-
-	It("SystemErrorJSONResponse", func() {
-		utils.SystemErrorJSONResponse(c, errors.New("anError"))
-		assert.Equal(GinkgoT(), 500, c.Writer.Status())
-
-		got := readResponse(w)
-		assert.Equal(GinkgoT(), utils.SystemError, got["error"].(map[string]interface{})["code"])
-		assert.Contains(GinkgoT(), got["error"].(map[string]interface{})["message"], "system error")
 	})
 })

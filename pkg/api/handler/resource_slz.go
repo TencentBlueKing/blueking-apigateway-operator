@@ -16,7 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package protocol
+package handler
 
 import "fmt"
 
@@ -62,21 +62,3 @@ type ListReq struct {
 }
 
 type ListInfo map[string]*StageScopedApiSixResources
-
-type CommonResp struct {
-	Code    string      `json:"code"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
-}
-
-type DiffResp struct {
-	Code    string   `json:"code"`
-	Message string   `json:"message"`
-	Data    DiffInfo `json:"data"`
-}
-
-type ListResp struct {
-	Code    string   `json:"code"`
-	Message string   `json:"message"`
-	Data    ListInfo `json:"data"`
-}
