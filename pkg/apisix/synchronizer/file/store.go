@@ -113,6 +113,7 @@ func (f *FileConfigStore) write(ctx context.Context, config *apisix.ApisixConfig
 	}
 
 	if err := os.Chmod(f.path, 0o644); err != nil {
+		f.logger.Error(err, "set filemode failed", "path", f.path)
 		return fmt.Errorf("can't set filemode on file %q: %v", f.path, err)
 	}
 	return nil

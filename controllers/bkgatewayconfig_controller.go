@@ -61,6 +61,7 @@ type BkGatewayConfigReconciler struct {
 func (r *BkGatewayConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	// reportInterval := time.Duration(viper.GetInt(constant.FlagKeyBkGatewayStatusReportInterval)) * time.Second
+	reportInterval := 30 * time.Second
 
 	config := &gatewayv1beta1.BkGatewayConfig{}
 	if err := r.Get(ctx, k8stypes.NamespacedName{
@@ -69,9 +70,8 @@ func (r *BkGatewayConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}, config); err != nil {
 		logger.Error(err, fmt.Sprintf("get bk gateway config %s/%s failed", req.Name, req.Namespace))
 		return ctrl.Result{
-			Requeue: true,
-			// RequeueAfter: reportInterval,
-			RequeueAfter: 30,
+			Requeue:      true,
+			RequeueAfter: reportInterval,
 		}, nil
 	}
 	r.Handler.KubeEventHandler(&registry.ResourceMetadata{})
@@ -86,9 +86,8 @@ func (r *BkGatewayConfigReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	// }
 
 	return ctrl.Result{
-		Requeue: true,
-		// RequeueAfter: reportInterval,
-		RequeueAfter: 30 * time.Second,
+		Requeue:      true,
+		RequeueAfter: reportInterval,
 	}, nil
 }
 
