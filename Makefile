@@ -52,12 +52,6 @@ manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and Cust
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
-.PHONY: proto
-proto:
-	protoc -I ./pkg/third_party/ --proto_path=. --go_out=. --go-grpc_out=. \
-		--grpc-gateway_out=allow_delete_body=true,logtostderr=true,register_func_suffix=Gw:. \
-		--openapiv2_out=. --openapiv2_opt=logtostderr=true ./api/serverpb/rpc.proto
-
 .PHONY: fmt
 fmt: ## Run go fmt against code.
 	go fmt ./...

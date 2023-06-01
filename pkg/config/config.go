@@ -71,6 +71,7 @@ type HttpServer struct {
 	BindAddress   string
 	BindAddressV6 string
 	BindPort      int
+	ApiKey        string
 }
 
 // VirtualStage ...
@@ -152,6 +153,7 @@ type Sentry struct {
 type Logger struct {
 	Default    LogConfig
 	Controller LogConfig
+	Api        LogConfig
 }
 
 // LogConfig ...
@@ -191,6 +193,7 @@ func newDefaultConfig() *Config {
 	return &Config{
 		HttpServer: HttpServer{
 			BindPort: 6004,
+			ApiKey:   "apiKey",
 		},
 		KubeExtension: KubeExtension{
 			LeaderElectionType:          "leases",
@@ -247,6 +250,13 @@ func newDefaultConfig() *Config {
 				},
 			},
 			Controller: LogConfig{
+				Level:  "info",
+				Writer: "os",
+				Settings: map[string]string{
+					"name": "stdout",
+				},
+			},
+			Api: LogConfig{
 				Level:  "info",
 				Writer: "os",
 				Settings: map[string]string{

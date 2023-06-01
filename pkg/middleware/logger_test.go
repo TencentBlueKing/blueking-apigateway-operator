@@ -15,29 +15,33 @@
  * We undertake not to change the open source license (MIT license) applicable
  * to the current version of the project delivered to anyone in the future.
  */
+package middleware
 
-package utils
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
 
-// StringInSlice see if a string is in a string slice
-func StringInSlice(target string, strs []string) bool {
-	for _, str := range strs {
-		if target == str {
-			return true
-		}
-	}
-	return false
-}
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 
-// TruncateBytes truncate []byte to specific length
-func TruncateBytes(content []byte, length int) []byte {
-	if len(content) > length {
-		return content[:length]
-	}
-	return content
-}
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
+)
 
-// TruncateBytesToString ...
-func TruncateBytesToString(content []byte, length int) string {
-	s := TruncateBytes(content, length)
-	return string(s)
+func TestAPILogger(t *testing.T) {
+	logging.Init(&config.Config{})
+
+	r := gin.Default()
+	r.Use(APILogger())
+	utils.NewTestRouter(r)
+
+	req, _ := http.NewRequest("GET", "/ping", nil)
+	req.Header.Set("content-type", "application/json")
+	w := httptest.NewRecorder()
+
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
 }

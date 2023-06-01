@@ -19,10 +19,10 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/api/serverpb"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/api/protocol"
+
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
 
 	"github.com/rotisserie/eris"
@@ -71,19 +71,19 @@ func (s *syncCommand) Init() {
 func (s *syncCommand) RunE(cmd *cobra.Command, args []string) error {
 	initClient()
 
-	// prepare grpc client
-	client, err := client.GetLeaderResourcesClient()
-	if client == nil {
+	// prepare grpc cli
+	cli, err := client.GetLeaderResourceClient(globalConfig.HttpServer.ApiKey)
+	if err != nil {
+		logger.Infow("GetLeaderResourcesClient failed", "err", err)
+		return err
+	}
+	if cli == nil {
 		logger.Error(err, "GetLeaderResourcesClient failed")
 		return err
 	}
-	if err != nil {
-		logger.Infow("GetLeaderResourcesClient failed", "err", err)
-	}
-	defer client.Close()
 
 	// build request
-	req := &serverpb.SyncRequest{}
+	req := &protocol.SyncReq{}
 	req.Gateway, _ = cmd.Flags().GetString("gateway")
 	req.Stage, _ = cmd.Flags().GetString("stage")
 	req.All, _ = cmd.Flags().GetBool("all")
@@ -92,22 +92,16 @@ func (s *syncCommand) RunE(cmd *cobra.Command, args []string) error {
 	if err := s.validateRequest(req); err != nil {
 		return err
 	}
-
-	resp, err := client.Sync(context.Background(), req)
+	err = cli.Sync(req)
 	if err != nil {
 		logger.Error(err, "Sync request failed")
-		return err
-	}
-	if resp.Code != 0 {
-		err = eris.New(resp.Message)
-		logger.Error(err, "Sync failed")
 		return err
 	}
 	fmt.Println("Sync task sent")
 	return nil
 }
 
-func (s *syncCommand) validateRequest(req *serverpb.SyncRequest) error {
+func (s *syncCommand) validateRequest(req *protocol.SyncReq) error {
 	if len(req.Gateway) == 0 && !req.All {
 		return eris.New("--gateway --stage, or --all should be set")
 	}

@@ -16,28 +16,25 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package utils
+package middleware
 
-// StringInSlice see if a string is in a string slice
-func StringInSlice(target string, strs []string) bool {
-	for _, str := range strs {
-		if target == str {
-			return true
+import (
+	"fmt"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
+
+	"github.com/gin-gonic/gin"
+)
+
+const ApiKeyHeader = "Operator-Api-Key"
+
+func Auth(baseKey string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		apiKey := c.Request.Header.Get(ApiKeyHeader)
+		if len(apiKey) == 0 || apiKey != baseKey {
+			utils.CommonErrorJSONResponse(c, utils.UnauthorizedError, fmt.Sprintf("api key: %s is illegal", apiKey))
+			return
 		}
+		c.Next()
 	}
-	return false
-}
-
-// TruncateBytes truncate []byte to specific length
-func TruncateBytes(content []byte, length int) []byte {
-	if len(content) > length {
-		return content[:length]
-	}
-	return content
-}
-
-// TruncateBytesToString ...
-func TruncateBytesToString(content []byte, length int) string {
-	s := TruncateBytes(content, length)
-	return string(s)
 }

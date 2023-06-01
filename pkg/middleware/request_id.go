@@ -15,29 +15,29 @@
  * We undertake not to change the open source license (MIT license) applicable
  * to the current version of the project delivered to anyone in the future.
  */
+package middleware
 
-package utils
+import (
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 
-// StringInSlice see if a string is in a string slice
-func StringInSlice(target string, strs []string) bool {
-	for _, str := range strs {
-		if target == str {
-			return true
+	"github.com/gin-gonic/gin"
+)
+
+// RequestIDHeaderKey is a key to set the request id in header
+const (
+	RequestIDHeaderKey = "X-Request-Id"
+)
+
+// RequestID add the request_id for each api request
+func RequestID() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		requestID := c.GetHeader(RequestIDHeaderKey)
+		if requestID == "" || len(requestID) != 32 {
+			requestID = utils.GetUUID()
 		}
-	}
-	return false
-}
+		utils.SetRequestID(c, requestID)
+		c.Writer.Header().Set(RequestIDHeaderKey, requestID)
 
-// TruncateBytes truncate []byte to specific length
-func TruncateBytes(content []byte, length int) []byte {
-	if len(content) > length {
-		return content[:length]
+		c.Next()
 	}
-	return content
-}
-
-// TruncateBytesToString ...
-func TruncateBytesToString(content []byte, length int) string {
-	s := TruncateBytes(content, length)
-	return string(s)
 }

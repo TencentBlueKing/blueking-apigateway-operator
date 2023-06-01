@@ -27,10 +27,12 @@ apisix:
     operatorExternalHealthProbePort: 6004
     extraApisixResources: "/data/config/extra-resources.yaml"
 
+
 httpServer:
   bindAddress: "0.0.0.0"
   bindAddressV6: "[::]"
   bindPort: 6004
+  apiKey: apiKey
 
 logger:
   default:
@@ -38,6 +40,10 @@ logger:
     writer: os
     settings: {name: stdout}
   controller:
+    level: info
+    writer: os
+    settings: {name: stdout}
+  api:
     level: info
     writer: os
     settings: {name: stdout}

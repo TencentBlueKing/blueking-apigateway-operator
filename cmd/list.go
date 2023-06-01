@@ -19,16 +19,15 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/api/serverpb"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/api/protocol"
+
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
 
 	"github.com/rotisserie/eris"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"google.golang.org/protobuf/types/known/structpb"
 )
 
 type listCommand struct {
@@ -42,13 +41,13 @@ func init() {
 }
 
 // Init ...
-func (c *listCommand) Init() {
+func (l *listCommand) Init() {
 	cmd := &cobra.Command{
 		Use:          "list",
 		Short:        "list resources in apisix",
 		SilenceUsage: true,
 		PreRun:       preRun,
-		RunE:         c.RunE,
+		RunE:         l.RunE,
 	}
 
 	cmd.Flags()
@@ -66,68 +65,58 @@ func (c *listCommand) Init() {
 	cmd.MarkFlagsRequiredTogether("gateway", "stage")
 	cmd.MarkFlagsMutuallyExclusive("resource_id", "resource_name")
 
-	cmd.Flags().StringVarP(&cfgFile, "config", "c", "", "config file (default is config.yml;required)")
+	cmd.Flags().StringVarP(&cfgFile, "config", "l", "", "config file (default is config.yml;required)")
 	cmd.PersistentFlags().Bool("viper", true, "Use Viper for configuration")
 
 	cmd.MarkFlagRequired("config")
 	viper.SetDefault("author", "blueking-paas")
 
 	rootCmd.AddCommand(cmd)
-	c.cmd = cmd
+	l.cmd = cmd
 }
 
 // RunE ...
-func (c *listCommand) RunE(cmd *cobra.Command, args []string) error {
+func (l *listCommand) RunE(cmd *cobra.Command, args []string) error {
 	initClient()
 
-	client, err := client.GetLeaderResourcesClient()
-	if client == nil {
+	cli, err := client.GetLeaderResourceClient(globalConfig.HttpServer.ApiKey)
+	if err != nil {
+		logger.Infow("GetLeaderResourcesClient failed", "err", err)
+		return err
+	}
+	if cli == nil {
 		logger.Error(err, "GetLeaderResourcesClient failed")
 		return err
 	}
-	if err != nil {
-		logger.Infow("GetLeaderResourcesClient failed", "err", err)
-	}
-	defer client.Close()
-
-	req := &serverpb.ListRequest{}
+	req := &protocol.ListReq{}
 	req.Gateway, _ = cmd.Flags().GetString("gateway")
 	req.Stage, _ = cmd.Flags().GetString("stage")
-	var resourceIdentity *serverpb.ResourceIdentity = nil
-	res_name, _ := cmd.Flags().GetString("resource_name")
-	res_id, _ := cmd.Flags().GetInt64("resource_id")
-	if len(res_name) != 0 {
-		resourceIdentity = &serverpb.ResourceIdentity{
-			ResourceIdentity: &serverpb.ResourceIdentity_ResourceName{
-				ResourceName: res_name,
-			},
+	var resourceIdentity *protocol.ResourceInfo
+	resName, _ := cmd.Flags().GetString("resource_name")
+	resID, _ := cmd.Flags().GetInt64("resource_id")
+	if len(resName) != 0 {
+		resourceIdentity = &protocol.ResourceInfo{
+			ResourceName: resName,
 		}
-	} else if res_id >= 0 {
-		resourceIdentity = &serverpb.ResourceIdentity{
-			ResourceIdentity: &serverpb.ResourceIdentity_ResourceId{
-				ResourceId: res_id,
-			},
+	} else if resID >= 0 {
+		resourceIdentity = &protocol.ResourceInfo{
+			ResourceId: resID,
 		}
 	}
 	req.Resource = resourceIdentity
 	req.All, _ = cmd.Flags().GetBool("all")
 
-	if err := c.validateRequest(req); err != nil {
+	if err := l.validateRequest(req); err != nil {
 		return err
 	}
 
-	resp, err := client.List(context.Background(), req)
+	resp, err := cli.List(req)
 	if err != nil {
 		logger.Error(err, "List request failed")
 		return err
 	}
-	if resp.Code != 0 {
-		err = eris.New(resp.Message)
-		logger.Error(err, "List failed")
-		return err
-	}
 	format, _ := cmd.Flags().GetString("write-out")
-	err = c.formatedOutput(resp, format)
+	err = l.formatedOutput(resp, format)
 	if err != nil {
 		logger.Error(err, "print resp failed")
 		return err
@@ -135,7 +124,7 @@ func (c *listCommand) RunE(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (c *listCommand) formatedOutput(resp *serverpb.ListResponse, format string) error {
+func (l *listCommand) formatedOutput(resp *protocol.ListResp, format string) error {
 	switch format {
 	case "json":
 		return printJson(resp)
@@ -144,26 +133,26 @@ func (c *listCommand) formatedOutput(resp *serverpb.ListResponse, format string)
 	case "simple":
 		for stage, listResources := range resp.Data {
 			fmt.Printf("Stage: %s\n", stage)
-			c.printResource("Routes", listResources.Routes)
-			c.printResource("Services", listResources.Services)
-			c.printResource("PluginMetadatas", listResources.PluginMetadata)
-			c.printResource("SSLs", listResources.Ssl)
+			l.printResource("Routes", listResources.Routes)
+			l.printResource("Services", listResources.Services)
+			l.printResource("PluginMetadatas", listResources.PluginMetadata)
+			l.printResource("SSLs", listResources.Ssl)
 		}
 	}
 	return nil
 }
 
-func (c *listCommand) printResource(typeName string, fields *structpb.Struct) {
+func (l *listCommand) printResource(typeName string, fields map[string]interface{}) {
 	fmt.Printf("\t%s:\n", typeName)
 	if fields == nil {
 		return
 	}
-	for id := range fields.Fields {
+	for id := range fields {
 		fmt.Printf("\t\t%s\n", id)
 	}
 }
 
-func (s *listCommand) validateRequest(req *serverpb.ListRequest) error {
+func (l *listCommand) validateRequest(req *protocol.ListReq) error {
 	if len(req.Gateway) == 0 && !req.All {
 		return eris.New("--gateway --stage, or --all should be set")
 	}

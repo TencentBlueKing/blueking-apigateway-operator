@@ -19,15 +19,14 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/api/serverpb"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/api/protocol"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
+
 	"github.com/rotisserie/eris"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"google.golang.org/protobuf/types/known/structpb"
 )
 
 type diffCommand struct {
@@ -41,14 +40,14 @@ func init() {
 }
 
 // Init ...
-func (c *diffCommand) Init() {
+func (d *diffCommand) Init() {
 	cmd := &cobra.Command{
 		Use:          "diff",
 		Short:        "diff between bkgateway resources and apisix storage",
 		Run:          func(cmd *cobra.Command, args []string) {},
 		SilenceUsage: true,
 		PreRun:       preRun,
-		RunE:         c.RunE,
+		RunE:         d.RunE,
 	}
 
 	cmd.Flags().String("gateway", "", "gateway name for list command")
@@ -67,61 +66,50 @@ func (c *diffCommand) Init() {
 	viper.SetDefault("author", "blueking-paas")
 
 	rootCmd.AddCommand(cmd)
-	c.cmd = cmd
+	d.cmd = cmd
 }
 
 // RunE ...
-func (c *diffCommand) RunE(cmd *cobra.Command, args []string) error {
+func (d *diffCommand) RunE(cmd *cobra.Command, args []string) error {
 	initClient()
 
-	client, err := client.GetLeaderResourcesClient()
-	if client == nil {
-		logger.Error(err, "GetLeaderResourcesClient failed")
-		return err
-	}
+	cli, err := client.GetLeaderResourceClient(globalConfig.HttpServer.ApiKey)
 	if err != nil {
 		logger.Infow("GetLeaderResourcesClient failed", "err", err)
-	}
-	defer client.Close()
-
-	req := &serverpb.DiffRequest{}
-	req.Gateway, _ = cmd.Flags().GetString("gateway")
-	req.Stage, _ = cmd.Flags().GetString("stage")
-	var resourceIdentity *serverpb.ResourceIdentity = nil
-	res_name, _ := cmd.Flags().GetString("resource_name")
-	res_id, _ := cmd.Flags().GetInt64("resource_id")
-	if len(res_name) != 0 {
-		resourceIdentity = &serverpb.ResourceIdentity{
-			ResourceIdentity: &serverpb.ResourceIdentity_ResourceName{
-				ResourceName: res_name,
-			},
-		}
-	} else if res_id >= 0 {
-		resourceIdentity = &serverpb.ResourceIdentity{
-			ResourceIdentity: &serverpb.ResourceIdentity_ResourceId{
-				ResourceId: res_id,
-			},
-		}
-	}
-	req.Resource = resourceIdentity
-	req.All, _ = cmd.Flags().GetBool("all")
-
-	if err := c.validateRequest(req); err != nil {
 		return err
 	}
+	if cli == nil {
+		logger.Error(err, "GetLeaderResourcesClient nil")
+		return err
+	}
+	req := &protocol.DiffReq{}
+	req.Gateway, _ = cmd.Flags().GetString("gateway")
+	req.Stage, _ = cmd.Flags().GetString("stage")
+	var resourceIdentity protocol.ResourceInfo
+	resName, _ := cmd.Flags().GetString("resource_name")
+	resID, _ := cmd.Flags().GetInt64("resource_id")
+	if len(resName) != 0 {
+		resourceIdentity = protocol.ResourceInfo{
+			ResourceName: resName,
+		}
+	} else if resID >= 0 {
+		resourceIdentity = protocol.ResourceInfo{
+			ResourceId: resID,
+		}
+	}
+	req.Resource = &resourceIdentity
+	req.All, _ = cmd.Flags().GetBool("all")
 
-	resp, err := client.Diff(context.Background(), req)
+	if err := d.validateRequest(req); err != nil {
+		return err
+	}
+	resp, err := cli.Diff(req)
 	if err != nil {
 		logger.Error(err, "Diff request failed")
 		return err
 	}
-	if resp.Code != 0 {
-		err = eris.New(resp.Message)
-		logger.Error(err, "diff failed")
-		return err
-	}
 	format, _ := cmd.Flags().GetString("write-out")
-	err = c.formatedOutput(resp, format)
+	err = d.formatedOutput(*resp, format)
 	if err != nil {
 		logger.Error(err, "print resp failed")
 		return err
@@ -129,7 +117,7 @@ func (c *diffCommand) RunE(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (c *diffCommand) formatedOutput(resp *serverpb.DiffResponse, format string) error {
+func (d *diffCommand) formatedOutput(resp protocol.DiffResp, format string) error {
 	switch format {
 	case "json":
 		return printJson(resp)
@@ -137,26 +125,26 @@ func (c *diffCommand) formatedOutput(resp *serverpb.DiffResponse, format string)
 		return printYaml(resp)
 	case "simple":
 		for stage, diffResources := range resp.Data {
-			c.printResource(stage, "Route", diffResources.Routes)
-			c.printResource(stage, "Service", diffResources.Services)
-			c.printResource(stage, "PluginMetadata", diffResources.PluginMetadata)
-			c.printResource(stage, "SSL", diffResources.Ssl)
+			d.printResource(stage, "Route", diffResources.Routes)
+			d.printResource(stage, "Service", diffResources.Services)
+			d.printResource(stage, "PluginMetadata", diffResources.PluginMetadata)
+			d.printResource(stage, "SSL", diffResources.Ssl)
 			fmt.Println()
 		}
 	}
 	return nil
 }
 
-func (c *diffCommand) printResource(stage, typeName string, fields *structpb.Struct) {
+func (d *diffCommand) printResource(stage, typeName string, fields map[string]interface{}) {
 	if fields == nil {
 		return
 	}
-	for id, value := range fields.Fields {
-		fmt.Printf("Stage: %s, %s: %s\n%s\n", stage, typeName, id, value.GetStringValue())
+	for id, value := range fields {
+		fmt.Printf("Stage: %s, %s: %s\n%s\n", stage, typeName, id, value)
 	}
 }
 
-func (s *diffCommand) validateRequest(req *serverpb.DiffRequest) error {
+func (d *diffCommand) validateRequest(req *protocol.DiffReq) error {
 	if len(req.Gateway) == 0 && !req.All {
 		return eris.New("--gateway --stage, or --all should be set")
 	}
