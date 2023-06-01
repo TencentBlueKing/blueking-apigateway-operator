@@ -30,6 +30,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/api/handler"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
+	"github.com/rotisserie/eris"
 	"gopkg.in/h2non/gentleman.v2"
 	"gopkg.in/h2non/gentleman.v2/plugins/body"
 )
@@ -51,7 +52,7 @@ var (
 	serverBindPort = 6004
 )
 
-// Init ...
+// Init client
 func Init(cfg *config.Config) {
 	switch {
 	case cfg.HttpServer.BindAddress != "":
@@ -73,6 +74,7 @@ func Init(cfg *config.Config) {
 	serverBindPort = cfg.HttpServer.BindPort
 }
 
+// NewResourceClient New resource client with host and apiKey
 func NewResourceClient(host string, apiKey string) *ResourceClient {
 	cli := gentleman.New()
 	cli.URL(host)
@@ -82,7 +84,7 @@ func NewResourceClient(host string, apiKey string) *ResourceClient {
 	}
 }
 
-// GetLeaderResourceClient ...
+// GetLeaderResourceClient get leader resource client
 func GetLeaderResourceClient(apiKey string) (*ResourceClient, error) {
 	client := NewResourceClient("http://"+serverAddr, apiKey)
 	leader, err := client.GetLeader()
@@ -96,33 +98,23 @@ func GetLeaderResourceClient(apiKey string) (*ResourceClient, error) {
 	return NewResourceClient("http://"+leaderHost, apiKey), nil
 }
 
-// GetLeader Resource
+// GetLeader Resource leader instance
 func (r *ResourceClient) GetLeader() (string, error) {
 	request := r.client.Request()
 	request.Path(GetLeaderURL)
 	request.Method(http.MethodGet)
-	r.SetAuth(request)
-	result, err := request.Send()
-	if err != nil {
-		return "", err
-	}
 	var leader string
-	return leader, r.DecodeResp(result, &leader)
+	return leader, r.DoHttpRequest(request, SetAuth(r.Apikey), SendAndDecodeResp(&leader))
 }
 
-// Diff Resource
+// Diff resource both gateway and apiSix
 func (r *ResourceClient) Diff(req *handler.DiffReq) (*handler.DiffInfo, error) {
 	request := r.client.Request()
 	request.Path(DiffResourceURL)
 	request.Method(http.MethodPost)
 	request.Use(body.JSON(req))
-	r.SetAuth(request)
-	result, err := request.Send()
-	if err != nil {
-		return nil, err
-	}
 	var res handler.DiffInfo
-	return &res, r.DecodeResp(result, &res)
+	return &res, r.DoHttpRequest(request, SetAuth(r.Apikey), SendAndDecodeResp(&res))
 }
 
 // List Resource
@@ -131,54 +123,70 @@ func (r *ResourceClient) List(req *handler.ListReq) (handler.ListInfo, error) {
 	request.Path(ListResourceURL)
 	request.Method(http.MethodPost)
 	request.Use(body.JSON(req))
-	r.SetAuth(request)
-	result, err := request.Send()
-	if err != nil {
-		return nil, err
-	}
 	var res handler.ListInfo
-	return res, r.DecodeResp(result, &req)
+	return res, r.DoHttpRequest(request, SetAuth(r.Apikey), SendAndDecodeResp(&res))
 }
 
-// Sync Resource
+// Sync Resource between gateway and apiSix
 func (r *ResourceClient) Sync(req *handler.SyncReq) error {
 	request := r.client.Request()
 	request.Path(SyncResourceURL)
 	request.Method(http.MethodPost)
 	request.Use(body.JSON(req))
-	r.SetAuth(request)
-	result, err := request.Send()
-	if err != nil {
-		return err
-	}
-	return r.DecodeResp(result, nil)
+	return r.DoHttpRequest(request, SetAuth(r.Apikey), SendAndDecodeResp(nil))
 }
 
-func (r *ResourceClient) SetAuth(request *gentleman.Request) {
-	request.SetHeader("Authorization",
-		fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString(
-			[]byte(fmt.Sprintf("bk-operator:%s", r.Apikey)))))
-}
-
-func (r *ResourceClient) DecodeResp(response *gentleman.Response, result interface{}) error {
-	var res utils.CommonResp
-	err := json.Unmarshal(response.Bytes(), &res)
-	if err != nil {
-		return err
-	}
-	if res.Error.Code != "" {
-		return fmt.Errorf("code:%s,msg:%s", res.Error.Code, res.Error.Message)
-	}
-	if result != nil {
-		resultByte, err := json.Marshal(res.Data)
+// DoHttpRequest do http request with opt
+func (r *ResourceClient) DoHttpRequest(request *gentleman.Request, options ...RequestOption) error {
+	for _, opt := range options {
+		err := opt(request)
 		if err != nil {
 			return err
 		}
-		return json.Unmarshal(resultByte, &result)
 	}
 	return nil
 }
 
+// RequestOption http option
+type RequestOption func(request *gentleman.Request) error
+
+// SetAuth set basic auth
+func SetAuth(apiKey string) RequestOption {
+	return func(request *gentleman.Request) error {
+		request.SetHeader("Authorization",
+			fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString(
+				[]byte(fmt.Sprintf("bk-operator:%s", apiKey)))))
+		return nil
+	}
+}
+
+// SendAndDecodeResp do http request and decode resp
+func SendAndDecodeResp(result interface{}) RequestOption {
+	return func(request *gentleman.Request) error {
+		resp, err := request.Send()
+		if err != nil {
+			return eris.Wrapf(err, "send http fail")
+		}
+		var res utils.CommonResp
+		err = json.Unmarshal(resp.Bytes(), &res)
+		if err != nil {
+			return eris.Wrapf(err, "unmarshal http res err")
+		}
+		if res.Error.Code != "" {
+			return fmt.Errorf("code:%s,msg:%s", res.Error.Code, res.Error.Message)
+		}
+		if result != nil {
+			resultByte, err := json.Marshal(res.Data)
+			if err != nil {
+				return eris.Wrapf(err, "marshal http result data err")
+			}
+			return json.Unmarshal(resultByte, &result)
+		}
+		return nil
+	}
+}
+
+// getHostFromLeaderName
 func getHostFromLeaderName(leader string) string {
 	// format somename-ip1,ip2,ip3
 	splitRes := strings.Split(leader, "_")

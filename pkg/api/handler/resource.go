@@ -83,14 +83,10 @@ func (r *ResourceHandler) Sync(c *gin.Context) {
 	}
 	stageList, err := r.registry.ListStages(c)
 	if err != nil {
-		utils.CommonErrorJSONResponse(c, utils.SystemError, err.Error())
+		utils.CommonErrorJSONResponse(c, utils.SystemError, fmt.Errorf("registry list stages err:%w", err).Error())
 		return
 	}
 	r.committer.ForceCommit(c, stageList)
-	if err != nil {
-		utils.CommonErrorJSONResponse(c, utils.SystemError, err.Error())
-		return
-	}
 	utils.SuccessJSONResponse(c, "ok")
 }
 
@@ -103,7 +99,7 @@ func (r *ResourceHandler) Diff(c *gin.Context) {
 	}
 	diff, err := r.DiffHandler(c, &req)
 	if err != nil {
-		utils.CommonErrorJSONResponse(c, utils.SystemError, err.Error())
+		utils.CommonErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("diff fail: %+v", err))
 		return
 	}
 	utils.SuccessJSONResponse(c, diff)
@@ -118,13 +114,13 @@ func (r *ResourceHandler) List(c *gin.Context) {
 	}
 	list, err := r.ListHandler(c, &req)
 	if err != nil {
-		utils.CommonErrorJSONResponse(c, utils.SystemError, err.Error())
+		utils.CommonErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("list err:%+v", err.Error()))
 		return
 	}
 	utils.SuccessJSONResponse(c, list)
 }
 
-// SyncHandler ...
+// SyncHandler handle sys resource between gateway and apiSix
 func (r *ResourceHandler) SyncHandler(ctx context.Context, req SyncReq) error {
 	if !req.All {
 		r.committer.ForceCommit(ctx, []registry.StageInfo{
@@ -143,7 +139,7 @@ func (r *ResourceHandler) SyncHandler(ctx context.Context, req SyncReq) error {
 	return nil
 }
 
-// DiffHandler ...
+// DiffHandler handle diff resource between gateway and apiSix
 func (r *ResourceHandler) DiffHandler(ctx context.Context, req *DiffReq) (DiffInfo, error) {
 	resp := make(DiffInfo)
 	var err error
@@ -193,7 +189,7 @@ func (r *ResourceHandler) DiffHandler(ctx context.Context, req *DiffReq) (DiffIn
 	return resp, nil
 }
 
-// ListHandler ...
+// ListHandler handle list resource from gateway and k8s
 func (r *ResourceHandler) ListHandler(ctx context.Context, req *ListReq) (ListInfo, error) {
 	resp := make(ListInfo)
 	if !req.All {
@@ -230,20 +226,22 @@ func (r *ResourceHandler) ListHandler(ctx context.Context, req *ListReq) (ListIn
 func (r *ResourceHandler) diffWithRouteID(
 	lhs, rhs *apisix.ApisixConfiguration,
 	routeID string) *StageScopedApiSixResources {
-	ret := &StageScopedApiSixResources{}
-	ret.Routes = r.diffMap(lhs.Routes, rhs.Routes, routeID)
-	ret.Services = r.diffMap(lhs.Services, rhs.Services, "")
-	ret.PluginMetadata = r.diffMap(lhs.PluginMetadatas, rhs.PluginMetadatas, "")
-	ret.Ssl = r.diffMap(lhs.SSLs, rhs.SSLs, "")
+	ret := &StageScopedApiSixResources{
+		Routes:         r.diffMap(lhs.Routes, rhs.Routes, routeID),
+		Services:       r.diffMap(lhs.Services, rhs.Services, ""),
+		PluginMetadata: r.diffMap(lhs.PluginMetadatas, rhs.PluginMetadatas, ""),
+		Ssl:            r.diffMap(lhs.SSLs, rhs.SSLs, ""),
+	}
 	return ret
 }
 
 func (r *ResourceHandler) diff(lhs, rhs *apisix.ApisixConfiguration) *StageScopedApiSixResources {
-	ret := &StageScopedApiSixResources{}
-	ret.Routes = r.diffMap(lhs.Routes, rhs.Routes, "")
-	ret.Services = r.diffMap(lhs.Services, rhs.Services, "")
-	ret.PluginMetadata = r.diffMap(lhs.PluginMetadatas, rhs.PluginMetadatas, "")
-	ret.Ssl = r.diffMap(lhs.SSLs, rhs.SSLs, "")
+	ret := &StageScopedApiSixResources{
+		Routes:         r.diffMap(lhs.Routes, rhs.Routes, ""),
+		Services:       r.diffMap(lhs.Services, rhs.Services, ""),
+		PluginMetadata: r.diffMap(lhs.PluginMetadatas, rhs.PluginMetadatas, ""),
+		Ssl:            r.diffMap(lhs.SSLs, rhs.SSLs, ""),
+	}
 	return ret
 }
 

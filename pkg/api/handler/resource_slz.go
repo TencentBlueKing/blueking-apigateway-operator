@@ -20,12 +20,14 @@ package handler
 
 import "fmt"
 
+// SyncReq Sync api req
 type SyncReq struct {
 	Gateway string `json:"gateway,omitempty"`
 	Stage   string `json:"stage,omitempty"`
 	All     bool   `json:"all,omitempty"`
 }
 
+// DiffReq Diff api req
 type DiffReq struct {
 	Gateway  string        `json:"gateway"`
 	Stage    string        `json:"stage"`
@@ -33,11 +35,13 @@ type DiffReq struct {
 	All      bool          `json:"all"`
 }
 
+// ResourceInfo resource
 type ResourceInfo struct {
 	ResourceId   int64  `json:"resource_id"`
 	ResourceName string `json:"resource_name"`
 }
 
+// ToString resource ToString
 func (r *ResourceInfo) ToString() string {
 	if r == nil {
 		return ""
@@ -45,6 +49,7 @@ func (r *ResourceInfo) ToString() string {
 	return fmt.Sprintf("resource_id:%d,resource_name:%s", r.ResourceId, r.ResourceName)
 }
 
+// DiffInfo diff api result.data
 type DiffInfo map[string]*StageScopedApiSixResources
 
 type StageScopedApiSixResources struct {
@@ -54,6 +59,7 @@ type StageScopedApiSixResources struct {
 	Ssl            map[string]interface{} `json:"ssl,omitempty"`
 }
 
+// ListReq list api req
 type ListReq struct {
 	Gateway  string        `json:"gateway,omitempty"`
 	Stage    string        `json:"stage,omitempty"`
@@ -61,4 +67,5 @@ type ListReq struct {
 	All      bool          `json:"all,omitempty"`
 }
 
+// ListInfo list api result.data
 type ListInfo map[string]*StageScopedApiSixResources
