@@ -22,6 +22,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"reflect"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
@@ -37,13 +38,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ResourceHandler resource api handler
 type ResourceHandler struct {
 	LeaderElector   leaderelection.LeaderElector
 	registry        registry.Registry
 	committer       *commiter.Commiter
-	apiSixConfStore synchronizer.ApisixConfigStore
+	apisixConfStore synchronizer.ApisixConfigStore
 }
 
+// NewResourceApi constructor of resource handler
 func NewResourceApi(
 	leaderElector leaderelection.LeaderElector,
 	registry registry.Registry,
@@ -53,14 +56,14 @@ func NewResourceApi(
 		LeaderElector:   leaderElector,
 		registry:        registry,
 		committer:       committer,
-		apiSixConfStore: apiSixConfStore,
+		apisixConfStore: apiSixConfStore,
 	}
 }
 
-// GetLeader ...
+// GetLeader get leader pod host
 func (r *ResourceHandler) GetLeader(c *gin.Context) {
 	if r.LeaderElector == nil {
-		utils.CommonErrorJSONResponse(c, utils.NotFoundError, "LeaderElector not found")
+		utils.BaseErrorJSONResponse(c, utils.NotFoundError, "LeaderElector not found", http.StatusOK)
 		return
 	}
 	utils.SuccessJSONResponse(c, r.LeaderElector.Leader())
@@ -73,6 +76,7 @@ func (r *ResourceHandler) Sync(c *gin.Context) {
 		utils.BadRequestErrorJSONResponse(c, utils.ValidationErrorMessage(err))
 		return
 	}
+
 	if !req.All {
 		r.committer.ForceCommit(c, []registry.StageInfo{
 			{
@@ -81,66 +85,49 @@ func (r *ResourceHandler) Sync(c *gin.Context) {
 			},
 		})
 	}
+
 	stageList, err := r.registry.ListStages(c)
 	if err != nil {
-		utils.CommonErrorJSONResponse(c, utils.SystemError, fmt.Errorf("registry list stages err:%w", err).Error())
+		utils.BaseErrorJSONResponse(c, utils.SystemError,
+			fmt.Errorf("registry list stages err:%w", err).Error(), http.StatusOK)
 		return
 	}
 	r.committer.ForceCommit(c, stageList)
 	utils.SuccessJSONResponse(c, "ok")
 }
 
-// Diff ...
+// Diff between bkgateway resources and apisix storage
 func (r *ResourceHandler) Diff(c *gin.Context) {
 	var req DiffReq
 	if err := c.ShouldBind(&req); err != nil {
 		utils.BadRequestErrorJSONResponse(c, utils.ValidationErrorMessage(err))
 		return
 	}
-	diff, err := r.DiffHandler(c, &req)
+	diff, err := r.diffHandler(c, &req)
 	if err != nil {
-		utils.CommonErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("diff fail: %+v", err))
+		utils.BaseErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("diff fail: %+v", err), http.StatusOK)
 		return
 	}
 	utils.SuccessJSONResponse(c, diff)
 }
 
-// List ...
+// List resources in apisix
 func (r *ResourceHandler) List(c *gin.Context) {
 	var req ListReq
 	if err := c.ShouldBind(&req); err != nil {
 		utils.BadRequestErrorJSONResponse(c, utils.ValidationErrorMessage(err))
 		return
 	}
-	list, err := r.ListHandler(c, &req)
+	list, err := r.listHandler(c, &req)
 	if err != nil {
-		utils.CommonErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("list err:%+v", err.Error()))
+		utils.BaseErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("list err:%+v", err.Error()), http.StatusOK)
 		return
 	}
 	utils.SuccessJSONResponse(c, list)
 }
 
-// SyncHandler handle sys resource between gateway and apiSix
-func (r *ResourceHandler) SyncHandler(ctx context.Context, req SyncReq) error {
-	if !req.All {
-		r.committer.ForceCommit(ctx, []registry.StageInfo{
-			{
-				GatewayName: req.Gateway,
-				StageName:   req.Stage,
-			},
-		})
-		return nil
-	}
-	stageList, err := r.registry.ListStages(ctx)
-	if err != nil {
-		return err
-	}
-	r.committer.ForceCommit(ctx, stageList)
-	return nil
-}
-
-// DiffHandler handle diff resource between gateway and apiSix
-func (r *ResourceHandler) DiffHandler(ctx context.Context, req *DiffReq) (DiffInfo, error) {
+// diffHandler handle diff resource between gateway and apiSix
+func (r *ResourceHandler) diffHandler(ctx context.Context, req *DiffReq) (DiffInfo, error) {
 	resp := make(DiffInfo)
 	var err error
 	if !req.All {
@@ -149,7 +136,7 @@ func (r *ResourceHandler) DiffHandler(ctx context.Context, req *DiffReq) (DiffIn
 			StageName:   req.Stage,
 		}
 		stageKey := config.GenStagePrimaryKey(req.Gateway, req.Stage)
-		originalApiSixResources := r.apiSixConfStore.Get(stageKey)
+		originalApiSixResources := r.apisixConfStore.Get(stageKey)
 		apiSixResources, err := r.committer.ConvertEtcdKVToApisixConfiguration(ctx, si)
 		if err != nil {
 			return nil, err
@@ -169,11 +156,12 @@ func (r *ResourceHandler) DiffHandler(ctx context.Context, req *DiffReq) (DiffIn
 		resp[stageKey] = r.diffWithRouteID(originalApiSixResources, apiSixResources, resourceKey)
 		return resp, nil
 	}
+
 	stageList, err := r.registry.ListStages(ctx)
 	if err != nil {
 		return nil, err
 	}
-	allApiSixResources := r.apiSixConfStore.GetAll()
+	allApiSixResources := r.apisixConfStore.GetAll()
 	for _, stage := range stageList {
 		stageKey := config.GenStagePrimaryKey(stage.GatewayName, stage.StageName)
 		apiSixResources, itemErr := r.committer.ConvertEtcdKVToApisixConfiguration(ctx, stage)
@@ -189,12 +177,12 @@ func (r *ResourceHandler) DiffHandler(ctx context.Context, req *DiffReq) (DiffIn
 	return resp, nil
 }
 
-// ListHandler handle list resource from gateway and k8s
-func (r *ResourceHandler) ListHandler(ctx context.Context, req *ListReq) (ListInfo, error) {
+// listHandler handle list resource from apisix
+func (r *ResourceHandler) listHandler(ctx context.Context, req *ListReq) (ListInfo, error) {
 	resp := make(ListInfo)
 	if !req.All {
 		stageKey := config.GenStagePrimaryKey(req.Gateway, req.Stage)
-		apiSixRes := r.apiSixConfStore.Get(stageKey)
+		apiSixRes := r.apisixConfStore.Get(stageKey)
 		if req.Resource != nil {
 			resourceKey, err := r.getRouteIDByResourceIdentity(apiSixRes, req.Gateway, req.Stage, req.Resource)
 			if err != nil {
@@ -214,7 +202,7 @@ func (r *ResourceHandler) ListHandler(ctx context.Context, req *ListReq) (ListIn
 		_ = json.Unmarshal(by, &resp)
 		return resp, nil
 	}
-	stagedApiSixRes := r.apiSixConfStore.GetAll()
+	stagedApiSixRes := r.apisixConfStore.GetAll()
 	by, err := json.Marshal(stagedApiSixRes)
 	if err != nil {
 		return nil, err
@@ -225,8 +213,8 @@ func (r *ResourceHandler) ListHandler(ctx context.Context, req *ListReq) (ListIn
 
 func (r *ResourceHandler) diffWithRouteID(
 	lhs, rhs *apisix.ApisixConfiguration,
-	routeID string) *StageScopedApiSixResources {
-	ret := &StageScopedApiSixResources{
+	routeID string) *StageScopedApisixResources {
+	ret := &StageScopedApisixResources{
 		Routes:         r.diffMap(lhs.Routes, rhs.Routes, routeID),
 		Services:       r.diffMap(lhs.Services, rhs.Services, ""),
 		PluginMetadata: r.diffMap(lhs.PluginMetadatas, rhs.PluginMetadatas, ""),
@@ -235,8 +223,8 @@ func (r *ResourceHandler) diffWithRouteID(
 	return ret
 }
 
-func (r *ResourceHandler) diff(lhs, rhs *apisix.ApisixConfiguration) *StageScopedApiSixResources {
-	ret := &StageScopedApiSixResources{
+func (r *ResourceHandler) diff(lhs, rhs *apisix.ApisixConfiguration) *StageScopedApisixResources {
+	ret := &StageScopedApisixResources{
 		Routes:         r.diffMap(lhs.Routes, rhs.Routes, ""),
 		Services:       r.diffMap(lhs.Services, rhs.Services, ""),
 		PluginMetadata: r.diffMap(lhs.PluginMetadatas, rhs.PluginMetadatas, ""),
@@ -303,7 +291,7 @@ func (r *ResourceHandler) getRouteIDByResourceIdentity(
 	return "", eris.New("resource id not found")
 }
 
-func (r *ResourceHandler) isDiffResultEmpty(result *StageScopedApiSixResources) bool {
+func (r *ResourceHandler) isDiffResultEmpty(result *StageScopedApisixResources) bool {
 	if result == nil {
 		return true
 	}

@@ -23,6 +23,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
@@ -47,7 +48,7 @@ func NewRouter(
 	})
 	operatorRouter := router.Group("/v1")
 	operatorRouter.Use(gin.BasicAuth(gin.Accounts{
-		"bk-operator": conf.HttpServer.ApiKey,
+		constant.ApiAuthAccount: conf.HttpServer.AuthPassword,
 	}))
 	operatorRouter.Use(gin.Recovery())
 	api.Register(operatorRouter, leaderElector, registry, committer, apiSixConfStore)

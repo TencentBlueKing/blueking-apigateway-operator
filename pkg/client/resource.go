@@ -29,6 +29,7 @@ import (
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/api/handler"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 	"github.com/rotisserie/eris"
 	"gopkg.in/h2non/gentleman.v2"
@@ -48,7 +49,7 @@ type ResourceClient struct {
 }
 
 var (
-	serverAddr     string
+	serverHost     string
 	serverBindPort = 6004
 )
 
@@ -56,19 +57,19 @@ var (
 func Init(cfg *config.Config) {
 	switch {
 	case cfg.HttpServer.BindAddress != "":
-		serverAddr = fmt.Sprintf(
-			"%s:%d",
+		serverHost = fmt.Sprintf(
+			"http://%s:%d",
 			cfg.HttpServer.BindAddress,
 			cfg.HttpServer.BindPort,
 		)
 	case cfg.HttpServer.BindAddressV6 != "":
-		serverAddr = fmt.Sprintf(
-			"%s:%d",
+		serverHost = fmt.Sprintf(
+			"http://%s:%d",
 			cfg.HttpServer.BindAddressV6,
 			cfg.HttpServer.BindPort,
 		)
 	default:
-		serverAddr = fmt.Sprintf("127.0.0.1:%d", cfg.HttpServer.BindPort)
+		serverHost = fmt.Sprintf("http://127.0.0.1:%d", cfg.HttpServer.BindPort)
 	}
 
 	serverBindPort = cfg.HttpServer.BindPort
@@ -86,7 +87,7 @@ func NewResourceClient(host string, apiKey string) *ResourceClient {
 
 // GetLeaderResourceClient get leader resource client
 func GetLeaderResourceClient(apiKey string) (*ResourceClient, error) {
-	client := NewResourceClient("http://"+serverAddr, apiKey)
+	client := NewResourceClient(serverHost, apiKey)
 	leader, err := client.GetLeader()
 	if err != nil {
 		return nil, err
@@ -95,7 +96,7 @@ func GetLeaderResourceClient(apiKey string) (*ResourceClient, error) {
 	if leaderHost == "" {
 		return nil, errors.New("empty leader host")
 	}
-	return NewResourceClient("http://"+leaderHost, apiKey), nil
+	return NewResourceClient(leaderHost, apiKey), nil
 }
 
 // GetLeader Resource leader instance
@@ -155,7 +156,7 @@ func SetAuth(apiKey string) RequestOption {
 	return func(request *gentleman.Request) error {
 		request.SetHeader("Authorization",
 			fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString(
-				[]byte(fmt.Sprintf("bk-operator:%s", apiKey)))))
+				[]byte(fmt.Sprintf("%s:%s", constant.ApiAuthAccount, apiKey)))))
 		return nil
 	}
 }
@@ -186,7 +187,7 @@ func SendAndDecodeResp(result interface{}) RequestOption {
 	}
 }
 
-// getHostFromLeaderName
+// getHostFromLeaderName eg: in:somename-ip1,ip2 out: http://ip1:port
 func getHostFromLeaderName(leader string) string {
 	// format somename-ip1,ip2,ip3
 	splitRes := strings.Split(leader, "_")
@@ -198,5 +199,5 @@ func getHostFromLeaderName(leader string) string {
 	if ip := net.ParseIP(addrList[0]); ip == nil {
 		return ""
 	}
-	return fmt.Sprintf("%s:%d", addrList[0], serverBindPort)
+	return fmt.Sprintf("http://%s:%d", addrList[0], serverBindPort)
 }

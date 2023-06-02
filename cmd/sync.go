@@ -72,7 +72,7 @@ func (s *syncCommand) RunE(cmd *cobra.Command, args []string) error {
 	initClient()
 
 	// prepare grpc cli
-	cli, err := client.GetLeaderResourceClient(globalConfig.HttpServer.ApiKey)
+	cli, err := client.GetLeaderResourceClient(globalConfig.HttpServer.AuthPassword)
 	if err != nil {
 		logger.Infow("GetLeaderResourcesClient failed", "err", err)
 		return err

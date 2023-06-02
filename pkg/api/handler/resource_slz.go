@@ -50,9 +50,10 @@ func (r *ResourceInfo) ToString() string {
 }
 
 // DiffInfo diff api result.data
-type DiffInfo map[string]*StageScopedApiSixResources
+type DiffInfo map[string]*StageScopedApisixResources
 
-type StageScopedApiSixResources struct {
+// StageScopedApisixResources apisix resource
+type StageScopedApisixResources struct {
 	Routes         map[string]interface{} `json:"routes,omitempty"`
 	Services       map[string]interface{} `json:"services,omitempty"`
 	PluginMetadata map[string]interface{} `json:"plugin_metadata,omitempty"`
@@ -68,4 +69,4 @@ type ListReq struct {
 }
 
 // ListInfo list api result.data
-type ListInfo map[string]*StageScopedApiSixResources
+type ListInfo map[string]*StageScopedApisixResources

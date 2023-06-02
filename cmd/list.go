@@ -79,7 +79,7 @@ func (l *listCommand) Init() {
 func (l *listCommand) RunE(cmd *cobra.Command, args []string) error {
 	initClient()
 
-	cli, err := client.GetLeaderResourceClient(globalConfig.HttpServer.ApiKey)
+	cli, err := client.GetLeaderResourceClient(globalConfig.HttpServer.AuthPassword)
 	if err != nil {
 		logger.Infow("GetLeaderResourcesClient failed", "err", err)
 		return err
@@ -116,7 +116,7 @@ func (l *listCommand) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	format, _ := cmd.Flags().GetString("write-out")
-	err = l.formatedOutput(resp, format)
+	err = l.formatOutput(resp, format)
 	if err != nil {
 		logger.Error(err, "print resp failed")
 		return err
@@ -124,7 +124,7 @@ func (l *listCommand) RunE(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (l *listCommand) formatedOutput(listInfo handler.ListInfo, format string) error {
+func (l *listCommand) formatOutput(listInfo handler.ListInfo, format string) error {
 	switch format {
 	case "json":
 		return printJson(listInfo)

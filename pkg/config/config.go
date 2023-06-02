@@ -71,7 +71,7 @@ type HttpServer struct {
 	BindAddress   string
 	BindAddressV6 string
 	BindPort      int
-	ApiKey        string
+	AuthPassword  string // The authentication pwd used to access the API
 }
 
 // VirtualStage ...
@@ -192,8 +192,8 @@ type Config struct {
 func newDefaultConfig() *Config {
 	return &Config{
 		HttpServer: HttpServer{
-			BindPort: 6004,
-			ApiKey:   "DebugModel@bk",
+			BindPort:     6004,
+			AuthPassword: "DebugModel@bk",
 		},
 		KubeExtension: KubeExtension{
 			LeaderElectionType:          "leases",

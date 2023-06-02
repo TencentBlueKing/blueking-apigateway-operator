@@ -22,7 +22,7 @@ This project is the "BlueKing API Gateway - Operator".
 - Convert Control Plane resources to Data Plane resources: The Operator is responsible for integrating with the Control Plane and Data Plane and can convert configuration resources issued from the Control Plane into gateway descriptor configuration resources for the Data Plane.
 - Support for multiple resource sources: The Operator supports etcd and Kubernetes native cloud methods for processing resource data to manage and coordinate data flow between the Control Plane and Data Plane.
 - Support for specialized and shared gateways: The Operator is designed for different usage scenarios and can integrate with gateways as a component in other systems or used as a common gateway component.
-
+- Provide debug cli tools: provide functions such as comparison, manual synchronization, and viewing of apisix resources on the data plane for the configuration data of the control plane and the gateway configuration data of the data plane. detailed introduction:[debug cli tool documentation](./docs/debug/README_EN.md)
 ## Getting started
 
 - [Local Developing(In Chinese)](https://github.com/TencentBlueKing/blueking-apigateway/blob/master/docs/DEVELOP_GUIDE.md)

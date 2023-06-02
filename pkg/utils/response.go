@@ -64,10 +64,6 @@ func BaseErrorJSONResponse(c *gin.Context, errorCode string, message string, sta
 	})
 }
 
-func CommonErrorJSONResponse(c *gin.Context, errorCode string, message string) {
-	BaseErrorJSONResponse(c, errorCode, message, http.StatusOK)
-}
-
 // NewErrorJSONResponse ...
 func NewErrorJSONResponse(
 	errorCode string,

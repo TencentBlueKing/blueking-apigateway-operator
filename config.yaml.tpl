@@ -32,7 +32,8 @@ httpServer:
   bindAddress: "0.0.0.0"
   bindAddressV6: "[::]"
   bindPort: 6004
-  apiKey: apiKey
+# The authentication pwd used to access the API
+  authPassword: DebugModel@bk
 
 logger:
   default:
@@ -43,9 +44,3 @@ logger:
     level: info
     writer: os
     settings: {name: stdout}
-  api:
-    level: info
-    writer: os
-    settings: {name: stdout}
-    # writer: file
-    # settings: {name: operator_system.log, size: 100, backups: 10, age: 7, path: /}
