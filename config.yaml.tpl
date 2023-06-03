@@ -44,3 +44,4 @@ logger:
     level: info
     writer: os
     settings: {name: stdout}
+    # writer: file

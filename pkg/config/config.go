@@ -153,7 +153,6 @@ type Sentry struct {
 type Logger struct {
 	Default    LogConfig
 	Controller LogConfig
-	Api        LogConfig
 }
 
 // LogConfig ...
@@ -250,13 +249,6 @@ func newDefaultConfig() *Config {
 				},
 			},
 			Controller: LogConfig{
-				Level:  "info",
-				Writer: "os",
-				Settings: map[string]string{
-					"name": "stdout",
-				},
-			},
-			Api: LogConfig{
 				Level:  "info",
 				Writer: "os",
 				Settings: map[string]string{
