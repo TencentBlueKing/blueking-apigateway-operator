@@ -16,18 +16,33 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package constant
+package cmd
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
 
-// Version ...
-var (
-	Version  string
-	CommitID string
-	Date     string
+	"github.com/spf13/cobra"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/version"
 )
 
-// GetVersion ...
-func GetVersion() string {
-	return fmt.Sprintf("\nVersion: %s\nCommitID: %s\nDate: %s\n", Version, CommitID, Date)
+// versionCmd represents the version command
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Print the version number of Operator",
+	Long:  `All software has versions. This is Operator's`,
+	Run: func(cmd *cobra.Command, args []string) {
+		info := []string{
+			"Version: " + version.Version,
+			"Commit: " + version.Commit,
+			"Build Time: " + version.BuildTime,
+			"Go Version: " + version.GoVersion,
+		}
+		fmt.Println(strings.Join(info, "\n"))
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(versionCmd)
 }

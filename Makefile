@@ -78,9 +78,10 @@ build-common: $(BUILD_PATH) generate manifests fmt vet
 
 .PHONY: build
 build: build-common ## Build manager binary.
-	go build -ldflags "-X micro-gateway/internal/constant.Version=${GITTAG} \
-		-X micro-gateway/internal/constant.CommitID=${GITHASH} \
-		-X micro-gateway/internal/constant.Date=${BUILDTIME}" \
+	go build -ldflags "-X github.com/TencentBlueKing/blueking-apigateway-operator/pkg/version.Version=${VERSION} \
+		-X github.com/TencentBlueKing/blueking-apigateway-operator/pkg/version.Commit=`git rev-parse HEAD` \
+		-X github.com/TencentBlueKing/blueking-apigateway-operator/pkg/version.BuildTime=`date +%Y-%m-%d_%I:%M:%S` \
+		-X 'github.com/TencentBlueKing/blueking-apigateway-operator/pkg/version.GoVersion=`go version`'"\
 		-o $(BUILD_PATH)/micro-gateway-operator .
 
 .PHONY: docker-build
