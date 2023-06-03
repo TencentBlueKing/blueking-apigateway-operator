@@ -27,10 +27,13 @@ apisix:
     operatorExternalHealthProbePort: 6004
     extraApisixResources: "/data/config/extra-resources.yaml"
 
+
 httpServer:
   bindAddress: "0.0.0.0"
   bindAddressV6: "[::]"
   bindPort: 6004
+# The authentication pwd used to access the API
+  authPassword: DebugModel@bk
 
 logger:
   default:
@@ -42,4 +45,3 @@ logger:
     writer: os
     settings: {name: stdout}
     # writer: file
-    # settings: {name: operator_system.log, size: 100, backups: 10, age: 7, path: /}

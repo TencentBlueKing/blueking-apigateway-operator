@@ -22,7 +22,7 @@
 - 转换控制面资源为数据面资源：Operator 负责对接控制面（Control Plane）和数据面（Data Plane），可以将从控制面下发的配置资源转换为数据面的网关描述配置资源。
 - 支持多种资源来源：Operator 支持 etcd 和 Kubernetes 云原生的方式来处理资源数据，以用于管理和协调控制面和数据面数据流转。
 - 支持专项网关和共享网关：Operator 面向不同的使用场景，可以将网关作为一个组件集成到其它系统中，也可以将其作为公共网关组件来使用。
-
+- 提供debug cli工具：为控制面配置数据和数据面的网关配置数据提供对比、手动同步以及查看数据面APISIX资源等功能。详细介绍:[debug cli工具文档](./docs/debug/README.md)
 ## 快速开始
 
 - [本地开发部署指引](https://github.com/TencentBlueKing/blueking-apigateway/blob/master/docs/DEVELOP_GUIDE.md)

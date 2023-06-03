@@ -16,28 +16,8 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package utils
+package constant
 
-// StringInSlice see if a string is in a string slice
-func StringInSlice(target string, strs []string) bool {
-	for _, str := range strs {
-		if target == str {
-			return true
-		}
-	}
-	return false
-}
-
-// TruncateBytes truncate []byte to specific length
-func TruncateBytes(content []byte, length int) []byte {
-	if len(content) > length {
-		return content[:length]
-	}
-	return content
-}
-
-// TruncateBytesToString ...
-func TruncateBytesToString(content []byte, length int) string {
-	s := TruncateBytes(content, length)
-	return string(s)
-}
+const (
+	ApiAuthAccount = "bk-apigateway"
+)

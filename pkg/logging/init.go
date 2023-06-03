@@ -86,11 +86,12 @@ func initSystemLogger(cfg *config.LogConfig, options []zap.Option) {
 		panic(err)
 	}
 	w := zapcore.AddSync(writer)
-
+	encoderConfig := zap.NewProductionEncoderConfig()
+	encoderConfig.EncodeTime = timeEncoder
 	// 设置日志级别
 	l := newZapLevel(cfg.Level)
 	core := zapcore.NewCore(
-		zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+		zapcore.NewJSONEncoder(encoderConfig),
 		w,
 		l,
 	)
@@ -153,4 +154,8 @@ func GetLogger() *zap.SugaredLogger {
 		return logger.Sugar()
 	}
 	return defaultLogger.Sugar()
+}
+
+func timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+	enc.AppendString(t.Format("2006-01-02 15:04:05"))
 }
