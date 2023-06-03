@@ -211,7 +211,7 @@ func (r *EtcdRegistryAdapter) List(ctx context.Context, key ResourceKey, obj cli
 	if resp.Count > math.MaxInt32 {
 		r.logger.Error(
 			nil,
-			"etcd resouce count is larger than MaxInt32, error may occured in 32 bit CPU",
+			"etcd resource count is larger than MaxInt32, error may occurred in 32 bit CPU",
 			"count",
 			resp.Count,
 			"key",

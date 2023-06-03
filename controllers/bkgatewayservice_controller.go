@@ -29,7 +29,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
 	gatewayv1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 )
@@ -59,7 +58,7 @@ type BkGatewayServiceReconciler struct {
 func (r *BkGatewayServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.V(1).Info("bk gateway service trigger", "obj", req)
-	r.adapater.Reconcile(ctx, req, &v1beta1.BkGatewayService{}, logger)
+	r.adapater.Reconcile(ctx, req, &gatewayv1beta1.BkGatewayService{}, logger)
 	return ctrl.Result{}, nil
 }
 

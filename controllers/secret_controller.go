@@ -23,7 +23,6 @@ import (
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 
-	corev1 "k8s.io/api/core/v1"
 	k8scorev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -57,7 +56,7 @@ type SecretController struct {
 func (r *SecretController) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.V(1).Info("secret trigger", "obj", req)
-	r.adapater.Reconcile(ctx, req, &corev1.Secret{}, logger)
+	r.adapater.Reconcile(ctx, req, &k8scorev1.Secret{}, logger)
 	return ctrl.Result{}, nil
 }
 

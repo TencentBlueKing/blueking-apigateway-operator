@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	gatewayv1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 
@@ -75,7 +75,7 @@ func (ra *registryAdapter) Reconcile(
 	}
 	// created or stage changes
 	if !ok || changed {
-		gvk, ok := v1beta1.GetGVK(obj)
+		gvk, ok := gatewayv1beta1.GetGVK(obj)
 		if !ok {
 			logger.Error(nil, "No gvk for provided resource", "type", reflect.TypeOf(obj).Name())
 			return nil

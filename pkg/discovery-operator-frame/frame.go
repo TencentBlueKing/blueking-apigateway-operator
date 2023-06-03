@@ -185,8 +185,8 @@ func (d *DiscoveryOperatorFrame) cleanUpOutdatedEndpoints() error {
 			setupLog.Error(
 				nil,
 				"Split endpoints name to service name and registry name failed, skip startup checking for this endpoints",
-				"seperator",
-				types.EndpointsNameSeperator,
+				"separator",
+				types.EndpointsNameSeparator,
 				"endpointsName",
 				eps.Name,
 			)
