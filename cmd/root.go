@@ -26,17 +26,15 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/internal/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/runner"
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:     "micro-gateway-operator",
-	Short:   "bk-gateway operator for apisix",
-	PreRun:  preRun,
-	Run:     rootRun,
-	Version: constant.GetVersion(),
+	Use:    "bk-apigateway-operator",
+	Short:  "bk-gateway operator for apisix",
+	PreRun: preRun,
+	Run:    rootRun,
 }
 
 func init() {

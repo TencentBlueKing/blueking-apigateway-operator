@@ -16,18 +16,11 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package constant
+package version
 
-import "fmt"
-
-// Version ...
 var (
-	Version  string
-	CommitID string
-	Date     string
+	Version   = "0.0.0"
+	Commit    = "none"
+	BuildTime = "unknown"
+	GoVersion = "1.20.X"
 )
-
-// GetVersion ...
-func GetVersion() string {
-	return fmt.Sprintf("\nVersion: %s\nCommitID: %s\nDate: %s\n", Version, CommitID, Date)
-}
