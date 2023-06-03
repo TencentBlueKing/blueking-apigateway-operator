@@ -21,6 +21,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -32,10 +33,8 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
-	"github.com/google/go-cmp/cmp"
-	"github.com/rotisserie/eris"
-
 	"github.com/gin-gonic/gin"
+	"github.com/google/go-cmp/cmp"
 )
 
 // ResourceHandler resource api handler
@@ -166,7 +165,7 @@ func (r *ResourceHandler) diffHandler(ctx context.Context, req *DiffReq) (DiffIn
 		stageKey := config.GenStagePrimaryKey(stage.GatewayName, stage.StageName)
 		apiSixResources, itemErr := r.committer.ConvertEtcdKVToApisixConfiguration(ctx, stage)
 		if itemErr != nil {
-			err = fmt.Errorf("%s [stage %s failed: %s]", stage.StageName, stageKey, eris.ToString(err, true))
+			err = fmt.Errorf("%s [stage %s failed: %w]", stage.StageName, stageKey, err)
 			continue
 		}
 		diffResult := r.diff(allApiSixResources[stageKey], apiSixResources)
@@ -277,7 +276,7 @@ func (r *ResourceHandler) getRouteIDByResourceIdentity(
 	resource *ResourceInfo,
 ) (string, error) {
 	if conf == nil || resource == nil {
-		return "", eris.New("resource id not found")
+		return "", errors.New("resource id not found")
 	}
 	if resource.ResourceId != 0 {
 		return fmt.Sprintf("%s.%s.%d", gateway, stage, resource.ResourceId), nil
@@ -288,7 +287,7 @@ func (r *ResourceHandler) getRouteIDByResourceIdentity(
 			return route.ID, nil
 		}
 	}
-	return "", eris.New("resource id not found")
+	return "", errors.New("resource id not found")
 }
 
 func (r *ResourceHandler) isDiffResultEmpty(result *StageScopedApisixResources) bool {

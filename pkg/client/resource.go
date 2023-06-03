@@ -31,7 +31,6 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
-	"github.com/rotisserie/eris"
 	"gopkg.in/h2non/gentleman.v2"
 	"gopkg.in/h2non/gentleman.v2/plugins/body"
 )
@@ -166,12 +165,12 @@ func SendAndDecodeResp(result interface{}) RequestOption {
 	return func(request *gentleman.Request) error {
 		resp, err := request.Send()
 		if err != nil {
-			return eris.Wrapf(err, "send http fail")
+			return fmt.Errorf("send http fail:%w", err)
 		}
 		var res utils.CommonResp
 		err = json.Unmarshal(resp.Bytes(), &res)
 		if err != nil {
-			return eris.Wrapf(err, "unmarshal http res err")
+			return fmt.Errorf("unmarshal http resp err:%w", err)
 		}
 		if res.Error.Code != "" {
 			return fmt.Errorf("code:%s,msg:%s", res.Error.Code, res.Error.Message)
@@ -179,7 +178,7 @@ func SendAndDecodeResp(result interface{}) RequestOption {
 		if result != nil {
 			resultByte, err := json.Marshal(res.Data)
 			if err != nil {
-				return eris.Wrapf(err, "marshal http result data err")
+				return fmt.Errorf("marshal http result data err:%w", err)
 			}
 			return json.Unmarshal(resultByte, &result)
 		}
