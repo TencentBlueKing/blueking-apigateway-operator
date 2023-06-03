@@ -1,5 +1,5 @@
 ## debug cli tool
-Provide functions such as comparison, manual synchronization, and viewing of apisix resources on the data plane for the configuration data of the control plane and the gateway configuration data of the data plane
+Provide functions such as comparison, manual synchronization, and viewing of APISIX resources on the data plane for the configuration data of the control plane and the gateway configuration data of the data plane
 ## Features
 
 ```shell
