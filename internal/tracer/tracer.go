@@ -22,6 +22,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/version"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
@@ -33,7 +34,6 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/internal/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
@@ -96,7 +96,7 @@ func mustNewResource(token string) *resource.Resource {
 			semconv.HostNameKey.String(hostname),
 			semconv.ServiceNameKey.String("bk-micro-gateway-operator"),
 			semconv.ServiceInstanceIDKey.String(utils.GetGeneratedUUID()),
-			semconv.ServiceVersionKey.String(constant.Version),
+			semconv.ServiceVersionKey.String(version.Version),
 			attribute.String("bk.data.token", token),
 		),
 	)
