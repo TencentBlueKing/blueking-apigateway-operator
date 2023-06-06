@@ -21,7 +21,7 @@ package controllers
 import (
 	"context"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	gatewayv1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -56,7 +56,7 @@ type BkGatewayTLSControlelr struct {
 func (r *BkGatewayTLSControlelr) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	logger.V(1).Info("secret trigger", "obj", req)
-	r.adapater.Reconcile(ctx, req, &v1beta1.BkGatewayTLS{}, logger)
+	r.adapater.Reconcile(ctx, req, &gatewayv1beta1.BkGatewayTLS{}, logger)
 	return ctrl.Result{}, nil
 }
 
@@ -68,6 +68,6 @@ func (r *BkGatewayTLSControlelr) SetupWithManager(mgr ctrl.Manager) error {
 		Client:     r.Client,
 	}
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&v1beta1.BkGatewayTLS{}).
+		For(&gatewayv1beta1.BkGatewayTLS{}).
 		Complete(r)
 }

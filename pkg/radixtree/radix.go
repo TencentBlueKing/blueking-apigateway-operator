@@ -216,7 +216,7 @@ func (tree *SuffixRadixTree) insert(obj registry.ResourceKey, tlsCert *v1beta1.T
 	return true, nil
 }
 
-// Insert insert the secret object descriptor and a cert pair assosiated with the secret
+// Insert insert the secret object descriptor and a cert pair associated with the secret
 func (tree *SuffixRadixTree) Insert(obj registry.ResourceKey, tlsCert *v1beta1.TLSCert) (bool, error) {
 	tree.Lock()
 	defer tree.Unlock()
@@ -240,7 +240,7 @@ func (tree *SuffixRadixTree) delete(obj registry.ResourceKey) (bool, error) {
 	return true, nil
 }
 
-// Delete delete the secret object descriptor and the assosiated cert pairs from tree
+// Delete delete the secret object descriptor and the associated cert pairs from tree
 func (tree *SuffixRadixTree) Delete(obj registry.ResourceKey) (bool, error) {
 	tree.Lock()
 	defer tree.Unlock()
@@ -272,7 +272,7 @@ func (tree *SuffixRadixTree) update(obj registry.ResourceKey, tlsCert *v1beta1.T
 	return true, nil
 }
 
-// Update update the secret object descriptor and the assosiated cert pairs in tree
+// Update update the secret object descriptor and the associated cert pairs in tree
 func (tree *SuffixRadixTree) Update(obj registry.ResourceKey, tlsCert *v1beta1.TLSCert) (bool, error) {
 	tree.Lock()
 	defer tree.Unlock()

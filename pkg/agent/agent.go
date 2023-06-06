@@ -310,7 +310,7 @@ func (w *EventAgent) handleTicker(ctx context.Context) {
 		}
 	}
 
-	w.logger.Debugw("stages to be commited", "stageList", stageList, "includeAllStage", includeAllStage)
+	w.logger.Debugw("stages to be committed", "stageList", stageList, "includeAllStage", includeAllStage)
 	if includeAllStage {
 		allStages, err := w.resourceRegistry.ListStages(ctx)
 		if err != nil {

@@ -28,6 +28,9 @@ linters:
     - gocritic
     - gocyclo
     - whitespace
+    - stylecheck
+    - misspell
+    - goimports
     # - bodyclose
     # - nestif
     # - gofumpt
@@ -37,3 +40,7 @@ linters:
     # - golint
     # - cyclop
   fast: false
+
+linters-settings:
+  stylecheck:
+    checks: ["-ST1000", "-ST1016", "-ST1020", "-ST1021", "-ST1022"]

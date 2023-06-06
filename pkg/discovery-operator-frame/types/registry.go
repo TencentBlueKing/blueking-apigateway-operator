@@ -41,8 +41,8 @@ const (
 const (
 	// ManagedByLabelTag is label tag for BkGatewayEndpoints
 	ManagedByLabelTag = "gateway.bk.tencent.com/managed-by"
-	// EndpointsNameSeperator is seperator for BkGatewayEndpoint name between registry name and service name
-	EndpointsNameSeperator = ".bksp."
+	// EndpointsNameSeparator is separator for BkGatewayEndpoint name between registry name and service name
+	EndpointsNameSeparator = ".bksp."
 )
 
 // Registry is user considered registry interface
