@@ -283,7 +283,7 @@ spec:
       jwt_private_key: xxxxxxxxxxxxxxxxxxxxx
       controller:
         endpoints:
-        - https://bk-apigateway.apigw.o.woa.com/
+        - https://bk-apigateway.apigw.example.com/
         base_path: /stag/api/v1/edge-controller
         jwt_auth:
           secret: xxxxxxxxxxxxxxxxxxxxxxxx
