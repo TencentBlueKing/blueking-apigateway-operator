@@ -205,17 +205,18 @@ func (s *EtcdConfigStore) alterByStage(
 
 	// delete resources
 	if deleteConf != nil {
-		if err = s.batchDeleteResource(ctx, ApisixResourceTypeSSL, deleteConf.SSLs); err != nil {
-			return fmt.Errorf("batch delete ssl failed: %w", err)
-		}
-		if err = s.batchDeleteResource(ctx, ApisixResourceTypePluginMetadata, deleteConf.PluginMetadatas); err != nil {
-			return fmt.Errorf("batch delete plugin metadata failed: %w", err)
+		// NOTE: 删除的顺序和创建的顺序相反, 错误的顺序会导致apisix的异常
+		if err = s.batchDeleteResource(ctx, ApisixResourceTypeRoutes, deleteConf.Routes); err != nil {
+			return fmt.Errorf("batch delete routes failed: %w", err)
 		}
 		if err = s.batchDeleteResource(ctx, ApisixResourceTypeServices, deleteConf.Services); err != nil {
 			return fmt.Errorf("batch delete services failed: %w", err)
 		}
-		if err = s.batchDeleteResource(ctx, ApisixResourceTypeRoutes, deleteConf.Routes); err != nil {
-			return fmt.Errorf("batch delete routes failed: %w", err)
+		if err = s.batchDeleteResource(ctx, ApisixResourceTypePluginMetadata, deleteConf.PluginMetadatas); err != nil {
+			return fmt.Errorf("batch delete plugin metadata failed: %w", err)
+		}
+		if err = s.batchDeleteResource(ctx, ApisixResourceTypeSSL, deleteConf.SSLs); err != nil {
+			return fmt.Errorf("batch delete ssl failed: %w", err)
 		}
 	}
 
