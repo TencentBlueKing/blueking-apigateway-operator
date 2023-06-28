@@ -21,6 +21,7 @@ package leaderelection
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -99,6 +100,7 @@ func (ele *EtcdLeaderElector) run() {
 func (ele *EtcdLeaderElector) elect() {
 	for {
 		ele.logger.Infow("Try to be leader", "id", ele.instanceID)
+		log.Printf("Try to be leader id: %s\n", ele.instanceID)
 		err := ele.election.Campaign(ele.ctx, ele.instanceID)
 		if err != nil {
 			ele.logger.Error(err, "Leader election compaign returns error", "id", ele.instanceID)
@@ -106,6 +108,7 @@ func (ele *EtcdLeaderElector) elect() {
 			continue
 		}
 		ele.logger.Infow("Become leader now", "id", ele.instanceID)
+		log.Printf("Become leader now id: %s\n", ele.instanceID)
 		ele.leading = true
 		close(ele.leadingCh)
 		return
@@ -150,6 +153,7 @@ func (ele *EtcdLeaderElector) Leader() string {
 // WaitForLeading ...
 func (ele *EtcdLeaderElector) WaitForLeading() (closeCh <-chan struct{}) {
 	if ele.leading {
+		ele.logger.Info("success get leader")
 		return ele.closeCh
 	}
 	<-ele.leadingCh
