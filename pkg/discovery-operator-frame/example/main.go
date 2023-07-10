@@ -23,12 +23,12 @@ import (
 	"fmt"
 	"time"
 
+	"go.uber.org/zap/zapcore"
+
 	gatewayv1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
 	frame "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/options"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/types"
-
-	"go.uber.org/zap/zapcore"
 )
 
 // TestRegistry ...

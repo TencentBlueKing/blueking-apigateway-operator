@@ -22,11 +22,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/prometheus/client_golang/prometheus"
@@ -34,10 +29,15 @@ import (
 	pb "go.etcd.io/etcd/api/v3/etcdserverpb"
 	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientv3 "go.etcd.io/etcd/client/v3"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 )
 
 type mockKV struct {
@@ -74,6 +74,7 @@ func (m *mockKV) Compact(
 func (m *mockKV) Do(ctx context.Context, op clientv3.Op) (clientv3.OpResponse, error) {
 	return clientv3.OpResponse{}, nil
 }
+
 func (m *mockKV) Txn(ctx context.Context) clientv3.Txn { return m.txn }
 
 type mockTxn struct {
@@ -247,6 +248,7 @@ spec:
   labels:
     gateway.bk.tencent.com/gateway: gateway
     gateway.bk.tencent.com/stage: stage
+    gateway.bk.tencent.com/publish_id: publish_id
   annotations: {}
 spec:
   name: stag
@@ -436,6 +438,7 @@ var _ = Describe("Etcdadapter Operations", Ordered, func() {
 			Expect(stage.Name).Should(Equal("stage"))
 			Expect(stage.Labels[config.BKAPIGatewayLabelKeyGatewayName]).Should(Equal("gateway"))
 			Expect(stage.Labels[config.BKAPIGatewayLabelKeyGatewayStage]).Should(Equal("stage"))
+			Expect(stage.Labels[config.BKAPIGatewayLabelKeyGatewayPublishID]).Should(Equal("publish_id"))
 			Expect(stage.Spec.Name).Should(Equal("stag"))
 		})
 

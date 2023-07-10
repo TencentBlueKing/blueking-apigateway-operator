@@ -35,6 +35,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter/conversion"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter/service"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/eventrepoter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/radixtree"
@@ -140,8 +141,9 @@ func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, wg *s
 	defer wg.Done()
 
 	// 每一个提交都是对一个stage的全量数据处理
-	apisixConf, err := c.ConvertEtcdKVToApisixConfiguration(ctx, si)
+	apisixConf, stage, err := c.ConvertEtcdKVToApisixConfiguration(ctx, si)
 	if err != nil {
+		eventrepoter.ReportParseConfigurationFailureEvent(ctx, stage, err)
 		if !eris.Is(err, errStageNotFound) {
 			c.logger.Error(err, "convert stage resources to apisix representation failed", "stageInfo", si)
 			// retry
@@ -152,40 +154,46 @@ func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, wg *s
 		c.logger.Infow("stage not found, delete it", "stageInfo", si)
 		// 如果stage不存在, 直接删除stage
 		apisixConf = apisix.NewEmptyApisixConfiguration()
+	} else {
+		eventrepoter.ReportParseConfigurationSuccessEvent(ctx, stage)
 	}
-
+	eventrepoter.ReportApplyConfigurationDoingEvent(ctx, stage)
 	c.synchronizer.Sync(
 		ctx,
 		si.GatewayName,
 		si.StageName,
 		apisixConf,
 	)
+	// eventrepoter.ReportApplyConfigurationSuccessEvent(ctx, stage) // 可以由事件之前的关系推断出来
+	eventrepoter.ReportLoadConfigurationDoingEvent(ctx, stage) //
+	eventrepoter.ReportLoadConfigurationResultEvent(ctx, stage)
 }
 
 // ConvertEtcdKVToApisixConfiguration ...
 func (c *Commiter) ConvertEtcdKVToApisixConfiguration(
 	ctx context.Context,
 	si registry.StageInfo,
-) (*apisix.ApisixConfiguration, error) {
+) (*apisix.ApisixConfiguration, *v1beta1.BkGatewayStage, error) {
 	stage, err := c.getStage(ctx, si)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
+	eventrepoter.ReportParseConfigurationDoingEvent(ctx, stage)
 	resList, err := c.listResources(ctx, si)
 	if err != nil {
-		return nil, err
+		return nil, stage, err
 	}
 	svcList, err := c.listServices(ctx, si)
 	if err != nil {
-		return nil, err
+		return nil, stage, err
 	}
 	sslList, err := c.listSSLs(ctx, si)
 	if err != nil {
-		return nil, err
+		return nil, stage, err
 	}
 	pluginMetadatas, err := c.listPluginMetadatas(ctx, si)
 	if err != nil {
-		return nil, err
+		return nil, stage, err
 	}
 
 	// 单一stage的转换
@@ -204,13 +212,13 @@ func (c *Commiter) ConvertEtcdKVToApisixConfiguration(
 		},
 	)
 	if err != nil {
-		return nil, err
+		return nil, stage, err
 	}
 	conf, err := cvt.Convert(ctx, resList, svcList, sslList, pluginMetadatas)
 
 	metric.ReportResourceCountHelper(si.GatewayName, si.StageName, conf, ReportResourceConvertedMetric)
 
-	return conf, err
+	return conf, stage, err
 }
 
 func (c *Commiter) getStage(ctx context.Context, stageInfo registry.StageInfo) (*v1beta1.BkGatewayStage, error) {

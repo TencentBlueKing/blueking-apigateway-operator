@@ -19,14 +19,11 @@
 package main
 
 import (
-	"github.com/TencentBlueKing/blueking-apigateway-operator/cmd"
+	_ "net/http/pprof"
 
-	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
-	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
-	_ "net/http/pprof"
-	//+kubebuilder:scaffold:imports
+	"github.com/TencentBlueKing/blueking-apigateway-operator/cmd"
 )
 
 func main() {

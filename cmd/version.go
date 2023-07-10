@@ -22,8 +22,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/version"
 	"github.com/spf13/cobra"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/version"
 )
 
 // versionCmd represents the version command

@@ -21,10 +21,9 @@ package synchronizer
 import (
 	"os"
 
-	"go.uber.org/zap"
-	"gopkg.in/yaml.v2"
-
 	apisixv1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
+	"go.uber.org/zap"
+	yaml "gopkg.in/yaml.v2"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"

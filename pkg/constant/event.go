@@ -16,17 +16,28 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package service
+package constant
 
-import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+type EventName string
 
-	gatewayv1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+const (
+	// dashboard
+	EventNameGenerateTask            EventName = "generate_release_task"
+	EventNameDistributeConfiguration EventName = "distribute_configuration"
+
+	// operator
+	EventNameParseConfiguration EventName = "parse_configuration"
+	EventNameApplyConfiguration EventName = "apply_configuration"
+
+	// apisix
+	EventNameLoadConfiguration EventName = "load_configuration"
 )
 
-// Service is common service info extract from service and routes
-type Service struct {
-	metav1.TypeMeta
-	metav1.ObjectMeta
-	Upstream *gatewayv1beta1.BkGatewayUpstreamConfig
-}
+type EventStatus string
+
+const (
+	EventStatusSuccess EventStatus = "success" // 执行成功
+	EventStatusFailure EventStatus = "failure" // 执行失败
+	EventStatusPending EventStatus = "pending" // 待执行
+	EventStatusDoing   EventStatus = "doing"   // 执行中
+)

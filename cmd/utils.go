@@ -22,7 +22,7 @@ import (
 	"fmt"
 
 	json "github.com/json-iterator/go"
-	"gopkg.in/yaml.v3"
+	yaml "gopkg.in/yaml.v3"
 )
 
 func printJson(i interface{}) error {

@@ -19,6 +19,8 @@
 package server
 
 import (
+	"github.com/gin-gonic/gin"
+
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/api"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
@@ -27,8 +29,6 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
-
-	"github.com/gin-gonic/gin"
 )
 
 // NewRouter do the router initialization

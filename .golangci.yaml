@@ -44,3 +44,9 @@ linters:
 linters-settings:
   stylecheck:
     checks: ["-ST1000", "-ST1016", "-ST1020", "-ST1021", "-ST1022"]
+
+  goimports:
+    # A comma-separated list of prefixes, which, if set, checks import paths
+    # with the given prefixes are grouped after 3rd-party packages.
+    # Default: ""
+    local-prefixes: "github.com/TencentBlueKing/blueking-apigateway-operator"

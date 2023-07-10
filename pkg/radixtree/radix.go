@@ -24,14 +24,14 @@ import (
 	"strings"
 	"sync"
 
+	radix "github.com/armon/go-radix"
+	"github.com/rotisserie/eris"
+	"go.uber.org/zap"
+
 	v1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
-
-	"github.com/armon/go-radix"
-	"github.com/rotisserie/eris"
-	"go.uber.org/zap"
 )
 
 // RadixTree is used to match prefix/suffix for ip/host in x509 certs stored in secret.

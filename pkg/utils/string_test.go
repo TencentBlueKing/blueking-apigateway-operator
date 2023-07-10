@@ -18,10 +18,10 @@
 package utils_test
 
 import (
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
-
 	. "github.com/onsi/ginkgo/v2"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 var _ = Describe("String", func() {

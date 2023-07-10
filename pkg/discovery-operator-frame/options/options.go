@@ -19,10 +19,10 @@
 package options
 
 import (
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/types"
-
 	"go.uber.org/zap/zapcore"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/types"
 )
 
 // FrameOptions is frame options

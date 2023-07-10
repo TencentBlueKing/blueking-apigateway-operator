@@ -27,6 +27,24 @@ apisix:
     operatorExternalHealthProbePort: 6004
     extraApisixResources: "/data/config/extra-resources.yaml"
 
+eventReporter:
+  coreAPIHost: "bk-apigateway-core-api:80"
+  apisixHost: "bk-apigateway-apigateway"
+  versionProbe:
+    timoutSs: 120 # version probe timeout
+    bufferSize: 300 # version probe chain size
+    retry:
+      count: 60
+      intervalMs: 500
+  eventBufferSize: 300 # reporter eventChain size
+  reporterBufferSize: 100 # control currency fo report to core API
+
+
+instance:
+  ID:"coreapi"
+  Secret:"coreapi"
+
+
 
 httpServer:
   bindAddress: "0.0.0.0"

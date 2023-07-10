@@ -21,12 +21,12 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/api/handler"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
-
 	"github.com/rotisserie/eris"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/api/handler"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
 )
 
 type diffCommand struct {
@@ -71,8 +71,6 @@ func (d *diffCommand) Init() {
 
 // RunE ...
 func (d *diffCommand) RunE(cmd *cobra.Command, args []string) error {
-	initClient()
-
 	cli, err := client.GetLeaderResourceClient(globalConfig.HttpServer.AuthPassword)
 	if err != nil {
 		logger.Infow("GetLeaderResourcesClient failed", "err", err)
@@ -99,11 +97,19 @@ func (d *diffCommand) RunE(cmd *cobra.Command, args []string) error {
 	}
 	req.Resource = &resourceIdentity
 	req.All, _ = cmd.Flags().GetBool("all")
-
 	if err := d.validateRequest(req); err != nil {
 		return err
 	}
-	resp, err := cli.Diff(req)
+	diffReq := &client.DiffReq{
+		Gateway: req.Gateway,
+		Stage:   req.Stage,
+		Resource: &client.ResourceInfo{
+			ResourceId:   req.Resource.ResourceId,
+			ResourceName: req.Resource.ResourceName,
+		},
+		All: req.All,
+	}
+	resp, err := cli.Diff(diffReq)
 	if err != nil {
 		logger.Error(err, "Diff request failed")
 		return err
@@ -117,7 +123,7 @@ func (d *diffCommand) RunE(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (d *diffCommand) formatOutput(diffInfo handler.DiffInfo, format string) error {
+func (d *diffCommand) formatOutput(diffInfo client.DiffInfo, format string) error {
 	switch format {
 	case "json":
 		return printJson(diffInfo)

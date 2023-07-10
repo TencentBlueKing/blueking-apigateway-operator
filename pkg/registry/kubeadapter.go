@@ -170,5 +170,6 @@ func (r *K8SRegistryAdapter) parseStageInfo(obj client.Object) (StageInfo, bool)
 			"type", reflect.TypeOf(obj).Name())
 		return emptyStageInfo, false
 	}
-	return StageInfo{GatewayName: gateway, StageName: stage}, true
+	publishID := labels[config.BKAPIGatewayLabelKeyGatewayPublishID]
+	return StageInfo{GatewayName: gateway, StageName: stage, PublishID: publishID}, true
 }
