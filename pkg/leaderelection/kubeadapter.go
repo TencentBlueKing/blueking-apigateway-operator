@@ -21,6 +21,7 @@ package leaderelection
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -123,6 +124,7 @@ func NewKubeLeaderElector(lockType, name, ns, kubeconfig string,
 		Callbacks: leaderelection.LeaderCallbacks{
 			OnStartedLeading: cl.onStartedLeading,
 			OnStoppedLeading: cl.onStoppedLeading,
+			OnNewLeader:      cl.OnNewLeader,
 		},
 	})
 	if err != nil {
@@ -141,15 +143,22 @@ func (c *KubeLeaderElector) Run(ctx context.Context) {
 
 func (c *KubeLeaderElector) onStartedLeading(ctx context.Context) {
 	c.logger.Info("become leader")
+	log.Println("become leader")
 	close(c.leadingCh)
 }
 
 func (c *KubeLeaderElector) onStoppedLeading() {
 	c.logger.Info("become follower")
+	log.Println("become follower")
 	close(c.closeCh)
 	c.leadingCh = make(chan struct{})
 	c.closeCh = make(chan struct{})
 	go c.elector.Run(c.ctx)
+}
+
+func (c *KubeLeaderElector) OnNewLeader(reportedLeader string) {
+	c.logger.Infof("leader changed: %s", reportedLeader)
+	log.Printf("leader changed: %s\n", reportedLeader)
 }
 
 // Leader ...
@@ -160,6 +169,7 @@ func (c *KubeLeaderElector) Leader() string {
 // WaitForLeading ...
 func (c *KubeLeaderElector) WaitForLeading() (closeCh <-chan struct{}) {
 	if c.elector.IsLeader() {
+		c.logger.Info("success get leader")
 		return c.closeCh
 	}
 	<-c.leadingCh
