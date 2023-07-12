@@ -67,7 +67,7 @@ func NewEtcdAgentRunner(cfg *config.Config) *EtcdAgentRunner {
 	r := &EtcdAgentRunner{
 		client: client,
 		cfg:    cfg,
-		logger: logging.GetLogger().Named("etcd-agent-runner"),
+		logger: logging.StdoutLogger().Named("etcd-agent-runner"),
 	}
 	r.init()
 	return r

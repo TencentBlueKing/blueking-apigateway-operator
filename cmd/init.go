@@ -77,7 +77,7 @@ func initConfig() {
 // initLog init logger must after initConfig
 func initLog() {
 	logging.Init(globalConfig)
-	logger = logging.GetLogger().Named("setup")
+	logger = logging.StdoutLogger().Named("setup")
 }
 
 func initTracing() {

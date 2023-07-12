@@ -79,7 +79,7 @@ type KubeAgentRunner struct {
 func NewKubeAgentRunner(cfg *config.Config) *KubeAgentRunner {
 	r := &KubeAgentRunner{
 		cfg:    cfg,
-		logger: logging.GetLogger().Named("kube-agent-runner"),
+		logger: logging.StdoutLogger().Named("kube-agent-runner"),
 	}
 	r.init()
 	return r

@@ -159,3 +159,10 @@ func GetLogger() *zap.SugaredLogger {
 func timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 	enc.AppendString(t.Format("2006-01-02 15:04:05"))
 }
+
+func StdoutLogger() *zap.SugaredLogger {
+	config := zap.NewProductionConfig()
+	config.OutputPaths = []string{"stdout"}
+	log, _ := config.Build()
+	return log.Sugar()
+}
