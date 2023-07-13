@@ -20,12 +20,12 @@ package client
 
 import "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 
-// AddEventReq add event request
-type AddEventReq struct {
-	PublishID   string                 `json:"-"`
-	GatewayName string                 `json:"gateway_name"`
-	StageName   string                 `json:"stage_name"`
-	Name        constant.EventName     `json:"name"`
-	Status      constant.EventStatus   `json:"status"`
-	Detail      map[string]interface{} `json:"detail"`
+// ReportEventReq add event request
+type ReportEventReq struct {
+	PublishID     string                 `json:"-"`
+	BkGatewayName string                 `json:"bk_gateway_name"`
+	BkStageName   string                 `json:"bk_stage_name"`
+	Name          constant.EventName     `json:"name"`
+	Status        constant.EventStatus   `json:"status"`
+	Detail        map[string]interface{} `json:"detail"`
 }

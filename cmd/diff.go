@@ -146,7 +146,7 @@ func (d *diffCommand) printResource(stage, typeName string, fields map[string]in
 		return
 	}
 	for id, value := range fields {
-		fmt.Printf("StageName: %s, %s: %s\n%s\n", stage, typeName, id, value)
+		fmt.Printf("Stage: %s, %s: %s\n%s\n", stage, typeName, id, value)
 	}
 }
 

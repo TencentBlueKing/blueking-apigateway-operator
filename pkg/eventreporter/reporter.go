@@ -171,7 +171,7 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *v1beta1.BkGa
 		eventReq := parseEventInfo(stage)
 		if eventReq.PublishID == "" {
 			logging.GetLogger().Errorf("stage[gateway:%s,stage:%s]publish_id is empty",
-				eventReq.GatewayName, eventReq.StageName)
+				eventReq.BkGatewayName, eventReq.BkStageName)
 			return
 		}
 
@@ -186,12 +186,12 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *v1beta1.BkGa
 		utils.GoroutineWithRecovery(ctx, func() {
 			// begin publish probe
 			versionInfo, err := client.GetApisixClient().
-				GetReleaseVersion(eventReq.GatewayName, eventReq.StageName, eventReq.PublishID)
+				GetReleaseVersion(eventReq.BkGatewayName, eventReq.BkStageName, eventReq.PublishID)
 			errChan <- err
 			if err != nil {
 				logging.GetLogger().Errorf(
 					"get release[gateway:%s,stage:%s,publish_id:%s] version from apisix err:%v",
-					eventReq.GatewayName, eventReq.StageName, eventReq.PublishID, err)
+					eventReq.BkGatewayName, eventReq.BkStageName, eventReq.PublishID, err)
 				return
 			}
 			event := reportEvent{
@@ -253,23 +253,23 @@ func (r *Reporter) reportEvent(event reportEvent) {
 	if err != nil {
 		logging.GetLogger().Errorf(
 			"report event  [name:%s,gateway:%s,stage:%s,publish_id:%s,status:%s] fail:%v",
-			event.Event, eventReq.GatewayName, eventReq.StageName, eventReq.PublishID, event.status, err)
+			event.Event, eventReq.BkGatewayName, eventReq.BkStageName, eventReq.PublishID, event.status, err)
 		return
 	}
 
 	// log event
 	logging.GetLogger().Infof("report event [name:%s,gateway:%s,stage:%s,publish_id:%s,status:%s] success",
-		event.Event, eventReq.GatewayName, eventReq.StageName, event.status, eventReq.PublishID)
+		event.Event, eventReq.BkGatewayName, eventReq.BkStageName, event.status, eventReq.PublishID)
 }
 
 // parseEventInfo parse stage info
-func parseEventInfo(stage *v1beta1.BkGatewayStage) *client.AddEventReq {
+func parseEventInfo(stage *v1beta1.BkGatewayStage) *client.ReportEventReq {
 	gatewayName := stage.Labels[config.BKAPIGatewayLabelKeyGatewayName]
 	stageName := stage.Labels[config.BKAPIGatewayLabelKeyGatewayStage]
 	publishID := stage.Labels[config.BKAPIGatewayLabelKeyGatewayPublishID]
-	return &client.AddEventReq{
-		GatewayName: gatewayName,
-		StageName:   stageName,
-		PublishID:   publishID,
+	return &client.ReportEventReq{
+		BkGatewayName: gatewayName,
+		BkStageName:   stageName,
+		PublishID:     publishID,
 	}
 }

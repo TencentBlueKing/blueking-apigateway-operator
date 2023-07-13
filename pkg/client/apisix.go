@@ -36,7 +36,7 @@ import (
 )
 
 const (
-	getPublishVersionURL = "/api/:gateway_name/:stage_name:/_version"
+	getPublishVersionURL = "/api/:gateway/:stage:/_version"
 )
 
 var apisixClient *ApisixClient
@@ -73,8 +73,8 @@ func (a *ApisixClient) GetReleaseVersion(gatewayName string, stageName string,
 	publishID string) (*VersionRouteResp, error) {
 	request := a.client.Request()
 	request.Path(getPublishVersionURL)
-	request.Use(url.Param("gateway_name", gatewayName))
-	request.Use(url.Param("stage_name", stageName))
+	request.Use(url.Param("gateway", gatewayName))
+	request.Use(url.Param("stage", stageName))
 	retryStrategy := retrier.New(retrier.ConstantBackoff(
 		a.versionProbeCount, a.versionProbeInterval), nil)
 	var resp VersionRouteResp

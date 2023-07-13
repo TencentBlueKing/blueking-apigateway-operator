@@ -172,7 +172,7 @@ func (r *EtcdRegistryAdapter) ListStages(ctx context.Context) ([]StageInfo, erro
 func (r *EtcdRegistryAdapter) List(ctx context.Context, key ResourceKey, obj client.ObjectList) error {
 	startedTime := time.Now()
 	if key.GatewayName == "" || key.StageName == "" {
-		return eris.Errorf("GatewayName and stage must be specified when list etcd resources")
+		return eris.Errorf("Gateway and stage must be specified when list etcd resources")
 	}
 
 	// type of *BkGatewaResourceList

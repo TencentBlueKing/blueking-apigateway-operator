@@ -38,7 +38,7 @@ const (
 	HealthZRouteIDOuter = "micro-gateway-operator-healthz-outer"
 	NotFoundHandling    = "micro-gateway-not-found-handling"
 	// HTTPHeaderKeyGatewayOperatorVersion http header key for GatewayOperatorVersion
-	HTTPHeaderKeyGatewayOperatorVersion = "GatewayName-Operator-Version"
+	HTTPHeaderKeyGatewayOperatorVersion = "Gateway-Operator-Version"
 )
 
 // VirtualStage combine some builtin routes
