@@ -22,10 +22,10 @@ import "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 
 // AddEventReq add event request
 type AddEventReq struct {
-	Gateway   string                 `json:"gate_way"`
-	PublishID string                 `json:"-"`
-	Stage     string                 `json:"stage"`
-	Name      constant.EventName     `json:"name"`
-	Status    constant.EventStatus   `json:"status"`
-	Detail    map[string]interface{} `json:"detail"`
+	PublishID   string                 `json:"-"`
+	GatewayName string                 `json:"gateway_name"`
+	StageName   string                 `json:"stage_name"`
+	Name        constant.EventName     `json:"name"`
+	Status      constant.EventStatus   `json:"status"`
+	Detail      map[string]interface{} `json:"detail"`
 }

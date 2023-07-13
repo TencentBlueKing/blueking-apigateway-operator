@@ -139,7 +139,7 @@ func (l *listCommand) formatOutput(listInfo client.ListInfo, format string) erro
 		return printYaml(listInfo)
 	case "simple":
 		for stage, listResources := range listInfo {
-			fmt.Printf("Stage: %s\n", stage)
+			fmt.Printf("StageName: %s\n", stage)
 			l.printResource("Routes", listResources.Routes)
 			l.printResource("Services", listResources.Services)
 			l.printResource("PluginMetadatas", listResources.PluginMetadata)

@@ -31,11 +31,11 @@ eventReporter:
   coreAPIHost: "bk-apigateway-core-api:80"
   apisixHost: "bk-apigateway-apigateway"
   versionProbe:
-    timoutSs: 120 # version probe timeout
+    timout: "2m" # version probe timeout
     bufferSize: 300 # version probe chain size
     retry:
       count: 60
-      intervalMs: 500
+      interval: "500ms"
   eventBufferSize: 300 # reporter eventChain size
   reporterBufferSize: 100 # control currency fo report to core API
 

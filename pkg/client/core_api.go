@@ -56,13 +56,13 @@ func GetCoreAPIClient() *CoreAPIClient {
 }
 
 // NewCoreAPIClient New core_api client with instance_id and instance_secret
-func newCoreAPIClient(endpoints string, instanceID string, instanceSecret string) *CoreAPIClient {
+func newCoreAPIClient(host string, instanceID string, instanceSecret string) *CoreAPIClient {
 	cli := gentleman.New()
-	cli.URL(endpoints)
+	cli.URL(host)
 
 	// set instance
-	cli.SetHeader("X-Bk-Micro-Gateway-Instance-Id", instanceID)
-	cli.SetHeader("X-Bk-Micro-Gateway-Instance-Secret", instanceSecret)
+	cli.SetHeader("X-Bk-Micro-GatewayName-Instance-Id", instanceID)
+	cli.SetHeader("X-Bk-Micro-GatewayName-Instance-Secret", instanceSecret)
 
 	return &CoreAPIClient{
 		baseClient: baseClient{
@@ -71,8 +71,8 @@ func newCoreAPIClient(endpoints string, instanceID string, instanceSecret string
 	}
 }
 
-// AddPublishEvent report event to core_api
-func (c *CoreAPIClient) AddPublishEvent(ctx context.Context, req *AddEventReq) error {
+// ReportPublishEvent report event to core_api
+func (c *CoreAPIClient) ReportPublishEvent(ctx context.Context, req *AddEventReq) error {
 	if req.PublishID == "" {
 		return errors.New("publish_id is empty")
 	}

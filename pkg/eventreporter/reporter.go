@@ -16,7 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package eventrepoter
+package eventreporter
 
 import (
 	"context"
@@ -46,21 +46,21 @@ type reportEvent struct {
 }
 
 type Reporter struct {
-	eventChain            chan reportEvent
-	versionProbeChain     chan struct{} // control version probe concurrency
-	reportChain           chan struct{} // control reporter concurrency
-	close                 chan struct{}
-	versionProbeTimeoutSs time.Duration
+	eventChain          chan reportEvent
+	versionProbeChain   chan struct{} // control version probe concurrency
+	reportChain         chan struct{} // control reporter concurrency
+	close               chan struct{}
+	versionProbeTimeout time.Duration
 }
 
 // InitReporter
 func InitReporter(cfg *config.Config) {
 	reporterOnce.Do(func() {
 		reporter = &Reporter{
-			eventChain:            make(chan reportEvent, cfg.EventReporter.EventBufferSize),
-			versionProbeChain:     make(chan struct{}, cfg.EventReporter.VersionProbe.BufferSize),
-			close:                 make(chan struct{}, cfg.EventReporter.ReporterBufferSize),
-			versionProbeTimeoutSs: cfg.EventReporter.VersionProbe.TimeoutSs,
+			eventChain:          make(chan reportEvent, cfg.EventReporter.EventBufferSize),
+			versionProbeChain:   make(chan struct{}, cfg.EventReporter.VersionProbe.BufferSize),
+			close:               make(chan struct{}, cfg.EventReporter.ReporterBufferSize),
+			versionProbeTimeout: cfg.EventReporter.VersionProbe.Timeout,
 		}
 	})
 }
@@ -171,11 +171,11 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *v1beta1.BkGa
 		eventReq := parseEventInfo(stage)
 		if eventReq.PublishID == "" {
 			logging.GetLogger().Errorf("stage[gateway:%s,stage:%s]publish_id is empty",
-				eventReq.Gateway, eventReq.Stage)
+				eventReq.GatewayName, eventReq.StageName)
 			return
 		}
 
-		reportCtx, cancelFunc := context.WithTimeout(ctx, time.Second*reporter.versionProbeTimeoutSs)
+		reportCtx, cancelFunc := context.WithTimeout(ctx, reporter.versionProbeTimeout)
 		errChan := make(chan error, 1)
 		defer func() {
 			cancelFunc()
@@ -186,12 +186,12 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *v1beta1.BkGa
 		utils.GoroutineWithRecovery(ctx, func() {
 			// begin publish probe
 			versionInfo, err := client.GetApisixClient().
-				GetReleaseVersion(eventReq.Gateway, eventReq.Stage, eventReq.PublishID)
+				GetReleaseVersion(eventReq.GatewayName, eventReq.StageName, eventReq.PublishID)
 			errChan <- err
 			if err != nil {
 				logging.GetLogger().Errorf(
 					"get release[gateway:%s,stage:%s,publish_id:%s] version from apisix err:%v",
-					eventReq.Gateway, eventReq.Stage, eventReq.PublishID, err)
+					eventReq.GatewayName, eventReq.StageName, eventReq.PublishID, err)
 				return
 			}
 			event := reportEvent{
@@ -249,17 +249,17 @@ func (r *Reporter) reportEvent(event reportEvent) {
 	}
 
 	// report event
-	err := client.GetCoreAPIClient().AddPublishEvent(context.TODO(), eventReq)
+	err := client.GetCoreAPIClient().ReportPublishEvent(context.TODO(), eventReq)
 	if err != nil {
 		logging.GetLogger().Errorf(
 			"report event  [name:%s,gateway:%s,stage:%s,publish_id:%s,status:%s] fail:%v",
-			event.Event, eventReq.Gateway, eventReq.Stage, eventReq.PublishID, event.status, err)
+			event.Event, eventReq.GatewayName, eventReq.StageName, eventReq.PublishID, event.status, err)
 		return
 	}
 
 	// log event
 	logging.GetLogger().Infof("report event [name:%s,gateway:%s,stage:%s,publish_id:%s,status:%s] success",
-		event.Event, eventReq.Gateway, eventReq.Stage, event.status, eventReq.PublishID)
+		event.Event, eventReq.GatewayName, eventReq.StageName, event.status, eventReq.PublishID)
 }
 
 // parseEventInfo parse stage info
@@ -268,8 +268,8 @@ func parseEventInfo(stage *v1beta1.BkGatewayStage) *client.AddEventReq {
 	stageName := stage.Labels[config.BKAPIGatewayLabelKeyGatewayStage]
 	publishID := stage.Labels[config.BKAPIGatewayLabelKeyGatewayPublishID]
 	return &client.AddEventReq{
-		Gateway:   gatewayName,
-		Stage:     stageName,
-		PublishID: publishID,
+		GatewayName: gatewayName,
+		StageName:   stageName,
+		PublishID:   publishID,
 	}
 }

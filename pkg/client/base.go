@@ -53,14 +53,14 @@ func sendAndDecodeResp(result interface{}) RequestOption {
 		var err error
 		defer func() {
 			if err != nil {
-				logging.GetLogger().Errorf("do http request fail:%+v", err)
+				logging.GetLogger().Errorf("do http request fail: %+v", err)
 			}
 		}()
 
 		// send request
 		resp, err = request.Send()
 		if err != nil {
-			return fmt.Errorf("send http fail:%w", err)
+			return fmt.Errorf("send http fail: %w", err)
 		}
 		defer func() {
 			_ = resp.Close()
@@ -70,10 +70,10 @@ func sendAndDecodeResp(result interface{}) RequestOption {
 		var res utils.CommonResp
 		err = json.Unmarshal(resp.Bytes(), &res)
 		if err != nil {
-			return fmt.Errorf("unmarshal http resp err:%w", err)
+			return fmt.Errorf("unmarshal http resp err: %w", err)
 		}
 		if res.Error.Code != "" {
-			return fmt.Errorf("code:%s,msg:%s", res.Error.Code, res.Error.Message)
+			return fmt.Errorf("code: %s,msg: %s", res.Error.Code, res.Error.Message)
 		}
 
 		// decode resp
@@ -81,7 +81,7 @@ func sendAndDecodeResp(result interface{}) RequestOption {
 			var resultByte []byte
 			resultByte, err = json.Marshal(res.Data)
 			if err != nil {
-				return fmt.Errorf("marshal http result data err:%w", err)
+				return fmt.Errorf("marshal http result data err: %w", err)
 			}
 			return json.Unmarshal(resultByte, &result)
 		}

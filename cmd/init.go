@@ -36,7 +36,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/eventrepoter"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/eventreporter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 )
 
@@ -122,7 +122,7 @@ func preRun(cmd *cobra.Command, args []string) {
 	initLog()
 	initClient()
 	// init publish reporter
-	eventrepoter.InitReporter(globalConfig)
+	eventreporter.InitReporter(globalConfig)
 }
 
 func initClient() {

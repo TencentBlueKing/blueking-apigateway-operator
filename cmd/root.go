@@ -26,7 +26,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/eventrepoter"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/eventreporter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/runner"
 )
 
@@ -57,7 +57,7 @@ func Execute() {
 
 func rootRun(cmd *cobra.Command, args []string) {
 	initOperator()
-	gracefulShutdown(eventrepoter.Shutdown)
+	gracefulShutdown(eventreporter.Shutdown)
 	initTracing()
 
 	// TODO sentry 相关的逻辑放到一起
@@ -69,7 +69,7 @@ func rootRun(cmd *cobra.Command, args []string) {
 	}
 
 	// start event reporter
-	eventrepoter.Start(rootCtx)
+	eventreporter.Start(rootCtx)
 
 	var agentRunner runner.AgentRunner
 	if globalConfig.Operator.WithKube {

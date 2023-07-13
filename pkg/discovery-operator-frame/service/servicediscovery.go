@@ -320,7 +320,7 @@ func (sd *ServiceDiscoveryImpl) updateEndpoints(spec *gatewayv1beta1.BkGatewayEn
 	err := sd.client.Get(context.Background(), client.ObjectKeyFromObject(endpoints), endpoints)
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			sd.logger.Info("Gateway endpoints not found, create one")
+			sd.logger.Info("GatewayName endpoints not found, create one")
 			newEndpoints := &gatewayv1beta1.BkGatewayEndpoints{}
 			newEndpoints.SetNamespace(sd.config.gatewaySvc.Namespace)
 			newEndpoints.SetName(sd.getGatewayEndpointsName())

@@ -35,7 +35,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter/conversion"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter/service"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/eventrepoter"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/eventreporter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/radixtree"
@@ -143,7 +143,7 @@ func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, wg *s
 	// 每一个提交都是对一个stage的全量数据处理
 	apisixConf, stage, err := c.ConvertEtcdKVToApisixConfiguration(ctx, si)
 	if err != nil {
-		eventrepoter.ReportParseConfigurationFailureEvent(ctx, stage, err)
+		eventreporter.ReportParseConfigurationFailureEvent(ctx, stage, err)
 		if !eris.Is(err, errStageNotFound) {
 			c.logger.Error(err, "convert stage resources to apisix representation failed", "stageInfo", si)
 			// retry
@@ -155,9 +155,9 @@ func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, wg *s
 		// 如果stage不存在, 直接删除stage
 		apisixConf = apisix.NewEmptyApisixConfiguration()
 	} else {
-		eventrepoter.ReportParseConfigurationSuccessEvent(ctx, stage)
+		eventreporter.ReportParseConfigurationSuccessEvent(ctx, stage)
 	}
-	eventrepoter.ReportApplyConfigurationDoingEvent(ctx, stage)
+	eventreporter.ReportApplyConfigurationDoingEvent(ctx, stage)
 	c.synchronizer.Sync(
 		ctx,
 		si.GatewayName,
@@ -165,8 +165,8 @@ func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, wg *s
 		apisixConf,
 	)
 	// eventrepoter.ReportApplyConfigurationSuccessEvent(ctx, stage) // 可以由事件之前的关系推断出来
-	eventrepoter.ReportLoadConfigurationDoingEvent(ctx, stage) //
-	eventrepoter.ReportLoadConfigurationResultEvent(ctx, stage)
+	eventreporter.ReportLoadConfigurationDoingEvent(ctx, stage) //
+	eventreporter.ReportLoadConfigurationResultEvent(ctx, stage)
 }
 
 // ConvertEtcdKVToApisixConfiguration ...
@@ -178,7 +178,7 @@ func (c *Commiter) ConvertEtcdKVToApisixConfiguration(
 	if err != nil {
 		return nil, nil, err
 	}
-	eventrepoter.ReportParseConfigurationDoingEvent(ctx, stage)
+	eventreporter.ReportParseConfigurationDoingEvent(ctx, stage)
 	resList, err := c.listResources(ctx, si)
 	if err != nil {
 		return nil, stage, err

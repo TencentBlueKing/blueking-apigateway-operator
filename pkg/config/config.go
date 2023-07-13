@@ -125,13 +125,13 @@ type VersionProbe struct {
 	BufferSize int
 	Host       string
 	Retry      Retry
-	TimeoutSs  time.Duration
+	Timeout    time.Duration
 }
 
 // Retry
 type Retry struct {
-	Count      int
-	IntervalMs time.Duration
+	Count    int
+	Interval time.Duration
 }
 
 type Instance struct {
@@ -257,10 +257,10 @@ func newDefaultConfig() *Config {
 			VersionProbe: VersionProbe{
 				BufferSize: 100,
 				Retry: Retry{
-					Count:      60,
-					IntervalMs: 500,
+					Count:    60,
+					Interval: time.Millisecond * 500,
 				},
-				TimeoutSs: 120,
+				Timeout: time.Minute * 2,
 			},
 			EventBufferSize:    300,
 			ReporterBufferSize: 100,

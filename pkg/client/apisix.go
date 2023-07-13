@@ -28,7 +28,7 @@ import (
 	json "github.com/json-iterator/go"
 	"gopkg.in/eapache/go-resiliency.v1/retrier"
 	retry "gopkg.in/h2non/gentleman-retry.v2"
-	"gopkg.in/h2non/gentleman.v2"
+	gentleman "gopkg.in/h2non/gentleman.v2"
 	"gopkg.in/h2non/gentleman.v2/plugins/url"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
@@ -36,7 +36,7 @@ import (
 )
 
 const (
-	getPublishVersionURL = "/api/:gateway/:stage:/_version"
+	getPublishVersionURL = "/api/:gateway_name/:stage_name:/_version"
 )
 
 var apisixClient *ApisixClient
@@ -47,8 +47,8 @@ type ApisixClient struct {
 	baseClient
 	// apisix版本探测次数
 	versionProbeCount int
-	// apisix版本探测间隔(ms)
-	versionProbeIntervalMs time.Duration
+	// apisix版本探测间隔
+	versionProbeInterval time.Duration
 }
 
 // InitApisixClient init apisix cli
@@ -57,9 +57,9 @@ func InitApisixClient(cfg *config.Config) {
 		cli := gentleman.New()
 		cli.URL(cfg.EventReporter.VersionProbe.Host)
 		apisixClient = &ApisixClient{
-			baseClient:             baseClient{client: cli},
-			versionProbeCount:      cfg.EventReporter.VersionProbe.Retry.Count,
-			versionProbeIntervalMs: time.Millisecond * cfg.EventReporter.VersionProbe.Retry.IntervalMs,
+			baseClient:           baseClient{client: cli},
+			versionProbeCount:    cfg.EventReporter.VersionProbe.Retry.Count,
+			versionProbeInterval: cfg.EventReporter.VersionProbe.Retry.Interval,
 		}
 	})
 }
@@ -69,16 +69,17 @@ func GetApisixClient() *ApisixClient {
 }
 
 // GetReleaseVersion get apisix release info
-func (a *ApisixClient) GetReleaseVersion(gateway string, stage string, publishID string) (*VersionRouteResp, error) {
+func (a *ApisixClient) GetReleaseVersion(gatewayName string, stageName string,
+	publishID string) (*VersionRouteResp, error) {
 	request := a.client.Request()
 	request.Path(getPublishVersionURL)
-	request.Use(url.Param("gateway", gateway))
-	request.Use(url.Param("stage", stage))
+	request.Use(url.Param("gateway_name", gatewayName))
+	request.Use(url.Param("stage_name", stageName))
 	retryStrategy := retrier.New(retrier.ConstantBackoff(
-		a.versionProbeCount, time.Millisecond*(a.versionProbeIntervalMs)), nil)
+		a.versionProbeCount, a.versionProbeInterval), nil)
 	var resp VersionRouteResp
 	// set retry strategy
-	retry.Evaluator = retryEvaluator(gateway, stage, publishID, &resp)
+	retry.Evaluator = retryEvaluator(gatewayName, stageName, publishID, &resp)
 	retryPlugin := retry.New(retryStrategy)
 	request.Use(retryPlugin)
 	_, err := request.Send()
@@ -100,7 +101,7 @@ func retryEvaluator(gateway string, stage string, publishID string, resp *Versio
 		// 虚拟路由不存在,继续重试
 		if res.StatusCode == http.StatusNotFound {
 			notFoundErr := fmt.Errorf(
-				"configuration [gateway:%s,state:%s] version route not found", gateway, stage)
+				"configuration [gateway: %s,stage: %s] version route not found", gateway, stage)
 			logging.GetLogger().Info(notFoundErr)
 			return notFoundErr
 		}
@@ -109,7 +110,7 @@ func retryEvaluator(gateway string, stage string, publishID string, resp *Versio
 			defer res.Body.Close()
 			result, readErr := io.ReadAll(res.Body)
 			if readErr != nil {
-				readBodyErr := fmt.Errorf("read configuration [gateway:%s,state:%s] version route body err:%w",
+				readBodyErr := fmt.Errorf("read configuration [gateway: %s,state: %s] version route body err: %w",
 					gateway, stage, readErr)
 				logging.GetLogger().Error(readBodyErr)
 				return readBodyErr
@@ -117,7 +118,7 @@ func retryEvaluator(gateway string, stage string, publishID string, resp *Versio
 			unmarshalErr := json.Unmarshal(result, &resp)
 			if unmarshalErr != nil {
 				unmarshalResultErr := fmt.Errorf(
-					"unmarshal configuration [gateway:%s,state:%s] version route body err:%w",
+					"unmarshal configuration [gateway: %s,stage: %s] version route body err: %w",
 					gateway, stage, unmarshalErr)
 				logging.GetLogger().Error(unmarshalResultErr)
 				return unmarshalResultErr
@@ -126,7 +127,7 @@ func retryEvaluator(gateway string, stage string, publishID string, resp *Versio
 			if resp.PublishID < publishID {
 				// 如果获取到的版本号比当前小，说明当前的版本还未加载完成
 				notLoadFinishedErr := fmt.Errorf(
-					"configuration [gateway:%s,state:%s]  [current:%s, expected:%s]is not latest",
+					"configuration [gateway: %s,stage: %s]  [current: %s, expected: %s]is not latest",
 					gateway, stage, resp.PublishID, publishID)
 				logging.GetLogger().Info(notLoadFinishedErr)
 				return notLoadFinishedErr
