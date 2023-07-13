@@ -30,14 +30,13 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 
-	//+kubebuilder:scaffold:imports
-
 	"github.com/TencentBlueKing/blueking-apigateway-operator/internal/tracer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/agent"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/eventreporter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 )
 
@@ -96,14 +95,17 @@ func initTracing() {
 	}
 }
 
-func listenSignal() {
+func gracefulShutdown(shutdownHookFuncOptions ...func()) {
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT)
 	go func() {
 		select {
 		case sig := <-c:
 			logger.Infow("Got signal. Aborting...", "sig", sig)
-			cancel()
+			cancel() // Gracefully shut down before listening to the context signal
+			for _, shutdown := range shutdownHookFuncOptions {
+				shutdown() // Suitable for those who need to process the data before closing
+			}
 			time.Sleep(time.Second * 3)
 			os.Exit(1)
 		case <-rootCtx.Done():
@@ -118,10 +120,15 @@ func preRun(cmd *cobra.Command, args []string) {
 	cmd.ParseFlags(args)
 	initConfig()
 	initLog()
+	initClient()
+	// init publish reporter
+	eventreporter.InitReporter(globalConfig)
 }
 
 func initClient() {
-	client.Init(globalConfig)
+	client.InitResourceClient(globalConfig)
+	client.InitCoreAPIClient(globalConfig)
+	client.InitApisixClient(globalConfig)
 }
 
 func initOperator() {

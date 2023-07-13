@@ -22,7 +22,6 @@ import (
 	"context"
 	"os"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/version"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
@@ -36,6 +35,7 @@ import (
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/version"
 )
 
 // InitTracing ...

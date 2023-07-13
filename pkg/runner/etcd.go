@@ -120,14 +120,14 @@ func (r *EtcdAgentRunner) init() {
 // Run ...
 func (r *EtcdAgentRunner) Run(ctx context.Context) {
 	// 1. run http server
-	server := server.NewServer(
+	httpServer := server.NewServer(
 		r.leader,
 		r.registry,
 		r.store,
 		r.commiter,
 	)
-	server.RegisterMetric(prometheus.DefaultGatherer)
-	server.Run(ctx, r.cfg)
+	httpServer.RegisterMetric(prometheus.DefaultGatherer)
+	httpServer.Run(ctx, r.cfg)
 
 	// 2. waiting leader election
 	var keepAliveChan <-chan struct{} = make(chan struct{})

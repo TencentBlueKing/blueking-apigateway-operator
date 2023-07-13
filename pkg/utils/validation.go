@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/go-playground/validator/v10"
+	validator "github.com/go-playground/validator/v10"
 )
 
 // 这里是通用的 FieldError 处理, 如果需要针对某些字段或struct做定制, 需要自行定义一个

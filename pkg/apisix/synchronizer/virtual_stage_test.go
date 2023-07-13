@@ -28,7 +28,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 	. "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"

@@ -52,6 +52,8 @@ require (
 	github.com/gin-contrib/pprof v1.4.0
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-playground/validator/v10 v10.11.0
+	gopkg.in/eapache/go-resiliency.v1 v1.2.0
+	gopkg.in/h2non/gentleman-retry.v2 v2.0.1
 	gopkg.in/h2non/gentleman.v2 v2.0.5
 )
 

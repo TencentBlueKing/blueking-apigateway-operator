@@ -19,31 +19,29 @@
 package client
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
 	"net/http"
 	"strings"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/api/handler"
+	gentleman "gopkg.in/h2non/gentleman.v2"
+	"gopkg.in/h2non/gentleman.v2/plugins/auth"
+	"gopkg.in/h2non/gentleman.v2/plugins/body"
+
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
-	"gopkg.in/h2non/gentleman.v2"
-	"gopkg.in/h2non/gentleman.v2/plugins/body"
 )
 
 const (
-	GetLeaderURL    = "/v1/leader"
-	DiffResourceURL = "/v1/resources/diff"
-	ListResourceURL = "/v1/resources/list"
-	SyncResourceURL = "/v1/resources/sync"
+	getLeaderURL    = "/v1/leader"
+	diffResourceURL = "/v1/resources/diff"
+	listResourceURL = "/v1/resources/list"
+	syncResourceURL = "/v1/resources/sync"
 )
 
 type ResourceClient struct {
-	client *gentleman.Client
+	baseClient
 	Apikey string
 }
 
@@ -52,8 +50,8 @@ var (
 	serverBindPort = 6004
 )
 
-// Init client
-func Init(cfg *config.Config) {
+// InitResourceClient client
+func InitResourceClient(cfg *config.Config) {
 	switch {
 	case cfg.HttpServer.BindAddress != "":
 		serverHost = fmt.Sprintf(
@@ -78,8 +76,12 @@ func Init(cfg *config.Config) {
 func NewResourceClient(host string, apiKey string) *ResourceClient {
 	cli := gentleman.New()
 	cli.URL(host)
+	// set auth
+	cli.Use(auth.Basic(constant.ApiAuthAccount, apiKey))
 	return &ResourceClient{
-		client: cli,
+		baseClient: baseClient{
+			client: cli,
+		},
 		Apikey: apiKey,
 	}
 }
@@ -101,89 +103,39 @@ func GetLeaderResourceClient(apiKey string) (*ResourceClient, error) {
 // GetLeader Resource leader instance
 func (r *ResourceClient) GetLeader() (string, error) {
 	request := r.client.Request()
-	request.Path(GetLeaderURL)
+	request.Path(getLeaderURL)
 	request.Method(http.MethodGet)
 	var leader string
-	return leader, r.DoHttpRequest(request, SetAuth(r.Apikey), SendAndDecodeResp(&leader))
+	return leader, r.doHttpRequest(request, sendAndDecodeResp(&leader))
 }
 
 // Diff resource both gateway and apiSix
-func (r *ResourceClient) Diff(req *handler.DiffReq) (*handler.DiffInfo, error) {
+func (r *ResourceClient) Diff(req *DiffReq) (*DiffInfo, error) {
 	request := r.client.Request()
-	request.Path(DiffResourceURL)
+	request.Path(diffResourceURL)
 	request.Method(http.MethodPost)
 	request.Use(body.JSON(req))
-	var res handler.DiffInfo
-	return &res, r.DoHttpRequest(request, SetAuth(r.Apikey), SendAndDecodeResp(&res))
+	var res DiffInfo
+	return &res, r.doHttpRequest(request, sendAndDecodeResp(&res))
 }
 
 // List Resource
-func (r *ResourceClient) List(req *handler.ListReq) (handler.ListInfo, error) {
+func (r *ResourceClient) List(req *ListReq) (ListInfo, error) {
 	request := r.client.Request()
-	request.Path(ListResourceURL)
+	request.Path(listResourceURL)
 	request.Method(http.MethodPost)
 	request.Use(body.JSON(req))
-	var res handler.ListInfo
-	return res, r.DoHttpRequest(request, SetAuth(r.Apikey), SendAndDecodeResp(&res))
+	var res ListInfo
+	return res, r.doHttpRequest(request, sendAndDecodeResp(&res))
 }
 
 // Sync Resource between gateway and apiSix
-func (r *ResourceClient) Sync(req *handler.SyncReq) error {
+func (r *ResourceClient) Sync(req *SyncReq) error {
 	request := r.client.Request()
-	request.Path(SyncResourceURL)
+	request.Path(syncResourceURL)
 	request.Method(http.MethodPost)
 	request.Use(body.JSON(req))
-	return r.DoHttpRequest(request, SetAuth(r.Apikey), SendAndDecodeResp(nil))
-}
-
-// DoHttpRequest do http request with opt
-func (r *ResourceClient) DoHttpRequest(request *gentleman.Request, options ...RequestOption) error {
-	for _, opt := range options {
-		err := opt(request)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// RequestOption http option
-type RequestOption func(request *gentleman.Request) error
-
-// SetAuth set basic auth
-func SetAuth(apiKey string) RequestOption {
-	return func(request *gentleman.Request) error {
-		request.SetHeader("Authorization",
-			fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString(
-				[]byte(fmt.Sprintf("%s:%s", constant.ApiAuthAccount, apiKey)))))
-		return nil
-	}
-}
-
-// SendAndDecodeResp do http request and decode resp
-func SendAndDecodeResp(result interface{}) RequestOption {
-	return func(request *gentleman.Request) error {
-		resp, err := request.Send()
-		if err != nil {
-			return fmt.Errorf("send http fail:%w", err)
-		}
-		var res utils.CommonResp
-		err = json.Unmarshal(resp.Bytes(), &res)
-		if err != nil {
-			return fmt.Errorf("unmarshal http resp err:%w", err)
-		}
-		if res.Error.Code != "" {
-			return fmt.Errorf("code:%s,msg:%s", res.Error.Code, res.Error.Message)
-		}
-		if result != nil {
-			resultByte, err := json.Marshal(res.Data)
-			if err != nil {
-				return fmt.Errorf("marshal http result data err:%w", err)
-			}
-			return json.Unmarshal(resultByte, &result)
-		}
-		return nil
-	}
+	return r.doHttpRequest(request, sendAndDecodeResp(nil))
 }
 
 // getHostFromLeaderName eg: in:somename-ip1,ip2 out: http://ip1:port

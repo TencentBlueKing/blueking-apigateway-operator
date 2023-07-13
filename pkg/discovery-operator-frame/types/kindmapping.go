@@ -19,9 +19,9 @@
 package types
 
 import (
-	gatewayv1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
-
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+
+	gatewayv1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
 )
 
 // KindMapping ...

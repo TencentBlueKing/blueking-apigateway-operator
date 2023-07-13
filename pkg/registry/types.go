@@ -36,6 +36,7 @@ type ResourceKey struct {
 type StageInfo struct {
 	GatewayName string
 	StageName   string
+	PublishID   string
 }
 
 // IsEmpty checks if the stage info is absent

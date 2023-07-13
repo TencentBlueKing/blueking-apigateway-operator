@@ -21,11 +21,11 @@ package conversion
 import (
 	"net"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 )
 
 func resetVars() {

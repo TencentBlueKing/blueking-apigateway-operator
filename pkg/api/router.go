@@ -19,12 +19,13 @@
 package api
 
 import (
+	"github.com/gin-gonic/gin"
+
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/api/handler"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
-	"github.com/gin-gonic/gin"
 )
 
 func Register(

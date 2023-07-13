@@ -26,6 +26,9 @@ import (
 	"net/http"
 	"reflect"
 
+	"github.com/gin-gonic/gin"
+	"github.com/google/go-cmp/cmp"
+
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
@@ -33,8 +36,6 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
-	"github.com/gin-gonic/gin"
-	"github.com/google/go-cmp/cmp"
 )
 
 // ResourceHandler resource api handler
@@ -50,7 +51,8 @@ func NewResourceApi(
 	leaderElector leaderelection.LeaderElector,
 	registry registry.Registry,
 	committer *commiter.Commiter,
-	apiSixConfStore synchronizer.ApisixConfigStore) *ResourceHandler {
+	apiSixConfStore synchronizer.ApisixConfigStore,
+) *ResourceHandler {
 	return &ResourceHandler{
 		LeaderElector:   leaderElector,
 		registry:        registry,
@@ -136,7 +138,7 @@ func (r *ResourceHandler) diffHandler(ctx context.Context, req *DiffReq) (DiffIn
 		}
 		stageKey := config.GenStagePrimaryKey(req.Gateway, req.Stage)
 		originalApiSixResources := r.apisixConfStore.Get(stageKey)
-		apiSixResources, err := r.committer.ConvertEtcdKVToApisixConfiguration(ctx, si)
+		apiSixResources, _, err := r.committer.ConvertEtcdKVToApisixConfiguration(ctx, si)
 		if err != nil {
 			return nil, err
 		}
@@ -163,7 +165,7 @@ func (r *ResourceHandler) diffHandler(ctx context.Context, req *DiffReq) (DiffIn
 	allApiSixResources := r.apisixConfStore.GetAll()
 	for _, stage := range stageList {
 		stageKey := config.GenStagePrimaryKey(stage.GatewayName, stage.StageName)
-		apiSixResources, itemErr := r.committer.ConvertEtcdKVToApisixConfiguration(ctx, stage)
+		apiSixResources, _, itemErr := r.committer.ConvertEtcdKVToApisixConfiguration(ctx, stage)
 		if itemErr != nil {
 			err = fmt.Errorf("%s [stage %s failed: %w]", stage.StageName, stageKey, err)
 			continue
@@ -212,7 +214,8 @@ func (r *ResourceHandler) listHandler(ctx context.Context, req *ListReq) (ListIn
 
 func (r *ResourceHandler) diffWithRouteID(
 	lhs, rhs *apisix.ApisixConfiguration,
-	routeID string) *StageScopedApisixResources {
+	routeID string,
+) *StageScopedApisixResources {
 	ret := &StageScopedApisixResources{
 		Routes:         r.diffMap(lhs.Routes, rhs.Routes, routeID),
 		Services:       r.diffMap(lhs.Services, rhs.Services, ""),

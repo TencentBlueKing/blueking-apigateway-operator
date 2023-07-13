@@ -25,16 +25,16 @@ import (
 	"sync"
 	"time"
 
-	gatewayv1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/types"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/utils"
-
 	"github.com/go-logr/logr"
 	"github.com/rotisserie/eris"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	gatewayv1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/types"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/utils"
 )
 
 // Status is service discovery's status

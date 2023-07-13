@@ -22,11 +22,11 @@ import (
 	"io"
 	"strings"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
-
-	"github.com/go-playground/validator/v10"
+	validator "github.com/go-playground/validator/v10"
 	. "github.com/onsi/ginkgo/v2"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 var _ = Describe("Validation", func() {

@@ -24,11 +24,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
-
 	"github.com/gin-gonic/gin"
 	. "github.com/onsi/ginkgo/v2"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 func readResponse(w *httptest.ResponseRecorder) map[string]interface{} {

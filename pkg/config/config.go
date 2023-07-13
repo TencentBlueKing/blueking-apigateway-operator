@@ -25,16 +25,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
-
 	"github.com/spf13/viper"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 // BKAPIGatewayLabelKeyGatewayName ...
 const (
-	BKAPIGatewayLabelKeyGatewayName  = "gateway.bk.tencent.com/gateway"
-	BKAPIGatewayLabelKeyGatewayStage = "gateway.bk.tencent.com/stage"
-	BKAPIGatewayLabelKeyResourceName = "gateway.bk.tencent.com/name"
+	BKAPIGatewayLabelKeyGatewayName      = "gateway.bk.tencent.com/gateway"
+	BKAPIGatewayLabelKeyGatewayStage     = "gateway.bk.tencent.com/stage"
+	BKAPIGatewayLabelKeyGatewayPublishID = "gateway.bk.tencent.com/publish_id"
+	BKAPIGatewayLabelKeyResourceName     = "gateway.bk.tencent.com/name"
 
 	BKAPIGatewaySubpathMatchParamName = "bk_api_subpath_match_param_name"
 
@@ -119,6 +120,33 @@ type Operator struct {
 	AgentConcurrencyLimit        int
 }
 
+// VersionProbe
+type VersionProbe struct {
+	BufferSize int
+	Host       string
+	Retry      Retry
+	Timeout    time.Duration
+}
+
+// Retry
+type Retry struct {
+	Count    int
+	Interval time.Duration
+}
+
+type Instance struct {
+	ID     string
+	Secret string
+}
+
+type EventReporter struct {
+	CoreAPIHost        string
+	ApisixHost         string
+	VersionProbe       VersionProbe
+	EventBufferSize    int
+	ReporterBufferSize int
+}
+
 // KubeExtension ...
 type KubeExtension struct {
 	WorkNamespace string
@@ -177,9 +205,11 @@ type Config struct {
 
 	HttpServer HttpServer
 
-	Dashboard Dashboard
-	Apisix    Apisix
-	Operator  Operator
+	Dashboard     Dashboard
+	Apisix        Apisix
+	Operator      Operator
+	EventReporter EventReporter
+	Instance      Instance
 
 	KubeExtension KubeExtension
 
@@ -222,6 +252,18 @@ func newDefaultConfig() *Config {
 				VirtualGateway: "-",
 				VirtualStage:   "-",
 			},
+		},
+		EventReporter: EventReporter{
+			VersionProbe: VersionProbe{
+				BufferSize: 100,
+				Retry: Retry{
+					Count:    60,
+					Interval: time.Millisecond * 500,
+				},
+				Timeout: time.Minute * 2,
+			},
+			EventBufferSize:    300,
+			ReporterBufferSize: 100,
 		},
 		Operator: Operator{
 			DefaultGateway: "-",

@@ -28,11 +28,6 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/internal/tracer"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
-
 	json "github.com/json-iterator/go"
 	"github.com/rotisserie/eris"
 	"go.etcd.io/etcd/api/v3/mvccpb"
@@ -41,10 +36,15 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/internal/tracer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 )
 
 // EtcdRegistryAdapter implements the Register interface using etcd as the main storage.

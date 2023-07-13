@@ -21,13 +21,12 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/api/handler"
-
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
-
 	"github.com/rotisserie/eris"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/api/handler"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
 )
 
 type listCommand struct {
@@ -109,8 +108,16 @@ func (l *listCommand) RunE(cmd *cobra.Command, args []string) error {
 	if err := l.validateRequest(req); err != nil {
 		return err
 	}
-
-	resp, err := cli.List(req)
+	listReq := &client.ListReq{
+		Gateway: req.Gateway,
+		Stage:   req.Stage,
+		Resource: &client.ResourceInfo{
+			ResourceId:   req.Resource.ResourceId,
+			ResourceName: req.Resource.ResourceName,
+		},
+		All: req.All,
+	}
+	resp, err := cli.List(listReq)
 	if err != nil {
 		logger.Error(err, "List request failed")
 		return err
@@ -124,7 +131,7 @@ func (l *listCommand) RunE(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (l *listCommand) formatOutput(listInfo handler.ListInfo, format string) error {
+func (l *listCommand) formatOutput(listInfo client.ListInfo, format string) error {
 	switch format {
 	case "json":
 		return printJson(listInfo)

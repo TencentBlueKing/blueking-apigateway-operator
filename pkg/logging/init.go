@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/getsentry/sentry-go"
+	sentry "github.com/getsentry/sentry-go"
 	"github.com/go-logr/zapr"
 	"github.com/tchap/zapext/v2/zapsentry"
 	"go.uber.org/zap"

@@ -23,12 +23,12 @@ import (
 	"strconv"
 	"testing"
 
+	radix "github.com/armon/go-radix"
+	"github.com/stretchr/testify/assert"
+
 	v1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
-
-	"github.com/armon/go-radix"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestReverse(t *testing.T) {

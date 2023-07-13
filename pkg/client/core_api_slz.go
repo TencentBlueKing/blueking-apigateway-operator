@@ -16,17 +16,16 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package service
+package client
 
-import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+import "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 
-	gatewayv1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
-)
-
-// Service is common service info extract from service and routes
-type Service struct {
-	metav1.TypeMeta
-	metav1.ObjectMeta
-	Upstream *gatewayv1beta1.BkGatewayUpstreamConfig
+// ReportEventReq add event request
+type ReportEventReq struct {
+	PublishID     string                 `json:"-"`
+	BkGatewayName string                 `json:"bk_gateway_name"`
+	BkStageName   string                 `json:"bk_stage_name"`
+	Name          constant.EventName     `json:"name"`
+	Status        constant.EventStatus   `json:"status"`
+	Detail        map[string]interface{} `json:"detail"`
 }

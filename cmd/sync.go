@@ -21,13 +21,12 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/api/handler"
-
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
-
 	"github.com/rotisserie/eris"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/api/handler"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
 )
 
 type syncCommand struct {
@@ -92,7 +91,12 @@ func (s *syncCommand) RunE(cmd *cobra.Command, args []string) error {
 	if err := s.validateRequest(req); err != nil {
 		return err
 	}
-	err = cli.Sync(req)
+	syncReq := &client.SyncReq{
+		Gateway: req.Gateway,
+		Stage:   req.Stage,
+		All:     req.All,
+	}
+	err = cli.Sync(syncReq)
 	if err != nil {
 		logger.Error(err, "Sync request failed")
 		return err

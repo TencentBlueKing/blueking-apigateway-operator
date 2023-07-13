@@ -16,17 +16,28 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package service
+package utils
 
 import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	gatewayv1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"context"
+	"fmt"
+	"log"
+	"runtime"
 )
 
-// Service is common service info extract from service and routes
-type Service struct {
-	metav1.TypeMeta
-	metav1.ObjectMeta
-	Upstream *gatewayv1beta1.BkGatewayUpstreamConfig
+// GoroutineWithRecovery is a wrapper of goroutine that can recover panic
+func GoroutineWithRecovery(ctx context.Context, fn func()) {
+	go func() {
+		defer func() {
+			if panicErr := recover(); panicErr != nil {
+				buf := make([]byte, 64<<10)
+				n := runtime.Stack(buf, false)
+				buf = buf[:n]
+				msg := fmt.Sprintf("painic err:%s", buf)
+				log.Println(msg)
+				// todo: report err
+			}
+		}()
+		fn()
+	}()
 }

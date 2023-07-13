@@ -24,15 +24,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
-
 	apisixv1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
 	json "github.com/json-iterator/go"
 	"github.com/rotisserie/eris"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 const (

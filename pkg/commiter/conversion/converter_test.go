@@ -23,7 +23,11 @@ import (
 	"testing"
 	"time"
 
+	apisixv1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
 	json "github.com/json-iterator/go"
+	"github.com/stretchr/testify/assert"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
@@ -31,11 +35,6 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/radixtree"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
-
-	apisixv1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
-	"github.com/stretchr/testify/assert"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func marshallIgnoreErr(obj interface{}) string {

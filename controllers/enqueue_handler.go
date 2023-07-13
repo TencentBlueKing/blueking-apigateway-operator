@@ -1,11 +1,11 @@
 package controllers
 
 import (
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
-
 	"k8s.io/client-go/util/workqueue"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 )
 
 type enqueueHandler struct {

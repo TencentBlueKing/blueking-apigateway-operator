@@ -20,7 +20,6 @@ package utils
 
 import (
 	json "github.com/json-iterator/go"
-
 	"k8s.io/apimachinery/pkg/runtime"
 )
 

@@ -21,15 +21,15 @@ package controllers
 import (
 	"fmt"
 
-	gatewayv1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/service"
-	frametypes "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/types"
-
 	"github.com/go-logr/logr"
 	"github.com/rotisserie/eris"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	gatewayv1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/service"
+	frametypes "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/discovery-operator-frame/types"
 )
 
 // ReconcilerLifeCycle ...
