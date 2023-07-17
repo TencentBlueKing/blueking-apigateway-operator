@@ -58,9 +58,10 @@ func InitReporter(cfg *config.Config) {
 	reporterOnce.Do(func() {
 		reporter = &Reporter{
 			eventChain:          make(chan reportEvent, cfg.EventReporter.EventBufferSize),
+			reportChain:         make(chan struct{}, cfg.EventReporter.ReporterBufferSize),
 			versionProbeChain:   make(chan struct{}, cfg.EventReporter.VersionProbe.BufferSize),
-			close:               make(chan struct{}, cfg.EventReporter.ReporterBufferSize),
 			versionProbeTimeout: cfg.EventReporter.VersionProbe.Timeout,
+			close:               make(chan struct{}),
 		}
 	})
 }
@@ -71,8 +72,9 @@ func Start(ctx context.Context) {
 		for event := range reporter.eventChain {
 			reporter.reportChain <- struct{}{}
 			// Concurrent processing to avoid processing too slow
+			tempEvent := event // Avoid closure problems
 			utils.GoroutineWithRecovery(ctx, func() {
-				reporter.reportEvent(event)
+				reporter.reportEvent(tempEvent)
 			})
 		}
 		reporter.close <- struct{}{}
@@ -169,12 +171,10 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *v1beta1.BkGa
 		}()
 
 		eventReq := parseEventInfo(stage)
-		if eventReq.PublishID == "" {
-			logging.GetLogger().Errorf("stage[gateway:%s,stage:%s]publish_id is empty",
-				eventReq.BkGatewayName, eventReq.BkStageName)
+		if err := eventReq.Validate(); err != nil {
+			logging.GetLogger().Errorf("event[%+v] validate err: %v", eventReq, err)
 			return
 		}
-
 		reportCtx, cancelFunc := context.WithTimeout(ctx, reporter.versionProbeTimeout)
 		errChan := make(chan error, 1)
 		defer func() {
@@ -242,6 +242,10 @@ func (r *Reporter) reportEvent(event reportEvent) {
 
 	// parse event info
 	eventReq := parseEventInfo(event.stage)
+	if err := eventReq.Validate(); err != nil {
+		logging.GetLogger().Errorf("event[%+v] validate err: %v", event, err)
+		return
+	}
 	eventReq.Name = event.Event
 	eventReq.Status = event.status
 	if len(event.detail) != 0 {
@@ -259,7 +263,7 @@ func (r *Reporter) reportEvent(event reportEvent) {
 
 	// log event
 	logging.GetLogger().Infof("report event [name:%s,gateway:%s,stage:%s,publish_id:%s,status:%s] success",
-		event.Event, eventReq.BkGatewayName, eventReq.BkStageName, event.status, eventReq.PublishID)
+		event.Event, eventReq.BkGatewayName, eventReq.BkStageName, eventReq.PublishID, event.status)
 }
 
 // parseEventInfo parse stage info

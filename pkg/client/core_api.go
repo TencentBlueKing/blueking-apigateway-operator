@@ -20,19 +20,18 @@ package client
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"net/http"
 	"sync"
 
-	gentleman "gopkg.in/h2non/gentleman.v2"
+	"gopkg.in/h2non/gentleman.v2"
 	"gopkg.in/h2non/gentleman.v2/plugins/body"
+	"gopkg.in/h2non/gentleman.v2/plugins/url"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 )
 
 const (
-	reportPublishEventURL = "/api/v1/micro-gateway/release/%s/events/"
+	reportPublishEventURL = "/api/v1/micro-gateway/:micro_gateway_instance_id/release/:publish_id/events/"
 )
 
 var coreAPIClient *CoreAPIClient
@@ -41,6 +40,7 @@ var coreOnce sync.Once
 
 type CoreAPIClient struct {
 	baseClient
+	microGatewayInstanceID string
 }
 
 // InitCoreAPIClient init core api client
@@ -68,17 +68,17 @@ func newCoreAPIClient(host string, instanceID string, instanceSecret string) *Co
 		baseClient: baseClient{
 			client: cli,
 		},
+		microGatewayInstanceID: instanceID,
 	}
 }
 
 // ReportPublishEvent report event to core_api
 func (c *CoreAPIClient) ReportPublishEvent(ctx context.Context, req *ReportEventReq) error {
-	if req.PublishID == "" {
-		return errors.New("publish_id is empty")
-	}
 	request := c.client.Request()
-	request.Path(fmt.Sprintf(reportPublishEventURL, req.PublishID))
+	request.Path(reportPublishEventURL)
 	request.Method(http.MethodPost)
+	request.Use(url.Param("micro_gateway_instance_id", coreAPIClient.microGatewayInstanceID))
+	request.Use(url.Param("publish_id", req.PublishID))
 	request.Use(body.JSON(req))
 	return c.doHttpRequest(request, sendAndDecodeResp(nil))
 }

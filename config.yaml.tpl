@@ -41,8 +41,8 @@ eventReporter:
 
 
 instance:
-  ID:"coreapi"
-  Secret:"coreapi"
+  id:"coreapi"
+  secret:"coreapi"
 
 
 

@@ -123,7 +123,6 @@ type Operator struct {
 // VersionProbe
 type VersionProbe struct {
 	BufferSize int
-	Host       string
 	Retry      Retry
 	Timeout    time.Duration
 }
