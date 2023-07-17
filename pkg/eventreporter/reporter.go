@@ -172,7 +172,7 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *v1beta1.BkGa
 
 		eventReq := parseEventInfo(stage)
 		if err := eventReq.Validate(); err != nil {
-			logging.GetLogger().Errorf("event[%+v] validate err: %v", eventReq, err)
+			logging.GetLogger().Infof("event[%+v] validate err: %v", eventReq, err)
 			return
 		}
 		reportCtx, cancelFunc := context.WithTimeout(ctx, reporter.versionProbeTimeout)
@@ -243,7 +243,7 @@ func (r *Reporter) reportEvent(event reportEvent) {
 	// parse event info
 	eventReq := parseEventInfo(event.stage)
 	if err := eventReq.Validate(); err != nil {
-		logging.GetLogger().Errorf("event[%+v] validate err: %v", event, err)
+		logging.GetLogger().Infof("event[%+v] validate err: %v", event, err)
 		return
 	}
 	eventReq.Name = event.Event
