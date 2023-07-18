@@ -19,6 +19,6 @@
 package client
 
 type VersionRouteResp struct {
-	PublishID string `json:"publish_id"`
+	PublishID int64  `json:"publish_id"`
 	StartTime string `json:"start_time"` // dashboard生成虚拟路由时间
 }

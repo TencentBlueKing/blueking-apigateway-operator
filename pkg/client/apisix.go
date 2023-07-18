@@ -26,9 +26,10 @@ import (
 	"time"
 
 	json "github.com/json-iterator/go"
+	"github.com/spf13/cast"
 	"gopkg.in/eapache/go-resiliency.v1/retrier"
 	retry "gopkg.in/h2non/gentleman-retry.v2"
-	gentleman "gopkg.in/h2non/gentleman.v2"
+	"gopkg.in/h2non/gentleman.v2"
 	"gopkg.in/h2non/gentleman.v2/plugins/url"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
@@ -36,7 +37,7 @@ import (
 )
 
 const (
-	getPublishVersionURL = "/api/:gateway/:stage:/_version"
+	getPublishVersionURL = "/api/:gateway/:stage/_version"
 )
 
 var apisixClient *ApisixClient
@@ -55,7 +56,7 @@ type ApisixClient struct {
 func InitApisixClient(cfg *config.Config) {
 	apisxiOnce.Do(func() {
 		cli := gentleman.New()
-		cli.URL(cfg.EventReporter.VersionProbe.Host)
+		cli.URL(cfg.EventReporter.ApisixHost)
 		apisixClient = &ApisixClient{
 			baseClient:           baseClient{client: cli},
 			versionProbeCount:    cfg.EventReporter.VersionProbe.Retry.Count,
@@ -73,13 +74,14 @@ func (a *ApisixClient) GetReleaseVersion(gatewayName string, stageName string,
 	publishID string) (*VersionRouteResp, error) {
 	request := a.client.Request()
 	request.Path(getPublishVersionURL)
+	request.Method(http.MethodGet)
 	request.Use(url.Param("gateway", gatewayName))
 	request.Use(url.Param("stage", stageName))
 	retryStrategy := retrier.New(retrier.ConstantBackoff(
 		a.versionProbeCount, a.versionProbeInterval), nil)
 	var resp VersionRouteResp
 	// set retry strategy
-	retry.Evaluator = retryEvaluator(gatewayName, stageName, publishID, &resp)
+	retry.Evaluator = retryEvaluator(gatewayName, stageName, cast.ToInt64(publishID), &resp)
 	retryPlugin := retry.New(retryStrategy)
 	request.Use(retryPlugin)
 	_, err := request.Send()
@@ -90,7 +92,7 @@ func (a *ApisixClient) GetReleaseVersion(gatewayName string, stageName string,
 }
 
 // retryEvaluator retry strategy
-func retryEvaluator(gateway string, stage string, publishID string, resp *VersionRouteResp) retry.EvalFunc {
+func retryEvaluator(gateway string, stage string, publishID int64, resp *VersionRouteResp) retry.EvalFunc {
 	return func(err error, res *http.Response, req *http.Request) error {
 		if err != nil {
 			return err
@@ -127,7 +129,7 @@ func retryEvaluator(gateway string, stage string, publishID string, resp *Versio
 			if resp.PublishID < publishID {
 				// 如果获取到的版本号比当前小，说明当前的版本还未加载完成
 				notLoadFinishedErr := fmt.Errorf(
-					"configuration [gateway: %s,stage: %s]  [current: %s, expected: %s]is not latest",
+					"configuration [gateway: %s,stage: %s]  [current: %d, expected: %d]is not latest",
 					gateway, stage, resp.PublishID, publishID)
 				logging.GetLogger().Info(notLoadFinishedErr)
 				return notLoadFinishedErr
