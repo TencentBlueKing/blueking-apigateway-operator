@@ -106,7 +106,7 @@ test: manifests generate fmt vet ## Run tests.
 build-common: $(BUILD_PATH) generate manifests fmt vet
 
 .PHONY: build
-build: build-common ## Build manager binary.
+build: ## Build manager binary.
 	go build -ldflags "-X github.com/TencentBlueKing/blueking-apigateway-operator/pkg/version.Version=${VERSION}  \
 		-X github.com/TencentBlueKing/blueking-apigateway-operator/pkg/version.Commit=`git rev-parse HEAD` \
 		-X github.com/TencentBlueKing/blueking-apigateway-operator/pkg/version.BuildTime=`date +%Y-%m-%d_%I:%M:%S` \
