@@ -18,6 +18,35 @@ SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
 .PHONY: all
+
+
+init:
+	pip install pre-commit
+	pre-commit install
+	# go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.46.2
+	# for make mock
+	go install github.com/golang/mock/mockgen@v1.6.0
+	# for ginkgo
+	go install github.com/onsi/ginkgo/v2/ginkgo@v2.3.1
+	# for gofumpt
+	go install mvdan.cc/gofumpt@latest
+	# for golines
+	go install github.com/segmentio/golines@latest
+	# for envtest
+	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
+    # Below content was based on the recent vesion of kubebuilder v3, source:
+    # https://github.com/kubernetes-sigs/kubebuilder/blob/master/pkg/plugins/golang/v3/scaffolds/internal/templates/makefile.go#L189
+	# for controller-gen-old
+	go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.6.0  && \
+	    mv $(shell go env GOPATH)/bin/controller-gen  $(shell go env GOPATH)/bin/controller-gen-old
+	# for controller-gen
+	go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.9.2
+	# for kustomize
+	curl -Ss https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh --output install_kustomize.sh \
+	    && bash install_kustomize.sh 3.8.7  $(shell go env GOPATH)/bin; rm install_kustomize.sh;
+
+
 all: build
 
 ##@ General
@@ -44,13 +73,13 @@ help: ## Display this help.
 $(BUILD_PATH):
 	mkdir -p $(BUILD_PATH)
 
-manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
-	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
-	$(CONTROLLER_GEN_OLD) crd:crdVersions=v1beta1 paths="./..." output:crd:artifacts:config=config/crd/v1beta1
+manifests: ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
+	controller-gen rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	controller-gen-old crd:crdVersions=v1beta1 paths="./..." output:crd:artifacts:config=config/crd/v1beta1
 
 .PHONY: generate
-generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
-	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+generate: ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
+	controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 .PHONY: fmt
 fmt: ## Run go fmt against code.
@@ -69,9 +98,9 @@ lint: vet
 	golangci-lint run
 
 .PHONY: test
-test: manifests generate fmt vet envtest ginkgo	## Run tests.
-	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) -p path)" \
-	$(GINKGO) --cover --coverprofile cover.out ./...
+test: manifests generate fmt vet ## Run tests.
+	KUBEBUILDER_ASSETS="$(shell setup-envtest use $(ENVTEST_K8S_VERSION) -p path)" \
+	ginkgo --cover --coverprofile cover.out ./...
 
 ##@ Build
 build-common: $(BUILD_PATH) generate manifests fmt vet
@@ -95,84 +124,27 @@ ifndef ignore-not-found
 endif
 
 .PHONY: install
-install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
-	$(KUSTOMIZE) build config/crd | kubectl apply -f -
+install: manifests   ## Install CRDs into the K8s cluster specified in ~/.kube/config.
+	kustomize build config/crd | kubectl apply -f -
 
 .PHONY: uninstall
-uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
-	$(KUSTOMIZE) build config/crd | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
+uninstall: manifests ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
+	kustomize build config/crd | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
 
 .PHONY: deploy
-deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
-	$(KUSTOMIZE) build config/default | kubectl apply -f -
+deploy: manifests ## Deploy controller to the K8s cluster specified in ~/.kube/config.
+	cd config/manager && kustomize edit set image controller=${IMG}
+	kustomize build config/default | kubectl apply -f -
 
 .PHONY: undeploy
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
-	$(KUSTOMIZE) build config/default | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
+	kustomize build config/default | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
 
 
-# Below content was based on the recent vesion of kubebuilder v3, source:
-# https://github.com/kubernetes-sigs/kubebuilder/blob/master/pkg/plugins/golang/v3/scaffolds/internal/templates/makefile.go#L189
 
-## Location to install dependencies to
-LOCALBIN ?= $(shell pwd)/bin
-$(LOCALBIN):
-	mkdir -p $(LOCALBIN)
 
-# A temporary directory for storing binaries
-LOCALBIN_TMP ?= $(shell pwd)/bin/tmp
-$(LOCALBIN_TMP):
-	mkdir -p $(LOCALBIN_TMP)
 
-## Tool Binaries
-KUSTOMIZE ?= $(LOCALBIN)/kustomize
-CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
-# CONTROLLER_GEN_OLD is an old version of controller-gen for processing CRDs of old version.
-CONTROLLER_GEN_OLD ?= $(LOCALBIN)/controller-gen-old
-ENVTEST ?= $(LOCALBIN)/setup-envtest
-GINKGO ?= $(LOCALBIN)/ginkgo
 
-## Tool Versions
-KUSTOMIZE_VERSION ?= v3.8.7
-CONTROLLER_TOOLS_VERSION ?= v0.9.2
-# For CONTROLLER_GEN_OLD
-CONTROLLER_TOOLS_OLD_VERSION ?= v0.6.0
-GINKGO_VERSION ?= v2.3.1
 
-KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
-.PHONY: kustomize
-kustomize: $(KUSTOMIZE) ## Download kustomize locally if necessary. If wrong version is installed, it will be removed before downloading.
-$(KUSTOMIZE): $(LOCALBIN)
-	@if test -x $(LOCALBIN)/kustomize && ! $(LOCALBIN)/kustomize version | grep -q $(KUSTOMIZE_VERSION); then \
-		echo "$(LOCALBIN)/kustomize version is not expected $(KUSTOMIZE_VERSION). Removing it before installing."; \
-		rm -rf $(LOCALBIN)/kustomize; \
-	fi
-	test -s $(LOCALBIN)/kustomize || { curl -Ss $(KUSTOMIZE_INSTALL_SCRIPT) --output install_kustomize.sh && bash install_kustomize.sh $(subst v,,$(KUSTOMIZE_VERSION)) $(LOCALBIN); rm install_kustomize.sh; }
 
-.PHONY: controller-gen
-controller-gen: $(CONTROLLER_GEN)
-$(CONTROLLER_GEN): $(LOCALBIN) $(CONTROLLER_GEN_OLD)  ## Download controller-gen locally if necessary.
-	test -s $(LOCALBIN)/controller-gen && $(LOCALBIN)/controller-gen --version | grep -q $(CONTROLLER_TOOLS_VERSION) || \
-	GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_TOOLS_VERSION)
 
-# Install a legacy version controller-gen and rename it to "controller-gen-old"
-.PHONY: controller-gen-old
-controller-gen-old: $(CONTROLLER_GEN_OLD)
-$(CONTROLLER_GEN_OLD): $(LOCAL_BIN) $(LOCALBIN_TMP)
-	test -s $(LOCALBIN)/controller-gen-old && $(LOCALBIN)/controller-gen-old --version | grep -q $(CONTROLLER_TOOLS_OLD_VERSION) || \
-	( \
-		GOBIN=$(LOCALBIN_TMP) go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_TOOLS_OLD_VERSION) \
-		&& mv $(LOCALBIN_TMP)/controller-gen $(LOCALBIN)/controller-gen-old \
-	)
-
-.PHONY: envtest
-envtest: $(ENVTEST) ## Download envtest-setup locally if necessary.
-$(ENVTEST): $(LOCALBIN)
-	test -s $(LOCALBIN)/setup-envtest || GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
-
-.PHONY: ginkgo
-ginkgo: $(GINKGO)
-$(GINKGO): $(LOCALBIN) ## Download ginkgo locally if necessary.
-	test -s $(LOCALBIN)/ginkgo && $(LOCALBIN)/ginkgo version | grep -q $(GINKGO_VERSION) || \
-	GOBIN=$(LOCALBIN) go install github.com/onsi/ginkgo/v2/ginkgo@$(GINKGO_VERSION)
