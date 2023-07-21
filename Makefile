@@ -98,7 +98,7 @@ lint: vet
 	golangci-lint run
 
 .PHONY: test
-test: manifests generate fmt vet ## Run tests.
+test: ## Run tests.
 	KUBEBUILDER_ASSETS="$(shell setup-envtest use $(ENVTEST_K8S_VERSION) -p path)" \
 	ginkgo --cover --coverprofile cover.out ./...
 
