@@ -23,7 +23,7 @@ SHELL = /usr/bin/env bash -o pipefail
 init:
 	pip install pre-commit
 	pre-commit install
-	# go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
+	# for golangci-lint
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.46.2
 	# for make mock
 	go install github.com/golang/mock/mockgen@v1.6.0
@@ -35,9 +35,6 @@ init:
 	go install github.com/segmentio/golines@latest
 	# for envtest
 	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
-    # Note:
-    #	 Below content was based on the recent vesion of kubebuilder v3, source:
-    #    https://github.com/kubernetes-sigs/kubebuilder/blob/master/pkg/plugins/golang/v3/scaffolds/internal/templates/makefile.go#L189
 	# for controller-gen-old
 	go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.6.0  && \
 	    mv $(shell go env GOPATH)/bin/controller-gen  $(shell go env GOPATH)/bin/controller-gen-old
