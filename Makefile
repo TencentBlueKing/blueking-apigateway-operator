@@ -35,8 +35,9 @@ init:
 	go install github.com/segmentio/golines@latest
 	# for envtest
 	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
-    # Below content was based on the recent vesion of kubebuilder v3, source:
-    # https://github.com/kubernetes-sigs/kubebuilder/blob/master/pkg/plugins/golang/v3/scaffolds/internal/templates/makefile.go#L189
+    # Note:
+    #	 Below content was based on the recent vesion of kubebuilder v3, source:
+    #    https://github.com/kubernetes-sigs/kubebuilder/blob/master/pkg/plugins/golang/v3/scaffolds/internal/templates/makefile.go#L189
 	# for controller-gen-old
 	go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.6.0  && \
 	    mv $(shell go env GOPATH)/bin/controller-gen  $(shell go env GOPATH)/bin/controller-gen-old
@@ -45,6 +46,7 @@ init:
 	# for kustomize
 	curl -Ss https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh --output install_kustomize.sh \
 	    && bash install_kustomize.sh 3.8.7  $(shell go env GOPATH)/bin; rm install_kustomize.sh;
+
 
 
 all: build
