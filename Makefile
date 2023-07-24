@@ -138,12 +138,3 @@ deploy: manifests ## Deploy controller to the K8s cluster specified in ~/.kube/c
 .PHONY: undeploy
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
 	kustomize build config/default | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
-
-
-
-
-
-
-
-
-
