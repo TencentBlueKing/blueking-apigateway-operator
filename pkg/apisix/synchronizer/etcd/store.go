@@ -224,12 +224,13 @@ func (s *EtcdConfigStore) alterByStage(
 }
 
 func (s *EtcdConfigStore) batchPutResource(ctx context.Context, resourceType string, resources interface{}) error {
-	// set create time from cache resource
-	st := time.Now()
 	resourceStore := s.stores[resourceType]
 
 	resourceIter := reflect.ValueOf(resources).MapRange()
 	for resourceIter.Next() {
+		// set create time from cache resource
+		st := time.Now()
+
 		key := resourceIter.Key().Interface().(string)
 		resource := resourceIter.Value().Interface().(apisix.ApisixResource)
 
@@ -280,11 +281,11 @@ func (s *EtcdConfigStore) batchPutResource(ctx context.Context, resourceType str
 }
 
 func (s *EtcdConfigStore) batchDeleteResource(ctx context.Context, resourceType string, resources interface{}) error {
-	st := time.Now()
-
 	resourceStore := s.stores[resourceType]
 	resourceMap := reflect.ValueOf(resources).MapRange()
 	for resourceMap.Next() {
+		st := time.Now()
+
 		key := resourceMap.Key().Interface().(string)
 		resource := resourceMap.Value().Interface().(apisix.ApisixResource)
 
