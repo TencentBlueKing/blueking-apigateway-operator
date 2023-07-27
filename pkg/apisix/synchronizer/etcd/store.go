@@ -201,6 +201,10 @@ func (s *EtcdConfigStore) alterByStage(
 		if err = s.batchPutResource(ctx, ApisixResourceTypeServices, putConf.Services); err != nil {
 			return fmt.Errorf("batch put services failed: %w", err)
 		}
+
+		// sleep putInterVal to avoid resource data inconsistency
+		time.Sleep(s.putInterval)
+
 		if err = s.batchPutResource(ctx, ApisixResourceTypeRoutes, putConf.Routes); err != nil {
 			return fmt.Errorf("batch put routes failed: %w", err)
 		}
@@ -278,10 +282,6 @@ func (s *EtcdConfigStore) batchPutResource(ctx context.Context, resourceType str
 			return fmt.Errorf("put resource failed: %w", err)
 		}
 	}
-
-	// sleep putInterVal to avoid resource data inconsistency
-	time.Sleep(s.putInterval)
-
 	return nil
 }
 
