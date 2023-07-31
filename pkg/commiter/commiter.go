@@ -145,6 +145,7 @@ func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, wg *s
 	_, span := trace.StartTrace(si.Ctx, "commiter.commitStage")
 	defer span.End()
 
+	span.AddEvent("commiter.ConvertEtcdKVToApisixConfiguration")
 	// 每一个提交都是对一个stage的全量数据处理
 	apisixConf, stage, err := c.ConvertEtcdKVToApisixConfiguration(ctx, si)
 	if err != nil {
@@ -154,7 +155,6 @@ func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, wg *s
 			// retry
 			c.stageTimer.Update(si)
 
-			span.AddEvent("commiter.ConvertEtcdKVToApisixConfiguration")
 			span.RecordError(err)
 			return
 		}
