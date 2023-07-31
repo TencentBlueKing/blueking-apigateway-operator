@@ -45,16 +45,19 @@ type EtcdConfigStore struct {
 	differ *configDiffer
 
 	logger *zap.SugaredLogger
+
+	putInterval time.Duration
 }
 
 // NewEtcdConfigStore ...
-func NewEtcdConfigStore(client *clientv3.Client, prefix string) (*EtcdConfigStore, error) {
+func NewEtcdConfigStore(client *clientv3.Client, prefix string, putInterval time.Duration) (*EtcdConfigStore, error) {
 	s := &EtcdConfigStore{
-		client: client,
-		prefix: strings.TrimRight(prefix, "/"),
-		stores: make(map[string]*resourceStore, 4),
-		differ: newConfigDiffer(),
-		logger: logging.GetLogger().Named("etcd-config-store"),
+		client:      client,
+		prefix:      strings.TrimRight(prefix, "/"),
+		stores:      make(map[string]*resourceStore, 4),
+		differ:      newConfigDiffer(),
+		logger:      logging.GetLogger().Named("etcd-config-store"),
+		putInterval: putInterval,
 	}
 	s.init()
 
@@ -198,6 +201,10 @@ func (s *EtcdConfigStore) alterByStage(
 		if err = s.batchPutResource(ctx, ApisixResourceTypeServices, putConf.Services); err != nil {
 			return fmt.Errorf("batch put services failed: %w", err)
 		}
+
+		// sleep putInterVal to avoid resource data inconsistency
+		time.Sleep(s.putInterval)
+
 		if err = s.batchPutResource(ctx, ApisixResourceTypeRoutes, putConf.Routes); err != nil {
 			return fmt.Errorf("batch put routes failed: %w", err)
 		}
@@ -276,7 +283,6 @@ func (s *EtcdConfigStore) batchPutResource(ctx context.Context, resourceType str
 			return fmt.Errorf("put resource failed: %w", err)
 		}
 	}
-
 	return nil
 }
 

@@ -7,6 +7,8 @@ operator:
 
   defaultGateway: "bk-default"
   defaultStage: "default"
+  #write apisix etcd interval
+  etcdPutInterval: "100ms"
 
 dashboard:
   etcd:
