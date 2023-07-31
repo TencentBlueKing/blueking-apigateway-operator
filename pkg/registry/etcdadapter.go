@@ -390,6 +390,7 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 
 						// push to ret channel
 						metadata.Ctx = eventCtx
+						retCh <- &metadata
 
 						span.End()
 					}
