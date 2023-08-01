@@ -324,10 +324,10 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 						// trace
 						eventCtx, span := trace.StartTrace(context.Background(), "registry.EventPut")
 						span.SetAttributes(
-							attribute.String("res.name", metadata.Name),
+							attribute.String("resource.name", metadata.Name),
 							attribute.String("stage", metadata.StageName),
 							attribute.String("gateway", metadata.GatewayName),
-							attribute.String("res.kind", metadata.Kind),
+							attribute.String("resource.kind", metadata.Kind),
 						)
 
 						if err != nil {
@@ -366,10 +366,10 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 						// trace
 						eventCtx, span := trace.StartTrace(context.Background(), "registry.EventDelete")
 						span.SetAttributes(
-							attribute.String("res.name", metadata.Name),
+							attribute.String("resource.name", metadata.Name),
 							attribute.String("stage", metadata.StageName),
 							attribute.String("gateway", metadata.GatewayName),
-							attribute.String("res.kind", metadata.Kind),
+							attribute.String("resource.kind", metadata.Kind),
 						)
 
 						if err != nil {
