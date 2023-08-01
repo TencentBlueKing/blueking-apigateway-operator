@@ -49,7 +49,7 @@ var globalTracer tc.Tracer = otel.Tracer("blueking-apigateway-operator")
 var traceOnce sync.Once
 
 // InitTrace init
-func InitTrace(config config.Tracing) error {
+func InitTrace(config config.Tracing, instanceName string) error {
 	if !config.Enable {
 		return nil
 	}
@@ -74,6 +74,7 @@ func InitTrace(config config.Tracing) error {
 				semconv.SchemaURL,
 				semconv.ServiceNameKey.String(config.ServiceName),
 				attribute.Key("bk.data.token").String(config.Token),
+				attribute.Key("instance.name").String(instanceName),
 			)),
 		}
 		// get sampler

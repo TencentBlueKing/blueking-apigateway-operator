@@ -80,7 +80,7 @@ func initLog() {
 }
 
 func initTracing() {
-	trace.InitTrace(globalConfig.Tracing)
+	trace.InitTrace(globalConfig.Tracing, config.InstanceName)
 }
 
 func gracefulShutdown(shutdownHookFuncOptions ...func()) {
