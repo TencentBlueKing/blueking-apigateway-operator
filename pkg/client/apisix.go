@@ -80,19 +80,25 @@ func (a *ApisixClient) GetReleaseVersion(gatewayName string, stageName string,
 	retryStrategy := retrier.New(retrier.ConstantBackoff(
 		a.versionProbeCount, a.versionProbeInterval), nil)
 	var resp VersionRouteResp
+	retryError := new(error)
 	// set retry strategy
-	retry.Evaluator = retryEvaluator(gatewayName, stageName, cast.ToInt64(publishID), &resp)
+	retry.Evaluator = retryEvaluator(gatewayName, stageName, cast.ToInt64(publishID), retryError, &resp)
 	retryPlugin := retry.New(retryStrategy)
 	request.Use(retryPlugin)
 	_, err := request.Send()
 	if err != nil {
 		return nil, err
 	}
+	if *retryError != nil {
+		return &resp, *retryError
+	}
+
 	return &resp, nil
 }
 
 // retryEvaluator retry strategy
-func retryEvaluator(gateway string, stage string, publishID int64, resp *VersionRouteResp) retry.EvalFunc {
+func retryEvaluator(gateway string, stage string, publishID int64, retryError *error,
+	resp *VersionRouteResp) retry.EvalFunc {
 	return func(err error, res *http.Response, req *http.Request) error {
 		if err != nil {
 			return err
@@ -102,40 +108,41 @@ func retryEvaluator(gateway string, stage string, publishID int64, resp *Version
 		}
 		// 虚拟路由不存在,继续重试
 		if res.StatusCode == http.StatusNotFound {
-			notFoundErr := fmt.Errorf(
+			*retryError = fmt.Errorf(
 				"configuration [gateway: %s,stage: %s] version route not found", gateway, stage)
-			logging.GetLogger().Info(notFoundErr)
-			return notFoundErr
+			logging.GetLogger().Info(err)
+			return *retryError
 		}
 		if res.StatusCode == http.StatusOK {
 			// 解析返回结果
 			defer res.Body.Close()
 			result, readErr := io.ReadAll(res.Body)
 			if readErr != nil {
-				readBodyErr := fmt.Errorf("read configuration [gateway: %s,state: %s] version route body err: %w",
+				*retryError = fmt.Errorf("read configuration [gateway: %s,state: %s] version route body err: %w",
 					gateway, stage, readErr)
-				logging.GetLogger().Error(readBodyErr)
-				return readBodyErr
+				logging.GetLogger().Error(err)
+				return *retryError
 			}
 			unmarshalErr := json.Unmarshal(result, &resp)
 			if unmarshalErr != nil {
-				unmarshalResultErr := fmt.Errorf(
+				*retryError = fmt.Errorf(
 					"unmarshal configuration [gateway: %s,stage: %s] version route body err: %w",
 					gateway, stage, unmarshalErr)
-				logging.GetLogger().Error(unmarshalResultErr)
-				return unmarshalResultErr
+				logging.GetLogger().Error(err)
+				return *retryError
 			}
 			// 判断版本号
 			if resp.PublishID < publishID {
 				// 如果获取到的版本号比当前小，说明当前的版本还未加载完成
-				notLoadFinishedErr := fmt.Errorf(
-					"configuration [gateway: %s,stage: %s]  [current: %d, expected: %d]is not latest",
+				*retryError = fmt.Errorf(
+					"configuration [gateway: %s,stage: %s]  [current: %d, expected: %d] is not latest",
 					gateway, stage, resp.PublishID, publishID)
-				logging.GetLogger().Info(notLoadFinishedErr)
-				return notLoadFinishedErr
+				logging.GetLogger().Info(*retryError)
+				return *retryError
 			}
 			// 如果发布的版本号比当前大，说明已经覆盖加载完成
 			if resp.PublishID >= publishID {
+				*retryError = nil
 				return nil
 			}
 		}
