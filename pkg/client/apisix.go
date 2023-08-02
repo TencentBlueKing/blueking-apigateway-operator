@@ -131,6 +131,7 @@ func retryEvaluator(gateway string, stage string, publishID int64, retryError *e
 				logging.GetLogger().Error(*retryError)
 				return *retryError
 			}
+
 			// 判断版本号
 			if resp.PublishID < publishID {
 				// 如果获取到的版本号比当前小，说明当前的版本还未加载完成
@@ -140,6 +141,7 @@ func retryEvaluator(gateway string, stage string, publishID int64, retryError *e
 				logging.GetLogger().Info(*retryError)
 				return *retryError
 			}
+
 			// 如果发布的版本号比当前大，说明已经覆盖加载完成
 			if resp.PublishID >= publishID {
 				*retryError = nil
