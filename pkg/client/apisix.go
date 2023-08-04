@@ -37,7 +37,7 @@ import (
 )
 
 const (
-	getPublishVersionURL = "/api/:gateway/:stage/_version"
+	getPublishVersionURL = "/api/:gateway/:stage/__apigw_version"
 )
 
 var apisixClient *ApisixClient
