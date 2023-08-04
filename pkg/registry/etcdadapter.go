@@ -34,6 +34,7 @@ import (
 	v3rpc "go.etcd.io/etcd/api/v3/v3rpc/rpctypes"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	yaml "gopkg.in/yaml.v2"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -41,9 +42,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/internal/tracer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/trace"
 )
 
 // EtcdRegistryAdapter implements the Register interface using etcd as the main storage.
@@ -68,6 +69,22 @@ func NewEtcdResourceRegistry(etcdClient *clientv3.Client, keyPrefix string) *Etc
 	return registry
 }
 
+func (r *EtcdRegistryAdapter) startSpan(
+	ctx context.Context,
+	key ResourceKey,
+	kind string,
+) (context.Context, trace.Span) {
+	return tracer.NewTracer("registry").Start(
+		ctx,
+		"etcdRegistry."+kind,
+		trace.WithAttributes(
+			attribute.String("res.name", key.ResourceName),
+			attribute.String("stage", key.StageName),
+			attribute.String("gateway", key.GatewayName),
+		),
+	)
+}
+
 // Get ...
 func (r *EtcdRegistryAdapter) Get(ctx context.Context, key ResourceKey, obj client.Object) error {
 	startedTime := time.Now()
@@ -75,6 +92,11 @@ func (r *EtcdRegistryAdapter) Get(ctx context.Context, key ResourceKey, obj clie
 	if !ok {
 		return eris.Errorf("Get gvk from object failed, key: %+v", key)
 	}
+
+	// tracing
+	var span trace.Span
+	ctx, span = r.startSpan(ctx, key, gvk.Kind)
+	defer span.End()
 
 	etcdKey := fmt.Sprintf(
 		"%s/%s/%s/%s/%s/%s",
@@ -172,6 +194,10 @@ func (r *EtcdRegistryAdapter) List(ctx context.Context, key ResourceKey, obj cli
 		metric.ReportRegistryAction(gvk.Kind, metric.ActionList, metric.ResultFail, startedTime)
 		return eris.Errorf("Get gvk from object failed, key: %+v", key)
 	}
+
+	var span trace.Span
+	ctx, span = r.startSpan(ctx, key, gvk.Kind)
+	defer span.End()
 
 	etcdKey := fmt.Sprintf("%s/%s/%s/%s/%s/", r.keyPrefix, key.GatewayName, key.StageName, gvk.Version, gvk.Kind)
 	if key.ResourceName != "" {
@@ -320,16 +346,13 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 							string(evt.Kv.Value),
 						)
 						metadata, err := r.extractResourceMetadata(string(evt.Kv.Key))
-
-						// trace
-						eventCtx, span := trace.StartTrace(context.Background(), "registry.EventPut")
-						span.SetAttributes(
-							attribute.String("resource.name", metadata.Name),
-							attribute.String("stage", metadata.StageName),
-							attribute.String("gateway", metadata.GatewayName),
-							attribute.String("resource.kind", metadata.Kind),
-						)
-
+						outgoingCTX, span := tracer.NewTracer("RegistryWatch").
+							Start(ctx, "RegistryWatch/EventPut", trace.WithAttributes(
+								attribute.String("res.name", metadata.Name),
+								attribute.String("stage", metadata.StageName),
+								attribute.String("gateway", metadata.GatewayName),
+								attribute.String("res.kind", metadata.Kind),
+							))
 						if err != nil {
 							r.logger.Infow(
 								"resource key is incorrect, skip it",
@@ -340,14 +363,13 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 								"err",
 								err,
 							)
-
-							span.RecordError(err)
+							span.AddEvent("SKIP")
 							span.End()
 							continue
 						}
 
 						// push to ret channel
-						metadata.Ctx = eventCtx
+						metadata.CTX = outgoingCTX
 						retCh <- &metadata
 
 						span.End()
@@ -362,16 +384,13 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 							string(evt.PrevKv.Value),
 						)
 						metadata, err := r.extractResourceMetadata(string(evt.PrevKv.Key))
-
-						// trace
-						eventCtx, span := trace.StartTrace(context.Background(), "registry.EventDelete")
-						span.SetAttributes(
-							attribute.String("resource.name", metadata.Name),
-							attribute.String("stage", metadata.StageName),
-							attribute.String("gateway", metadata.GatewayName),
-							attribute.String("resource.kind", metadata.Kind),
-						)
-
+						outgoingCTX, span := tracer.NewTracer("RegistryWatch").
+							Start(ctx, "RegistryWatch/EventDelete", trace.WithAttributes(
+								attribute.String("res.name", metadata.Name),
+								attribute.String("stage", metadata.StageName),
+								attribute.String("gateway", metadata.GatewayName),
+								attribute.String("res.kind", metadata.Kind),
+							))
 						if err != nil {
 							r.logger.Infow(
 								"deleted resource key is incorrect, skip it",
@@ -382,14 +401,13 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 								"err",
 								err,
 							)
-
-							span.RecordError(err)
+							span.AddEvent("SKIP")
 							span.End()
 							continue
 						}
 
 						// push to ret channel
-						metadata.Ctx = eventCtx
+						metadata.CTX = outgoingCTX
 						retCh <- &metadata
 
 						span.End()
