@@ -37,6 +37,11 @@ type StageInfo struct {
 	GatewayName string
 	StageName   string
 	PublishID   string
+	Ctx         context.Context
+}
+
+func (s *StageInfo) Key() string {
+	return s.GatewayName + "/" + s.StageName
 }
 
 // IsEmpty checks if the stage info is absent
@@ -51,8 +56,7 @@ type ResourceMetadata struct {
 	APIVersion string
 	Kind       string
 	Name       string
-	CTX        context.Context `json:"-" yaml:"-"`
-	RetryCount int64           `json:"-" yaml:"-"`
+	RetryCount int64 `json:"-" yaml:"-"`
 }
 
 // IsEmpty check if the metadata object is empty

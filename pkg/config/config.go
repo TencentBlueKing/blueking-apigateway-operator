@@ -194,11 +194,13 @@ type LogConfig struct {
 
 // Tracing ...
 type Tracing struct {
-	Enabled           bool
-	ExporterMode      string
-	Endpoint          string
-	URLPath           string
-	BkMonitorAPMToken string
+	Enable       bool
+	Endpoint     string
+	Type         string
+	Token        string
+	Sampler      string
+	SamplerRatio float64
+	ServiceName  string
 }
 
 // Config ...
@@ -260,7 +262,7 @@ func newDefaultConfig() *Config {
 				BufferSize: 100,
 				Retry: Retry{
 					Count:    60,
-					Interval: time.Millisecond * 500,
+					Interval: time.Second,
 				},
 				Timeout: time.Minute * 2,
 			},
@@ -280,11 +282,7 @@ func newDefaultConfig() *Config {
 		Sentry: Sentry{
 			ReportLevel: 2,
 		},
-		Tracing: Tracing{
-			ExporterMode: "grpc",
-			Endpoint:     "127.0.0.1:4317",
-			URLPath:      "/v1/traces",
-		},
+		Tracing: Tracing{},
 		Logger: Logger{
 			Default: LogConfig{
 				Level:  "info",
