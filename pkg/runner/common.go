@@ -24,8 +24,6 @@ import (
 	"strings"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
-	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-	"go.opentelemetry.io/otel"
 	"google.golang.org/grpc"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
@@ -66,33 +64,19 @@ func initApisixConfigStore(cfg *config.Config) (store synchronizer.ApisixConfigS
 }
 
 func initOperatorEtcdClient(cfg *config.Config) (*clientv3.Client, error) {
-	return createEtcdClient(&cfg.Dashboard.Etcd, cfg.Tracing.Enabled)
+	return createEtcdClient(&cfg.Dashboard.Etcd)
 }
 
 func initApisixEtcdClient(cfg *config.Config) (*clientv3.Client, error) {
-	return createEtcdClient(&cfg.Apisix.Etcd, cfg.Tracing.Enabled)
+	return createEtcdClient(&cfg.Apisix.Etcd)
 }
 
-func createEtcdClient(config *config.Etcd, tracingEnabled bool) (*clientv3.Client, error) {
+func createEtcdClient(config *config.Etcd) (*clientv3.Client, error) {
 	if len(config.Endpoints) == 0 {
 		fmt.Println("Etcd endpoints is empty")
 		os.Exit(1)
 	}
 	opts := make([]grpc.DialOption, 0)
-	if tracingEnabled {
-		opts = append(
-			opts,
-			grpc.WithUnaryInterceptor(
-				otelgrpc.UnaryClientInterceptor(otelgrpc.WithTracerProvider(otel.GetTracerProvider())),
-			),
-		)
-		opts = append(
-			opts,
-			grpc.WithStreamInterceptor(
-				otelgrpc.StreamClientInterceptor(otelgrpc.WithTracerProvider(otel.GetTracerProvider())),
-			),
-		)
-	}
 	opt := clientv3.Config{
 		Endpoints:   strings.Split(config.Endpoints, ","),
 		Logger:      logging.GetControllerLogger().Named("etcd"),

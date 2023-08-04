@@ -35,6 +35,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/radixtree"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/trace"
 )
 
 const (
@@ -189,8 +190,15 @@ func (w *EventAgent) bootstrapSync(ctx context.Context) error {
 }
 
 func (w *EventAgent) handleEvent(event *registry.ResourceMetadata) {
+	// trace
+	ctx, span := trace.StartTrace(event.Ctx, "agent.handleEvent")
+	event.Ctx = ctx
+	defer span.End()
+
 	if event.Kind == v1beta1.BkGatewayInstanceTypeName {
 		w.logger.Debugw("skip BkInstance event")
+
+		span.AddEvent("skip BkInstance event")
 		return
 	}
 
@@ -220,12 +228,16 @@ func (w *EventAgent) handleSecret(event *registry.ResourceMetadata) error {
 		return nil
 	}
 
+	// trace
+	ctx, span := trace.StartTrace(event.Ctx, "agent.handleSecret")
+	event.Ctx = ctx
+	defer span.End()
+
 	if event.RetryCount > retryLimit {
 		w.logger.Error(nil, "Receive retry event, retry count exceeded, ignore it", "event", event)
 		return nil
 	}
 
-	ctx := event.CTX
 	switch event.Kind {
 	case "Secret":
 		var radixTree radixtree.RadixTree = w.radixTreeGetter.Get(event.StageInfo)

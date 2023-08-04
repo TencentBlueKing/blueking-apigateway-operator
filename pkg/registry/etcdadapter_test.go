@@ -769,7 +769,8 @@ var _ = Describe("Etcdadapter Operations", Ordered, func() {
 
 		It("will receive put event", func() {
 			rm := <-metaCh
-			Expect(rm.StageInfo).Should(Equal(testStageInfo))
+			Expect(rm.StageInfo.GatewayName).Should(Equal(testStageInfo.GatewayName))
+			Expect(rm.StageInfo.StageName).Should(Equal(testStageInfo.StageName))
 			Expect(rm.Kind).Should(Equal(v1beta1.BkGatewayResourceTypeName))
 			Expect(rm.APIVersion).Should(Equal("v1beta1"))
 			Expect(rm.Name).Should(Equal("resource"))
@@ -778,7 +779,8 @@ var _ = Describe("Etcdadapter Operations", Ordered, func() {
 
 		It("will receive delete event", func() {
 			rm := <-metaCh
-			Expect(rm.StageInfo).Should(Equal(testStageInfo))
+			Expect(rm.StageInfo.GatewayName).Should(Equal(testStageInfo.GatewayName))
+			Expect(rm.StageInfo.StageName).Should(Equal(testStageInfo.StageName))
 			Expect(rm.Kind).Should(Equal(v1beta1.BkGatewayResourceTypeName))
 			Expect(rm.APIVersion).Should(Equal("v1beta1"))
 			Expect(rm.Name).Should(Equal("resource"))
@@ -788,7 +790,8 @@ var _ = Describe("Etcdadapter Operations", Ordered, func() {
 
 		It("will skip event", func() {
 			rm := <-metaCh
-			Expect(rm.StageInfo).Should(Equal(testStageInfo))
+			Expect(rm.StageInfo.GatewayName).Should(Equal(testStageInfo.GatewayName))
+			Expect(rm.StageInfo.StageName).Should(Equal(testStageInfo.StageName))
 			Expect(rm.Kind).Should(Equal(v1beta1.BkGatewayResourceTypeName))
 			Expect(rm.APIVersion).Should(Equal("v1beta1"))
 			Expect(rm.Name).Should(Equal("resource"))
