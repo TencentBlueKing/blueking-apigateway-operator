@@ -260,7 +260,7 @@ func newDefaultConfig() *Config {
 				BufferSize: 100,
 				Retry: Retry{
 					Count:    60,
-					Interval: time.Millisecond * 500,
+					Interval: time.Second,
 				},
 				Timeout: time.Minute * 2,
 			},
