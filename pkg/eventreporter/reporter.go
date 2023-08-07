@@ -167,7 +167,7 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *v1beta1.BkGa
 	// filter not need report event
 	publishID := stage.Labels[config.BKAPIGatewayLabelKeyGatewayPublishID]
 	if publishID == constant.NoNeedReportPublishID || publishID == "" {
-		logging.GetLogger().Infof("event[publish_id:%s] is not need to report", publishID)
+		logging.GetLogger().Debugf("event[stage: %+v] is not need to report", stage.Labels)
 		return
 	}
 
@@ -238,7 +238,7 @@ func addEvent(event reportEvent) {
 	// filter not need report event
 	publishID := event.stage.Labels[config.BKAPIGatewayLabelKeyGatewayPublishID]
 	if publishID == constant.NoNeedReportPublishID || publishID == "" {
-		logging.GetLogger().Infof("event[publish_id:%s] is not need to report", publishID)
+		logging.GetLogger().Debugf("event[stage: %+v] is not need to report", event.stage.Labels)
 		return
 	}
 	reporter.eventChain <- event
