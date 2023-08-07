@@ -107,7 +107,7 @@ func ReportParseConfigurationDoingEvent(ctx context.Context, stage *v1beta1.BkGa
 		status: constant.EventStatusDoing,
 		detail: nil,
 	}
-	reporter.eventChain <- event
+	addEvent(event)
 }
 
 // ReportParseConfigurationFailureEvent will report parse configuration failure event
@@ -119,7 +119,7 @@ func ReportParseConfigurationFailureEvent(ctx context.Context, stage *v1beta1.Bk
 		status: constant.EventStatusFailure,
 		detail: map[string]interface{}{"err_msg": err.Error()},
 	}
-	reporter.eventChain <- event
+	addEvent(event)
 }
 
 // ReportParseConfigurationSuccessEvent will report the success event of parse configuration
@@ -129,7 +129,7 @@ func ReportParseConfigurationSuccessEvent(ctx context.Context, stage *v1beta1.Bk
 		Event:  constant.EventNameParseConfiguration,
 		status: constant.EventStatusSuccess,
 	}
-	reporter.eventChain <- event
+	addEvent(event)
 }
 
 // ReportApplyConfigurationDoingEvent will report the event of applying configuration
@@ -139,7 +139,7 @@ func ReportApplyConfigurationDoingEvent(ctx context.Context, stage *v1beta1.BkGa
 		Event:  constant.EventNameApplyConfiguration,
 		status: constant.EventStatusDoing,
 	}
-	reporter.eventChain <- event
+	addEvent(event)
 }
 
 // ReportApplyConfigurationSuccessEvent will report success event when apply configuration successfully
@@ -149,7 +149,7 @@ func ReportApplyConfigurationSuccessEvent(ctx context.Context, stage *v1beta1.Bk
 		Event:  constant.EventNameApplyConfiguration,
 		status: constant.EventStatusSuccess,
 	}
-	reporter.eventChain <- event
+	addEvent(event)
 }
 
 // ReportLoadConfigurationDoingEvent will report  event when loading configuration
@@ -159,11 +159,18 @@ func ReportLoadConfigurationDoingEvent(ctx context.Context, stage *v1beta1.BkGat
 		Event:  constant.EventNameLoadConfiguration,
 		status: constant.EventStatusDoing,
 	}
-	reporter.eventChain <- event
+	addEvent(event)
 }
 
 // ReportLoadConfigurationResultEvent Report the detection result of apisix loading
 func ReportLoadConfigurationResultEvent(ctx context.Context, stage *v1beta1.BkGatewayStage) {
+	// filter not need report event
+	publishID := stage.Labels[config.BKAPIGatewayLabelKeyGatewayPublishID]
+	if publishID == constant.NoNeedReportPublishID || publishID == "" {
+		logging.GetLogger().Infof("event[publish_id:%s] is not need to report", publishID)
+		return
+	}
+
 	reporter.versionProbeChain <- struct{}{} // control concurrency
 	utils.GoroutineWithRecovery(ctx, func() {
 		defer func() {
@@ -171,10 +178,6 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *v1beta1.BkGa
 		}()
 
 		eventReq := parseEventInfo(stage)
-		if err := eventReq.Validate(); err != nil {
-			logging.GetLogger().Infof("event[%+v] validate err: %v", eventReq, err)
-			return
-		}
 		reportCtx, cancelFunc := context.WithTimeout(ctx, reporter.versionProbeTimeout)
 		errChan := make(chan error, 1)
 		defer func() {
@@ -230,6 +233,17 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *v1beta1.BkGa
 	})
 }
 
+// addEvent add event to reporter event
+func addEvent(event reportEvent) {
+	// filter not need report event
+	publishID := event.stage.Labels[config.BKAPIGatewayLabelKeyGatewayPublishID]
+	if publishID == constant.NoNeedReportPublishID || publishID == "" {
+		logging.GetLogger().Infof("event[publish_id:%s] is not need to report", publishID)
+		return
+	}
+	reporter.eventChain <- event
+}
+
 // reportEvent
 func (r *Reporter) reportEvent(event reportEvent) {
 	defer func() {
@@ -242,10 +256,6 @@ func (r *Reporter) reportEvent(event reportEvent) {
 
 	// parse event info
 	eventReq := parseEventInfo(event.stage)
-	if err := eventReq.Validate(); err != nil {
-		logging.GetLogger().Infof("event[%+v] validate err: %v", event, err)
-		return
-	}
 	eventReq.Name = event.Event
 	eventReq.Status = event.status
 	if len(event.detail) != 0 {

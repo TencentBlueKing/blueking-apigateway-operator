@@ -32,6 +32,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/agent/timer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/radixtree"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
@@ -172,6 +173,11 @@ func (w *EventAgent) bootstrapSync(ctx context.Context) error {
 	stageList, err := w.resourceRegistry.ListStages(ctx) // get all stages
 	if err != nil {
 		return err
+	}
+
+	// 避免启动全量同步,导致大量publish event上报
+	for i := range stageList {
+		stageList[i].PublishID = constant.NoNeedReportPublishID
 	}
 
 	keys := make([]string, 0, len(stageList))
@@ -328,9 +334,16 @@ func (w *EventAgent) handleTicker(ctx context.Context) {
 		if err != nil {
 			w.logger.Error(err, "List stage failed when all stage event triggered")
 			w.stageTimer.Update(registry.StageInfo{})
+
+			// 避免全量同步,导致大量publish event上报
+			for i := range stageList {
+				stageList[i].PublishID = constant.NoNeedReportPublishID
+			}
+
 			w.commitChan <- stageList
 			return
 		}
+
 		w.commitChan <- allStages
 	}
 	if len(stageList) != 0 {
