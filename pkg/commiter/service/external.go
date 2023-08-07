@@ -67,7 +67,6 @@ func (rd *RegistryExternalNodeDiscoverer) GetNodes(
 		StageInfo: registry.StageInfo{
 			GatewayName: gatewayName,
 			StageName:   stageName,
-			Ctx:         context.Background(),
 		},
 	}, eps); err != nil {
 		return nil, eris.Wrapf(err,

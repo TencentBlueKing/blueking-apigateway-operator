@@ -24,7 +24,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-var emptyStageInfo = StageInfo{Ctx: context.Background()}
+var emptyStageInfo = StageInfo{}
 
 // ResourceKey ...
 type ResourceKey struct {
@@ -40,6 +40,7 @@ type StageInfo struct {
 	Ctx         context.Context
 }
 
+// Key returns the stage key
 func (s *StageInfo) Key() string {
 	return s.GatewayName + "/" + s.StageName
 }

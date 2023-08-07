@@ -327,7 +327,7 @@ func (w *EventAgent) handleTicker(ctx context.Context) {
 		allStages, err := w.resourceRegistry.ListStages(ctx)
 		if err != nil {
 			w.logger.Error(err, "List stage failed when all stage event triggered")
-			w.stageTimer.Update(registry.StageInfo{Ctx: context.Background()})
+			w.stageTimer.Update(registry.StageInfo{})
 			w.commitChan <- stageList
 			return
 		}
