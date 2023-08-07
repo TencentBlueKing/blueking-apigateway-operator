@@ -117,6 +117,7 @@ func buildResourceMetadata(
 	if rm.StageName, ok = labels[config.BKAPIGatewayLabelKeyGatewayStage]; !ok {
 		return nil
 	}
+	rm.Ctx = context.Background()
 	return rm
 }
 

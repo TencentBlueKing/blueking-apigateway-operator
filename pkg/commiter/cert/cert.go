@@ -60,7 +60,7 @@ func (f *RegistryTLSCertFetcher) GetTLSCertFromSecret(
 	err := f.resourceRegistry.Get(
 		ctx,
 		registry.ResourceKey{
-			StageInfo:    registry.StageInfo{GatewayName: gatewayName, StageName: stageName},
+			StageInfo:    registry.StageInfo{GatewayName: gatewayName, StageName: stageName, Ctx: context.Background()},
 			ResourceName: secretRef,
 		},
 		&secret,

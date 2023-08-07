@@ -24,7 +24,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-var emptyStageInfo = StageInfo{}
+var emptyStageInfo = StageInfo{Ctx: context.Background()}
 
 // ResourceKey ...
 type ResourceKey struct {

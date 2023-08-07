@@ -111,6 +111,10 @@ func getExporterClient(protocolType string, endpoint string) (otlptrace.Client, 
 
 // StartTrace  start span from global tracer
 func StartTrace(ctx context.Context, name string) (context.Context, tc.Span) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
 	return globalTracer.Start(ctx, name)
 }
 

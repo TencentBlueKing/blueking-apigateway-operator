@@ -83,6 +83,7 @@ func (r *ResourceHandler) Sync(c *gin.Context) {
 			{
 				GatewayName: req.Gateway,
 				StageName:   req.Stage,
+				Ctx:         context.Background(),
 			},
 		})
 	}
@@ -135,6 +136,7 @@ func (r *ResourceHandler) diffHandler(ctx context.Context, req *DiffReq) (DiffIn
 		si := registry.StageInfo{
 			GatewayName: req.Gateway,
 			StageName:   req.Stage,
+			Ctx:         context.Background(),
 		}
 		stageKey := config.GenStagePrimaryKey(req.Gateway, req.Stage)
 		originalApiSixResources := r.apisixConfStore.Get(stageKey)
