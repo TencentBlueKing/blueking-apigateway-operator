@@ -28,8 +28,6 @@ import (
 
 // CacheTimer ...
 type CacheTimer struct {
-	StageInfo registry.StageInfo
-
 	CachedTime       time.Time
 	ShouldCommitTime time.Time
 }
@@ -57,15 +55,10 @@ func NewStageTimer() *StageTimer {
 
 // Update ...
 func (t *StageTimer) Update(stage registry.StageInfo) {
-	// trace
-	ctx, span := trace.StartTrace(stage.Ctx, "timer.Update")
-	stage.Ctx = ctx
-	defer span.End()
-
 	var timer *CacheTimer
-	timerInterface, ok := t.stageTimer.Load(stage.Key())
+	timerInterface, ok := t.stageTimer.Load(stage)
 	if !ok {
-		timer = &CacheTimer{StageInfo: stage}
+		timer = &CacheTimer{}
 		timer.Reset(eventsWaitingTimeWindow)
 	} else {
 		timer = timerInterface.(*CacheTimer)
@@ -75,6 +68,7 @@ func (t *StageTimer) Update(stage registry.StageInfo) {
 		span.End()
 
 		timer.StageInfo = stage
+
 		timer.Update(eventsWaitingTimeWindow)
 	}
 	t.stageTimer.Store(stage, timer)
@@ -84,12 +78,13 @@ func (t *StageTimer) Update(stage registry.StageInfo) {
 func (t *StageTimer) ListStagesForCommit() []registry.StageInfo {
 	stageList := make([]registry.StageInfo, 0)
 
-	t.stageTimer.Range(func(key, timerInterface interface{}) bool {
+	t.stageTimer.Range(func(stageInterface, timerInterface interface{}) bool {
+		stage := stageInterface.(registry.StageInfo)
 		timer := timerInterface.(*CacheTimer)
 
 		if time.Since(timer.ShouldCommitTime) > 0 || time.Since(timer.CachedTime) > forceUpdateTimeWindow {
-			stageList = append(stageList, timer.StageInfo)
-			t.stageTimer.Delete(key)
+			stageList = append(stageList, stage)
+			t.stageTimer.Delete(stage)
 		}
 		return true
 	})

@@ -37,6 +37,7 @@ import (
 
 	gatewayv1beta1 "github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/controllers"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/internal/token"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/agent"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/agent/timer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
@@ -48,7 +49,6 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/radixtree"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/server"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/token"
 )
 
 var (

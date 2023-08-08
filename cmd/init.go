@@ -30,6 +30,7 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 
+	"github.com/TencentBlueKing/blueking-apigateway-operator/internal/tracer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/agent"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
@@ -37,7 +38,6 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/eventreporter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/trace"
 )
 
 var (
@@ -80,7 +80,19 @@ func initLog() {
 }
 
 func initTracing() {
-	trace.InitTrace(globalConfig.Tracing, config.InstanceName)
+	if !globalConfig.Tracing.Enabled {
+		return
+	}
+	opt := tracer.Options{
+		ExporterMode:      globalConfig.Tracing.ExporterMode,
+		Endpoint:          globalConfig.Tracing.Endpoint,
+		URLPath:           globalConfig.Tracing.URLPath,
+		BkMonitorAPMToken: globalConfig.Tracing.BkMonitorAPMToken,
+	}
+	err := tracer.InitTracing(rootCtx, &opt)
+	if err != nil {
+		logger.Error(err, "init tracing failed")
+	}
 }
 
 func gracefulShutdown(shutdownHookFuncOptions ...func()) {
