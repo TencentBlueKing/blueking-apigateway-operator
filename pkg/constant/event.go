@@ -33,6 +33,11 @@ const (
 	EventNameLoadConfiguration EventName = "load_configuration"
 )
 
+const (
+	// special event not need resport
+	NoNeedReportPublishID = "-1"
+)
+
 type EventStatus string
 
 const (
