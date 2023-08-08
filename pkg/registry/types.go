@@ -40,6 +40,7 @@ type StageInfo struct {
 	Ctx         context.Context
 }
 
+// Key returns the stage key
 func (s *StageInfo) Key() string {
 	return s.GatewayName + "/" + s.StageName
 }

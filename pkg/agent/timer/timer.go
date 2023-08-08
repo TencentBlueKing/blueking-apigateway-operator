@@ -71,10 +71,8 @@ func (t *StageTimer) Update(stage registry.StageInfo) {
 		timer = timerInterface.(*CacheTimer)
 
 		// end old stage trace
-		if timer.StageInfo.Ctx != stage.Ctx {
-			_, span := trace.StartTrace(timer.StageInfo.Ctx, "timer.Replace")
-			span.End()
-		}
+		_, span := trace.StartTrace(timer.StageInfo.Ctx, "timer.Replace")
+		span.End()
 
 		timer.StageInfo = stage
 		timer.Update(eventsWaitingTimeWindow)

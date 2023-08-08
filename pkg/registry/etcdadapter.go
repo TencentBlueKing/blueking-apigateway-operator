@@ -322,7 +322,7 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 						metadata, err := r.extractResourceMetadata(string(evt.Kv.Key))
 
 						// trace
-						eventCtx, span := trace.StartTrace(context.Background(), "registry.EventPut")
+						eventCtx, span := trace.StartTrace(metadata.Ctx, "registry.EventPut")
 						span.SetAttributes(
 							attribute.String("resource.name", metadata.Name),
 							attribute.String("stage", metadata.StageName),
@@ -364,7 +364,7 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 						metadata, err := r.extractResourceMetadata(string(evt.PrevKv.Key))
 
 						// trace
-						eventCtx, span := trace.StartTrace(context.Background(), "registry.EventDelete")
+						eventCtx, span := trace.StartTrace(metadata.Ctx, "registry.EventDelete")
 						span.SetAttributes(
 							attribute.String("resource.name", metadata.Name),
 							attribute.String("stage", metadata.StageName),
@@ -427,6 +427,7 @@ func (r *EtcdRegistryAdapter) extractResourceMetadata(key string) (ResourceMetad
 	ret.APIVersion = matches[len(matches)-3]
 	ret.Kind = matches[len(matches)-2]
 	ret.Name = matches[len(matches)-1]
+	ret.Ctx = context.Background()
 	r.logger.Debugw("Extract resource info from etcdkey", "key", key, "resourceInfo", ret)
 	return ret, nil
 }
