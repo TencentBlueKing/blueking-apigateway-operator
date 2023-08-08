@@ -40,6 +40,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/radixtree"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/trace"
 )
 
 var errStageNotFound = eris.Errorf("no bk gateway stage found")
@@ -140,6 +141,11 @@ func (c *Commiter) commitGroup(ctx context.Context, stageInfoList []registry.Sta
 func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, wg *sync.WaitGroup) {
 	defer wg.Done()
 
+	// trace
+	_, span := trace.StartTrace(si.Ctx, "commiter.commitStage")
+	defer span.End()
+
+	span.AddEvent("commiter.ConvertEtcdKVToApisixConfiguration")
 	// 每一个提交都是对一个stage的全量数据处理
 	apisixConf, stage, err := c.ConvertEtcdKVToApisixConfiguration(ctx, si)
 	if err != nil {
@@ -148,12 +154,16 @@ func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, wg *s
 			c.logger.Error(err, "convert stage resources to apisix representation failed", "stageInfo", si)
 			// retry
 			c.stageTimer.Update(si)
+
+			span.RecordError(err)
 			return
 		}
 
 		c.logger.Infow("stage not found, delete it", "stageInfo", si)
 		// 如果stage不存在, 直接删除stage
 		apisixConf = apisix.NewEmptyApisixConfiguration()
+
+		span.AddEvent("commiter.DeleteStage")
 	} else {
 		eventreporter.ReportParseConfigurationSuccessEvent(ctx, stage)
 	}

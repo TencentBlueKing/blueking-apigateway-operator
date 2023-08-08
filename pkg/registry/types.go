@@ -57,8 +57,7 @@ type ResourceMetadata struct {
 	APIVersion string
 	Kind       string
 	Name       string
-	CTX        context.Context `json:"-" yaml:"-"`
-	RetryCount int64           `json:"-" yaml:"-"`
+	RetryCount int64 `json:"-" yaml:"-"`
 }
 
 // IsEmpty check if the metadata object is empty
