@@ -34,6 +34,7 @@ import (
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 const (
@@ -77,6 +78,10 @@ func (a *ApisixClient) GetReleaseVersion(gatewayName string, stageName string,
 	request.Method(http.MethodGet)
 	request.Use(url.Param("gateway", gatewayName))
 	request.Use(url.Param("stage", stageName))
+
+	// set X-Forwarded-For avoid apisix real-ip plugin logs get error: missing real address
+	request.SetHeader("X-Forwarded-For", utils.GetLocalIP())
+
 	retryStrategy := retrier.New(retrier.ConstantBackoff(
 		a.versionProbeCount, a.versionProbeInterval), nil)
 	var resp VersionRouteResp
