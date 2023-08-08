@@ -105,7 +105,6 @@ func buildResourceMetadata(
 		APIVersion: gvk.Version,
 		Kind:       gvk.Kind,
 		Name:       name,
-		CTX:        context.Background(),
 	}
 	// TODO:: make secret resource support stage-scoped
 	if gvk.Kind == "Secret" {
@@ -118,6 +117,7 @@ func buildResourceMetadata(
 	if rm.StageName, ok = labels[config.BKAPIGatewayLabelKeyGatewayStage]; !ok {
 		return nil
 	}
+	rm.Ctx = context.Background()
 	return rm
 }
 

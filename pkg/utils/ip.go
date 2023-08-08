@@ -16,19 +16,28 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package tracer
+package utils
 
-// ExporterGRPC ...
-const (
-	ExporterGRPC   = "grpc"
-	ExporterHTTP   = "http"
-	ExporterSTDOUT = "stdout"
-)
+import "net"
 
-// Options ...
-type Options struct {
-	ExporterMode      string
-	Endpoint          string
-	URLPath           string
-	BkMonitorAPMToken string
+// GetLocalIP get ip local address
+func GetLocalIP() string {
+	addrList, err := net.InterfaceAddrs()
+	if err != nil {
+		return ""
+	}
+	for _, addr := range addrList {
+		ipAddr, ok := addr.(*net.IPNet)
+		if !ok {
+			continue
+		}
+		if ipAddr.IP.IsLoopback() {
+			continue
+		}
+		if !ipAddr.IP.IsGlobalUnicast() {
+			continue
+		}
+		return ipAddr.IP.String()
+	}
+	return ""
 }

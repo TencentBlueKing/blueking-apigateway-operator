@@ -19,14 +19,7 @@
 package client
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
-)
-
-const (
-	cliSyncEventPublishID = "-1"
 )
 
 // ReportEventReq add event request
@@ -37,13 +30,4 @@ type ReportEventReq struct {
 	Name          constant.EventName     `json:"name"`
 	Status        constant.EventStatus   `json:"status"`
 	Detail        map[string]interface{} `json:"detail"`
-}
-
-// Validate ReportEventReq
-func (r ReportEventReq) Validate() error {
-	// filter sync event (publish_id=-1 or empty)
-	if strings.TrimSpace(r.PublishID) == cliSyncEventPublishID || r.PublishID == "" {
-		return fmt.Errorf("not need report event: %+v", r)
-	}
-	return nil
 }

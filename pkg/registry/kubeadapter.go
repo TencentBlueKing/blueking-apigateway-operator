@@ -147,6 +147,11 @@ func (r *K8SRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadata
 // KubeEventHandler pushes a ResourceMetadata object to all bound channels.
 func (r *K8SRegistryAdapter) KubeEventHandler(rm *ResourceMetadata) {
 	r.logger.Debugw("Resource event triggered", "resourceMeta", rm)
+
+	if rm.Ctx == nil {
+		rm.Ctx = context.Background()
+	}
+
 	r.watchChMap.Range(func(key, value interface{}) bool {
 		ubc := value.(*chanx.UnboundedChan)
 		ubc.In <- rm
@@ -171,5 +176,5 @@ func (r *K8SRegistryAdapter) parseStageInfo(obj client.Object) (StageInfo, bool)
 		return emptyStageInfo, false
 	}
 	publishID := labels[config.BKAPIGatewayLabelKeyGatewayPublishID]
-	return StageInfo{GatewayName: gateway, StageName: stage, PublishID: publishID}, true
+	return StageInfo{GatewayName: gateway, StageName: stage, PublishID: publishID, Ctx: context.Background()}, true
 }
