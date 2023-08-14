@@ -83,7 +83,6 @@ type VirtualStage struct {
 	OperatorExternalHost            string
 	OperatorExternalHealthProbePort int
 	ExtraApisixResources            string
-	FileLoggerLogPath               string
 }
 
 // Dashboard ...
@@ -251,7 +250,6 @@ func newDefaultConfig() *Config {
 			VirtualStage: VirtualStage{
 				OperatorExternalHost:            "127.0.0.1",
 				OperatorExternalHealthProbePort: 8081,
-				FileLoggerLogPath:               "/usr/local/apisix/logs/access.log",
 
 				VirtualGateway: "-",
 				VirtualStage:   "-",

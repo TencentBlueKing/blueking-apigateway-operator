@@ -24,7 +24,6 @@ var (
 	virtualGatewayName string = "-"
 	virtualStageName   string = "-"
 
-	fileLoggerLogPath               string = "/usr/local/apisix/logs/access.log"
 	operatorExternalHost            string = "127.0.0.1"
 	operatorExternalHealthProbePort int    = 8081
 	extraApisixResourcesPath        string
@@ -35,7 +34,6 @@ func Init(cfg *config.Config) {
 	virtualGatewayName = cfg.Apisix.VirtualStage.VirtualGateway
 	virtualStageName = cfg.Apisix.VirtualStage.VirtualStage
 
-	fileLoggerLogPath = cfg.Apisix.VirtualStage.FileLoggerLogPath
 	operatorExternalHost = cfg.Apisix.VirtualStage.OperatorExternalHost
 	operatorExternalHealthProbePort = cfg.Apisix.VirtualStage.OperatorExternalHealthProbePort
 	extraApisixResourcesPath = cfg.Apisix.VirtualStage.ExtraApisixResources

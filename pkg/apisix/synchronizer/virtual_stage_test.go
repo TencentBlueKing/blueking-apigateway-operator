@@ -45,7 +45,6 @@ var _ = Describe("VirtualStage", func() {
 		operatorURL     string
 		gatewayName     string
 		stageName       string
-		logPath         string
 	)
 
 	JustAfterEach(viper.Reset)
@@ -57,7 +56,6 @@ var _ = Describe("VirtualStage", func() {
 		operatorURL = "/operator/healthz"
 		gatewayName = "virtual-gateway"
 		stageName = "virtual-stage"
-		logPath = "/logs/access.log"
 
 		Init(&config.Config{
 			Apisix: config.Apisix{
@@ -66,7 +64,6 @@ var _ = Describe("VirtualStage", func() {
 					VirtualStage:                    stageName,
 					OperatorExternalHost:            operatorHost,
 					OperatorExternalHealthProbePort: operatorPort,
-					FileLoggerLogPath:               logPath,
 				},
 			},
 		})
@@ -105,7 +102,6 @@ var _ = Describe("VirtualStage", func() {
 				plugins := route.Plugins
 				Expect(plugins).To(HaveKey("bk-error-wrapper"))
 				Expect(plugins).To(HaveKey("bk-not-found-handler"))
-				Expect(plugins["file-logger"]).To(HaveKeyWithValue("path", logPath))
 			})
 
 			It("should create inner healthz route", func() {
@@ -160,7 +156,6 @@ var _ = Describe("VirtualStage", func() {
 							VirtualStage:                    stageName,
 							OperatorExternalHost:            operatorHost,
 							OperatorExternalHealthProbePort: operatorPort,
-							FileLoggerLogPath:               logPath,
 							ExtraApisixResources:            extraPath,
 						},
 					},

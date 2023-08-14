@@ -93,9 +93,6 @@ func (s *VirtualStage) make404DefaultRoute() *apisix.Route {
 			Plugins: map[string]interface{}{
 				"bk-error-wrapper":     map[string]interface{}{},
 				"bk-not-found-handler": map[string]interface{}{},
-				"file-logger": map[string]interface{}{
-					"path": fileLoggerLogPath,
-				},
 			},
 		},
 		Status: utils.IntPtr(1),
