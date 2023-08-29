@@ -345,7 +345,9 @@ func (w *EventAgent) handleTicker(ctx context.Context) {
 		}
 
 		w.commitChan <- allStages
+		return
 	}
+
 	if len(stageList) != 0 {
 		w.commitChan <- stageList
 	}
