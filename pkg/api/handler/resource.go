@@ -73,7 +73,7 @@ func (r *ResourceHandler) GetLeader(c *gin.Context) {
 // Sync ...
 func (r *ResourceHandler) Sync(c *gin.Context) {
 	var req SyncReq
-	if err := c.ShouldBindQuery(&req); err != nil {
+	if err := c.ShouldBind(&req); err != nil {
 		utils.BadRequestErrorJSONResponse(c, utils.ValidationErrorMessage(err))
 		return
 	}
@@ -85,6 +85,8 @@ func (r *ResourceHandler) Sync(c *gin.Context) {
 				StageName:   req.Stage,
 			},
 		})
+		utils.SuccessJSONResponse(c, "ok")
+		return
 	}
 
 	stageList, err := r.registry.ListStages(c)
