@@ -42,8 +42,8 @@ eventReporter:
   reporterBufferSize: 100 # control currency fo report to core API
 
 instance:
-  id:"coreapi"
-  secret:"coreapi"
+  id: "coreapi"
+  secret: "coreapi"
 
 httpServer:
   bindAddress: "0.0.0.0"
