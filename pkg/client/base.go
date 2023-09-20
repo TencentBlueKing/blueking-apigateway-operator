@@ -19,17 +19,17 @@
 package client
 
 import (
-    "encoding/json"
-    "fmt"
+	"encoding/json"
+	"fmt"
 
-    gentleman "gopkg.in/h2non/gentleman.v2"
+	"gopkg.in/h2non/gentleman.v2"
 
-    "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
-    "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 type baseClient struct {
-    client *gentleman.Client
+	client *gentleman.Client
 }
 
 // RequestOption http option
@@ -37,54 +37,54 @@ type RequestOption func(request *gentleman.Request) error
 
 // DoHttpRequest do http request with opt
 func (c *baseClient) doHttpRequest(request *gentleman.Request, options ...RequestOption) error {
-    for _, opt := range options {
-        err := opt(request)
-        if err != nil {
-            return err
-        }
-    }
-    return nil
+	for _, opt := range options {
+		err := opt(request)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // sendAndDecodeResp do http request and decode resp
 func sendAndDecodeResp(result interface{}) RequestOption {
-    return func(request *gentleman.Request) error {
-        var resp *gentleman.Response
-        var err error
-        defer func() {
-            if err != nil {
-                logging.GetLogger().Errorf("do http request fail: %+v", err)
-            }
-        }()
+	return func(request *gentleman.Request) error {
+		var resp *gentleman.Response
+		var err error
+		defer func() {
+			if err != nil {
+				logging.GetLogger().Errorf("do http request fail: %+v", err)
+			}
+		}()
 
-        // send request
-        resp, err = request.Send()
-        if err != nil {
-            return fmt.Errorf("send http fail: %w", err)
-        }
-        defer func() {
-            _ = resp.Close()
-        }()
+		// send request
+		resp, err = request.Send()
+		if err != nil {
+			return fmt.Errorf("send http fail: %w", err)
+		}
+		defer func() {
+			_ = resp.Close()
+		}()
 
-        // decode common resp
-        var res utils.CommonResp
-        err = json.Unmarshal(resp.Bytes(), &res)
-        if err != nil {
-            return fmt.Errorf("unmarshal http resp err: %w", err)
-        }
-        if res.Error.Code != "" {
-            return fmt.Errorf("code: %s,msg: %s", res.Error.Code, res.Error.Message)
-        }
+		// decode common resp
+		var res utils.CommonResp
+		err = json.Unmarshal(resp.Bytes(), &res)
+		if err != nil {
+			return fmt.Errorf("unmarshal http resp err: %w", err)
+		}
+		if res.Error.Code != "" {
+			return fmt.Errorf("code: %s,msg: %s", res.Error.Code, res.Error.Message)
+		}
 
-        // decode resp
-        if result != nil {
-            var resultByte []byte
-            resultByte, err = json.Marshal(res.Data)
-            if err != nil {
-                return fmt.Errorf("marshal http result data err: %w", err)
-            }
-            return json.Unmarshal(resultByte, &result)
-        }
-        return nil
-    }
+		// decode resp
+		if result != nil {
+			var resultByte []byte
+			resultByte, err = json.Marshal(res.Data)
+			if err != nil {
+				return fmt.Errorf("marshal http result data err: %w", err)
+			}
+			return json.Unmarshal(resultByte, &result)
+		}
+		return nil
+	}
 }
