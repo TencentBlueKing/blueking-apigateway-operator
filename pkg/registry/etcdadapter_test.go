@@ -29,7 +29,7 @@ import (
 	pb "go.etcd.io/etcd/api/v3/etcdserverpb"
 	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientv3 "go.etcd.io/etcd/client/v3"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -677,6 +677,36 @@ var _ = Describe("Etcdadapter Operations", Ordered, func() {
 			Expect(siList).ShouldNot(BeNil())
 			Expect(len(siList)).Should(Equal(4))
 		})
+	})
+
+	Context("convertStage", Ordered, func() {
+		var kvs []*mvccpb.KeyValue
+
+		BeforeEach(func() {
+			kvs = []*mvccpb.KeyValue{
+				{
+					Key: []byte("/test/gateway/stage/v1beta1/BkGatewayResource/resource1"),
+				},
+				{
+					Key: []byte("/test/gateway/stage/v1beta1/BkGatewayResource/resource2"),
+				},
+				{
+					Key: []byte("/test/gateway/stage2/v1beta1/BkGatewayResource/resource3"),
+				},
+				{
+					Key: []byte("/test/gateway/stage2/v1beta1/BkGatewayResource/resource4"),
+				},
+			}
+		})
+
+		It("should return a list of unique stages", func() {
+			stages := testRegistry.convertStages(kvs)
+			Expect(len(stages)).To(Equal(2))
+			for _, stage := range stages {
+				Expect(stage.Key()).To(BeElementOf([]string{"gateway/stage", "gateway/stage2"}))
+			}
+		})
+
 	})
 
 	Context("Watch", Ordered, func() {

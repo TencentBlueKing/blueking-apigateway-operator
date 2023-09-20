@@ -35,7 +35,7 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.opentelemetry.io/otel/attribute"
 	"go.uber.org/zap"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -127,23 +127,34 @@ func (r *EtcdRegistryAdapter) ListStages(ctx context.Context) ([]StageInfo, erro
 	}
 
 	// 2. convert
-	stageList := make([]StageInfo, 0)
-	stageMap := make(map[StageInfo]struct{})
-	for _, kv := range resp.Kvs {
+	stageList := r.convertStages(resp.Kvs)
+
+	metric.ReportRegistryAction(v1beta1.BkGatewayStageTypeName, metric.ActionList, metric.ResultSuccess, startedTime)
+
+	return stageList, nil
+}
+
+// convertStages convert stages from etcd kvs
+func (r *EtcdRegistryAdapter) convertStages(kvs []*mvccpb.KeyValue) []StageInfo {
+	stageMap := make(map[string]StageInfo)
+	for _, kv := range kvs {
 		rm, err := r.extractResourceMetadata(string(kv.Key))
 		if err != nil {
 			r.logger.Infow("resource key is incorrect, skip it", "key", string(kv.Key), "err", err)
 			continue
 		}
-		stageMap[rm.StageInfo] = struct{}{}
+		// 去重
+		if _, ok := stageMap[rm.StageInfo.Key()]; !ok {
+			stageMap[rm.StageInfo.Key()] = rm.StageInfo
+		}
 	}
-	for stage := range stageMap {
+
+	stageList := make([]StageInfo, 0)
+	for _, stage := range stageMap {
 		stageList = append(stageList, stage)
 	}
 
-	metric.ReportRegistryAction(v1beta1.BkGatewayStageTypeName, metric.ActionList, metric.ResultSuccess, startedTime)
-
-	return stageList, nil
+	return stageList
 }
 
 // List ...

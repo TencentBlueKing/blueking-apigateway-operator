@@ -22,7 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	gentleman "gopkg.in/h2non/gentleman.v2"
+	"gopkg.in/h2non/gentleman.v2"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
