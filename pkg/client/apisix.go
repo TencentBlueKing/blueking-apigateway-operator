@@ -143,7 +143,7 @@ func retryEvaluator(gateway string, stage string, publishID int64, retryError *e
 				*retryError = fmt.Errorf(
 					"configuration [gateway: %s,stage: %s]  [current: %d, expected: %d] is not latest",
 					gateway, stage, resp.PublishID, publishID)
-				logging.GetLogger().Debug(*retryError)
+				logging.GetLogger().Info(*retryError)
 				return *retryError
 			}
 

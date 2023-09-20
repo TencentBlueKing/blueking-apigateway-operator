@@ -127,9 +127,17 @@ func (r *EtcdRegistryAdapter) ListStages(ctx context.Context) ([]StageInfo, erro
 	}
 
 	// 2. convert
-	stageList := make([]StageInfo, 0)
+	stageList := r.convertStages(resp.Kvs)
+
+	metric.ReportRegistryAction(v1beta1.BkGatewayStageTypeName, metric.ActionList, metric.ResultSuccess, startedTime)
+
+	return stageList, nil
+}
+
+// convertStages convert stages from etcd kvs
+func (r *EtcdRegistryAdapter) convertStages(kvs []*mvccpb.KeyValue) []StageInfo {
 	stageMap := make(map[string]StageInfo)
-	for _, kv := range resp.Kvs {
+	for _, kv := range kvs {
 		rm, err := r.extractResourceMetadata(string(kv.Key))
 		if err != nil {
 			r.logger.Infow("resource key is incorrect, skip it", "key", string(kv.Key), "err", err)
@@ -140,13 +148,14 @@ func (r *EtcdRegistryAdapter) ListStages(ctx context.Context) ([]StageInfo, erro
 			stageMap[rm.StageInfo.Key()] = rm.StageInfo
 		}
 	}
+
+	stageList := make([]StageInfo, 0)
 	for _, stage := range stageMap {
 		stageList = append(stageList, stage)
 	}
 
-	metric.ReportRegistryAction(v1beta1.BkGatewayStageTypeName, metric.ActionList, metric.ResultSuccess, startedTime)
+	return stageList
 
-	return stageList, nil
 }
 
 // List ...

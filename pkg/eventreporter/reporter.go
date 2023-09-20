@@ -272,7 +272,7 @@ func (r *Reporter) reportEvent(event reportEvent) {
 	}
 
 	// log event
-	logging.GetLogger().Debugf("report event [name:%s,gateway:%s,stage:%s,publish_id:%s,status:%s] success",
+	logging.GetLogger().Info("report event [name:%s,gateway:%s,stage:%s,publish_id:%s,status:%s] success",
 		event.Event, eventReq.BkGatewayName, eventReq.BkStageName, eventReq.PublishID, event.status)
 }
 
