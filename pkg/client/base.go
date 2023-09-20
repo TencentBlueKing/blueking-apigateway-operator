@@ -53,7 +53,7 @@ func sendAndDecodeResp(result interface{}) RequestOption {
         var err error
         defer func() {
             if err != nil {
-                logging.GetLogger().Debug("do http request fail: %+v", err)
+                logging.GetLogger().Errorf("do http request fail: %+v", err)
             }
         }()
 
