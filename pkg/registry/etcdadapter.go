@@ -155,7 +155,6 @@ func (r *EtcdRegistryAdapter) convertStages(kvs []*mvccpb.KeyValue) []StageInfo 
 	}
 
 	return stageList
-
 }
 
 // List ...
