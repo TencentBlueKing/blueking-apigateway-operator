@@ -21,6 +21,7 @@ package eventreporter
 import (
 	"context"
 	"log"
+	"strings"
 	"sync"
 	"time"
 
@@ -264,7 +265,7 @@ func (r *Reporter) reportEvent(event reportEvent) {
 
 	// report event
 	err := client.GetCoreAPIClient().ReportPublishEvent(context.TODO(), eventReq)
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), constant.EventDuplicatedErrMsg) {
 		logging.GetLogger().Errorf(
 			"report event  [name:%s,gateway:%s,stage:%s,publish_id:%s,status:%s] fail:%v",
 			event.Event, eventReq.BkGatewayName, eventReq.BkStageName, eventReq.PublishID, event.status, err)
