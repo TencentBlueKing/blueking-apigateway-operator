@@ -46,3 +46,5 @@ const (
 	EventStatusPending EventStatus = "pending" // 待执行
 	EventStatusDoing   EventStatus = "doing"   // 执行中
 )
+
+const EventDuplicatedErrMsg = "duplicated"

@@ -77,7 +77,7 @@ func (t *StageTimer) Update(stage registry.StageInfo) {
 		timer.StageInfo = stage
 		timer.Update(eventsWaitingTimeWindow)
 	}
-	t.stageTimer.Store(stage, timer)
+	t.stageTimer.Store(stage.Key(), timer)
 }
 
 // ListStagesForCommit ...
