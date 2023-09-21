@@ -64,7 +64,7 @@ func (l *listCommand) Init() {
 	cmd.MarkFlagsRequiredTogether("gateway", "stage")
 	cmd.MarkFlagsMutuallyExclusive("resource_id", "resource_name")
 
-	cmd.Flags().StringVarP(&cfgFile, "config", "l", "", "config file (default is config.yml;required)")
+	cmd.Flags().StringVarP(&cfgFile, "config", "c", "", "config file (default is config.yml;required)")
 	cmd.PersistentFlags().Bool("viper", true, "Use Viper for configuration")
 
 	cmd.MarkFlagRequired("config")
@@ -90,19 +90,13 @@ func (l *listCommand) RunE(cmd *cobra.Command, args []string) error {
 	req := &handler.ListReq{}
 	req.Gateway, _ = cmd.Flags().GetString("gateway")
 	req.Stage, _ = cmd.Flags().GetString("stage")
-	var resourceIdentity *handler.ResourceInfo
 	resName, _ := cmd.Flags().GetString("resource_name")
 	resID, _ := cmd.Flags().GetInt64("resource_id")
-	if len(resName) != 0 {
-		resourceIdentity = &handler.ResourceInfo{
-			ResourceName: resName,
-		}
-	} else if resID >= 0 {
-		resourceIdentity = &handler.ResourceInfo{
-			ResourceId: resID,
-		}
+
+	req.Resource = &handler.ResourceInfo{
+		ResourceId:   resID,
+		ResourceName: resName,
 	}
-	req.Resource = resourceIdentity
 	req.All, _ = cmd.Flags().GetBool("all")
 
 	if err := l.validateRequest(req); err != nil {
