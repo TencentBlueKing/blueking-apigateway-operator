@@ -19,16 +19,27 @@
 package etcd
 
 import (
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
+	"fmt"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+	json "github.com/json-iterator/go"
 )
 
 type configDiffer struct{}
 
 func newConfigDiffer() *configDiffer {
 	return &configDiffer{}
+}
+
+// transformMap: 需要单独针对于map类型添加一个对比转换器，由于value是一个interface类型,对于不同的序列化方式会存在类型不一致
+// eg： value存在map[any]any和map[string]any和map[interface]any的问题
+func transformMap(mapType map[string]interface{}) map[string]interface{} {
+	mapTypeJson, _ := json.Marshal(mapType)
+	var newMap map[string]interface{}
+	_ = json.Unmarshal(mapTypeJson, &newMap)
+	return newMap
 }
 
 func (d *configDiffer) diff(
@@ -65,7 +76,8 @@ func (d *configDiffer) diffRoutes(
 			putList[key] = newRes
 			continue
 		}
-		if !cmp.Equal(oldRes, newRes, cmpopts.IgnoreFields(apisix.Route{}, "CreateTime", "UpdateTime")) {
+		if !cmp.Equal(oldRes, newRes, cmp.Transformer("transformerMap", transformMap), cmpopts.IgnoreFields(apisix.Route{}, "CreateTime", "UpdateTime")) {
+			fmt.Println("diff",cmp.Diff(oldRes, newRes, cmp.Transformer("transformerMap", transformMap), cmpopts.IgnoreFields(apisix.Route{}, "CreateTime", "UpdateTime")))
 			putList[key] = newRes
 		}
 		delete(oldResMap, key)

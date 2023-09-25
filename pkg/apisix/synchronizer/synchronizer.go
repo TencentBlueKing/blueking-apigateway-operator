@@ -22,13 +22,13 @@ import (
 	"context"
 	"sync"
 
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/version"
 	"go.uber.org/zap"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	cfg "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 const (
@@ -159,7 +159,7 @@ func (as *ApisixConfigurationSynchronizer) flush(ctx context.Context) {
 
 	as.logger.Debug("flush virtual stage")
 	controlPlaneConfiguration := make(map[string]*apisix.ApisixConfiguration)
-	virtualStage := NewVirtualStage(utils.GetUUID(), as.operatorURL)
+	virtualStage := NewVirtualStage(version.Commit, as.operatorURL)
 	controlPlaneConfiguration[config.VirtualStageKey] = virtualStage.MakeConfiguration()
 	as.store.Alter(ctx, controlPlaneConfiguration, as.resync)
 }
