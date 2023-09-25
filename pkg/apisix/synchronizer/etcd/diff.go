@@ -104,7 +104,9 @@ func (d *configDiffer) diffServices(
 			putList[key] = newRes
 			continue
 		}
-		if !cmp.Equal(oldRes, newRes, cmpopts.IgnoreFields(apisix.Service{}, "CreateTime", "UpdateTime")) {
+		if !cmp.Equal(oldRes, newRes,
+			cmp.Transformer("transformerMap", transformMap),
+			cmpopts.IgnoreFields(apisix.Service{}, "CreateTime", "UpdateTime")) {
 			putList[key] = newRes
 		}
 		delete(oldResMap, key)
@@ -131,7 +133,8 @@ func (d *configDiffer) diffPluginMetadatas(
 			putList[key] = newRes
 			continue
 		}
-		if !cmp.Equal(oldRes, newRes) {
+		if !cmp.Equal(oldRes, newRes,
+			cmp.Transformer("transformerMap", transformMap)) {
 			putList[key] = newRes
 		}
 		delete(oldResMap, key)
@@ -158,7 +161,9 @@ func (d *configDiffer) diffSSLs(
 			putList[key] = newRes
 			continue
 		}
-		if !cmp.Equal(oldRes, newRes, cmpopts.IgnoreFields(apisix.SSL{}, "CreateTime", "UpdateTime")) {
+		if !cmp.Equal(oldRes, newRes,
+			cmp.Transformer("transformerMap", transformMap),
+			cmpopts.IgnoreFields(apisix.SSL{}, "CreateTime", "UpdateTime")) {
 			putList[key] = newRes
 		}
 		delete(oldResMap, key)
