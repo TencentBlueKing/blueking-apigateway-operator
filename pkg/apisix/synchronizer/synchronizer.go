@@ -22,13 +22,13 @@ import (
 	"context"
 	"sync"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/version"
 	"go.uber.org/zap"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	cfg "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/version"
 )
 
 const (

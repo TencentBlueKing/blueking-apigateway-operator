@@ -19,12 +19,11 @@
 package etcd
 
 import (
-	"fmt"
-
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	json "github.com/json-iterator/go"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 )
 
 type configDiffer struct{}
@@ -76,8 +75,9 @@ func (d *configDiffer) diffRoutes(
 			putList[key] = newRes
 			continue
 		}
-		if !cmp.Equal(oldRes, newRes, cmp.Transformer("transformerMap", transformMap), cmpopts.IgnoreFields(apisix.Route{}, "CreateTime", "UpdateTime")) {
-			fmt.Println("diff",cmp.Diff(oldRes, newRes, cmp.Transformer("transformerMap", transformMap), cmpopts.IgnoreFields(apisix.Route{}, "CreateTime", "UpdateTime")))
+		if !cmp.Equal(oldRes, newRes,
+			cmp.Transformer("transformerMap", transformMap),
+			cmpopts.IgnoreFields(apisix.Route{}, "CreateTime", "UpdateTime")) {
 			putList[key] = newRes
 		}
 		delete(oldResMap, key)
