@@ -33,28 +33,21 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 	. "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 var _ = Describe("VirtualStage", func() {
 	var (
-		stage           *VirtualStage
-		resourceVersion string
-		operatorHost    string
-		operatorPort    int
-		operatorURL     string
-		gatewayName     string
-		stageName       string
-		logPath         string
+		stage            *VirtualStage
+		apisixHealthzURI string
+		gatewayName      string
+		stageName        string
+		logPath          string
 	)
 
 	JustAfterEach(viper.Reset)
 
 	BeforeEach(func() {
-		resourceVersion = utils.GetUUID()
-		operatorHost = "localhost"
-		operatorPort = 80
-		operatorURL = "/operator/healthz"
+		apisixHealthzURI = "/healthz"
 		gatewayName = "virtual-gateway"
 		stageName = "virtual-stage"
 		logPath = "/logs/access.log"
@@ -62,18 +55,16 @@ var _ = Describe("VirtualStage", func() {
 		Init(&config.Config{
 			Apisix: config.Apisix{
 				VirtualStage: config.VirtualStage{
-					VirtualGateway:                  gatewayName,
-					VirtualStage:                    stageName,
-					OperatorExternalHost:            operatorHost,
-					OperatorExternalHealthProbePort: operatorPort,
-					FileLoggerLogPath:               logPath,
+					VirtualGateway:    gatewayName,
+					VirtualStage:      stageName,
+					FileLoggerLogPath: logPath,
 				},
 			},
 		})
 	})
 
 	JustBeforeEach(func() {
-		stage = NewVirtualStage(resourceVersion, operatorURL)
+		stage = NewVirtualStage(apisixHealthzURI)
 	})
 
 	checkLabels := func(labels map[string]string) {
@@ -108,38 +99,16 @@ var _ = Describe("VirtualStage", func() {
 				Expect(plugins["file-logger"]).To(HaveKeyWithValue("path", logPath))
 			})
 
-			It("should create inner healthz route", func() {
-				route := configuration.Routes[HealthZRouteIDInner]
-				checkMetadata(route.Metadata)
-
-				Expect(route.Host).To(Equal("localhost"))
-				Expect(route.Uri).To(Equal("/" + resourceVersion))
-				Expect(route.Methods).To(ContainElement("GET"))
-				Expect(*route.Status).To(Equal(1))
-
-				plugins := route.Plugins
-				Expect(plugins["proxy-rewrite"]).To(HaveKeyWithValue("uri", operatorURL))
-				Expect(plugins["response-rewrite"]).To(HaveKey("headers"))
-
-				upstream := route.Upstream
-				Expect(*upstream.Type).To(Equal("roundrobin"))
-
-				node := upstream.Nodes[0]
-				Expect(node).To(HaveField("Host", operatorHost))
-				Expect(node).To(HaveField("Port", operatorPort))
-			})
-
 			It("should create outter healthz route", func() {
 				route := configuration.Routes[HealthZRouteIDOuter]
 				checkMetadata(route.Metadata)
 
-				Expect(route.Uri).To(Equal(operatorURL))
+				Expect(route.Uri).To(Equal(apisixHealthzURI))
 				Expect(route.Priority).To(Equal(-100))
 				Expect(route.Methods).To(ContainElement("GET"))
 				Expect(*route.Status).To(Equal(1))
 
 				plugins := route.Plugins
-				Expect(plugins["proxy-rewrite"]).To(HaveKeyWithValue("uri", operatorURL))
 				Expect(plugins["limit-req"]).To(HaveKeyWithValue("key", "server_addr"))
 				Expect(plugins["mocking"]).To(HaveKeyWithValue("response_example", "ok"))
 			})
@@ -156,12 +125,10 @@ var _ = Describe("VirtualStage", func() {
 				Init(&config.Config{
 					Apisix: config.Apisix{
 						VirtualStage: config.VirtualStage{
-							VirtualGateway:                  gatewayName,
-							VirtualStage:                    stageName,
-							OperatorExternalHost:            operatorHost,
-							OperatorExternalHealthProbePort: operatorPort,
-							FileLoggerLogPath:               logPath,
-							ExtraApisixResources:            extraPath,
+							VirtualGateway:       gatewayName,
+							VirtualStage:         stageName,
+							FileLoggerLogPath:    logPath,
+							ExtraApisixResources: extraPath,
 						},
 					},
 				})
