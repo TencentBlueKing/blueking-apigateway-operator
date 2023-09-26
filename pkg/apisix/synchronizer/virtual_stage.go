@@ -37,8 +37,8 @@ const (
 	HealthZRouteIDInner = "micro-gateway-operator-healthz-inner"
 	HealthZRouteIDOuter = "micro-gateway-operator-healthz-outer"
 	NotFoundHandling    = "micro-gateway-not-found-handling"
-	// HTTPHeaderKeyGatewayOperatorVersion http header key for GatewayOperatorVersion
-	HTTPHeaderKeyGatewayOperatorVersion = "Gateway-Operator-Version"
+	// HTTPHeaderKeyGatewayOperatorBuildTime http header key for GatewayOperatorBuildTime
+	HTTPHeaderKeyGatewayOperatorBuildTime = "Gateway-Operator-Build-Time"
 )
 
 // VirtualStage combine some builtin routes
@@ -120,7 +120,7 @@ func (s *VirtualStage) makeInnerHealthzRoute() *apisix.Route {
 				},
 				"response-rewrite": map[string]interface{}{
 					"headers": map[string]interface{}{
-						HTTPHeaderKeyGatewayOperatorVersion: s.resourceVersion,
+						HTTPHeaderKeyGatewayOperatorBuildTime: s.resourceVersion,
 					},
 				},
 			},
