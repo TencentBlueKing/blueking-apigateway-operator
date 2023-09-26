@@ -53,7 +53,12 @@ type EtcdConfigStore struct {
 }
 
 // NewEtcdConfigStore ...
-func NewEtcdConfigStore(client *clientv3.Client, prefix string, putInterval time.Duration, rateLimit int) (*EtcdConfigStore, error) {
+func NewEtcdConfigStore(
+	client *clientv3.Client,
+	prefix string,
+	putInterval time.Duration,
+	rateLimit int,
+) (*EtcdConfigStore, error) {
 	s := &EtcdConfigStore{
 		client:      client,
 		prefix:      strings.TrimRight(prefix, "/"),
@@ -200,7 +205,12 @@ func (s *EtcdConfigStore) alterByStage(
 		if err = s.batchPutResource(ctx, ApisixResourceTypeSSL, putConf.SSLs, needRateLimit); err != nil {
 			return fmt.Errorf("batch put ssl failed: %w", err)
 		}
-		if err = s.batchPutResource(ctx, ApisixResourceTypePluginMetadata, putConf.PluginMetadatas, needRateLimit); err != nil {
+		if err = s.batchPutResource(
+			ctx,
+			ApisixResourceTypePluginMetadata,
+			putConf.PluginMetadatas,
+			needRateLimit,
+		); err != nil {
 			return fmt.Errorf("batch put plugin metadata failed: %w", err)
 		}
 		if err = s.batchPutResource(ctx, ApisixResourceTypeServices, putConf.Services, needRateLimit); err != nil {
@@ -224,7 +234,12 @@ func (s *EtcdConfigStore) alterByStage(
 		if err = s.batchDeleteResource(ctx, ApisixResourceTypeServices, deleteConf.Services, needRateLimit); err != nil {
 			return fmt.Errorf("batch delete services failed: %w", err)
 		}
-		if err = s.batchDeleteResource(ctx, ApisixResourceTypePluginMetadata, deleteConf.PluginMetadatas, needRateLimit); err != nil {
+		if err = s.batchDeleteResource(
+			ctx,
+			ApisixResourceTypePluginMetadata,
+			deleteConf.PluginMetadatas,
+			needRateLimit,
+		); err != nil {
 			return fmt.Errorf("batch delete plugin metadata failed: %w", err)
 		}
 		if err = s.batchDeleteResource(ctx, ApisixResourceTypeSSL, deleteConf.SSLs, needRateLimit); err != nil {
@@ -235,7 +250,12 @@ func (s *EtcdConfigStore) alterByStage(
 	return nil
 }
 
-func (s *EtcdConfigStore) batchPutResource(ctx context.Context, resourceType string, resources interface{}, needRateLimit bool) error {
+func (s *EtcdConfigStore) batchPutResource(
+	ctx context.Context,
+	resourceType string,
+	resources interface{},
+	needRateLimit bool,
+) error {
 	resourceStore := s.stores[resourceType]
 
 	resourceIter := reflect.ValueOf(resources).MapRange()
@@ -296,7 +316,12 @@ func (s *EtcdConfigStore) batchPutResource(ctx context.Context, resourceType str
 	return nil
 }
 
-func (s *EtcdConfigStore) batchDeleteResource(ctx context.Context, resourceType string, resources interface{}, needRateLimit bool) error {
+func (s *EtcdConfigStore) batchDeleteResource(
+	ctx context.Context,
+	resourceType string,
+	resources interface{},
+	needRateLimit bool,
+) error {
 	resourceStore := s.stores[resourceType]
 	resourceMap := reflect.ValueOf(resources).MapRange()
 	for resourceMap.Next() {
