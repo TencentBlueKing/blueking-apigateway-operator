@@ -37,17 +37,17 @@ import (
 
 var _ = Describe("VirtualStage", func() {
 	var (
-		stage       *VirtualStage
-		operatorURL string
-		gatewayName string
-		stageName   string
-		logPath     string
+		stage            *VirtualStage
+		apisixHealthZURI string
+		gatewayName      string
+		stageName        string
+		logPath          string
 	)
 
 	JustAfterEach(viper.Reset)
 
 	BeforeEach(func() {
-		operatorURL = "/operator/healthz"
+		apisixHealthZURI = "/healthz"
 		gatewayName = "virtual-gateway"
 		stageName = "virtual-stage"
 		logPath = "/logs/access.log"
@@ -64,7 +64,7 @@ var _ = Describe("VirtualStage", func() {
 	})
 
 	JustBeforeEach(func() {
-		stage = NewVirtualStage(operatorURL)
+		stage = NewVirtualStage(apisixHealthZURI)
 	})
 
 	checkLabels := func(labels map[string]string) {
@@ -103,13 +103,13 @@ var _ = Describe("VirtualStage", func() {
 				route := configuration.Routes[HealthZRouteIDOuter]
 				checkMetadata(route.Metadata)
 
-				Expect(route.Uri).To(Equal(operatorURL))
+				Expect(route.Uri).To(Equal(apisixHealthZURI))
 				Expect(route.Priority).To(Equal(-100))
 				Expect(route.Methods).To(ContainElement("GET"))
 				Expect(*route.Status).To(Equal(1))
 
 				plugins := route.Plugins
-				Expect(plugins["proxy-rewrite"]).To(HaveKeyWithValue("uri", operatorURL))
+				Expect(plugins["proxy-rewrite"]).To(HaveKeyWithValue("uri", apisixHealthZURI))
 				Expect(plugins["limit-req"]).To(HaveKeyWithValue("key", "server_addr"))
 				Expect(plugins["mocking"]).To(HaveKeyWithValue("response_example", "ok"))
 			})

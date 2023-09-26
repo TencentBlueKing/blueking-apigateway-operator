@@ -39,22 +39,22 @@ const (
 
 // VirtualStage combine some builtin routes
 type VirtualStage struct {
-	labels      map[string]string
-	operatorURL string
+	labels           map[string]string
+	apisixHealthZURI string
 
 	logger *zap.SugaredLogger
 }
 
 // NewVirtualStage creates a new virtual stage
-func NewVirtualStage(operatorURL string) *VirtualStage {
+func NewVirtualStage(apisixHealthZURI string) *VirtualStage {
 	labels := make(map[string]string)
 	labels[config.BKAPIGatewayLabelKeyGatewayName] = virtualGatewayName
 	labels[config.BKAPIGatewayLabelKeyGatewayStage] = virtualStageName
 
 	return &VirtualStage{
-		labels:      labels,
-		operatorURL: operatorURL,
-		logger:      logging.GetLogger().Named("virtual-stage"),
+		labels:           labels,
+		apisixHealthZURI: apisixHealthZURI,
+		logger:           logging.GetLogger().Named("virtual-stage"),
 	}
 }
 
@@ -98,9 +98,6 @@ func (s *VirtualStage) make404DefaultRoute() *apisix.Route {
 
 func (s *VirtualStage) makeOuterHealthzRoute() *apisix.Route {
 	plugins := map[string]interface{}{
-		"proxy-rewrite": map[string]interface{}{
-			"uri": s.operatorURL,
-		},
 		"limit-req": map[string]interface{}{
 			"rate":  float64(10),
 			"burst": float64(10),
@@ -115,7 +112,7 @@ func (s *VirtualStage) makeOuterHealthzRoute() *apisix.Route {
 	return &apisix.Route{
 		Route: apisixv1.Route{
 			Metadata: s.makeRouteMetadata(HealthZRouteIDOuter),
-			Uri:      s.operatorURL,
+			Uri:      s.apisixHealthZURI,
 			Priority: -100,
 			Methods:  []string{"GET"},
 			Plugins:  plugins,
