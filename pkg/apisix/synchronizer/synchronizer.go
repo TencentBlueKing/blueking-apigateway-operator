@@ -108,8 +108,8 @@ func (as *ApisixConfigurationSynchronizer) resync(ctx context.Context, key strin
 }
 
 // Flush will flush the cached apisix configuration changes
-func (as *ApisixConfigurationSynchronizer) Flush(ctx context.Context) {
-	go as.flush(ctx)
+func (as *ApisixConfigurationSynchronizer) Flush(ctx context.Context, needRateLimit bool) {
+	go as.flush(ctx, needRateLimit)
 }
 
 // RemoveNotExistStage remove stages that does not exist
@@ -129,10 +129,10 @@ func (as *ApisixConfigurationSynchronizer) RemoveNotExistStage(ctx context.Conte
 			changedConfig[key] = apisix.NewEmptyApisixConfiguration()
 		}
 	}
-	as.store.Alter(ctx, changedConfig, as.resync)
+	as.store.Alter(ctx, changedConfig, as.resync, true)
 }
 
-func (as *ApisixConfigurationSynchronizer) flush(ctx context.Context) {
+func (as *ApisixConfigurationSynchronizer) flush(ctx context.Context, needRateLimit bool) {
 	as.Lock()
 
 	// 取出buffer中的数据, 并重置buffer
@@ -154,12 +154,11 @@ func (as *ApisixConfigurationSynchronizer) flush(ctx context.Context) {
 	defer as.flushMux.Unlock()
 
 	as.logger.Debug("flush changes")
-	as.store.Alter(ctx, changedConfig, as.resync)
+	as.store.Alter(ctx, changedConfig, as.resync, needRateLimit)
 
 	as.logger.Debug("flush virtual stage")
 	controlPlaneConfiguration := make(map[string]*apisix.ApisixConfiguration)
-	// todo: 后续version.version替换,暂时先用BuildTime
 	virtualStage := NewVirtualStage(as.apisixHealthzURI)
 	controlPlaneConfiguration[config.VirtualStageKey] = virtualStage.MakeConfiguration()
-	as.store.Alter(ctx, controlPlaneConfiguration, as.resync)
+	as.store.Alter(ctx, controlPlaneConfiguration, as.resync, needRateLimit)
 }

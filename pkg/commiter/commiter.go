@@ -35,6 +35,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter/conversion"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter/service"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/eventreporter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
@@ -134,8 +135,17 @@ func (c *Commiter) commitGroup(ctx context.Context, stageInfoList []registry.Sta
 	}
 	wg.Wait()
 
+	needRateLimit := true
+	for _, stage := range stageInfoList {
+		// if publishID is no need report mean no need rate limit
+		if stage.PublishID == constant.NoNeedReportPublishID {
+			needRateLimit = false
+			break
+		}
+	}
+
 	// flush all buffed apisix conf to etcd/file
-	c.synchronizer.Flush(ctx)
+	c.synchronizer.Flush(ctx, needRateLimit)
 }
 
 func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, wg *sync.WaitGroup) {

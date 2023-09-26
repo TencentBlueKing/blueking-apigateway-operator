@@ -29,6 +29,7 @@ import (
 	json "github.com/json-iterator/go"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.uber.org/zap"
+	"golang.org/x/time/rate"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
@@ -47,10 +48,12 @@ type EtcdConfigStore struct {
 	logger *zap.SugaredLogger
 
 	putInterval time.Duration
+
+	limiter *rate.Limiter
 }
 
 // NewEtcdConfigStore ...
-func NewEtcdConfigStore(client *clientv3.Client, prefix string, putInterval time.Duration) (*EtcdConfigStore, error) {
+func NewEtcdConfigStore(client *clientv3.Client, prefix string, putInterval time.Duration, rateLimit int) (*EtcdConfigStore, error) {
 	s := &EtcdConfigStore{
 		client:      client,
 		prefix:      strings.TrimRight(prefix, "/"),
@@ -58,6 +61,7 @@ func NewEtcdConfigStore(client *clientv3.Client, prefix string, putInterval time
 		differ:      newConfigDiffer(),
 		logger:      logging.GetLogger().Named("etcd-config-store"),
 		putInterval: putInterval,
+		limiter:     rate.NewLimiter(rate.Limit(rateLimit), 1),
 	}
 	s.init()
 
@@ -159,13 +163,14 @@ func (s *EtcdConfigStore) Alter(
 	ctx context.Context,
 	changedConfig map[string]*apisix.ApisixConfiguration,
 	callbackFunc synchronizer.RetrySyncFunc,
+	needRateLimit bool,
 ) {
 	wg := &sync.WaitGroup{}
 	for stagName, conf := range changedConfig {
 		wg.Add(1)
 		go func(name string, conf *apisix.ApisixConfiguration) {
 			st := time.Now()
-			err := s.alterByStage(ctx, name, conf)
+			err := s.alterByStage(ctx, name, conf, needRateLimit)
 
 			// metric
 			synchronizer.ReportStageConfigAlterMetric(name, conf, st, err)
@@ -182,7 +187,7 @@ func (s *EtcdConfigStore) Alter(
 }
 
 func (s *EtcdConfigStore) alterByStage(
-	ctx context.Context, stageKey string, conf *apisix.ApisixConfiguration,
+	ctx context.Context, stageKey string, conf *apisix.ApisixConfiguration, needRateLimit bool,
 ) (err error) {
 	// get cached config
 	oldConf := s.Get(stageKey)
@@ -192,20 +197,20 @@ func (s *EtcdConfigStore) alterByStage(
 
 	// put resources
 	if putConf != nil {
-		if err = s.batchPutResource(ctx, ApisixResourceTypeSSL, putConf.SSLs); err != nil {
+		if err = s.batchPutResource(ctx, ApisixResourceTypeSSL, putConf.SSLs, needRateLimit); err != nil {
 			return fmt.Errorf("batch put ssl failed: %w", err)
 		}
-		if err = s.batchPutResource(ctx, ApisixResourceTypePluginMetadata, putConf.PluginMetadatas); err != nil {
+		if err = s.batchPutResource(ctx, ApisixResourceTypePluginMetadata, putConf.PluginMetadatas, needRateLimit); err != nil {
 			return fmt.Errorf("batch put plugin metadata failed: %w", err)
 		}
-		if err = s.batchPutResource(ctx, ApisixResourceTypeServices, putConf.Services); err != nil {
+		if err = s.batchPutResource(ctx, ApisixResourceTypeServices, putConf.Services, needRateLimit); err != nil {
 			return fmt.Errorf("batch put services failed: %w", err)
 		}
 
 		// sleep putInterVal to avoid resource data inconsistency
 		time.Sleep(s.putInterval)
 
-		if err = s.batchPutResource(ctx, ApisixResourceTypeRoutes, putConf.Routes); err != nil {
+		if err = s.batchPutResource(ctx, ApisixResourceTypeRoutes, putConf.Routes, needRateLimit); err != nil {
 			return fmt.Errorf("batch put routes failed: %w", err)
 		}
 	}
@@ -213,16 +218,16 @@ func (s *EtcdConfigStore) alterByStage(
 	// delete resources
 	if deleteConf != nil {
 		// NOTE: 删除的顺序和创建的顺序相反, 错误的顺序会导致apisix的异常
-		if err = s.batchDeleteResource(ctx, ApisixResourceTypeRoutes, deleteConf.Routes); err != nil {
+		if err = s.batchDeleteResource(ctx, ApisixResourceTypeRoutes, deleteConf.Routes, needRateLimit); err != nil {
 			return fmt.Errorf("batch delete routes failed: %w", err)
 		}
-		if err = s.batchDeleteResource(ctx, ApisixResourceTypeServices, deleteConf.Services); err != nil {
+		if err = s.batchDeleteResource(ctx, ApisixResourceTypeServices, deleteConf.Services, needRateLimit); err != nil {
 			return fmt.Errorf("batch delete services failed: %w", err)
 		}
-		if err = s.batchDeleteResource(ctx, ApisixResourceTypePluginMetadata, deleteConf.PluginMetadatas); err != nil {
+		if err = s.batchDeleteResource(ctx, ApisixResourceTypePluginMetadata, deleteConf.PluginMetadatas, needRateLimit); err != nil {
 			return fmt.Errorf("batch delete plugin metadata failed: %w", err)
 		}
-		if err = s.batchDeleteResource(ctx, ApisixResourceTypeSSL, deleteConf.SSLs); err != nil {
+		if err = s.batchDeleteResource(ctx, ApisixResourceTypeSSL, deleteConf.SSLs, needRateLimit); err != nil {
 			return fmt.Errorf("batch delete ssl failed: %w", err)
 		}
 	}
@@ -230,7 +235,7 @@ func (s *EtcdConfigStore) alterByStage(
 	return nil
 }
 
-func (s *EtcdConfigStore) batchPutResource(ctx context.Context, resourceType string, resources interface{}) error {
+func (s *EtcdConfigStore) batchPutResource(ctx context.Context, resourceType string, resources interface{}, needRateLimit bool) error {
 	resourceStore := s.stores[resourceType]
 
 	resourceIter := reflect.ValueOf(resources).MapRange()
@@ -266,6 +271,11 @@ func (s *EtcdConfigStore) batchPutResource(ctx context.Context, resourceType str
 
 		s.logger.Debugw("Put resource to etcd", "resourceType", resourceType, "resourceID", resource.GetID())
 
+		// client操作限流
+		if needRateLimit {
+			s.limiter.Wait(ctx)
+		}
+
 		_, err = s.client.Put(ctx, resourceStore.prefix+key, string(bytes))
 
 		synchronizer.ReportApisixEtcdMetric(resourceType, metric.ActionPut, st, err)
@@ -286,7 +296,7 @@ func (s *EtcdConfigStore) batchPutResource(ctx context.Context, resourceType str
 	return nil
 }
 
-func (s *EtcdConfigStore) batchDeleteResource(ctx context.Context, resourceType string, resources interface{}) error {
+func (s *EtcdConfigStore) batchDeleteResource(ctx context.Context, resourceType string, resources interface{}, needRateLimit bool) error {
 	resourceStore := s.stores[resourceType]
 	resourceMap := reflect.ValueOf(resources).MapRange()
 	for resourceMap.Next() {
@@ -296,6 +306,11 @@ func (s *EtcdConfigStore) batchDeleteResource(ctx context.Context, resourceType 
 		resource := resourceMap.Value().Interface().(apisix.ApisixResource)
 
 		s.logger.Debugw("Delete resource from etcd", "resourceType", resourceType, "resourceID", resource.GetID())
+
+		// client操作限流
+		if needRateLimit {
+			s.limiter.Wait(ctx)
+		}
 
 		_, err := s.client.Delete(ctx, resourceStore.prefix+key)
 

@@ -32,6 +32,6 @@ type ApisixConfigStore interface {
 	Get(stageName string) *apisix.ApisixConfiguration
 	GetAll() map[string]*apisix.ApisixConfiguration
 	Alter(
-		ctx context.Context, changedConfig map[string]*apisix.ApisixConfiguration, callbackFunc RetrySyncFunc,
+		ctx context.Context, changedConfig map[string]*apisix.ApisixConfiguration, callbackFunc RetrySyncFunc, needRateLimit bool,
 	)
 }

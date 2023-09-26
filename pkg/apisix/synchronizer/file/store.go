@@ -68,6 +68,7 @@ func (f *FileConfigStore) Alter(
 	ctx context.Context,
 	changedConfig map[string]*apisix.ApisixConfiguration,
 	callbackFunc synchronizer.RetrySyncFunc,
+	needRateLimit bool,
 ) {
 	f.mux.Lock()
 	defer f.mux.Unlock()
