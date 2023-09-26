@@ -33,6 +33,7 @@ import (
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 )
@@ -57,7 +58,7 @@ func NewEtcdConfigStore(
 	client *clientv3.Client,
 	prefix string,
 	putInterval time.Duration,
-	rateLimit int,
+	rateLimit config.EtcdRateLimit,
 ) (*EtcdConfigStore, error) {
 	s := &EtcdConfigStore{
 		client:      client,
@@ -66,7 +67,7 @@ func NewEtcdConfigStore(
 		differ:      newConfigDiffer(),
 		logger:      logging.GetLogger().Named("etcd-config-store"),
 		putInterval: putInterval,
-		limiter:     rate.NewLimiter(rate.Limit(rateLimit), 1),
+		limiter:     rate.NewLimiter(rate.Limit(rateLimit.Limit), rateLimit.Burst),
 	}
 	s.init()
 

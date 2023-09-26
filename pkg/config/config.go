@@ -119,8 +119,8 @@ type Operator struct {
 
 	// etcd put interval
 	EtcdPutInterval time.Duration
-	// etcd client rate limit per second
-	EtcdRateLimit int
+	// etcd client rate limit
+	EtcdRateLimit EtcdRateLimit
 }
 
 // VersionProbe
@@ -171,6 +171,11 @@ type Etcd struct {
 	WithoutAuth bool
 
 	KeyPrefix string
+}
+
+type EtcdRateLimit struct {
+	Limit int
+	Burst int
 }
 
 // Sentry ...
@@ -276,7 +281,10 @@ func newDefaultConfig() *Config {
 			AgentCommitTimeWindow:        5 * time.Second,
 			AgentConcurrencyLimit:        2,
 			EtcdPutInterval:              50 * time.Millisecond,
-			EtcdRateLimit:                100,
+			EtcdRateLimit: EtcdRateLimit{
+				Limit: 100,
+				Burst: 1,
+			},
 		},
 		Sentry: Sentry{
 			ReportLevel: 2,
