@@ -33,27 +33,20 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 	. "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 var _ = Describe("VirtualStage", func() {
 	var (
-		stage           *VirtualStage
-		resourceVersion string
-		operatorHost    string
-		operatorPort    int
-		operatorURL     string
-		gatewayName     string
-		stageName       string
-		logPath         string
+		stage       *VirtualStage
+		operatorURL string
+		gatewayName string
+		stageName   string
+		logPath     string
 	)
 
 	JustAfterEach(viper.Reset)
 
 	BeforeEach(func() {
-		resourceVersion = utils.GetUUID()
-		operatorHost = "localhost"
-		operatorPort = 80
 		operatorURL = "/operator/healthz"
 		gatewayName = "virtual-gateway"
 		stageName = "virtual-stage"
@@ -62,18 +55,16 @@ var _ = Describe("VirtualStage", func() {
 		Init(&config.Config{
 			Apisix: config.Apisix{
 				VirtualStage: config.VirtualStage{
-					VirtualGateway:                  gatewayName,
-					VirtualStage:                    stageName,
-					OperatorExternalHost:            operatorHost,
-					OperatorExternalHealthProbePort: operatorPort,
-					FileLoggerLogPath:               logPath,
+					VirtualGateway:    gatewayName,
+					VirtualStage:      stageName,
+					FileLoggerLogPath: logPath,
 				},
 			},
 		})
 	})
 
 	JustBeforeEach(func() {
-		stage = NewVirtualStage(resourceVersion, operatorURL)
+		stage = NewVirtualStage(operatorURL)
 	})
 
 	checkLabels := func(labels map[string]string) {
@@ -135,12 +126,10 @@ var _ = Describe("VirtualStage", func() {
 				Init(&config.Config{
 					Apisix: config.Apisix{
 						VirtualStage: config.VirtualStage{
-							VirtualGateway:                  gatewayName,
-							VirtualStage:                    stageName,
-							OperatorExternalHost:            operatorHost,
-							OperatorExternalHealthProbePort: operatorPort,
-							FileLoggerLogPath:               logPath,
-							ExtraApisixResources:            extraPath,
+							VirtualGateway:       gatewayName,
+							VirtualStage:         stageName,
+							FileLoggerLogPath:    logPath,
+							ExtraApisixResources: extraPath,
 						},
 					},
 				})

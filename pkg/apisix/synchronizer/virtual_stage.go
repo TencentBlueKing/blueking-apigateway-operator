@@ -33,31 +33,28 @@ import (
 
 // HealthZRouteIDInner ...
 const (
-	HealthZRouteIDInner = "micro-gateway-operator-healthz-inner"
 	HealthZRouteIDOuter = "micro-gateway-operator-healthz-outer"
 	NotFoundHandling    = "micro-gateway-not-found-handling"
 )
 
 // VirtualStage combine some builtin routes
 type VirtualStage struct {
-	labels          map[string]string
-	resourceVersion string
-	operatorURL     string
+	labels      map[string]string
+	operatorURL string
 
 	logger *zap.SugaredLogger
 }
 
 // NewVirtualStage creates a new virtual stage
-func NewVirtualStage(resourceVersion, operatorURL string) *VirtualStage {
+func NewVirtualStage(operatorURL string) *VirtualStage {
 	labels := make(map[string]string)
 	labels[config.BKAPIGatewayLabelKeyGatewayName] = virtualGatewayName
 	labels[config.BKAPIGatewayLabelKeyGatewayStage] = virtualStageName
 
 	return &VirtualStage{
-		labels:          labels,
-		resourceVersion: resourceVersion,
-		operatorURL:     operatorURL,
-		logger:          logging.GetLogger().Named("virtual-stage"),
+		labels:      labels,
+		operatorURL: operatorURL,
+		logger:      logging.GetLogger().Named("virtual-stage"),
 	}
 }
 

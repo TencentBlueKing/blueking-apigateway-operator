@@ -28,7 +28,6 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	cfg "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/version"
 )
 
 const (
@@ -160,7 +159,7 @@ func (as *ApisixConfigurationSynchronizer) flush(ctx context.Context) {
 	as.logger.Debug("flush virtual stage")
 	controlPlaneConfiguration := make(map[string]*apisix.ApisixConfiguration)
 	// todo: 后续version.version替换,暂时先用BuildTime
-	virtualStage := NewVirtualStage(version.BuildTime, as.operatorURL)
+	virtualStage := NewVirtualStage(as.operatorURL)
 	controlPlaneConfiguration[config.VirtualStageKey] = virtualStage.MakeConfiguration()
 	as.store.Alter(ctx, controlPlaneConfiguration, as.resync)
 }
