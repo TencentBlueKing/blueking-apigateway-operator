@@ -80,10 +80,8 @@ type VirtualStage struct {
 	VirtualGateway string
 	VirtualStage   string
 
-	OperatorExternalHost            string
-	OperatorExternalHealthProbePort int
-	ExtraApisixResources            string
-	FileLoggerLogPath               string
+	ExtraApisixResources string
+	FileLoggerLogPath    string
 }
 
 // Dashboard ...
@@ -249,9 +247,7 @@ func newDefaultConfig() *Config {
 			ConfigPath:            "/usr/local/apisix/conf/apisix.yaml",
 			InternalDiscoveryType: []string{"dns", "consul_kv", "nacos", "eureka"},
 			VirtualStage: VirtualStage{
-				OperatorExternalHost:            "127.0.0.1",
-				OperatorExternalHealthProbePort: 8081,
-				FileLoggerLogPath:               "/usr/local/apisix/logs/access.log",
+				FileLoggerLogPath: "/usr/local/apisix/logs/access.log",
 
 				VirtualGateway: "-",
 				VirtualStage:   "-",

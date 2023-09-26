@@ -28,7 +28,6 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	cfg "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 const (
@@ -46,23 +45,23 @@ type ApisixConfigurationSynchronizer struct {
 	store    ApisixConfigStore
 	flushMux sync.Mutex
 
-	operatorURL string
+	apisixHealthzURI string
 
 	logger *zap.SugaredLogger
 }
 
 // NewSynchronizer create new Synchronizer
-func NewSynchronizer(store ApisixConfigStore, operatorURL string) *ApisixConfigurationSynchronizer {
+func NewSynchronizer(store ApisixConfigStore, apisixHealthzURI string) *ApisixConfigurationSynchronizer {
 	bufferSelection := make([]*apisix.SynchronizerBuffer, bufferCnt)
 	for i := range bufferSelection {
 		bufferSelection[i] = apisix.NewSynchronizerBuffer()
 	}
 	syncer := &ApisixConfigurationSynchronizer{
-		buffer:          bufferSelection[0],
-		bufferSelection: bufferSelection,
-		store:           store,
-		operatorURL:     operatorURL,
-		logger:          logging.GetLogger().Named("apisix-config-synchronizer"),
+		buffer:           bufferSelection[0],
+		bufferSelection:  bufferSelection,
+		store:            store,
+		apisixHealthzURI: apisixHealthzURI,
+		logger:           logging.GetLogger().Named("apisix-config-synchronizer"),
 	}
 	return syncer
 }
@@ -159,7 +158,8 @@ func (as *ApisixConfigurationSynchronizer) flush(ctx context.Context) {
 
 	as.logger.Debug("flush virtual stage")
 	controlPlaneConfiguration := make(map[string]*apisix.ApisixConfiguration)
-	virtualStage := NewVirtualStage(utils.GetUUID(), as.operatorURL)
+	// todo: 后续version.version替换,暂时先用BuildTime
+	virtualStage := NewVirtualStage(as.apisixHealthzURI)
 	controlPlaneConfiguration[config.VirtualStageKey] = virtualStage.MakeConfiguration()
 	as.store.Alter(ctx, controlPlaneConfiguration, as.resync)
 }

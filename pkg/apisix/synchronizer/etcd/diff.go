@@ -47,6 +47,7 @@ func ignoreApisixMetadata() cmp.Option {
 	return cmpopts.IgnoreFields(apisixv1.Metadata{}, "Desc", "Labels")
 }
 
+
 func (d *configDiffer) diff(
 	old, new *apisix.ApisixConfiguration,
 ) (put *apisix.ApisixConfiguration, delete *apisix.ApisixConfiguration) {
@@ -111,6 +112,7 @@ func (d *configDiffer) diffServices(
 			continue
 		}
 		if !cmp.Equal(oldRes, newRes,
+			cmp.Transformer("transformerMap", transformMap),
 			ignoreApisixMetadata(),
 			cmpopts.IgnoreFields(apisix.Service{}, "CreateTime", "UpdateTime")) {
 			putList[key] = newRes
@@ -139,7 +141,8 @@ func (d *configDiffer) diffPluginMetadatas(
 			putList[key] = newRes
 			continue
 		}
-		if !cmp.Equal(oldRes, newRes) {
+		if !cmp.Equal(oldRes, newRes,
+			cmp.Transformer("transformerMap", transformMap)) {
 			putList[key] = newRes
 		}
 		delete(oldResMap, key)
@@ -166,7 +169,9 @@ func (d *configDiffer) diffSSLs(
 			putList[key] = newRes
 			continue
 		}
-		if !cmp.Equal(oldRes, newRes, cmpopts.IgnoreFields(apisix.SSL{}, "CreateTime", "UpdateTime")) {
+		if !cmp.Equal(oldRes, newRes,
+			cmp.Transformer("transformerMap", transformMap),
+			cmpopts.IgnoreFields(apisix.SSL{}, "CreateTime", "UpdateTime")) {
 			putList[key] = newRes
 		}
 		delete(oldResMap, key)

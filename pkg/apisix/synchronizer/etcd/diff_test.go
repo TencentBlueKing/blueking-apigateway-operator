@@ -348,6 +348,69 @@ var _ = Describe("configDiffer", func() {
 		})
 	})
 
+	Describe("diffRoutes with different type plugin value", func() {
+		var (
+			newRoutes map[string]*apisix.Route
+			oldRoutes map[string]*apisix.Route
+		)
+		BeforeEach(func() {
+			differ = newConfigDiffer()
+			newRoutes = map[string]*apisix.Route{
+				"test-route1": {
+					Route: v1.Route{
+						Metadata: v1.Metadata{
+							ID: "test-route",
+							Labels: map[string]string{
+								config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
+								config.BKAPIGatewayLabelKeyGatewayStage: "test-stage",
+							},
+						},
+						Plugins: map[string]interface{}{
+							"proxy-rewrite": map[any]any{
+								"uri": "/test/v1",
+							},
+							"response-rewrite": map[interface{}]any{
+								"uri": "/test/v1",
+							},
+						},
+					},
+					CreateTime: 1,
+				},
+			}
+
+			oldRoutes = map[string]*apisix.Route{
+				"test-route1": {
+					Route: v1.Route{
+						Metadata: v1.Metadata{
+							ID: "test-route",
+							Labels: map[string]string{
+								config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
+								config.BKAPIGatewayLabelKeyGatewayStage: "test-stage",
+							},
+						},
+						Plugins: map[string]interface{}{
+							"proxy-rewrite": map[string]any{
+								"uri": "/test/v1",
+							},
+							"response-rewrite": map[any]any{
+								"uri": "/test/v1",
+							},
+						},
+					},
+					CreateTime: 2,
+				},
+			}
+		})
+
+		Context("Test diff Routes", func() {
+			It("diff Routes", func() {
+				put, del := differ.diffRoutes(newRoutes, oldRoutes)
+				Expect(len(put)).To(Equal(0))
+				Expect(len(del)).To(Equal(0))
+			})
+		})
+	})
+
 	Describe("diff", func() {
 		var (
 			newConf *apisix.ApisixConfiguration
