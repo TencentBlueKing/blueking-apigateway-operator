@@ -25,7 +25,6 @@ import (
 	"go.uber.org/zap"
 	yaml "gopkg.in/yaml.v2"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
@@ -37,8 +36,6 @@ const (
 	HealthZRouteIDInner = "micro-gateway-operator-healthz-inner"
 	HealthZRouteIDOuter = "micro-gateway-operator-healthz-outer"
 	NotFoundHandling    = "micro-gateway-not-found-handling"
-	// HTTPHeaderKeyGatewayOperatorBuildTime http header key for GatewayOperatorBuildTime
-	HTTPHeaderKeyGatewayOperatorBuildTime = "Gateway-Operator-Build-Time"
 )
 
 // VirtualStage combine some builtin routes
@@ -95,43 +92,6 @@ func (s *VirtualStage) make404DefaultRoute() *apisix.Route {
 				"bk-not-found-handler": map[string]interface{}{},
 				"file-logger": map[string]interface{}{
 					"path": fileLoggerLogPath,
-				},
-			},
-		},
-		Status: utils.IntPtr(1),
-	}
-}
-
-func (s *VirtualStage) makeInnerHealthzRoute() *apisix.Route {
-	return &apisix.Route{
-		Route: apisixv1.Route{
-			Metadata: s.makeRouteMetadata(HealthZRouteIDInner),
-			Host:     "localhost",
-			Uri:      "/" + s.resourceVersion,
-			Methods:  []string{"GET"},
-			Timeout: &apisixv1.UpstreamTimeout{
-				Connect: 2,
-				Read:    2,
-				Send:    2,
-			},
-			Plugins: map[string]interface{}{
-				"proxy-rewrite": map[string]interface{}{
-					"uri": s.operatorURL,
-				},
-				"response-rewrite": map[string]interface{}{
-					"headers": map[string]interface{}{
-						HTTPHeaderKeyGatewayOperatorBuildTime: s.resourceVersion,
-					},
-				},
-			},
-		},
-		Upstream: &apisix.Upstream{
-			Type: utils.StringPtr("roundrobin"),
-			Nodes: []v1beta1.BkGatewayNode{
-				{
-					Host:   operatorExternalHost,
-					Port:   operatorExternalHealthProbePort,
-					Weight: 10,
 				},
 			},
 		},
@@ -218,7 +178,6 @@ func (s *VirtualStage) MakeConfiguration() *apisix.ApisixConfiguration {
 
 	for _, fn := range []func() *apisix.Route{
 		s.make404DefaultRoute,
-		s.makeInnerHealthzRoute,
 		s.makeOuterHealthzRoute,
 	} {
 		route := fn()

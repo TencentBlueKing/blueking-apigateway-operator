@@ -108,27 +108,6 @@ var _ = Describe("VirtualStage", func() {
 				Expect(plugins["file-logger"]).To(HaveKeyWithValue("path", logPath))
 			})
 
-			It("should create inner healthz route", func() {
-				route := configuration.Routes[HealthZRouteIDInner]
-				checkMetadata(route.Metadata)
-
-				Expect(route.Host).To(Equal("localhost"))
-				Expect(route.Uri).To(Equal("/" + resourceVersion))
-				Expect(route.Methods).To(ContainElement("GET"))
-				Expect(*route.Status).To(Equal(1))
-
-				plugins := route.Plugins
-				Expect(plugins["proxy-rewrite"]).To(HaveKeyWithValue("uri", operatorURL))
-				Expect(plugins["response-rewrite"]).To(HaveKey("headers"))
-
-				upstream := route.Upstream
-				Expect(*upstream.Type).To(Equal("roundrobin"))
-
-				node := upstream.Nodes[0]
-				Expect(node).To(HaveField("Host", operatorHost))
-				Expect(node).To(HaveField("Port", operatorPort))
-			})
-
 			It("should create outter healthz route", func() {
 				route := configuration.Routes[HealthZRouteIDOuter]
 				checkMetadata(route.Metadata)
