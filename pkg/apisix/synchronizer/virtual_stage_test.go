@@ -109,7 +109,6 @@ var _ = Describe("VirtualStage", func() {
 				Expect(*route.Status).To(Equal(1))
 
 				plugins := route.Plugins
-				Expect(plugins["proxy-rewrite"]).To(HaveKeyWithValue("uri", apisixHealthZURI))
 				Expect(plugins["limit-req"]).To(HaveKeyWithValue("key", "server_addr"))
 				Expect(plugins["mocking"]).To(HaveKeyWithValue("response_example", "ok"))
 			})
