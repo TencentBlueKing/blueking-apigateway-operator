@@ -19,12 +19,12 @@
 package etcd
 
 import (
+	apisixv1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	json "github.com/json-iterator/go"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
-	apisixv1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
 )
 
 type configDiffer struct{}
