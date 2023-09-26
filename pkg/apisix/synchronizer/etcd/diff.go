@@ -47,7 +47,6 @@ func ignoreApisixMetadata() cmp.Option {
 	return cmpopts.IgnoreFields(apisixv1.Metadata{}, "Desc", "Labels")
 }
 
-
 func (d *configDiffer) diff(
 	old, new *apisix.ApisixConfiguration,
 ) (put *apisix.ApisixConfiguration, delete *apisix.ApisixConfiguration) {
