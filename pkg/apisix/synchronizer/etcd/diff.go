@@ -44,7 +44,7 @@ func transformMap(mapType map[string]interface{}) map[string]interface{} {
 
 // ignoreApisixMetadata: 忽略apisixeMetadata的部分成员
 func ignoreApisixMetadata() cmp.Option {
-	return cmpopts.IgnoreFields(apisixv1.Metadata{}, "Desc", "Name")
+	return cmpopts.IgnoreFields(apisixv1.Metadata{}, "Desc", "Labels")
 }
 
 func (d *configDiffer) diff(

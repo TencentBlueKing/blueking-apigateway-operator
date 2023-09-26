@@ -135,7 +135,7 @@ func (c *Converter) convertResource(
 	}
 
 	pluginsMap := make(map[string]interface{})
-	if resource.Spec.Rewrite != nil && resource.Spec.Rewrite.Enabled {
+	if resource.Spec.Rewrite != nil {
 		pluginsMap, err = c.mergeRewrite(resource.Spec.Rewrite, resource)
 		if err != nil {
 			return nil, err
@@ -399,7 +399,12 @@ func (c *Converter) externalExternalServiceNodes(
 
 func (c *Converter) mergeRewrite(
 	rewrite *v1beta1.BkGatewayResourceHTTPRewrite,
-	resource *v1beta1.BkGatewayResource) (map[string]interface{}, error) {
+	resource *v1beta1.BkGatewayResource,
+) (map[string]interface{}, error) {
+	if !rewrite.Enabled {
+		return map[string]interface{}{}, nil
+	}
+
 	rewritePluginConfig := make(map[string]interface{})
 	if len(rewrite.Path) != 0 {
 		upstreamURI := render.GetUpstreamURIRender().Render(rewrite.Path, c.stage.Spec.Vars)
