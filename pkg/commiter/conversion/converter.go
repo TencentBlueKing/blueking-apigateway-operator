@@ -21,7 +21,6 @@ package conversion
 import (
 	"context"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	json "github.com/json-iterator/go"
 	"github.com/rotisserie/eris"
 	"go.uber.org/zap"
@@ -31,6 +30,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter/cert"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter/service"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/radixtree"
 )

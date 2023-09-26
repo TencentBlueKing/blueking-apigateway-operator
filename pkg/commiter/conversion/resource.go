@@ -399,9 +399,7 @@ func (c *Converter) externalExternalServiceNodes(
 
 func (c *Converter) mergeRewrite(
 	rewrite *v1beta1.BkGatewayResourceHTTPRewrite,
-	resource *v1beta1.BkGatewayResource,
-) (map[string]interface{}, error) {
-
+	resource *v1beta1.BkGatewayResource) (map[string]interface{}, error) {
 	rewritePluginConfig := make(map[string]interface{})
 	if len(rewrite.Path) != 0 {
 		upstreamURI := render.GetUpstreamURIRender().Render(rewrite.Path, c.stage.Spec.Vars)

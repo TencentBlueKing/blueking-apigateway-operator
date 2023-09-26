@@ -110,7 +110,9 @@ func (d *configDiffer) diffServices(
 			putList[key] = newRes
 			continue
 		}
-		if !cmp.Equal(oldRes, newRes, ignoreApisixMetadata(), cmpopts.IgnoreFields(apisix.Service{}, "CreateTime", "UpdateTime")) {
+		if !cmp.Equal(oldRes, newRes,
+			ignoreApisixMetadata(),
+			cmpopts.IgnoreFields(apisix.Service{}, "CreateTime", "UpdateTime")) {
 			putList[key] = newRes
 		}
 		delete(oldResMap, key)
