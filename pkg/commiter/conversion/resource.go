@@ -135,7 +135,7 @@ func (c *Converter) convertResource(
 	}
 
 	pluginsMap := make(map[string]interface{})
-	if resource.Spec.Rewrite != nil {
+	if resource.Spec.Rewrite != nil && resource.Spec.Rewrite.Enabled {
 		pluginsMap, err = c.mergeRewrite(resource.Spec.Rewrite, resource)
 		if err != nil {
 			return nil, err
