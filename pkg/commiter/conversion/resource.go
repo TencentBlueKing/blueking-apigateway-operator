@@ -135,7 +135,7 @@ func (c *Converter) convertResource(
 	}
 
 	pluginsMap := make(map[string]interface{})
-	if resource.Spec.Rewrite != nil {
+	if resource.Spec.Rewrite != nil && resource.Spec.Rewrite.Enabled {
 		pluginsMap, err = c.mergeRewrite(resource.Spec.Rewrite, resource)
 		if err != nil {
 			return nil, err
@@ -401,9 +401,6 @@ func (c *Converter) mergeRewrite(
 	rewrite *v1beta1.BkGatewayResourceHTTPRewrite,
 	resource *v1beta1.BkGatewayResource,
 ) (map[string]interface{}, error) {
-	if !rewrite.Enabled {
-		return nil, nil
-	}
 
 	rewritePluginConfig := make(map[string]interface{})
 	if len(rewrite.Path) != 0 {
