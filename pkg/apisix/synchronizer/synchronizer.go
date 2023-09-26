@@ -45,13 +45,13 @@ type ApisixConfigurationSynchronizer struct {
 	store    ApisixConfigStore
 	flushMux sync.Mutex
 
-	apisixHealthZURI string
+	apisixHealthzURI string
 
 	logger *zap.SugaredLogger
 }
 
 // NewSynchronizer create new Synchronizer
-func NewSynchronizer(store ApisixConfigStore, apisixHealthZURI string) *ApisixConfigurationSynchronizer {
+func NewSynchronizer(store ApisixConfigStore, apisixHealthzURI string) *ApisixConfigurationSynchronizer {
 	bufferSelection := make([]*apisix.SynchronizerBuffer, bufferCnt)
 	for i := range bufferSelection {
 		bufferSelection[i] = apisix.NewSynchronizerBuffer()
@@ -60,7 +60,7 @@ func NewSynchronizer(store ApisixConfigStore, apisixHealthZURI string) *ApisixCo
 		buffer:           bufferSelection[0],
 		bufferSelection:  bufferSelection,
 		store:            store,
-		apisixHealthZURI: apisixHealthZURI,
+		apisixHealthzURI: apisixHealthzURI,
 		logger:           logging.GetLogger().Named("apisix-config-synchronizer"),
 	}
 	return syncer
@@ -159,7 +159,7 @@ func (as *ApisixConfigurationSynchronizer) flush(ctx context.Context) {
 	as.logger.Debug("flush virtual stage")
 	controlPlaneConfiguration := make(map[string]*apisix.ApisixConfiguration)
 	// todo: 后续version.version替换,暂时先用BuildTime
-	virtualStage := NewVirtualStage(as.apisixHealthZURI)
+	virtualStage := NewVirtualStage(as.apisixHealthzURI)
 	controlPlaneConfiguration[config.VirtualStageKey] = virtualStage.MakeConfiguration()
 	as.store.Alter(ctx, controlPlaneConfiguration, as.resync)
 }

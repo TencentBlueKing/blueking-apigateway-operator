@@ -38,7 +38,7 @@ import (
 var _ = Describe("VirtualStage", func() {
 	var (
 		stage            *VirtualStage
-		apisixHealthZURI string
+		apisixHealthzURI string
 		gatewayName      string
 		stageName        string
 		logPath          string
@@ -47,7 +47,7 @@ var _ = Describe("VirtualStage", func() {
 	JustAfterEach(viper.Reset)
 
 	BeforeEach(func() {
-		apisixHealthZURI = "/healthz"
+		apisixHealthzURI = "/healthz"
 		gatewayName = "virtual-gateway"
 		stageName = "virtual-stage"
 		logPath = "/logs/access.log"
@@ -64,7 +64,7 @@ var _ = Describe("VirtualStage", func() {
 	})
 
 	JustBeforeEach(func() {
-		stage = NewVirtualStage(apisixHealthZURI)
+		stage = NewVirtualStage(apisixHealthzURI)
 	})
 
 	checkLabels := func(labels map[string]string) {
@@ -103,7 +103,7 @@ var _ = Describe("VirtualStage", func() {
 				route := configuration.Routes[HealthZRouteIDOuter]
 				checkMetadata(route.Metadata)
 
-				Expect(route.Uri).To(Equal(apisixHealthZURI))
+				Expect(route.Uri).To(Equal(apisixHealthzURI))
 				Expect(route.Priority).To(Equal(-100))
 				Expect(route.Methods).To(ContainElement("GET"))
 				Expect(*route.Status).To(Equal(1))

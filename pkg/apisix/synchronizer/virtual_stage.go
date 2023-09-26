@@ -40,20 +40,20 @@ const (
 // VirtualStage combine some builtin routes
 type VirtualStage struct {
 	labels           map[string]string
-	apisixHealthZURI string
+	apisixHealthzURI string
 
 	logger *zap.SugaredLogger
 }
 
 // NewVirtualStage creates a new virtual stage
-func NewVirtualStage(apisixHealthZURI string) *VirtualStage {
+func NewVirtualStage(apisixHealthzURI string) *VirtualStage {
 	labels := make(map[string]string)
 	labels[config.BKAPIGatewayLabelKeyGatewayName] = virtualGatewayName
 	labels[config.BKAPIGatewayLabelKeyGatewayStage] = virtualStageName
 
 	return &VirtualStage{
 		labels:           labels,
-		apisixHealthZURI: apisixHealthZURI,
+		apisixHealthzURI: apisixHealthzURI,
 		logger:           logging.GetLogger().Named("virtual-stage"),
 	}
 }
@@ -112,7 +112,7 @@ func (s *VirtualStage) makeOuterHealthzRoute() *apisix.Route {
 	return &apisix.Route{
 		Route: apisixv1.Route{
 			Metadata: s.makeRouteMetadata(HealthZRouteIDOuter),
-			Uri:      s.apisixHealthZURI,
+			Uri:      s.apisixHealthzURI,
 			Priority: -100,
 			Methods:  []string{"GET"},
 			Plugins:  plugins,
