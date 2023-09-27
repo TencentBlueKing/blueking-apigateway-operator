@@ -30,6 +30,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter/cert"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter/service"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/radixtree"
 )
@@ -98,13 +99,18 @@ func (c *Converter) Convert(
 		return nil, eris.New("no stage defined")
 	}
 
-	config := apisix.NewEmptyApisixConfiguration()
+	apisixConfig := apisix.NewEmptyApisixConfiguration()
 	for _, res := range resources {
+		// 如果publish_id为-1，则跳过版本探测路由(id=-1)的写入
+		if res.Spec.ID.String() == constant.ApisixVersionRouteID &&
+			c.stage.Labels[config.BKAPIGatewayLabelKeyGatewayPublishID] == constant.NoNeedReportPublishID {
+			continue
+		}
 		route, err := c.convertResource(res, services)
 		if err != nil {
 			return nil, eris.Wrapf(err, "convert resource failed")
 		}
-		config.Routes[route.GetID()] = route
+		apisixConfig.Routes[route.GetID()] = route
 	}
 
 	for _, svc := range services {
@@ -112,7 +118,7 @@ func (c *Converter) Convert(
 		if err != nil {
 			return nil, eris.Wrapf(err, "convert service failed")
 		}
-		config.Services[svc.GetID()] = svc
+		apisixConfig.Services[svc.GetID()] = svc
 	}
 
 	for _, ssl := range ssls {
@@ -120,7 +126,7 @@ func (c *Converter) Convert(
 		if err != nil {
 			return nil, eris.Wrapf(err, "convert service failed")
 		}
-		config.SSLs[apisixSSL.GetID()] = apisixSSL
+		apisixConfig.SSLs[apisixSSL.GetID()] = apisixSSL
 	}
 
 	for _, metadata := range pluginMetadatas {
@@ -134,10 +140,10 @@ func (c *Converter) Convert(
 			c.logger.Errorw("Get name from BkGatewayPluginMetadata failed", "err", err, "metadata", metadata.ObjectMeta)
 			continue
 		}
-		config.PluginMetadatas[name] = apisix.NewPluginMetadata(name, obj)
+		apisixConfig.PluginMetadatas[name] = apisix.NewPluginMetadata(name, obj)
 	}
 
-	return config, nil
+	return apisixConfig, nil
 }
 
 func (c *Converter) getResourceName(specName string, labels map[string]string) (string, error) {
