@@ -35,6 +35,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter/conversion"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter/service"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/eventreporter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
@@ -238,6 +239,10 @@ func (c *Commiter) getStage(ctx context.Context, stageInfo registry.StageInfo) (
 	}
 	if len(stageList.Items) == 0 {
 		return nil, errStageNotFound
+	}
+	// 如果是启动全量同步，这里查出crd之后重新赋值回去,避免上报
+	if stageInfo.PublishID == constant.NoNeedReportPublishID {
+		stageList.Items[0].Labels[config.BKAPIGatewayLabelKeyGatewayPublishID] = constant.NoNeedReportPublishID
 	}
 	return &stageList.Items[0], nil
 }
