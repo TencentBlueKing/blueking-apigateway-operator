@@ -241,7 +241,7 @@ func (c *Commiter) getStage(ctx context.Context, stageInfo registry.StageInfo) (
 		return nil, errStageNotFound
 	}
 	// 如果是启动全量同步，stageInfo的publish_id的会被置为NoNeedReportPublishID，
-	// 这里查出crd的stage会被用到上班，由于存在历史的publish_id这里需要被覆盖重新赋值回去,避免重复上报
+	// 这里查出crd的stage会被用于上报，由于存在历史的publish_id这里需要被覆盖重新赋值回去,避免重复上报
 	if stageInfo.PublishID == constant.NoNeedReportPublishID {
 		stageList.Items[0].Labels[config.BKAPIGatewayLabelKeyGatewayPublishID] = constant.NoNeedReportPublishID
 	}

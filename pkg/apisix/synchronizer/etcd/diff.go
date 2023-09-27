@@ -43,8 +43,11 @@ func transformMap(mapType map[string]interface{}) map[string]interface{} {
 }
 
 // ignoreApisixMetadata: 忽略apisixeMetadata的部分成员
-func ignoreApisixMetadata() cmp.Option {
-	return cmpopts.IgnoreFields(apisixv1.Metadata{}, "Desc", "Labels")
+var ignoreApisixMetadataCmpOpt = cmpopts.IgnoreFields(apisixv1.Metadata{}, "Desc", "Labels")
+
+// ignoreCreateTimeAndUpdateTimeCmpOpt: 忽略typ 创建、更新时间
+var ignoreCreateTimeAndUpdateTimeCmpOptFunc = func(typ interface{}) cmp.Option {
+	return cmpopts.IgnoreFields(typ, "CreateTime", "UpdateTime")
 }
 
 func (d *configDiffer) diff(
@@ -81,9 +84,13 @@ func (d *configDiffer) diffRoutes(
 			putList[key] = newRes
 			continue
 		}
-		if !cmp.Equal(oldRes, newRes,
+		if !cmp.Equal(
+			oldRes,
+			newRes,
 			cmp.Transformer("transformerMap", transformMap),
-			ignoreApisixMetadata(), cmpopts.IgnoreFields(apisix.Route{}, "CreateTime", "UpdateTime")) {
+			ignoreApisixMetadataCmpOpt,
+			ignoreCreateTimeAndUpdateTimeCmpOptFunc(apisix.Route{}),
+		) {
 			putList[key] = newRes
 		}
 		delete(oldResMap, key)
@@ -110,10 +117,13 @@ func (d *configDiffer) diffServices(
 			putList[key] = newRes
 			continue
 		}
-		if !cmp.Equal(oldRes, newRes,
+		if !cmp.Equal(
+			oldRes,
+			newRes,
 			cmp.Transformer("transformerMap", transformMap),
-			ignoreApisixMetadata(),
-			cmpopts.IgnoreFields(apisix.Service{}, "CreateTime", "UpdateTime")) {
+			ignoreApisixMetadataCmpOpt,
+			ignoreCreateTimeAndUpdateTimeCmpOptFunc(apisix.Service{}),
+		) {
 			putList[key] = newRes
 		}
 		delete(oldResMap, key)
@@ -140,8 +150,11 @@ func (d *configDiffer) diffPluginMetadatas(
 			putList[key] = newRes
 			continue
 		}
-		if !cmp.Equal(oldRes, newRes,
-			cmp.Transformer("transformerMap", transformMap)) {
+		if !cmp.Equal(
+			oldRes,
+			newRes,
+			cmp.Transformer("transformerMap", transformMap),
+		) {
 			putList[key] = newRes
 		}
 		delete(oldResMap, key)
@@ -170,7 +183,8 @@ func (d *configDiffer) diffSSLs(
 		}
 		if !cmp.Equal(oldRes, newRes,
 			cmp.Transformer("transformerMap", transformMap),
-			cmpopts.IgnoreFields(apisix.SSL{}, "CreateTime", "UpdateTime")) {
+			ignoreCreateTimeAndUpdateTimeCmpOptFunc(apisix.SSL{}),
+		) {
 			putList[key] = newRes
 		}
 		delete(oldResMap, key)
