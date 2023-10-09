@@ -19,17 +19,18 @@
 package etcd
 
 import (
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 	v1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 var _ = Describe("configDiffer", func() {
 	var differ *configDiffer
-
+	metric.InitMetric(prometheus.DefaultRegisterer)
 	Describe("diffSSLs", func() {
 		var (
 			newSSLs map[string]*apisix.SSL
