@@ -16,32 +16,52 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package agent
+package timer
 
 import (
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
+	"time"
+
+	. "github.com/onsi/ginkgo/v2"
+	"github.com/onsi/gomega"
+
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 )
 
-// ReportBootstrapSyncingMetric ...
-func ReportBootstrapSyncingMetric(err error) {
-	result := metric.ResultSuccess
-	if err != nil {
-		result = metric.ResultFail
-	}
+var _ = Describe("Timer", func() {
+	var (
+		stageTimer *StageTimer
+		stageInfo  registry.StageInfo
+	)
 
-	if metric.BootstrapSyncingCounter == nil {
-		return
-	}
+	BeforeEach(func() {
+		stageTimer = NewStageTimer()
+		stageInfo = registry.StageInfo{
+			GatewayName: "gateway",
+			StageName:   "stage",
+			Ctx:         nil,
+		}
 
-	metric.BootstrapSyncingCounter.WithLabelValues(result).Inc()
-}
+		eventsWaitingTimeWindow = 100 * time.Millisecond
+	})
 
-// ReportEventTriggeredMetric ...
-func ReportEventTriggeredMetric(event *registry.ResourceMetadata) {
-	if metric.ResourceEventTriggeredCounter == nil {
-		return
-	}
+	AfterEach(func() {
+		eventsWaitingTimeWindow = 2 * time.Second
+	})
 
-	metric.ResourceEventTriggeredCounter.WithLabelValues(event.GatewayName, event.StageName, event.Kind).Inc()
-}
+	It("should update the stage timer correctly", func() {
+		stageTimer.Update(stageInfo)
+		stageList := stageTimer.ListStagesForCommit()
+		gomega.Expect(stageList).To(gomega.HaveLen(0))
+	})
+
+	It("should list stages for commit correctly", func() {
+		stageTimer.Update(stageInfo)
+		stageTimer.Update(stageInfo)
+
+		time.Sleep(200 * time.Millisecond)
+
+		stageList := stageTimer.ListStagesForCommit()
+		gomega.Expect(stageList).To(gomega.HaveLen(1))
+		gomega.Expect(stageList[0].Key()).To(gomega.Equal(stageInfo.Key()))
+	})
+})

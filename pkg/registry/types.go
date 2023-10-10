@@ -18,6 +18,8 @@
 
 package registry
 
+//go:generate mockgen -source=$GOFILE -destination=./mock/$GOFILE -package=mock
+
 import (
 	"context"
 

@@ -62,7 +62,7 @@ type KubeAgentRunner struct {
 	manager      manager.Manager
 	registry     registry.Registry
 	leader       leaderelection.LeaderElector
-	synchronizer *synchronizer.ApisixConfigurationSynchronizer
+	synchronizer synchronizer.ApisixConfigSynchronizer
 	store        synchronizer.ApisixConfigStore
 
 	commiter *commiter.Commiter

@@ -18,6 +18,8 @@
 
 package synchronizer
 
+//go:generate mockgen -source=$GOFILE -destination=./mock/$GOFILE -package=mock
+
 import (
 	"context"
 	"sync"
@@ -25,7 +27,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	cfg "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 )
@@ -35,7 +36,18 @@ const (
 )
 
 // ApisixConfigurationSynchronizer is implementation for Synchronizer
-type ApisixConfigurationSynchronizer struct {
+type ApisixConfigSynchronizer interface {
+	Sync(
+		ctx context.Context,
+		gatewayName, stageName string,
+		config *apisix.ApisixConfiguration,
+	)
+	Flush(ctx context.Context)
+	RemoveNotExistStage(ctx context.Context, existStageKeys []string)
+}
+
+// apisixConfigurationSynchronizer is implementation for Synchronizer
+type apisixConfigurationSynchronizer struct {
 	sync.Mutex
 
 	buffer          *apisix.SynchronizerBuffer
@@ -51,12 +63,12 @@ type ApisixConfigurationSynchronizer struct {
 }
 
 // NewSynchronizer create new Synchronizer
-func NewSynchronizer(store ApisixConfigStore, apisixHealthzURI string) *ApisixConfigurationSynchronizer {
+func NewSynchronizer(store ApisixConfigStore, apisixHealthzURI string) ApisixConfigSynchronizer {
 	bufferSelection := make([]*apisix.SynchronizerBuffer, bufferCnt)
 	for i := range bufferSelection {
 		bufferSelection[i] = apisix.NewSynchronizerBuffer()
 	}
-	syncer := &ApisixConfigurationSynchronizer{
+	syncer := &apisixConfigurationSynchronizer{
 		buffer:           bufferSelection[0],
 		bufferSelection:  bufferSelection,
 		store:            store,
@@ -66,7 +78,7 @@ func NewSynchronizer(store ApisixConfigStore, apisixHealthzURI string) *ApisixCo
 	return syncer
 }
 
-func (as *ApisixConfigurationSynchronizer) put(
+func (as *apisixConfigurationSynchronizer) put(
 	ctx context.Context,
 	key string,
 	config *apisix.ApisixConfiguration,
@@ -92,7 +104,7 @@ func (as *ApisixConfigurationSynchronizer) put(
 }
 
 // Sync will sync new staged apisix configuration
-func (as *ApisixConfigurationSynchronizer) Sync(
+func (as *apisixConfigurationSynchronizer) Sync(
 	ctx context.Context,
 	gatewayName, stageName string,
 	config *apisix.ApisixConfiguration,
@@ -103,17 +115,17 @@ func (as *ApisixConfigurationSynchronizer) Sync(
 	ReportStageConfigSyncMetric(gatewayName, stageName)
 }
 
-func (as *ApisixConfigurationSynchronizer) resync(ctx context.Context, key string, conf *apisix.ApisixConfiguration) {
+func (as *apisixConfigurationSynchronizer) resync(ctx context.Context, key string, conf *apisix.ApisixConfiguration) {
 	as.put(ctx, key, conf, true)
 }
 
 // Flush will flush the cached apisix configuration changes
-func (as *ApisixConfigurationSynchronizer) Flush(ctx context.Context) {
+func (as *apisixConfigurationSynchronizer) Flush(ctx context.Context) {
 	go as.flush(ctx)
 }
 
 // RemoveNotExistStage remove stages that does not exist
-func (as *ApisixConfigurationSynchronizer) RemoveNotExistStage(ctx context.Context, existStageKeys []string) {
+func (as *apisixConfigurationSynchronizer) RemoveNotExistStage(ctx context.Context, existStageKeys []string) {
 	as.flushMux.Lock()
 	defer as.flushMux.Unlock()
 
@@ -132,7 +144,7 @@ func (as *ApisixConfigurationSynchronizer) RemoveNotExistStage(ctx context.Conte
 	as.store.Alter(ctx, changedConfig, as.resync)
 }
 
-func (as *ApisixConfigurationSynchronizer) flush(ctx context.Context) {
+func (as *apisixConfigurationSynchronizer) flush(ctx context.Context) {
 	as.Lock()
 
 	// 取出buffer中的数据, 并重置buffer
@@ -160,6 +172,6 @@ func (as *ApisixConfigurationSynchronizer) flush(ctx context.Context) {
 	controlPlaneConfiguration := make(map[string]*apisix.ApisixConfiguration)
 	// todo: 后续version.version替换,暂时先用BuildTime
 	virtualStage := NewVirtualStage(as.apisixHealthzURI)
-	controlPlaneConfiguration[config.VirtualStageKey] = virtualStage.MakeConfiguration()
+	controlPlaneConfiguration[cfg.VirtualStageKey] = virtualStage.MakeConfiguration()
 	as.store.Alter(ctx, controlPlaneConfiguration, as.resync)
 }

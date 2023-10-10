@@ -16,32 +16,16 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package agent
+package timer
 
 import (
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
+	"testing"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-// ReportBootstrapSyncingMetric ...
-func ReportBootstrapSyncingMetric(err error) {
-	result := metric.ResultSuccess
-	if err != nil {
-		result = metric.ResultFail
-	}
-
-	if metric.BootstrapSyncingCounter == nil {
-		return
-	}
-
-	metric.BootstrapSyncingCounter.WithLabelValues(result).Inc()
-}
-
-// ReportEventTriggeredMetric ...
-func ReportEventTriggeredMetric(event *registry.ResourceMetadata) {
-	if metric.ResourceEventTriggeredCounter == nil {
-		return
-	}
-
-	metric.ResourceEventTriggeredCounter.WithLabelValues(event.GatewayName, event.StageName, event.Kind).Inc()
+func TestTimer(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Timer Suite")
 }

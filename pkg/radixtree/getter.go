@@ -18,6 +18,8 @@
 
 package radixtree
 
+//go:generate mockgen -source=$GOFILE -destination=./mock/$GOFILE -package=mock
+
 import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 )
