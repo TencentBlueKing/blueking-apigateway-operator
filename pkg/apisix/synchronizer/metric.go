@@ -85,5 +85,5 @@ func ReportSyncCmpMetric(gateway, stage, resourceType string) {
 
 // ReportSyncCmpDiffMetric ...
 func ReportSyncCmpDiffMetric(gateway, stage, resourceType string) {
-	metric.SyncCmpCounter.WithLabelValues(gateway, stage, resourceType).Inc()
+	metric.SyncCmpDiffCounter.WithLabelValues(gateway, stage, resourceType).Inc()
 }
