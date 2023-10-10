@@ -25,7 +25,6 @@ import (
 	"go.uber.org/zap"
 	yaml "gopkg.in/yaml.v2"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
@@ -34,33 +33,28 @@ import (
 
 // HealthZRouteIDInner ...
 const (
-	HealthZRouteIDInner = "micro-gateway-operator-healthz-inner"
 	HealthZRouteIDOuter = "micro-gateway-operator-healthz-outer"
 	NotFoundHandling    = "micro-gateway-not-found-handling"
-	// HTTPHeaderKeyGatewayOperatorVersion http header key for GatewayOperatorVersion
-	HTTPHeaderKeyGatewayOperatorVersion = "Gateway-Operator-Version"
 )
 
 // VirtualStage combine some builtin routes
 type VirtualStage struct {
-	labels          map[string]string
-	resourceVersion string
-	operatorURL     string
+	labels           map[string]string
+	apisixHealthzURI string
 
 	logger *zap.SugaredLogger
 }
 
 // NewVirtualStage creates a new virtual stage
-func NewVirtualStage(resourceVersion, operatorURL string) *VirtualStage {
+func NewVirtualStage(apisixHealthzURI string) *VirtualStage {
 	labels := make(map[string]string)
 	labels[config.BKAPIGatewayLabelKeyGatewayName] = virtualGatewayName
 	labels[config.BKAPIGatewayLabelKeyGatewayStage] = virtualStageName
 
 	return &VirtualStage{
-		labels:          labels,
-		resourceVersion: resourceVersion,
-		operatorURL:     operatorURL,
-		logger:          logging.GetLogger().Named("virtual-stage"),
+		labels:           labels,
+		apisixHealthzURI: apisixHealthzURI,
+		logger:           logging.GetLogger().Named("virtual-stage"),
 	}
 }
 
@@ -102,48 +96,8 @@ func (s *VirtualStage) make404DefaultRoute() *apisix.Route {
 	}
 }
 
-func (s *VirtualStage) makeInnerHealthzRoute() *apisix.Route {
-	return &apisix.Route{
-		Route: apisixv1.Route{
-			Metadata: s.makeRouteMetadata(HealthZRouteIDInner),
-			Host:     "localhost",
-			Uri:      "/" + s.resourceVersion,
-			Methods:  []string{"GET"},
-			Timeout: &apisixv1.UpstreamTimeout{
-				Connect: 2,
-				Read:    2,
-				Send:    2,
-			},
-			Plugins: map[string]interface{}{
-				"proxy-rewrite": map[string]interface{}{
-					"uri": s.operatorURL,
-				},
-				"response-rewrite": map[string]interface{}{
-					"headers": map[string]interface{}{
-						HTTPHeaderKeyGatewayOperatorVersion: s.resourceVersion,
-					},
-				},
-			},
-		},
-		Upstream: &apisix.Upstream{
-			Type: utils.StringPtr("roundrobin"),
-			Nodes: []v1beta1.BkGatewayNode{
-				{
-					Host:   operatorExternalHost,
-					Port:   operatorExternalHealthProbePort,
-					Weight: 10,
-				},
-			},
-		},
-		Status: utils.IntPtr(1),
-	}
-}
-
 func (s *VirtualStage) makeOuterHealthzRoute() *apisix.Route {
 	plugins := map[string]interface{}{
-		"proxy-rewrite": map[string]interface{}{
-			"uri": s.operatorURL,
-		},
 		"limit-req": map[string]interface{}{
 			"rate":  float64(10),
 			"burst": float64(10),
@@ -158,7 +112,7 @@ func (s *VirtualStage) makeOuterHealthzRoute() *apisix.Route {
 	return &apisix.Route{
 		Route: apisixv1.Route{
 			Metadata: s.makeRouteMetadata(HealthZRouteIDOuter),
-			Uri:      s.operatorURL,
+			Uri:      s.apisixHealthzURI,
 			Priority: -100,
 			Methods:  []string{"GET"},
 			Plugins:  plugins,
@@ -218,7 +172,6 @@ func (s *VirtualStage) MakeConfiguration() *apisix.ApisixConfiguration {
 
 	for _, fn := range []func() *apisix.Route{
 		s.make404DefaultRoute,
-		s.makeInnerHealthzRoute,
 		s.makeOuterHealthzRoute,
 	} {
 		route := fn()

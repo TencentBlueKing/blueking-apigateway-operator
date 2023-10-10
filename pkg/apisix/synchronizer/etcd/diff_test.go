@@ -176,6 +176,7 @@ var _ = Describe("configDiffer", func() {
 							config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
 							config.BKAPIGatewayLabelKeyGatewayStage: "test-stage1",
 						},
+						Name: "test-stage1",
 					},
 					CreateTime: 1,
 				},
@@ -186,6 +187,7 @@ var _ = Describe("configDiffer", func() {
 							config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
 							config.BKAPIGatewayLabelKeyGatewayStage: "test-stage2",
 						},
+						Name: "test-stage2",
 					},
 				},
 				"test-svc4": {
@@ -195,6 +197,7 @@ var _ = Describe("configDiffer", func() {
 							config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
 							config.BKAPIGatewayLabelKeyGatewayStage: "test-stage4",
 						},
+						Name: "test-stage4",
 					},
 				},
 			}
@@ -207,6 +210,8 @@ var _ = Describe("configDiffer", func() {
 							config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
 							config.BKAPIGatewayLabelKeyGatewayStage: "test-stage1",
 						},
+						Name: "test-stage1",
+						Desc: "test-svc1",
 					},
 					CreateTime: 2,
 				},
@@ -217,6 +222,8 @@ var _ = Describe("configDiffer", func() {
 							config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
 							config.BKAPIGatewayLabelKeyGatewayStage: "test-stagexx",
 						},
+						Name: "test-stagexx",
+						Desc: "test-svc2",
 					},
 				},
 				"test-svc3": {
@@ -226,6 +233,8 @@ var _ = Describe("configDiffer", func() {
 							config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
 							config.BKAPIGatewayLabelKeyGatewayStage: "test-stage3",
 						},
+						Name: "test-stage3",
+						Desc: "test-svc3",
 					},
 				},
 			}
@@ -256,6 +265,7 @@ var _ = Describe("configDiffer", func() {
 								config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
 								config.BKAPIGatewayLabelKeyGatewayStage: "test-stage",
 							},
+							Name: "test-stage",
 						},
 					},
 					CreateTime: 1,
@@ -268,6 +278,7 @@ var _ = Describe("configDiffer", func() {
 								config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
 								config.BKAPIGatewayLabelKeyGatewayStage: "test-stagexx",
 							},
+							Name: "test-stagexx",
 						},
 					},
 				},
@@ -279,6 +290,7 @@ var _ = Describe("configDiffer", func() {
 								config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
 								config.BKAPIGatewayLabelKeyGatewayStage: "test-stage",
 							},
+							Name: "test-stage",
 						},
 					},
 				},
@@ -293,6 +305,8 @@ var _ = Describe("configDiffer", func() {
 								config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
 								config.BKAPIGatewayLabelKeyGatewayStage: "test-stage",
 							},
+							Name: "test-stage",
+							Desc: "test-route1",
 						},
 					},
 					CreateTime: 2,
@@ -305,6 +319,8 @@ var _ = Describe("configDiffer", func() {
 								config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
 								config.BKAPIGatewayLabelKeyGatewayStage: "test-stage",
 							},
+							Name: "test-stage",
+							Desc: "test-route2",
 						},
 					},
 				},
@@ -316,6 +332,7 @@ var _ = Describe("configDiffer", func() {
 								config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
 								config.BKAPIGatewayLabelKeyGatewayStage: "test-stage",
 							},
+							Name: "test-stage",
 						},
 					},
 				},
@@ -327,6 +344,69 @@ var _ = Describe("configDiffer", func() {
 				put, del := differ.diffRoutes(newRoutes, oldRoutes)
 				Expect(len(put)).To(Equal(2))
 				Expect(len(del)).To(Equal(1))
+			})
+		})
+	})
+
+	Describe("diffRoutes with different type plugin value", func() {
+		var (
+			newRoutes map[string]*apisix.Route
+			oldRoutes map[string]*apisix.Route
+		)
+		BeforeEach(func() {
+			differ = newConfigDiffer()
+			newRoutes = map[string]*apisix.Route{
+				"test-route1": {
+					Route: v1.Route{
+						Metadata: v1.Metadata{
+							ID: "test-route",
+							Labels: map[string]string{
+								config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
+								config.BKAPIGatewayLabelKeyGatewayStage: "test-stage",
+							},
+						},
+						Plugins: map[string]interface{}{
+							"proxy-rewrite": map[any]any{
+								"uri": "/test/v1",
+							},
+							"response-rewrite": map[interface{}]any{
+								"uri": "/test/v1",
+							},
+						},
+					},
+					CreateTime: 1,
+				},
+			}
+
+			oldRoutes = map[string]*apisix.Route{
+				"test-route1": {
+					Route: v1.Route{
+						Metadata: v1.Metadata{
+							ID: "test-route",
+							Labels: map[string]string{
+								config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
+								config.BKAPIGatewayLabelKeyGatewayStage: "test-stage",
+							},
+						},
+						Plugins: map[string]interface{}{
+							"proxy-rewrite": map[string]any{
+								"uri": "/test/v1",
+							},
+							"response-rewrite": map[any]any{
+								"uri": "/test/v1",
+							},
+						},
+					},
+					CreateTime: 2,
+				},
+			}
+		})
+
+		Context("Test diff Routes", func() {
+			It("diff Routes", func() {
+				put, del := differ.diffRoutes(newRoutes, oldRoutes)
+				Expect(len(put)).To(Equal(0))
+				Expect(len(del)).To(Equal(0))
 			})
 		})
 	})
@@ -348,6 +428,8 @@ var _ = Describe("configDiffer", func() {
 									config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
 									config.BKAPIGatewayLabelKeyGatewayStage: "test-stage",
 								},
+								Name: "test-stage",
+								Desc: "test-route1",
 							},
 						},
 					},
@@ -359,6 +441,8 @@ var _ = Describe("configDiffer", func() {
 									config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
 									config.BKAPIGatewayLabelKeyGatewayStage: "test-stage",
 								},
+								Name: "test-stage",
+								Desc: "test-route2",
 							},
 						},
 					},
@@ -371,6 +455,7 @@ var _ = Describe("configDiffer", func() {
 								config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
 								config.BKAPIGatewayLabelKeyGatewayStage: "test-stage1",
 							},
+							Name: "test-stage1",
 						},
 					},
 					"test-svc2": {
@@ -380,6 +465,7 @@ var _ = Describe("configDiffer", func() {
 								config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
 								config.BKAPIGatewayLabelKeyGatewayStage: "test-stagexx",
 							},
+							Name: "test-stagexx",
 						},
 					},
 				},
@@ -422,6 +508,7 @@ var _ = Describe("configDiffer", func() {
 									config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
 									config.BKAPIGatewayLabelKeyGatewayStage: "test-stage",
 								},
+								Name: "test-stage",
 							},
 						},
 					},
@@ -433,6 +520,7 @@ var _ = Describe("configDiffer", func() {
 									config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
 									config.BKAPIGatewayLabelKeyGatewayStage: "test-stage",
 								},
+								Name: "test-stage",
 							},
 						},
 					},
@@ -445,6 +533,7 @@ var _ = Describe("configDiffer", func() {
 								config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
 								config.BKAPIGatewayLabelKeyGatewayStage: "test-stage1",
 							},
+							Name: "test-stage1",
 						},
 					},
 					"test-svc3": {
@@ -454,6 +543,7 @@ var _ = Describe("configDiffer", func() {
 								config.BKAPIGatewayLabelKeyGatewayName:  "test-gateway",
 								config.BKAPIGatewayLabelKeyGatewayStage: "test-stagexx",
 							},
+							Name: "test-stagexx",
 						},
 					},
 				},

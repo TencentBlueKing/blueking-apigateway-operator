@@ -36,6 +36,9 @@ const (
 const (
 	// special event not need resport
 	NoNeedReportPublishID = "-1"
+
+	// ApisixVersionRouteID
+	ApisixVersionRouteID = "-1"
 )
 
 type EventStatus string

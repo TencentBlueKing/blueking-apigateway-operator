@@ -25,8 +25,6 @@ apisix:
     password: "blueking"
   resourceStoreMode: "etcd"
   virtualStage:
-    operatorExternalHost: "bk-apigateway-operator"
-    operatorExternalHealthProbePort: 6004
     extraApisixResources: "/data/config/extra-resources.yaml"
 
 eventReporter:

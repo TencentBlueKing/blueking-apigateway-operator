@@ -19,8 +19,10 @@
 package etcd
 
 import (
+	apisixv1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	json "github.com/json-iterator/go"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 )
@@ -29,6 +31,23 @@ type configDiffer struct{}
 
 func newConfigDiffer() *configDiffer {
 	return &configDiffer{}
+}
+
+// transformMap: 需要单独针对于map类型添加一个对比转换器，由于value是一个interface类型,对于不同的序列化方式会存在类型不一致
+// eg： value存在map[any]any和map[string]any和map[interface]any的问题
+func transformMap(mapType map[string]interface{}) map[string]interface{} {
+	mapTypeJson, _ := json.Marshal(mapType)
+	var newMap map[string]interface{}
+	_ = json.Unmarshal(mapTypeJson, &newMap)
+	return newMap
+}
+
+// ignoreApisixMetadata: 忽略apisixeMetadata的部分成员
+var ignoreApisixMetadataCmpOpt = cmpopts.IgnoreFields(apisixv1.Metadata{}, "Desc", "Labels")
+
+// ignoreCreateTimeAndUpdateTimeCmpOpt: 忽略typ 创建、更新时间
+var ignoreCreateTimeAndUpdateTimeCmpOptFunc = func(typ interface{}) cmp.Option {
+	return cmpopts.IgnoreFields(typ, "CreateTime", "UpdateTime")
 }
 
 func (d *configDiffer) diff(
@@ -65,7 +84,13 @@ func (d *configDiffer) diffRoutes(
 			putList[key] = newRes
 			continue
 		}
-		if !cmp.Equal(oldRes, newRes, cmpopts.IgnoreFields(apisix.Route{}, "CreateTime", "UpdateTime")) {
+		if !cmp.Equal(
+			oldRes,
+			newRes,
+			cmp.Transformer("transformerMap", transformMap),
+			ignoreApisixMetadataCmpOpt,
+			ignoreCreateTimeAndUpdateTimeCmpOptFunc(apisix.Route{}),
+		) {
 			putList[key] = newRes
 		}
 		delete(oldResMap, key)
@@ -92,7 +117,13 @@ func (d *configDiffer) diffServices(
 			putList[key] = newRes
 			continue
 		}
-		if !cmp.Equal(oldRes, newRes, cmpopts.IgnoreFields(apisix.Service{}, "CreateTime", "UpdateTime")) {
+		if !cmp.Equal(
+			oldRes,
+			newRes,
+			cmp.Transformer("transformerMap", transformMap),
+			ignoreApisixMetadataCmpOpt,
+			ignoreCreateTimeAndUpdateTimeCmpOptFunc(apisix.Service{}),
+		) {
 			putList[key] = newRes
 		}
 		delete(oldResMap, key)
@@ -119,7 +150,11 @@ func (d *configDiffer) diffPluginMetadatas(
 			putList[key] = newRes
 			continue
 		}
-		if !cmp.Equal(oldRes, newRes) {
+		if !cmp.Equal(
+			oldRes,
+			newRes,
+			cmp.Transformer("transformerMap", transformMap),
+		) {
 			putList[key] = newRes
 		}
 		delete(oldResMap, key)
@@ -146,7 +181,10 @@ func (d *configDiffer) diffSSLs(
 			putList[key] = newRes
 			continue
 		}
-		if !cmp.Equal(oldRes, newRes, cmpopts.IgnoreFields(apisix.SSL{}, "CreateTime", "UpdateTime")) {
+		if !cmp.Equal(oldRes, newRes,
+			cmp.Transformer("transformerMap", transformMap),
+			ignoreCreateTimeAndUpdateTimeCmpOptFunc(apisix.SSL{}),
+		) {
 			putList[key] = newRes
 		}
 		delete(oldResMap, key)
