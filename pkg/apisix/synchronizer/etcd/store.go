@@ -235,6 +235,10 @@ func (s *EtcdConfigStore) alterByStage(
 		)
 	}
 
+	if deleteConf == nil && putConf == nil {
+		s.logger.Infof("%s has no change", stageKey)
+	}
+
 	return nil
 }
 

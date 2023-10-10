@@ -87,7 +87,7 @@ func InitMetric(register prometheus.Registerer) {
 	SyncCmpDiffCounter = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "sync_cmp_diff_count",
-			Help: "sync_cmp_diff_count describe count of compare",
+			Help: "sync_cmp_diff_count describe count of compare diff",
 		},
 		[]string{"gateway", "stage", "type"},
 	)
