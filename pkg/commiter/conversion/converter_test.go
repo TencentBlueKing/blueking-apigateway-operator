@@ -23,18 +23,17 @@ import (
 	"testing"
 	"time"
 
-	apisixv1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
-	json "github.com/json-iterator/go"
-	"github.com/stretchr/testify/assert"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-
 	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/radixtree"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
+	apisixv1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
+	json "github.com/json-iterator/go"
+	"github.com/stretchr/testify/assert"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func marshallIgnoreErr(obj interface{}) string {
@@ -835,5 +834,63 @@ c9TCEaBGVFyH5ZMhzcSvLq8k8bU=
 			continue
 		}
 		assert.Equal(t, test.outConfig, apisixConf)
+	}
+}
+
+func TestConverter_getResourceName(t *testing.T) {
+	type args struct {
+		specName string
+		labels   map[string]string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "test with spec name",
+			args: args{
+				specName: "test-spec-name",
+				labels: map[string]string{
+					config.BKAPIGatewayLabelKeyResourceName: "test-resource",
+				},
+			},
+			want:    "test-spec-name",
+			wantErr: false,
+		},
+		{
+			name: "test with labels name",
+			args: args{
+				specName: "",
+				labels: map[string]string{
+					config.BKAPIGatewayLabelKeyResourceName: "test-resource",
+				},
+			},
+			want:    "test-resource",
+			wantErr: false,
+		},
+		{
+			name: "test with labels name",
+			args: args{
+				specName: "",
+				labels:   map[string]string{},
+			},
+			want:    "",
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Converter{}
+			got, err := c.getResourceName(tt.args.specName, tt.args.labels)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Converter.getResourceName() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Converter.getResourceName() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

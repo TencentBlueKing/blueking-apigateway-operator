@@ -106,6 +106,7 @@ func (c *Converter) Convert(
 			c.stage.Labels[config.BKAPIGatewayLabelKeyGatewayPublishID] == constant.NoNeedReportPublishID {
 			continue
 		}
+
 		route, err := c.convertResource(res, services)
 		if err != nil {
 			return nil, eris.Wrapf(err, "convert resource failed")
