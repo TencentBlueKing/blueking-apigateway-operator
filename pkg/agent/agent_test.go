@@ -367,6 +367,7 @@ var _ = Describe("Agent", func() {
 			time.Sleep(200 * time.Millisecond)
 
 			stageList := stageTimer.ListStagesForCommit()
+			// tls sni is empty, so stage will be not pushed
 			gomega.Expect(stageList).To(gomega.HaveLen(0))
 		})
 	})
