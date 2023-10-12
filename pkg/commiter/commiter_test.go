@@ -42,7 +42,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var _ = Describe("Agent", func() {
+var _ = Describe("Commiter", func() {
 	var ctl *gomock.Controller
 
 	var mockRegister *registryMock.MockRegistry
