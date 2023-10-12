@@ -18,13 +18,14 @@
 
 package commiter
 
-import "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
+import (
+	"testing"
 
-// ReportResourceConvertedMetric ...
-func ReportResourceConvertedMetric(gateway, stage, resType string, numbers int) {
-	if metric.ResourceConvertedCounter == nil {
-		return
-	}
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+)
 
-	metric.ResourceConvertedCounter.WithLabelValues(gateway, stage, resType).Add(float64(numbers))
+func TestCommiter(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Commiter Suite")
 }
