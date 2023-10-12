@@ -189,7 +189,6 @@ func (s *EtcdConfigStore) alterByStage(
 
 	// diff config
 	putConf, deleteConf := s.differ.diff(oldConf, conf)
-
 	// put resources
 	if putConf != nil {
 		if err = s.batchPutResource(ctx, ApisixResourceTypeSSL, putConf.SSLs); err != nil {
@@ -208,6 +207,11 @@ func (s *EtcdConfigStore) alterByStage(
 		if err = s.batchPutResource(ctx, ApisixResourceTypeRoutes, putConf.Routes); err != nil {
 			return fmt.Errorf("batch put routes failed: %w", err)
 		}
+
+		s.logger.Infof(
+			"put conf count:[route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
+			len(putConf.Routes), len(putConf.Services), len(putConf.PluginMetadatas), len(putConf.SSLs),
+		)
 	}
 
 	// delete resources
@@ -225,6 +229,14 @@ func (s *EtcdConfigStore) alterByStage(
 		if err = s.batchDeleteResource(ctx, ApisixResourceTypeSSL, deleteConf.SSLs); err != nil {
 			return fmt.Errorf("batch delete ssl failed: %w", err)
 		}
+		s.logger.Infof(
+			"del conf count:[route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
+			len(deleteConf.Routes), len(deleteConf.Services), len(deleteConf.PluginMetadatas), len(deleteConf.SSLs),
+		)
+	}
+
+	if deleteConf == nil && putConf == nil {
+		s.logger.Infof("%s has no change", stageKey)
 	}
 
 	return nil
