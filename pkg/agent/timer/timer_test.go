@@ -50,7 +50,9 @@ var _ = Describe("Timer", func() {
 
 	It("should update the stage timer correctly", func() {
 		stageTimer.Update(stageInfo)
+		stageTimer.Update(stageInfo)
 		stageList := stageTimer.ListStagesForCommit()
+		// no sleep for exceeding 100ms (eventsWaitingTimeWindow)
 		gomega.Expect(stageList).To(gomega.HaveLen(0))
 	})
 

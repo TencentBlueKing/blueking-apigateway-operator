@@ -167,6 +167,7 @@ var _ = Describe("Agent", func() {
 			time.Sleep(200 * time.Millisecond)
 
 			stageList := stageTimer.ListStagesForCommit()
+			// Instance event should be ignored
 			gomega.Expect(stageList).To(gomega.HaveLen(0))
 		})
 
@@ -190,10 +191,12 @@ var _ = Describe("Agent", func() {
 			time.Sleep(200 * time.Millisecond)
 
 			stageList := stageTimer.ListStagesForCommit()
+			// Secret event will handle by handleSecret
+			// 这里只测试handleEvent, 不测试handleSecret, 所以monkey patch后不会执行handleSecret, 不会set timer
 			gomega.Expect(stageList).To(gomega.HaveLen(0))
 		})
 
-		It("Secret event", func() {
+		It("tls event", func() {
 			patchGuard := sm.Patch((*EventAgent).handleSecret, func(_ *EventAgent, event *registry.ResourceMetadata) error {
 				fmt.Println("monkey patch")
 				return nil
@@ -213,6 +216,7 @@ var _ = Describe("Agent", func() {
 			time.Sleep(200 * time.Millisecond)
 
 			stageList := stageTimer.ListStagesForCommit()
+			// tls event will handle by handleSecret
 			gomega.Expect(stageList).To(gomega.HaveLen(0))
 		})
 
@@ -236,6 +240,7 @@ var _ = Describe("Agent", func() {
 			time.Sleep(200 * time.Millisecond)
 
 			stageList := stageTimer.ListStagesForCommit()
+			// empty event will handle by handleSecret
 			gomega.Expect(stageList).To(gomega.HaveLen(0))
 		})
 
@@ -257,6 +262,8 @@ var _ = Describe("Agent", func() {
 			})
 
 			event := <-agent.retryChan
+			// empty event will handle by handleSecret
+			// if handleSecret failed, retryChan will be pushed
 			gomega.Expect(event.IsEmpty()).To(gomega.BeTrue())
 		})
 	})
@@ -338,6 +345,7 @@ var _ = Describe("Agent", func() {
 			time.Sleep(200 * time.Millisecond)
 
 			stageList := stageTimer.ListStagesForCommit()
+			// handleSecret will set stage to timer
 			gomega.Expect(stageList).To(gomega.HaveLen(1))
 		})
 
