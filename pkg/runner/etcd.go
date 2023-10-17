@@ -45,7 +45,7 @@ type EtcdAgentRunner struct {
 	client       *clientv3.Client
 	registry     registry.Registry
 	leader       leaderelection.LeaderElector
-	synchronizer *synchronizer.ApisixConfigurationSynchronizer
+	synchronizer synchronizer.ApisixConfigSynchronizer
 	store        synchronizer.ApisixConfigStore
 
 	commiter *commiter.Commiter

@@ -52,7 +52,7 @@ type Commiter struct {
 
 	commitChan chan []registry.StageInfo
 
-	synchronizer *synchronizer.ApisixConfigurationSynchronizer
+	synchronizer synchronizer.ApisixConfigSynchronizer
 
 	// for upstream tls cert
 	radixTreeGetter radixtree.RadixTreeGetter
@@ -67,7 +67,7 @@ type Commiter struct {
 // NewCommiter 创建Commiter
 func NewCommiter(
 	resourceRegistry registry.Registry,
-	synchronizer *synchronizer.ApisixConfigurationSynchronizer,
+	synchronizer synchronizer.ApisixConfigSynchronizer,
 	radixTreeGetter radixtree.RadixTreeGetter,
 	stageTimer *timer.StageTimer,
 	kubeClient client.Client,
