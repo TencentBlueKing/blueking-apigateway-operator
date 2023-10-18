@@ -40,6 +40,8 @@ var (
 	BootstrapSyncingCounter       *prometheus.CounterVec
 	ResourceEventTriggeredCounter *prometheus.CounterVec
 	ResourceConvertedCounter      *prometheus.CounterVec
+	SyncCmpCounter                *prometheus.CounterVec
+	SyncCmpDiffCounter            *prometheus.CounterVec
 	SynchronizerEventCounter      *prometheus.CounterVec
 	SynchronizerFlushingCounter   *prometheus.CounterVec
 	SynchronizerFlushingHistogram *prometheus.HistogramVec
@@ -73,6 +75,23 @@ func InitMetric(register prometheus.Registerer) {
 		},
 		[]string{"gateway", "stage", "type"},
 	)
+
+	SyncCmpCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "sync_cmp_count",
+			Help: "sync_cmp_count describe count of compare",
+		},
+		[]string{"gateway", "stage", "type"},
+	)
+
+	SyncCmpDiffCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "sync_cmp_diff_count",
+			Help: "sync_cmp_diff_count describe count of compare diff",
+		},
+		[]string{"gateway", "stage", "type"},
+	)
+
 	SynchronizerEventCounter = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "synchronizer_event_count",
@@ -144,4 +163,6 @@ func InitMetric(register prometheus.Registerer) {
 	register.MustRegister(ApisixOperationHistogram)
 	register.MustRegister(RegistryActionCounter)
 	register.MustRegister(RegistryActionHistogram)
+	register.MustRegister(SyncCmpCounter)
+	register.MustRegister(SyncCmpDiffCounter)
 }

@@ -30,10 +30,18 @@ func ReportBootstrapSyncingMetric(err error) {
 		result = metric.ResultFail
 	}
 
+	if metric.BootstrapSyncingCounter == nil {
+		return
+	}
+
 	metric.BootstrapSyncingCounter.WithLabelValues(result).Inc()
 }
 
 // ReportEventTriggeredMetric ...
 func ReportEventTriggeredMetric(event *registry.ResourceMetadata) {
+	if metric.ResourceEventTriggeredCounter == nil {
+		return
+	}
+
 	metric.ResourceEventTriggeredCounter.WithLabelValues(event.GatewayName, event.StageName, event.Kind).Inc()
 }

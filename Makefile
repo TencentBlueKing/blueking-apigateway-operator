@@ -99,7 +99,7 @@ lint: vet
 .PHONY: test
 test: ## Run tests.
 	KUBEBUILDER_ASSETS="$(shell setup-envtest use $(ENVTEST_K8S_VERSION) -p path)" \
-	ginkgo --cover --coverprofile cover.out ./...
+	ginkgo -ldflags="-s=false" -gcflags="-l" --cover --coverprofile cover.out ./...
 
 ##@ Build
 build-common: $(BUILD_PATH) generate manifests fmt vet

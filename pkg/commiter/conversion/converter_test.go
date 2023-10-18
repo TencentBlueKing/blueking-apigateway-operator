@@ -837,3 +837,61 @@ c9TCEaBGVFyH5ZMhzcSvLq8k8bU=
 		assert.Equal(t, test.outConfig, apisixConf)
 	}
 }
+
+func TestConverter_getResourceName(t *testing.T) {
+	type args struct {
+		specName string
+		labels   map[string]string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "test with spec name",
+			args: args{
+				specName: "test-spec-name",
+				labels: map[string]string{
+					config.BKAPIGatewayLabelKeyResourceName: "test-resource",
+				},
+			},
+			want:    "test-spec-name",
+			wantErr: false,
+		},
+		{
+			name: "test with labels name",
+			args: args{
+				specName: "",
+				labels: map[string]string{
+					config.BKAPIGatewayLabelKeyResourceName: "test-resource",
+				},
+			},
+			want:    "test-resource",
+			wantErr: false,
+		},
+		{
+			name: "test with labels name",
+			args: args{
+				specName: "",
+				labels:   map[string]string{},
+			},
+			want:    "",
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Converter{}
+			got, err := c.getResourceName(tt.args.specName, tt.args.labels)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Converter.getResourceName() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Converter.getResourceName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

@@ -49,7 +49,7 @@ var retryDelaySeconds = time.Second * 5
 type EventAgent struct {
 	resourceRegistry registry.Registry
 	commitChan       chan []registry.StageInfo
-	synchronizer     *synchronizer.ApisixConfigurationSynchronizer
+	synchronizer     synchronizer.ApisixConfigSynchronizer
 
 	// for upstream tls cert
 	radixTreeGetter radixtree.RadixTreeGetter
@@ -66,7 +66,7 @@ type EventAgent struct {
 func NewEventAgent(
 	resourceRegistry registry.Registry,
 	commitCh chan []registry.StageInfo,
-	synchronizer *synchronizer.ApisixConfigurationSynchronizer,
+	synchronizer synchronizer.ApisixConfigSynchronizer,
 	radixTreeGetter radixtree.RadixTreeGetter,
 	stageTimer *timer.StageTimer,
 ) *EventAgent {

@@ -77,3 +77,13 @@ func ReportStageConfigAlterMetric(
 	metric.SynchronizerFlushingHistogram.WithLabelValues(gateway, stage, result).
 		Observe(float64(time.Since(started).Milliseconds()))
 }
+
+// ReportSyncCmpMetric ...
+func ReportSyncCmpMetric(gateway, stage, resourceType string) {
+	metric.SyncCmpCounter.WithLabelValues(gateway, stage, resourceType).Inc()
+}
+
+// ReportSyncCmpDiffMetric ...
+func ReportSyncCmpDiffMetric(gateway, stage, resourceType string) {
+	metric.SyncCmpDiffCounter.WithLabelValues(gateway, stage, resourceType).Inc()
+}

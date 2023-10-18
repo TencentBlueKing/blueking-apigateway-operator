@@ -25,6 +25,8 @@ import (
 	json "github.com/json-iterator/go"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 )
 
 type configDiffer struct{}
@@ -48,6 +50,43 @@ var ignoreApisixMetadataCmpOpt = cmpopts.IgnoreFields(apisixv1.Metadata{}, "Desc
 // ignoreCreateTimeAndUpdateTimeCmpOpt: 忽略typ 创建、更新时间
 var ignoreCreateTimeAndUpdateTimeCmpOptFunc = func(typ interface{}) cmp.Option {
 	return cmpopts.IgnoreFields(typ, "CreateTime", "UpdateTime")
+}
+
+type CmpReporter struct {
+	Gateway      string
+	Stage        string
+	ResourceType string
+	CmpReported  bool
+	DiffReported bool
+}
+
+func (r *CmpReporter) PushStep(ps cmp.PathStep) {
+
+}
+
+func (r *CmpReporter) PopStep() {
+}
+
+func (r *CmpReporter) Report(rs cmp.Result) {
+	// report sync cmp metric
+	if !r.CmpReported {
+		synchronizer.ReportSyncCmpMetric(
+			r.Gateway,
+			r.Stage,
+			r.ResourceType,
+		)
+		r.CmpReported = true
+	}
+
+	// report sync cmp diff  metric
+	if !rs.Equal() && !r.DiffReported {
+		synchronizer.ReportSyncCmpDiffMetric(
+			r.Gateway,
+			r.Stage,
+			r.ResourceType,
+		)
+		r.DiffReported = true
+	}
 }
 
 func (d *configDiffer) diff(
@@ -84,12 +123,18 @@ func (d *configDiffer) diffRoutes(
 			putList[key] = newRes
 			continue
 		}
+
 		if !cmp.Equal(
 			oldRes,
 			newRes,
 			cmp.Transformer("transformerMap", transformMap),
 			ignoreApisixMetadataCmpOpt,
 			ignoreCreateTimeAndUpdateTimeCmpOptFunc(apisix.Route{}),
+			cmp.Reporter(&CmpReporter{
+				Gateway:      newRes.Labels[config.BKAPIGatewayLabelKeyGatewayName],
+				Stage:        newRes.Labels[config.BKAPIGatewayLabelKeyGatewayStage],
+				ResourceType: ApisixResourceTypeRoutes,
+			}),
 		) {
 			putList[key] = newRes
 		}
@@ -123,6 +168,11 @@ func (d *configDiffer) diffServices(
 			cmp.Transformer("transformerMap", transformMap),
 			ignoreApisixMetadataCmpOpt,
 			ignoreCreateTimeAndUpdateTimeCmpOptFunc(apisix.Service{}),
+			cmp.Reporter(&CmpReporter{
+				Gateway:      newRes.Labels[config.BKAPIGatewayLabelKeyGatewayName],
+				Stage:        newRes.Labels[config.BKAPIGatewayLabelKeyGatewayStage],
+				ResourceType: ApisixResourceTypeServices,
+			}),
 		) {
 			putList[key] = newRes
 		}
@@ -184,6 +234,11 @@ func (d *configDiffer) diffSSLs(
 		if !cmp.Equal(oldRes, newRes,
 			cmp.Transformer("transformerMap", transformMap),
 			ignoreCreateTimeAndUpdateTimeCmpOptFunc(apisix.SSL{}),
+			cmp.Reporter(&CmpReporter{
+				Gateway:      newRes.Labels[config.BKAPIGatewayLabelKeyGatewayName],
+				Stage:        newRes.Labels[config.BKAPIGatewayLabelKeyGatewayStage],
+				ResourceType: ApisixResourceTypeSSL,
+			}),
 		) {
 			putList[key] = newRes
 		}

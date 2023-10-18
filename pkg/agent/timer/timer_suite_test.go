@@ -16,15 +16,16 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package commiter
+package timer
 
-import "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
+import (
+	"testing"
 
-// ReportResourceConvertedMetric ...
-func ReportResourceConvertedMetric(gateway, stage, resType string, numbers int) {
-	if metric.ResourceConvertedCounter == nil {
-		return
-	}
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+)
 
-	metric.ResourceConvertedCounter.WithLabelValues(gateway, stage, resType).Add(float64(numbers))
+func TestTimer(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Timer Suite")
 }
