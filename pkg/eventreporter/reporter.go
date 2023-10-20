@@ -47,22 +47,24 @@ type reportEvent struct {
 }
 
 type Reporter struct {
-	eventChain          chan reportEvent
-	versionProbeChain   chan struct{} // control version probe concurrency
-	reportChain         chan struct{} // control reporter concurrency
-	close               chan struct{}
-	versionProbeTimeout time.Duration
+	eventChain           chan reportEvent
+	versionProbeChain    chan struct{} // control version probe concurrency
+	reportChain          chan struct{} // control reporter concurrency
+	close                chan struct{}
+	versionProbeTimeout  time.Duration
+	versionProbeWaitTime time.Duration
 }
 
 // InitReporter
 func InitReporter(cfg *config.Config) {
 	reporterOnce.Do(func() {
 		reporter = &Reporter{
-			eventChain:          make(chan reportEvent, cfg.EventReporter.EventBufferSize),
-			reportChain:         make(chan struct{}, cfg.EventReporter.ReporterBufferSize),
-			versionProbeChain:   make(chan struct{}, cfg.EventReporter.VersionProbe.BufferSize),
-			versionProbeTimeout: cfg.EventReporter.VersionProbe.Timeout,
-			close:               make(chan struct{}),
+			eventChain:           make(chan reportEvent, cfg.EventReporter.EventBufferSize),
+			reportChain:          make(chan struct{}, cfg.EventReporter.ReporterBufferSize),
+			versionProbeChain:    make(chan struct{}, cfg.EventReporter.VersionProbe.BufferSize),
+			versionProbeTimeout:  cfg.EventReporter.VersionProbe.Timeout,
+			versionProbeWaitTime: cfg.EventReporter.VersionProbe.WaitTime,
+			close:                make(chan struct{}),
 		}
 	})
 }
@@ -178,6 +180,8 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *v1beta1.BkGa
 			<-reporter.versionProbeChain
 		}()
 
+		// wait apisix rebuild finished then begin version probe
+		time.Sleep(reporter.versionProbeWaitTime)
 		eventReq := parseEventInfo(stage)
 		reportCtx, cancelFunc := context.WithTimeout(ctx, reporter.versionProbeTimeout)
 		errChan := make(chan error, 1)

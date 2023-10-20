@@ -252,7 +252,6 @@ func (s *EtcdConfigStore) batchPutResource(ctx context.Context, resourceType str
 
 		key := resourceIter.Key().Interface().(string)
 		resource := resourceIter.Value().Interface().(apisix.ApisixResource)
-
 		oldSt := resourceStore.getResourceCreateTime(resource.GetID())
 		if oldSt != 0 {
 			resource.SetCreateTime(oldSt)
