@@ -163,7 +163,7 @@ func (e *resourceStore) parseResource(key, value []byte) (resource apisix.Apisix
 	}
 
 	// remove resource desc
-	resource.ClearDesc()
+	resource.ClearXxxFields()
 	return resource, nil
 }
 
