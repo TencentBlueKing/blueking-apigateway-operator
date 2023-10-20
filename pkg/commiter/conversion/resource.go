@@ -88,7 +88,6 @@ func (c *Converter) convertResource(
 			Metadata: apisixv1.Metadata{
 				ID:     c.getID(resource.Spec.ID.String(), getObjectName(resource.GetName(), resource.GetNamespace())),
 				Name:   getObjectName(resource.GetName(), resource.GetNamespace()),
-				Desc:   resource.Spec.Desc,
 				Labels: c.getLabel(),
 			},
 			Host:            c.stage.Spec.Domain,

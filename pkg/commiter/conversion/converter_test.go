@@ -257,7 +257,6 @@ func TestConvert(t *testing.T) {
 							Metadata: apisixv1.Metadata{
 								ID:   "gateway.stage.test-resource",
 								Name: "test-resource",
-								Desc: "test resource",
 								Labels: map[string]string{
 									config.BKAPIGatewayLabelKeyGatewayName:  "gateway",
 									config.BKAPIGatewayLabelKeyGatewayStage: "stage",
@@ -331,7 +330,6 @@ func TestConvert(t *testing.T) {
 							Metadata: apisixv1.Metadata{
 								ID:   "gateway.stage.test-resource",
 								Name: "test-resource",
-								Desc: "test resource",
 								Labels: map[string]string{
 									config.BKAPIGatewayLabelKeyGatewayName:  "gateway",
 									config.BKAPIGatewayLabelKeyGatewayStage: "stage",
@@ -405,7 +403,6 @@ func TestConvert(t *testing.T) {
 							Metadata: apisixv1.Metadata{
 								ID:   "gateway.stage.test-resource",
 								Name: "test-resource",
-								Desc: "test resource",
 								Labels: map[string]string{
 									config.BKAPIGatewayLabelKeyGatewayName:  "gateway",
 									config.BKAPIGatewayLabelKeyGatewayStage: "stage",
@@ -516,7 +513,6 @@ func TestConvertForCert(t *testing.T) {
 							Metadata: apisixv1.Metadata{
 								ID:   "gateway.stage.test-resource",
 								Name: "test-resource",
-								Desc: "test resource",
 								Labels: map[string]string{
 									config.BKAPIGatewayLabelKeyGatewayName:  "gateway",
 									config.BKAPIGatewayLabelKeyGatewayStage: "stage",
@@ -649,7 +645,6 @@ c9TCEaBGVFyH5ZMhzcSvLq8k8bU=
 							Metadata: apisixv1.Metadata{
 								ID:   "gateway.stage.test-resource",
 								Name: "test-resource",
-								Desc: "test resource",
 								Labels: map[string]string{
 									config.BKAPIGatewayLabelKeyGatewayName:  "gateway",
 									config.BKAPIGatewayLabelKeyGatewayStage: "stage",

@@ -465,7 +465,6 @@ var _ = Describe("resource", func() {
 				Metadata: apisixv1.Metadata{
 					ID:   "..test-resource",
 					Name: "test-resource",
-					Desc: "test resource",
 					Labels: map[string]string{
 						config.BKAPIGatewayLabelKeyGatewayName:  "",
 						config.BKAPIGatewayLabelKeyGatewayStage: "",

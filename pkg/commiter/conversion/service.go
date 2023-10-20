@@ -33,7 +33,6 @@ func (c *Converter) convertService(service *v1beta1.BkGatewayService) (*apisix.S
 		Metadata: apisixv1.Metadata{
 			ID:     c.getID(service.Spec.ID, getObjectName(service.GetName(), service.GetNamespace())),
 			Name:   getObjectName(service.GetName(), service.GetNamespace()),
-			Desc:   service.Spec.Desc,
 			Labels: c.getLabel(),
 		},
 		EnableWebsocket: service.Spec.EnableWebsocket,

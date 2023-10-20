@@ -126,7 +126,6 @@ var _ = Describe("Commiter", func() {
 					Name:       "stage",
 					Domain:     "test.exmaple.com",
 					PathPrefix: "/",
-					Desc:       "test desc",
 					Vars: map[string]string{
 						"runMode": "prod",
 					},
@@ -184,7 +183,6 @@ var _ = Describe("Commiter", func() {
 						Metadata: apisixv1.Metadata{
 							ID:   "gateway.stage.test-resource",
 							Name: "test-resource",
-							Desc: "test resource",
 							Labels: map[string]string{
 								config.BKAPIGatewayLabelKeyGatewayName:  "gateway",
 								config.BKAPIGatewayLabelKeyGatewayStage: "stage",
@@ -226,7 +224,6 @@ var _ = Describe("Commiter", func() {
 				Name:       "stage",
 				Domain:     "test.exmaple.com",
 				PathPrefix: "/",
-				Desc:       "test desc",
 				Vars:       map[string]string{"runMode": "prod"},
 				Rewrite: &v1beta1.BkGatewayRewrite{
 					Enabled: true,
