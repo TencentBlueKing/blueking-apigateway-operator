@@ -46,23 +46,31 @@ type reportEvent struct {
 	detail map[string]interface{}
 }
 
+type versionProbe struct {
+	chain    chan struct{} // control version probe concurrency
+	timeout  time.Duration // control version probe timeout
+	waitTime time.Duration // control version probe wait time
+}
+
 type Reporter struct {
-	eventChain          chan reportEvent
-	versionProbeChain   chan struct{} // control version probe concurrency
-	reportChain         chan struct{} // control reporter concurrency
-	close               chan struct{}
-	versionProbeTimeout time.Duration
+	eventChain   chan reportEvent
+	reportChain  chan struct{} // control reporter concurrency
+	close        chan struct{}
+	versionProbe versionProbe
 }
 
 // InitReporter
 func InitReporter(cfg *config.Config) {
 	reporterOnce.Do(func() {
 		reporter = &Reporter{
-			eventChain:          make(chan reportEvent, cfg.EventReporter.EventBufferSize),
-			reportChain:         make(chan struct{}, cfg.EventReporter.ReporterBufferSize),
-			versionProbeChain:   make(chan struct{}, cfg.EventReporter.VersionProbe.BufferSize),
-			versionProbeTimeout: cfg.EventReporter.VersionProbe.Timeout,
-			close:               make(chan struct{}),
+			eventChain:  make(chan reportEvent, cfg.EventReporter.EventBufferSize),
+			reportChain: make(chan struct{}, cfg.EventReporter.ReporterBufferSize),
+			close:       make(chan struct{}),
+			versionProbe: versionProbe{
+				chain:    make(chan struct{}, cfg.EventReporter.VersionProbe.BufferSize),
+				timeout:  cfg.EventReporter.VersionProbe.Timeout,
+				waitTime: cfg.EventReporter.VersionProbe.WaitTime,
+			},
 		}
 	})
 }
@@ -172,14 +180,16 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *v1beta1.BkGa
 		return
 	}
 
-	reporter.versionProbeChain <- struct{}{} // control concurrency
+	reporter.versionProbe.chain <- struct{}{} // control concurrency
 	utils.GoroutineWithRecovery(ctx, func() {
 		defer func() {
-			<-reporter.versionProbeChain
+			<-reporter.versionProbe.chain
 		}()
 
+		// wait apisix rebuild finished then begin version probe
+		time.Sleep(reporter.versionProbe.waitTime)
 		eventReq := parseEventInfo(stage)
-		reportCtx, cancelFunc := context.WithTimeout(ctx, reporter.versionProbeTimeout)
+		reportCtx, cancelFunc := context.WithTimeout(ctx, reporter.versionProbe.timeout)
 		errChan := make(chan error, 1)
 		defer func() {
 			cancelFunc()

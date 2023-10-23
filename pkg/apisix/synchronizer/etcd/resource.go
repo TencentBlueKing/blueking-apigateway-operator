@@ -162,6 +162,8 @@ func (e *resourceStore) parseResource(key, value []byte) (resource apisix.Apisix
 		return nil, fmt.Errorf("unmarshal resource from etcd failed: %w", err)
 	}
 
+	// remove resource desc
+	resource.ClearUnusedFields()
 	return resource, nil
 }
 
