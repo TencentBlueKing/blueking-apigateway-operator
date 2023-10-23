@@ -40,7 +40,7 @@ type ApisixResource interface {
 	SetCreateTime(int64)
 	SetUpdateTime(int64)
 
-	ClearXxxFields()
+	ClearUnusedFields()
 }
 
 // Service apisix service object
@@ -83,7 +83,7 @@ func (s *Service) SetCreateTime(t int64) { s.CreateTime = t }
 func (s *Service) SetUpdateTime(t int64) { s.UpdateTime = t }
 
 // ClearDesc clear desc
-func (s *Service) ClearXxxFields() { s.Desc = "" }
+func (s *Service) ClearUnusedFields() { s.Desc = "" }
 
 // Upstream route upstream
 // +k8s:deepcopy-gen=true
@@ -149,7 +149,7 @@ func (r *Route) SetCreateTime(t int64) { r.CreateTime = t }
 func (r *Route) SetUpdateTime(t int64) { r.UpdateTime = t }
 
 // ClearDesc clear desc
-func (r *Route) ClearXxxFields() { r.Desc = "" }
+func (r *Route) ClearUnusedFields() { r.Desc = "" }
 
 // +k8s:deepcopy-gen=true
 // SSL ...
@@ -186,7 +186,7 @@ func (s *SSL) SetCreateTime(t int64) { s.CreateTime = t }
 func (s *SSL) SetUpdateTime(t int64) { s.UpdateTime = t }
 
 // ClearDesc clear desc
-func (s *SSL) ClearXxxFields() {}
+func (s *SSL) ClearUnusedFields() {}
 
 // +k8s:deepcopy-gen=true
 // PluginMetadata is resource definition for apisix plugin_metadata
@@ -276,7 +276,7 @@ func (pm *PluginMetadata) SetCreateTime(t int64) {}
 func (pm *PluginMetadata) SetUpdateTime(t int64) {}
 
 // ClearDesc clear desc
-func (pm *PluginMetadata) ClearXxxFields() {}
+func (pm *PluginMetadata) ClearUnusedFields() {}
 
 // NewPluginMetadata will build a new plugin metadata object
 func NewPluginMetadata(name string, config map[string]interface{}) *PluginMetadata {
