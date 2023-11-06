@@ -62,6 +62,11 @@ logger:
     settings: {name: stdout}
     # writer: file
 
+sentry:
+  dsn: ""
+  ## zapcore.Level
+  reportLevel: 3
+
 tracing:
   enable: false
   endpoint: "127.0.0.1:4318"
