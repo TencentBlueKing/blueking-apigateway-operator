@@ -16,30 +16,35 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package utils
+package leaderelection
 
 import (
-	"context"
-	"fmt"
-	"log"
-	"runtime"
+	"github.com/prometheus/client_golang/prometheus"
+	"k8s.io/client-go/tools/leaderelection"
 
-	"github.com/getsentry/sentry-go"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 )
 
-// GoroutineWithRecovery is a wrapper of goroutine that can recover panic
-func GoroutineWithRecovery(ctx context.Context, fn func()) {
-	go func() {
-		defer func() {
-			if panicErr := recover(); panicErr != nil {
-				buf := make([]byte, 64<<10)
-				n := runtime.Stack(buf, false)
-				buf = buf[:n]
-				msg := fmt.Sprintf("painic err:%s", buf)
-				log.Println(msg)
-				sentry.CurrentHub().Client().CaptureMessage(msg, nil, sentry.NewScope())
-			}
-		}()
-		fn()
-	}()
+type prometheusMetricsProvider struct{}
+
+func (p *prometheusMetricsProvider) NewLeaderMetric() leaderelection.SwitchMetric {
+	return &prometheusSwitchMetric{
+		gauge: metric.LeaderElectionGauge,
+	}
+}
+
+type prometheusSwitchMetric struct {
+	gauge *prometheus.GaugeVec
+}
+
+func (m *prometheusSwitchMetric) On(name string) {
+	m.gauge.WithLabelValues(name).Set(1)
+}
+
+func (m *prometheusSwitchMetric) Off(name string) {
+	m.gauge.WithLabelValues(name).Set(0)
+}
+
+func ReportLeaderElectionMetric(hostname string) {
+	metric.LeaderElectionGauge.WithLabelValues(hostname).Set(1)
 }

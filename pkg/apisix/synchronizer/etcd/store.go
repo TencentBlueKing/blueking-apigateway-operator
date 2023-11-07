@@ -34,6 +34,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 // EtcdConfigStore ...
@@ -77,15 +78,18 @@ func (s *EtcdConfigStore) init() {
 		ApisixResourceTypeRoutes, ApisixResourceTypeServices, ApisixResourceTypeSSL, ApisixResourceTypePluginMetadata,
 	} {
 		wg.Add(1)
-		go func(resourceType string) {
+
+		// 避免闭包导致变量覆盖问题
+		tempResourceType := resourceType
+		utils.GoroutineWithRecovery(context.Background(), func() {
 			defer wg.Done()
-			resourceStore, err := newResourceStore(s.client, s.prefix+"/"+resourceType+"/")
+			resourceStore, err := newResourceStore(s.client, s.prefix+"/"+tempResourceType+"/")
 			if err != nil {
-				s.logger.Errorw("Create resource store failed", "resourceType", resourceType)
+				s.logger.Errorw("Create resource store failed", "resourceType", tempResourceType)
 				return
 			}
-			s.stores[resourceType] = resourceStore
-		}(resourceType)
+			s.stores[tempResourceType] = resourceStore
+		})
 	}
 	wg.Wait()
 }
@@ -163,19 +167,23 @@ func (s *EtcdConfigStore) Alter(
 	wg := &sync.WaitGroup{}
 	for stagName, conf := range changedConfig {
 		wg.Add(1)
-		go func(name string, conf *apisix.ApisixConfiguration) {
+
+		// 避免闭包导致变量覆盖问题
+		tempStagName := stagName
+		tempConf := conf
+		utils.GoroutineWithRecovery(ctx, func() {
 			st := time.Now()
-			err := s.alterByStage(ctx, name, conf)
+			err := s.alterByStage(ctx, tempStagName, tempConf)
 
 			// metric
-			synchronizer.ReportStageConfigAlterMetric(name, conf, st, err)
+			synchronizer.ReportStageConfigAlterMetric(tempStagName, tempConf, st, err)
 
 			if err != nil {
-				s.logger.Errorw("Alter by stage failed", "err", err, "stage", name)
-				go callbackFunc(ctx, name, conf)
+				s.logger.Errorw("Alter by stage failed", "err", err, "stage", tempStagName)
+				go callbackFunc(ctx, tempStagName, tempConf)
 			}
 			wg.Done()
-		}(stagName, conf)
+		})
 	}
 
 	wg.Wait()

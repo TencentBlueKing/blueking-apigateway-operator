@@ -77,7 +77,7 @@ func NewKubeLeaderElector(lockType, name, ns, kubeconfig string,
 	cl.leadingCh = make(chan struct{})
 	cl.logger = logging.GetLogger().Named("kube-leader-elector")
 
-	id, err := os.Hostname()
+	hostName, err := os.Hostname()
 	if err != nil {
 		cl.logger.Error(err, "get hostname failed")
 		return nil, err
@@ -103,7 +103,7 @@ func NewKubeLeaderElector(lockType, name, ns, kubeconfig string,
 		return nil, eris.Wrapf(err, "create client set from config failed")
 	}
 
-	id = fmt.Sprintf("%s_%s_%s", id, uuid.NewUUID(), config.InstanceIP)
+	id := fmt.Sprintf("%s_%s_%s", hostName, uuid.NewUUID(), config.InstanceIP)
 
 	rl, err := resourcelock.New(cl.lockType, cl.namespace, cl.name,
 		k8sClientSet.CoreV1(), k8sClientSet.CoordinationV1(),
@@ -116,6 +116,9 @@ func NewKubeLeaderElector(lockType, name, ns, kubeconfig string,
 	}
 	cl.lock = rl
 
+	// report leader metrics
+	leaderelection.SetProvider(&prometheusMetricsProvider{})
+
 	elector, err := leaderelection.NewLeaderElector(leaderelection.LeaderElectionConfig{
 		Lock:          rl,
 		LeaseDuration: leaseDuration,
@@ -126,7 +129,9 @@ func NewKubeLeaderElector(lockType, name, ns, kubeconfig string,
 			OnStoppedLeading: cl.onStoppedLeading,
 			OnNewLeader:      cl.OnNewLeader,
 		},
+		Name: hostName,
 	})
+
 	if err != nil {
 		cl.logger.Error(err, "create client-go leader elector failed")
 		return nil, eris.Wrapf(err, "create client-go leader elector failed")

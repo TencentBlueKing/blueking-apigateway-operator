@@ -110,6 +110,10 @@ func (ele *EtcdLeaderElector) elect() {
 		ele.logger.Infow("Become leader now", "id", ele.instanceID)
 		log.Printf("Become leader now id: %s\n", ele.instanceID)
 		ele.leading = true
+
+		// report leader election metric
+		ReportLeaderElectionMetric(ele.instanceID)
+
 		close(ele.leadingCh)
 		return
 	}

@@ -119,22 +119,10 @@ func newZapLevel(levelStr string) zap.AtomicLevel {
 }
 
 func newSentryLogCore(cfg *config.Config) (zapcore.Core, error) {
-	// NOTE: DO NOT USE NewHTTPSyncTransport, will block!
-	// call Flush() to send events to Sentry before exit if Fatal
-	client, err := sentry.NewClient(
-		sentry.ClientOptions{
-			Dsn:   cfg.Sentry.Dsn,
-			Debug: cfg.Debug,
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	rawCore := zapsentry.NewCore(zapcore.Level(cfg.Sentry.ReportLevel), client)
+	rawCore := zapsentry.NewCore(zapcore.Level(cfg.Sentry.ReportLevel), sentry.CurrentHub().Client())
 	sentryCore := zapcore.RegisterHooks(rawCore, func(entry zapcore.Entry) error {
 		if entry.Level == zapcore.FatalLevel {
-			client.Flush(2 * time.Second)
+			sentry.CurrentHub().Client().Flush(2 * time.Second)
 		}
 		return nil
 	})
