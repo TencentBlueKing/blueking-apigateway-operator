@@ -271,7 +271,6 @@ func (r *ResourceHandler) diffMap(lhs, rhs interface{}, id string) map[string]in
 			}
 			if val.Elem().Type().Name() == "SSL" {
 				cmpOps = append(cmpOps, ignoreCreateTimeAndUpdateTimeCmpOptFunc(apisix.SSL{}))
-
 			}
 			diffStr := cmp.Diff(
 				val.Interface(), rhsItemValue.Interface(),

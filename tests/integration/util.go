@@ -53,7 +53,6 @@ func GetHttpBinGatewayResource() []EtcdConfig {
 		panic(err)
 	}
 	return resources
-
 }
 
 func GetAllMetrics() (map[string]*dto.MetricFamily, error) {
@@ -68,59 +67,68 @@ func GetAllMetrics() (map[string]*dto.MetricFamily, error) {
 	return parser.TextToMetricFamilies(resp.Body)
 }
 
-func GetResourceEventTriggeredCountMetric(metrics map[string]*dto.MetricFamily, gateway string, stage string, resourceType string) float64 {
+func GetResourceEventTriggeredCountMetric(
+	metrics map[string]*dto.MetricFamily, gateway string, stage string, resourceType string) float64 {
 	resourceEventTriggeredCountMetric := metrics[ResourceEventTriggeredCountMetric]
 	if resourceEventTriggeredCountMetric == nil {
 		return 0
 	}
 	for _, metric := range resourceEventTriggeredCountMetric.Metric {
-		if len(metric.Label) == 3 && metric.Label[0].GetValue() == gateway && metric.Label[1].GetValue() == stage && metric.Label[2].GetValue() == resourceType {
+		if len(metric.Label) == 3 && metric.Label[0].GetValue() == gateway &&
+			metric.Label[1].GetValue() == stage && metric.Label[2].GetValue() == resourceType {
 			return metric.Counter.GetValue()
 		}
 	}
 	return 0
 }
 
-func GetResourceConvertedCountMetric(metrics map[string]*dto.MetricFamily, gateway string, stage string, resourceType string) float64 {
+func GetResourceConvertedCountMetric(
+	metrics map[string]*dto.MetricFamily, gateway string, stage string, resourceType string) float64 {
 	resourceConvertedCountMetric := metrics[ResourceEventTriggeredCountMetric]
 	if resourceConvertedCountMetric == nil {
 		return 0
 	}
 	for _, metric := range resourceConvertedCountMetric.Metric {
-		if len(metric.Label) == 3 && metric.Label[0].GetValue() == gateway && metric.Label[1].GetValue() == stage && metric.Label[2].GetValue() == resourceType {
+		if len(metric.Label) == 3 && metric.Label[0].GetValue() == gateway &&
+			metric.Label[1].GetValue() == stage && metric.Label[2].GetValue() == resourceType {
 			return metric.Counter.GetValue()
 		}
 	}
 	return 0
 }
 
-func GetResourceSyncCmpCountMetrics(metrics map[string]*dto.MetricFamily, gateway string, stage string, resourceType string) float64 {
+func GetResourceSyncCmpCountMetrics(
+	metrics map[string]*dto.MetricFamily, gateway string, stage string, resourceType string) float64 {
 	resourceSyncCmpCountMetric := metrics[ResourceSyncCmpCount]
 	if resourceSyncCmpCountMetric == nil {
 		return 0
 	}
 	for _, metric := range resourceSyncCmpCountMetric.Metric {
-		if len(metric.Label) == 3 && metric.Label[0].GetValue() == gateway && metric.Label[1].GetValue() == stage && metric.Label[2].GetValue() == resourceType {
+		if len(metric.Label) == 3 && metric.Label[0].GetValue() == gateway &&
+			metric.Label[1].GetValue() == stage && metric.Label[2].GetValue() == resourceType {
 			return metric.Counter.GetValue()
 		}
 	}
 	return 0
 }
 
-func GetResourceSyncCmpDiffCountMetrics(metrics map[string]*dto.MetricFamily, gateway string, stage string, resourceType string) float64 {
+func GetResourceSyncCmpDiffCountMetrics(
+	metrics map[string]*dto.MetricFamily, gateway string, stage string, resourceType string) float64 {
 	resourceSyncCmpDiffCountMetric := metrics[ResourceSyncCmpDiffCount]
 	if resourceSyncCmpDiffCountMetric == nil {
 		return 0
 	}
 	for _, metric := range resourceSyncCmpDiffCountMetric.Metric {
-		if len(metric.Label) == 3 && metric.Label[0].GetValue() == gateway && metric.Label[1].GetValue() == stage && metric.Label[2].GetValue() == resourceType {
+		if len(metric.Label) == 3 && metric.Label[0].GetValue() == gateway &&
+			metric.Label[1].GetValue() == stage && metric.Label[2].GetValue() == resourceType {
 			return metric.Counter.GetValue()
 		}
 	}
 	return 0
 }
 
-func GetApisixOperationCountMetric(metrics map[string]*dto.MetricFamily, action string, result string, resourceType string) float64 {
+func GetApisixOperationCountMetric(
+	metrics map[string]*dto.MetricFamily, action string, result string, resourceType string) float64 {
 	apisixOperationCountMetric := metrics[ApisixOperationCountMetric]
 	if apisixOperationCountMetric == nil {
 		return 0
