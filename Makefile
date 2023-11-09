@@ -99,7 +99,7 @@ lint: vet
 .PHONY: test
 test: ## Run tests.
 	KUBEBUILDER_ASSETS="$(shell setup-envtest use $(ENVTEST_K8S_VERSION) -p path)" \
-	ginkgo -ldflags="-s=false" -gcflags="-l" --cover --coverprofile cover.out ./...
+	ginkgo --skip-package=vendor,tests/integration -ldflags="-s=false" -gcflags="-l" --cover --coverprofile cover.out ./...
 
 ##@ Build
 build-common: $(BUILD_PATH) generate manifests fmt vet
@@ -138,3 +138,8 @@ deploy: manifests ## Deploy controller to the K8s cluster specified in ~/.kube/c
 .PHONY: undeploy
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
 	kustomize build config/default | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
+
+integration: docker-build
+	cd tests/integration && docker-compose down && docker-compose up -d && ginkgo -ldflags="-s=false" -gcflags="-l" && docker-compose down
+
+

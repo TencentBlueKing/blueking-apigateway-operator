@@ -121,7 +121,7 @@ var _ = Describe("VirtualStage", func() {
 			)
 
 			BeforeEach(func() {
-				extraPath = filepath.Join(os.TempDir(), "extra-config.yaml")
+				extraPath = filepath.Join(os.TempDir(), "extra-config_test.yaml")
 				Init(&config.Config{
 					Apisix: config.Apisix{
 						VirtualStage: config.VirtualStage{

@@ -28,6 +28,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
@@ -59,6 +60,11 @@ func NewResourceApi(
 		committer:       committer,
 		apisixConfStore: apiSixConfStore,
 	}
+}
+
+// ignoreCreateTimeAndUpdateTimeCmpOpt: 忽略typ 创建、更新时间
+var ignoreCreateTimeAndUpdateTimeCmpOptFunc = func(typ interface{}) cmp.Option {
+	return cmpopts.IgnoreFields(typ, "CreateTime", "UpdateTime")
 }
 
 // GetLeader get leader pod host
@@ -256,7 +262,21 @@ func (r *ResourceHandler) diffMap(lhs, rhs interface{}, id string) map[string]in
 		if !rhsItemValue.IsValid() {
 			diff[key.String()] = cmp.Diff(val.Interface(), nil)
 		} else {
-			diffStr := cmp.Diff(val.Interface(), rhsItemValue.Interface())
+			var cmpOps []cmp.Option
+			if val.Elem().Type().Name() == "Route" {
+				cmpOps = append(cmpOps, ignoreCreateTimeAndUpdateTimeCmpOptFunc(apisix.Route{}))
+			}
+			if val.Elem().Type().Name() == "Service" {
+				cmpOps = append(cmpOps, ignoreCreateTimeAndUpdateTimeCmpOptFunc(apisix.Service{}))
+			}
+			if val.Elem().Type().Name() == "SSL" {
+				cmpOps = append(cmpOps, ignoreCreateTimeAndUpdateTimeCmpOptFunc(apisix.SSL{}))
+
+			}
+			diffStr := cmp.Diff(
+				val.Interface(), rhsItemValue.Interface(),
+				cmpOps...,
+			)
 			if len(diffStr) != 0 {
 				diff[key.String()] = diffStr
 			}
