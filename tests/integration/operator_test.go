@@ -41,6 +41,7 @@ const (
 	testDataServiceAmount   = 1
 	testDataRoutesAmount    = 75
 	versionRouteKey         = "integration-test-prod-apigw-builtin-mock-release-version"
+	operatorURL             = "http://127.0.0.1:6004"
 	updateVersionRouteValue = "metadata:\n  name: integration-test-prod-apigw-builtin-mock-release-version\n  labels:\n    gateway.bk.tencent.com/gateway: integration-test\n    gateway.bk.tencent.com/stage: prod\n  annotations: {}\nspec:\n  name: apigw_builtin__mock_release_version\n  desc: \u83b7\u53d6\u53d1\u5e03\u4fe1\u606f\uff0c\u7528\u4e8e\u68c0\u67e5\u7248\u672c\u53d1\u5e03\u7ed3\u679c\n  id: -1\n  plugins:\n  - name: bk-mock\n    config:\n      response_status: 200\n      response_example: '{\"publish_id\": 14, \"start_time\": \"2023-11-08 15:11:09+0800\"}'\n      response_headers:\n        Content-Type: application/json\n  service: ''\n  protocol: http\n  methods:\n  - GET\n  timeout:\n    connect: 60\n    read: 60\n    send: 60\n  uri: /__apigw_version\n  matchSubPath: false\n  upstream:\n    type: roundrobin\n    hashOn:\n    key:\n    checks:\n    scheme: http\n    retries:\n    retryTimeout:\n    passHost: node\n    upstreamHost:\n    tlsEnable: false\n    externalDiscoveryType:\n    externalDiscoveryConfig:\n    discoveryType:\n    serviceName:\n    nodes: []\n    timeout:\n  rewrite:\n    enabled: false\n    method:\n    path:\n    headers: {}\n    stageHeaders: append\n    serviceHeaders: append\n"
 )
 
@@ -57,7 +58,7 @@ var _ = Describe("Operator Integration", func() {
 		etcdCli, err = clientv3.New(cfg)
 		Expect(err).NotTo(HaveOccurred())
 
-		resourceCli = client.NewResourceClient("http://127.0.0.1:6004", "DebugModel@bk")
+		resourceCli = client.NewResourceClient(operatorURL, "DebugModel@bk")
 	})
 
 	AfterEach(func() {
@@ -79,44 +80,44 @@ var _ = Describe("Operator Integration", func() {
 
 				time.Sleep(time.Second * 10)
 
-				metrics, err := util.GetAllMetrics()
+				metricsAdapter, err := util.NewMetricsAdapter(operatorURL)
 
 				Expect(err).NotTo(HaveOccurred())
 
 				// assert bootstrap syncing count
-				Expect(int(util.GetBootstrapSyncingSuccessCountMetric(metrics))).To(Equal(1))
+				Expect(metricsAdapter.GetBootstrapSyncingSuccessCountMetric(metric.ResultSuccess)).To(Equal(1))
 
 				// assert resource_event_triggered_count
-				Expect(int(util.GetResourceEventTriggeredCountMetric(
-					metrics, testGateway, testStage, v1beta1.BkGatewayResourceTypeName),
-				)).To(Equal(testDataRoutesAmount))
+				Expect(metricsAdapter.GetResourceEventTriggeredCountMetric(
+					testGateway, testStage, v1beta1.BkGatewayResourceTypeName),
+				).To(Equal(testDataRoutesAmount))
 
-				Expect(int(util.GetResourceEventTriggeredCountMetric(
-					metrics, testGateway, testStage, v1beta1.BkGatewayServiceTypeName),
-				)).To(Equal(testDataServiceAmount))
+				Expect(metricsAdapter.GetResourceEventTriggeredCountMetric(
+					testGateway, testStage, v1beta1.BkGatewayServiceTypeName),
+				).To(Equal(testDataServiceAmount))
 
-				Expect(int(util.GetResourceEventTriggeredCountMetric(
-					metrics, testGateway, testStage, v1beta1.BkGatewayStageTypeName),
-				)).To(Equal(testDataStageAmount))
+				Expect(metricsAdapter.GetResourceEventTriggeredCountMetric(
+					testGateway, testStage, v1beta1.BkGatewayStageTypeName),
+				).To(Equal(testDataStageAmount))
 
 				// assert resource convert
-				Expect(int(util.GetResourceConvertedCountMetric(
-					metrics, testGateway, testStage, v1beta1.BkGatewayResourceTypeName),
-				)).To(Equal(testDataRoutesAmount))
+				Expect(metricsAdapter.GetResourceConvertedCountMetric(
+					testGateway, testStage, v1beta1.BkGatewayResourceTypeName),
+				).To(Equal(testDataRoutesAmount))
 
-				Expect(int(util.GetResourceConvertedCountMetric(
-					metrics, testGateway, testStage, v1beta1.BkGatewayServiceTypeName),
-				)).To(Equal(testDataServiceAmount))
+				Expect(metricsAdapter.GetResourceConvertedCountMetric(
+					testGateway, testStage, v1beta1.BkGatewayServiceTypeName),
+				).To(Equal(testDataServiceAmount))
 
 				// assert apisix operation count
-				Expect(int(util.GetApisixOperationCountMetric(
-					metrics, metric.ActionPut, metric.ResultSuccess, etcd.ApisixResourceTypeRoutes),
+				Expect(metricsAdapter.GetApisixOperationCountMetric(
+					metric.ActionPut, metric.ResultSuccess, etcd.ApisixResourceTypeRoutes),
 				// 2 micro-gateway-not-found-handling and healthz-outer
-				)).To(Equal(testDataRoutesAmount + 2))
+				).To(Equal(testDataRoutesAmount + 2))
 
-				Expect(int(util.GetApisixOperationCountMetric(
-					metrics, metric.ActionPut, metric.ResultSuccess, etcd.ApisixResourceTypeServices),
-				)).To(Equal(testDataServiceAmount))
+				Expect(metricsAdapter.GetApisixOperationCountMetric(
+					metric.ActionPut, metric.ResultSuccess, etcd.ApisixResourceTypeServices),
+				).To(Equal(testDataServiceAmount))
 
 				// assert apigw resource and apisix resource
 				gatewayResourcesMap, err := resourceCli.List(&client.ListReq{
@@ -167,39 +168,35 @@ var _ = Describe("Operator Integration", func() {
 
 				time.Sleep(time.Second * 10)
 
-				metrics, err := util.GetAllMetrics()
+				metricsAdapter, err := util.NewMetricsAdapter(operatorURL)
 
 				Expect(err).NotTo(HaveOccurred())
 
 				// assert sync
-				Expect(int(util.GetResourceSyncCmpCountMetrics(
-					metrics,
+				Expect(metricsAdapter.GetResourceSyncCmpCountMetric(
 					testGateway,
 					testStage,
 					etcd.ApisixResourceTypeRoutes),
-				)).To(Equal(testDataRoutesAmount))
+				).To(Equal(testDataRoutesAmount))
 
-				Expect(int(util.GetResourceSyncCmpCountMetrics(
-					metrics,
+				Expect(metricsAdapter.GetResourceSyncCmpCountMetric(
 					testGateway,
 					testStage,
 					etcd.ApisixResourceTypeServices),
-				)).To(Equal(testDataServiceAmount))
+				).To(Equal(testDataServiceAmount))
 
 				// diff
-				Expect(int(util.GetResourceSyncCmpDiffCountMetrics(
-					metrics,
+				Expect(metricsAdapter.GetResourceSyncCmpDiffCountMetric(
 					testGateway,
 					testStage,
 					etcd.ApisixResourceTypeRoutes),
-				)).To(Equal(1))
+				).To(Equal(1))
 
-				Expect(int(util.GetResourceSyncCmpDiffCountMetrics(
-					metrics,
+				Expect(metricsAdapter.GetResourceSyncCmpDiffCountMetric(
 					testGateway,
 					testStage,
 					etcd.ApisixResourceTypeServices),
-				)).To(Equal(0))
+				).To(Equal(0))
 
 				// assert apigw resource and apisix resource
 				gatewayResourcesMap, err := resourceCli.List(&client.ListReq{

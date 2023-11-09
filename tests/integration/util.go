@@ -22,9 +22,9 @@ import (
 	"net/http"
 	"os"
 
-	json "github.com/json-iterator/go"
 	dto "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -37,26 +37,31 @@ const (
 )
 
 type EtcdConfig struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
+	Key   string `yaml:"key"`
+	Value string `yaml:"value"`
 }
 
+type MetricsAdapter struct {
+	Metrics map[string]*dto.MetricFamily
+}
+
+// GetHttpBinGatewayResource returns the httpbin gateway resource
 func GetHttpBinGatewayResource() []EtcdConfig {
-	// load json
 	var resources []EtcdConfig
-	data, err := os.ReadFile("bk_apigw_httpbin_resources.json")
+	data, err := os.ReadFile("bk_apigw_httpbin_resources.yaml")
 	if err != nil {
 		panic(err)
 	}
-	err = json.Unmarshal(data, &resources)
+	err = yaml.Unmarshal(data, &resources)
 	if err != nil {
 		panic(err)
 	}
 	return resources
 }
 
-func GetAllMetrics() (map[string]*dto.MetricFamily, error) {
-	resp, err := http.Get("http://127.0.0.1:6004/metrics")
+// NewMetricsAdapter creates a new MetricsAdapter
+func NewMetricsAdapter(host string) (*MetricsAdapter, error) {
+	resp, err := http.Get(host + "/metrics")
 	if err != nil {
 		return nil, err
 	}
@@ -64,93 +69,66 @@ func GetAllMetrics() (map[string]*dto.MetricFamily, error) {
 	// 创建一个解析器
 	parser := expfmt.TextParser{}
 	// 使用解析器解析metrics 数据
-	return parser.TextToMetricFamilies(resp.Body)
+	metrics, err := parser.TextToMetricFamilies(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return &MetricsAdapter{
+		Metrics: metrics,
+	}, nil
 }
 
-func GetResourceEventTriggeredCountMetric(
-	metrics map[string]*dto.MetricFamily, gateway string, stage string, resourceType string) float64 {
-	resourceEventTriggeredCountMetric := metrics[ResourceEventTriggeredCountMetric]
+// GetResourceMetrics returns the resource metrics by metricsType and labels
+func (m *MetricsAdapter) GetResourceMetrics(metricsType string, labels []string) int {
+	resourceEventTriggeredCountMetric := m.Metrics[metricsType]
 	if resourceEventTriggeredCountMetric == nil {
 		return 0
 	}
 	for _, metric := range resourceEventTriggeredCountMetric.Metric {
-		if len(metric.Label) == 3 && metric.Label[0].GetValue() == gateway &&
-			metric.Label[1].GetValue() == stage && metric.Label[2].GetValue() == resourceType {
-			return metric.Counter.GetValue()
+		if len(labels) != len(metric.Label) {
+			continue
+		}
+		marched := true
+		for i, lab := range metric.Label {
+			if labels[i] != lab.GetValue() {
+				marched = false
+				break
+			}
+		}
+		if marched {
+			return int(metric.Counter.GetValue())
 		}
 	}
 	return 0
 }
 
-func GetResourceConvertedCountMetric(
-	metrics map[string]*dto.MetricFamily, gateway string, stage string, resourceType string) float64 {
-	resourceConvertedCountMetric := metrics[ResourceEventTriggeredCountMetric]
-	if resourceConvertedCountMetric == nil {
-		return 0
-	}
-	for _, metric := range resourceConvertedCountMetric.Metric {
-		if len(metric.Label) == 3 && metric.Label[0].GetValue() == gateway &&
-			metric.Label[1].GetValue() == stage && metric.Label[2].GetValue() == resourceType {
-			return metric.Counter.GetValue()
-		}
-	}
-	return 0
+// GetResourceEventTriggeredCountMetric ResourceEventTriggeredCountMetric returns the resource event triggered
+// count metric
+func (m *MetricsAdapter) GetResourceEventTriggeredCountMetric(gateway string, stage string, resourceType string) int {
+	return m.GetResourceMetrics(ResourceEventTriggeredCountMetric, []string{gateway, stage, resourceType})
 }
 
-func GetResourceSyncCmpCountMetrics(
-	metrics map[string]*dto.MetricFamily, gateway string, stage string, resourceType string) float64 {
-	resourceSyncCmpCountMetric := metrics[ResourceSyncCmpCount]
-	if resourceSyncCmpCountMetric == nil {
-		return 0
-	}
-	for _, metric := range resourceSyncCmpCountMetric.Metric {
-		if len(metric.Label) == 3 && metric.Label[0].GetValue() == gateway &&
-			metric.Label[1].GetValue() == stage && metric.Label[2].GetValue() == resourceType {
-			return metric.Counter.GetValue()
-		}
-	}
-	return 0
+// GetResourceConvertedCountMetric ResourceConvertedCountMetric returns the resource event triggered count metric
+func (m *MetricsAdapter) GetResourceConvertedCountMetric(gateway string, stage string, resourceType string) int {
+	return m.GetResourceMetrics(ResourceConvertedCountMetric, []string{gateway, stage, resourceType})
 }
 
-func GetResourceSyncCmpDiffCountMetrics(
-	metrics map[string]*dto.MetricFamily, gateway string, stage string, resourceType string) float64 {
-	resourceSyncCmpDiffCountMetric := metrics[ResourceSyncCmpDiffCount]
-	if resourceSyncCmpDiffCountMetric == nil {
-		return 0
-	}
-	for _, metric := range resourceSyncCmpDiffCountMetric.Metric {
-		if len(metric.Label) == 3 && metric.Label[0].GetValue() == gateway &&
-			metric.Label[1].GetValue() == stage && metric.Label[2].GetValue() == resourceType {
-			return metric.Counter.GetValue()
-		}
-	}
-	return 0
+// GetResourceSyncCmpCountMetric ResourceSyncCmpCount returns the resource event triggered count metric
+func (m *MetricsAdapter) GetResourceSyncCmpCountMetric(gateway string, stage string, resourceType string) int {
+	return m.GetResourceMetrics(ResourceSyncCmpCount, []string{gateway, stage, resourceType})
 }
 
-func GetApisixOperationCountMetric(
-	metrics map[string]*dto.MetricFamily, action string, result string, resourceType string) float64 {
-	apisixOperationCountMetric := metrics[ApisixOperationCountMetric]
-	if apisixOperationCountMetric == nil {
-		return 0
-	}
-	for _, metric := range apisixOperationCountMetric.Metric {
-		if len(metric.Label) == 3 && metric.Label[0].GetValue() == action &&
-			metric.Label[1].GetValue() == result && metric.Label[2].GetValue() == resourceType {
-			return metric.Counter.GetValue()
-		}
-	}
-	return 0
+// GetResourceSyncCmpDiffCountMetric ResourceSyncCmpDiffCount returns the resource event triggered count metric
+func (m *MetricsAdapter) GetResourceSyncCmpDiffCountMetric(gateway string, stage string, resourceType string) int {
+	return m.GetResourceMetrics(ResourceSyncCmpDiffCount, []string{gateway, stage, resourceType})
 }
 
-func GetBootstrapSyncingSuccessCountMetric(metrics map[string]*dto.MetricFamily) float64 {
-	bootstrapSyncingCountMetric := metrics[BootstrapSyncingCountMetric]
-	if bootstrapSyncingCountMetric == nil {
-		return 0
-	}
-	for _, metric := range bootstrapSyncingCountMetric.Metric {
-		if len(metric.Label) == 1 && metric.Label[0].GetValue() == "succ" {
-			return metric.Counter.GetValue()
-		}
-	}
-	return 0
+// GetApisixOperationCountMetric ApisixOperationCountMetric returns the resource event triggered count metric
+func (m *MetricsAdapter) GetApisixOperationCountMetric(action string, result string, resourceType string) int {
+	return m.GetResourceMetrics(ApisixOperationCountMetric, []string{action, result, resourceType})
+}
+
+// GetBootstrapSyncingSuccessCountMetric BootstrapSyncingCountMetric returns the resource event triggered count metric
+func (m *MetricsAdapter) GetBootstrapSyncingSuccessCountMetric(result string) int {
+	return m.GetResourceMetrics(BootstrapSyncingCountMetric, []string{result})
 }
