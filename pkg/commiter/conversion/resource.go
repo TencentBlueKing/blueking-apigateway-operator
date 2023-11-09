@@ -110,7 +110,7 @@ func (c *Converter) convertResource(
 		)
 
 	uriWithoutSuffixSlash = render.GetURIRender().Render(uriWithoutSuffixSlash, c.stage.Spec.Vars)
-	// to enable prefix match, apisix.router.http = radixtree_uri should be set in config_test.yaml
+	// to enable prefix match, apisix.router.http = radixtree_uri should be set in config.yaml
 	if resource.Spec.MatchSubPath {
 		newRoute.Uris = []string{
 			uriWithoutSuffixSlash,
