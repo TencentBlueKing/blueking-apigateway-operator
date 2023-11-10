@@ -102,17 +102,17 @@ var _ = Describe("Operator Integration", func() {
 
 				// assert resource convert
 				Expect(metricsAdapter.GetResourceConvertedCountMetric(
-					testGateway, testStage, v1beta1.BkGatewayResourceTypeName),
+					testGateway, testStage, etcd.ApisixResourceTypeRoutes),
 				).To(Equal(testDataRoutesAmount))
 
 				Expect(metricsAdapter.GetResourceConvertedCountMetric(
-					testGateway, testStage, v1beta1.BkGatewayServiceTypeName),
+					testGateway, testStage, etcd.ApisixResourceTypeServices),
 				).To(Equal(testDataServiceAmount))
 
 				// assert apisix operation count
 				Expect(metricsAdapter.GetApisixOperationCountMetric(
 					metric.ActionPut, metric.ResultSuccess, etcd.ApisixResourceTypeRoutes),
-				// 2 micro-gateway-not-found-handling and healthz-outer
+					// 2 micro-gateway-not-found-handling and healthz-outer
 				).To(Equal(testDataRoutesAmount + 2))
 
 				Expect(metricsAdapter.GetApisixOperationCountMetric(
