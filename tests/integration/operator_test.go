@@ -163,14 +163,14 @@ var _ = Describe("Operator Integration", func() {
 					Expect(err).NotTo(HaveOccurred())
 				}
 
-				time.Sleep(time.Second * 10)
+				time.Sleep(time.Second * 15)
 
 				// update version routes
 				versionRoute.Value = updateVersionRouteValue
 				_, err := etcdCli.Put(context.Background(), versionRoute.Key, versionRoute.Value)
 				Expect(err).NotTo(HaveOccurred())
 
-				time.Sleep(time.Second * 10)
+				time.Sleep(time.Second * 15)
 
 				metricsAdapter, err := util.NewMetricsAdapter(operatorURL)
 
