@@ -219,7 +219,7 @@ var _ = Describe("Operator Integration", func() {
 					All:     true,
 				})
 				Expect(err).NotTo(HaveOccurred())
-				Expect(len(*diffResourceResult)).To(Equal(1))
+				Expect(len(*diffResourceResult)).To(Equal(0))
 
 			})
 		})

@@ -21,15 +21,14 @@ jobs:
     - name: Build
       run: make build
 
-    - name: Test
-      run: |
-          go install github.com/onsi/ginkgo/v2/ginkgo@v2.3.1 && make test
-
     - name: Lint
       uses: golangci/golangci-lint-action@v3
       with:
         version: v1.52.2
 
-    - name: Integration Test
+    - name: Test
       run: |
-          go install github.com/onsi/ginkgo/v2/ginkgo@v2.3.1 && make integration
+          go install github.com/onsi/ginkgo/v2/ginkgo@v2.3.1 && make test
+
+    - name: Integration Test
+      run: make integration
