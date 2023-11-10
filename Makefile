@@ -140,6 +140,6 @@ undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/confi
 	kustomize build config/default | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
 
 integration: docker-build
-	cd tests/integration && docker-compose up -d && ginkgo -ldflags="-s=false" -gcflags="-l";docker-compose down
+	cd tests/integration && docker-compose down && docker-compose up -d && ginkgo -ldflags="-s=false" -gcflags="-l";docker-compose down
 
 
