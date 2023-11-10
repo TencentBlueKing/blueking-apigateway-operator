@@ -29,3 +29,8 @@ jobs:
       uses: golangci/golangci-lint-action@v3
       with:
         version: v1.52.2
+
+    - name: Integration Test
+      uses: docker/compose-action@v2
+      run: |
+          go install github.com/onsi/ginkgo/v2/ginkgo@v2.3.1 && make integration
