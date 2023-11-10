@@ -20,14 +20,12 @@ package integration_test
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer/etcd"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
-	json "github.com/json-iterator/go"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -141,8 +139,6 @@ var _ = Describe("Operator Integration", func() {
 					Stage:   testStage,
 					All:     true,
 				})
-				result, _ := json.Marshal(diffResourceResult)
-				fmt.Printf("%s", result)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(len(*diffResourceResult)).To(Equal(0))
 
@@ -163,14 +159,14 @@ var _ = Describe("Operator Integration", func() {
 					Expect(err).NotTo(HaveOccurred())
 				}
 
-				time.Sleep(time.Second * 15)
+				time.Sleep(time.Second * 10)
 
 				// update version routes
 				versionRoute.Value = updateVersionRouteValue
 				_, err := etcdCli.Put(context.Background(), versionRoute.Key, versionRoute.Value)
 				Expect(err).NotTo(HaveOccurred())
 
-				time.Sleep(time.Second * 15)
+				time.Sleep(time.Second * 10)
 
 				metricsAdapter, err := util.NewMetricsAdapter(operatorURL)
 
@@ -223,9 +219,6 @@ var _ = Describe("Operator Integration", func() {
 					All:     true,
 				})
 				Expect(err).NotTo(HaveOccurred())
-
-				result, _ := json.Marshal(diffResourceResult)
-				fmt.Printf("%s", result)
 
 				Expect(len(*diffResourceResult)).To(Equal(0))
 
