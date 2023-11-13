@@ -170,7 +170,6 @@ func (as *apisixConfigurationSynchronizer) flush(ctx context.Context) {
 
 	as.logger.Debug("flush virtual stage")
 	controlPlaneConfiguration := make(map[string]*apisix.ApisixConfiguration)
-	// todo: 后续version.version替换,暂时先用BuildTime
 	virtualStage := NewVirtualStage(as.apisixHealthzURI)
 	controlPlaneConfiguration[cfg.VirtualStageKey] = virtualStage.MakeConfiguration()
 	as.store.Alter(ctx, controlPlaneConfiguration, as.resync)

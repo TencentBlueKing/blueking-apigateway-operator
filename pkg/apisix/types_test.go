@@ -269,3 +269,74 @@ var _ = Describe("PluginMetadata", func() {
 		})
 	})
 })
+
+var _ = Describe("SynchronizerBuffer", func() {
+	var buffer *SynchronizerBuffer
+
+	BeforeEach(func() {
+		buffer = NewSynchronizerBuffer()
+	})
+
+	Describe("Testing Put method", func() {
+		It("should put a staged apisix configuration into buffer correctly", func() {
+			key := "test_key"
+			value := &ApisixConfiguration{}
+			buffer.Put(key, value)
+			result, ok := buffer.Get(key)
+			Expect(ok).To(BeTrue())
+			Expect(result).To(Equal(value))
+		})
+	})
+
+	Describe("Testing Get method", func() {
+		It("should get a staged apisix configuration from buffer correctly", func() {
+			key := "test_key"
+			value := &ApisixConfiguration{}
+			buffer.Put(key, value)
+			result, ok := buffer.Get(key)
+			Expect(ok).To(BeTrue())
+			Expect(result).To(Equal(value))
+		})
+	})
+
+	Describe("Testing GetAll method", func() {
+		It("should get all content of buffer correctly", func() {
+			key1 := "test_key1"
+			value1 := &ApisixConfiguration{}
+			buffer.Put(key1, value1)
+
+			key2 := "test_key2"
+			value2 := &ApisixConfiguration{}
+			buffer.Put(key2, value2)
+
+			all := buffer.GetAll()
+			Expect(len(all)).To(Equal(2))
+			Expect(all[key1]).To(Equal(value1))
+			Expect(all[key2]).To(Equal(value2))
+		})
+	})
+
+	Describe("Testing Replace method", func() {
+		It("should replace the whole buffer with provided content correctly", func() {
+			newBuffer := map[string]*ApisixConfiguration{
+				"new_key": &ApisixConfiguration{},
+			}
+			buffer.Replcae(newBuffer)
+
+			all := buffer.GetAll()
+			Expect(len(all)).To(Equal(1))
+			Expect(all["new_key"]).To(Equal(newBuffer["new_key"]))
+		})
+	})
+
+	Describe("Testing LockAll and Done methods", func() {
+		It("should lock all and clean buffer correctly", func() {
+			buffer.Put("test_key", &ApisixConfiguration{})
+			all := buffer.LockAll()
+			Expect(len(all)).To(Equal(1))
+			buffer.Done()
+			all = buffer.GetAll()
+			Expect(len(all)).To(Equal(0))
+		})
+	})
+})
