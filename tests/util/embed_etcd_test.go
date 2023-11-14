@@ -25,11 +25,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/tests/util"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/server/v3/embed"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/tests/util"
 )
 
 func TestMockEtcd(t *testing.T) {
