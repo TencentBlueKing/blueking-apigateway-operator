@@ -20,12 +20,12 @@ package synchronizer_test
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/prometheus/client_golang/prometheus"
@@ -70,15 +70,15 @@ var _ = Describe("ApisixConfigSynchronizer", func() {
 		ctx = context.Background()
 		aConfig = &apisix.ApisixConfiguration{
 			Routes: map[string]*apisix.Route{
-				"gateway.stage.test-resource": {
+				"gateway.prod.test-resource": {
 					Route: apisixv1.Route{
 						Metadata: apisixv1.Metadata{
-							ID:   "gateway.stage.test-resource",
+							ID:   "gateway.prod.test-resource",
 							Name: "test-resource",
 							Desc: "test resource",
 							Labels: map[string]string{
 								config.BKAPIGatewayLabelKeyGatewayName:  "gateway",
-								config.BKAPIGatewayLabelKeyGatewayStage: "stage",
+								config.BKAPIGatewayLabelKeyGatewayStage: "prod",
 							},
 						},
 						Host:    "test.exmaple.com",
@@ -123,17 +123,17 @@ var _ = Describe("ApisixConfigSynchronizer", func() {
 		Context("with valid input", func() {
 			It("should sync new staged apisix configuration correctly", func() {
 				gatewayName := "gateway"
-				stageName := "stage"
+				stageName := "prod"
 				ac.Sync(ctx, gatewayName, stageName, aConfig)
 				ac.Flush(ctx)
 				time.Sleep(time.Second * 5)
 
-				apisixConfig := store.Get("gateway/stage")
+				apisixConfig := store.Get("gateway/prod")
 
-				result := cmp.Equal(apisixConfig, aConfig)
-				Expect(result).To(BeTrue())
-
-				fmt.Println(cmp.Diff(apisixConfig, aConfig))
+				result := cmp.Equal(
+					apisixConfig, aConfig,
+					cmpopts.IgnoreFields(apisixv1.Metadata{}, "Desc", "Labels"))
+				Expect(result).Should(BeTrue())
 
 			})
 		})

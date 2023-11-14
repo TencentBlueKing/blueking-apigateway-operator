@@ -177,6 +177,7 @@ func (s *EtcdConfigStore) Alter(
 		tempStagName := stagName
 		tempConf := conf
 		utils.GoroutineWithRecovery(ctx, func() {
+			defer wg.Done()
 			st := time.Now()
 			err := s.alterByStage(ctx, tempStagName, tempConf)
 
@@ -187,7 +188,6 @@ func (s *EtcdConfigStore) Alter(
 				s.logger.Errorw("Alter by stage failed", "err", err, "stage", tempStagName)
 				go callbackFunc(ctx, tempStagName, tempConf)
 			}
-			wg.Done()
 		})
 	}
 
