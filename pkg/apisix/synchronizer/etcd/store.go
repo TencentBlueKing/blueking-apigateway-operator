@@ -26,6 +26,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 	json "github.com/json-iterator/go"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.uber.org/zap"
@@ -47,6 +48,8 @@ type EtcdConfigStore struct {
 	logger *zap.SugaredLogger
 
 	putInterval time.Duration
+
+	lock *sync.RWMutex
 }
 
 // NewEtcdConfigStore ...
@@ -58,8 +61,9 @@ func NewEtcdConfigStore(client *clientv3.Client, prefix string, putInterval time
 		differ:      newConfigDiffer(),
 		logger:      logging.GetLogger().Named("etcd-config-store"),
 		putInterval: putInterval,
+		lock:        &sync.RWMutex{},
 	}
-	s.init()
+	s.Init()
 
 	s.logger.Infow("Create etcd config store", "prefix", prefix)
 
@@ -71,21 +75,24 @@ func NewEtcdConfigStore(client *clientv3.Client, prefix string, putInterval time
 	return s, nil
 }
 
-func (s *EtcdConfigStore) init() {
+func (s *EtcdConfigStore) Init() {
 	wg := &sync.WaitGroup{}
 	for _, resourceType := range []string{
 		ApisixResourceTypeRoutes, ApisixResourceTypeServices, ApisixResourceTypeSSL, ApisixResourceTypePluginMetadata,
 	} {
 		wg.Add(1)
-		go func(resourceType string) {
+		tempResourceType := resourceType
+		utils.GoroutineWithRecovery(context.Background(), func() {
 			defer wg.Done()
 			resourceStore, err := newResourceStore(s.client, s.prefix+"/"+resourceType+"/")
 			if err != nil {
 				s.logger.Errorw("Create resource store failed", "resourceType", resourceType)
 				return
 			}
-			s.stores[resourceType] = resourceStore
-		}(resourceType)
+			s.lock.Lock()
+			defer s.lock.Unlock()
+			s.stores[tempResourceType] = resourceStore
+		})
 	}
 	wg.Wait()
 }
