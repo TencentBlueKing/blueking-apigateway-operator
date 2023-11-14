@@ -26,6 +26,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -73,6 +74,21 @@ func initConfig() {
 	}
 }
 
+func initSentry() {
+	if len(globalConfig.Sentry.Dsn) != 0 {
+		err := sentry.Init(sentry.ClientOptions{
+			Dsn: globalConfig.Sentry.Dsn,
+		})
+		if err != nil {
+			logging.GetLogger().Errorf("init Sentry fail: %s", err)
+			return
+		}
+		logging.GetLogger().Info("init Sentry success")
+	} else {
+		logging.GetLogger().Info("Sentry is not enabled, will not init it")
+	}
+}
+
 // initLog init logger must after initConfig
 func initLog() {
 	logging.Init(globalConfig)
@@ -107,6 +123,7 @@ func gracefulShutdown(shutdownHookFuncOptions ...func()) {
 func preRun(cmd *cobra.Command, args []string) {
 	cmd.ParseFlags(args)
 	initConfig()
+	initSentry()
 	initLog()
 	initClient()
 	// init publish reporter

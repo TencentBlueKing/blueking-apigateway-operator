@@ -32,6 +32,7 @@ eventReporter:
   apisixHost: "bk-apigateway-apigateway"
   versionProbe:
     timout: "2m" # version probe timeout
+    waitTime: "15s" # version probe wait time
     bufferSize: 300 # version probe chain size
     retry:
       count: 60
@@ -60,6 +61,11 @@ logger:
     writer: os
     settings: {name: stdout}
     # writer: file
+
+sentry:
+  dsn: ""
+  ## zapcore.Level
+  reportLevel: 3
 
 tracing:
   enable: false
