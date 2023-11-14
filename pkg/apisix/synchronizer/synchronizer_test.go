@@ -20,6 +20,7 @@ package synchronizer_test
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"time"
 
@@ -131,6 +132,8 @@ var _ = Describe("ApisixConfigSynchronizer", func() {
 
 				result := cmp.Equal(apisixConfig, aConfig)
 				Expect(result).To(BeTrue())
+
+				fmt.Println(cmp.Diff(apisixConfig, aConfig))
 
 			})
 		})
