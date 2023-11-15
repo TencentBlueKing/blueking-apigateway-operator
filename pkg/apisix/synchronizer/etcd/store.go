@@ -48,6 +48,8 @@ type EtcdConfigStore struct {
 	logger *zap.SugaredLogger
 
 	putInterval time.Duration
+
+	lock *sync.RWMutex
 }
 
 // NewEtcdConfigStore ...
@@ -59,8 +61,9 @@ func NewEtcdConfigStore(client *clientv3.Client, prefix string, putInterval time
 		differ:      newConfigDiffer(),
 		logger:      logging.GetLogger().Named("etcd-config-store"),
 		putInterval: putInterval,
+		lock:        &sync.RWMutex{},
 	}
-	s.init()
+	s.Init()
 
 	s.logger.Infow("Create etcd config store", "prefix", prefix)
 
@@ -72,7 +75,7 @@ func NewEtcdConfigStore(client *clientv3.Client, prefix string, putInterval time
 	return s, nil
 }
 
-func (s *EtcdConfigStore) init() {
+func (s *EtcdConfigStore) Init() {
 	wg := &sync.WaitGroup{}
 	for _, resourceType := range []string{
 		ApisixResourceTypeRoutes, ApisixResourceTypeServices, ApisixResourceTypeSSL, ApisixResourceTypePluginMetadata,
@@ -88,6 +91,8 @@ func (s *EtcdConfigStore) init() {
 				s.logger.Errorw("Create resource store failed", "resourceType", tempResourceType)
 				return
 			}
+			s.lock.Lock()
+			defer s.lock.Unlock()
 			s.stores[tempResourceType] = resourceStore
 		})
 	}
@@ -172,6 +177,7 @@ func (s *EtcdConfigStore) Alter(
 		tempStagName := stagName
 		tempConf := conf
 		utils.GoroutineWithRecovery(ctx, func() {
+			defer wg.Done()
 			st := time.Now()
 			err := s.alterByStage(ctx, tempStagName, tempConf)
 
@@ -182,7 +188,6 @@ func (s *EtcdConfigStore) Alter(
 				s.logger.Errorw("Alter by stage failed", "err", err, "stage", tempStagName)
 				go callbackFunc(ctx, tempStagName, tempConf)
 			}
-			wg.Done()
 		})
 	}
 
