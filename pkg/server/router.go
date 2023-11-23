@@ -19,6 +19,9 @@
 package server
 
 import (
+	"net/http"
+	"net/http/pprof"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/api"
@@ -52,5 +55,34 @@ func NewRouter(
 	}))
 	operatorRouter.Use(gin.Recovery())
 	api.Register(operatorRouter, leaderElector, registry, committer, apiSixConfStore)
+
+	// pprof
+	pprofRouter := router.Group("/debug/pprof")
+	if !conf.Debug {
+		pprofRouter.Use(gin.BasicAuth(gin.Accounts{
+			"bk-apigateway": "DebugModel@bk",
+		}))
+	}
+	{
+		pprofRouter.GET("/", pprofHandler(pprof.Index))
+		pprofRouter.GET("/cmdline", pprofHandler(pprof.Cmdline))
+		pprofRouter.GET("/profile", pprofHandler(pprof.Profile))
+		pprofRouter.POST("/symbol", pprofHandler(pprof.Symbol))
+		pprofRouter.GET("/symbol", pprofHandler(pprof.Symbol))
+		pprofRouter.GET("/trace", pprofHandler(pprof.Trace))
+		pprofRouter.GET("/allocs", pprofHandler(pprof.Handler("allocs").ServeHTTP))
+		pprofRouter.GET("/block", pprofHandler(pprof.Handler("block").ServeHTTP))
+		pprofRouter.GET("/goroutine", pprofHandler(pprof.Handler("goroutine").ServeHTTP))
+		pprofRouter.GET("/heap", pprofHandler(pprof.Handler("heap").ServeHTTP))
+		pprofRouter.GET("/mutex", pprofHandler(pprof.Handler("mutex").ServeHTTP))
+		pprofRouter.GET("/threadcreate", pprofHandler(pprof.Handler("threadcreate").ServeHTTP))
+	}
 	return router
+}
+
+func pprofHandler(h http.HandlerFunc) gin.HandlerFunc {
+	// handler := http.HandlerFunc(h)
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
+	}
 }
