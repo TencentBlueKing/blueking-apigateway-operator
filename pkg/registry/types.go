@@ -40,6 +40,8 @@ type StageInfo struct {
 	StageName   string
 	PublishID   string
 	Ctx         context.Context
+
+	RetryCount int64
 }
 
 // Key returns the stage key

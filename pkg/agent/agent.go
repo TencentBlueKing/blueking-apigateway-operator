@@ -368,7 +368,7 @@ func (w *EventAgent) secretEventCallback(
 			radixTree.Delete(obj)
 			return true, nil
 		}
-		return false, eris.Wrapf(err, "Get secret (%s) failed", obj)
+		return false, eris.Wrapf(err, "Get secret (%v) failed", obj)
 	}
 	tlsCert, err := v1beta1.GetTLSCertFromSecret(secret)
 	if err != nil {
@@ -403,7 +403,7 @@ func (w *EventAgent) gatewayTLSCallback(
 			radixTree.Delete(tlsObjKey)
 			return true, nil
 		}
-		return false, eris.Wrapf(err, "Get secret (%s) failed", secretObj)
+		return false, eris.Wrapf(err, "Get secret (%v) failed", secretObj)
 	}
 
 	tlsCert, err := v1beta1.GetTLSCertFromSecret(secret)

@@ -44,6 +44,8 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/trace"
 )
 
+const maxStageRetryCount = 3
+
 var errStageNotFound = eris.Errorf("no bk gateway stage found")
 
 // Commiter ...
@@ -151,7 +153,7 @@ func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, wg *s
 		if !eris.Is(err, errStageNotFound) {
 			c.logger.Error(err, "convert stage resources to apisix representation failed", "stageInfo", si)
 			// retry
-			c.stageTimer.Update(si)
+			c.retryStage(si)
 
 			span.RecordError(err)
 			return
@@ -175,13 +177,21 @@ func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, wg *s
 	)
 	if err != nil {
 		c.logger.Error(err, "sync stage resources to apisix failed", "stageInfo", si)
-		// retry
-		c.stageTimer.Update(si)
-		// TODO 限制retry的次数
+		c.retryStage(si)
 	}
 
 	// eventrepoter.ReportApplyConfigurationSuccessEvent(ctx, stage) // 可以由事件之前的关系推断出来
 	eventreporter.ReportLoadConfigurationResultEvent(ctx, stage)
+}
+
+func (c *Commiter) retryStage(si registry.StageInfo) {
+	if si.RetryCount >= maxStageRetryCount {
+		c.logger.Errorf("too many retries", "stageInfo", si)
+		return
+	}
+
+	si.RetryCount++
+	c.stageTimer.Update(si)
 }
 
 // ConvertEtcdKVToApisixConfiguration ...
