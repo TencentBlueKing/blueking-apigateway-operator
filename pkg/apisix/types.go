@@ -19,8 +19,6 @@
 package apisix
 
 import (
-	"sync"
-
 	apisixv1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
 	json "github.com/json-iterator/go"
 	"github.com/rotisserie/eris"
@@ -455,71 +453,4 @@ func (in *ApisixConfiguration) Statistic() map[string]interface{} {
 	ret["plugin_metadata_cnt"] = len(in.PluginMetadatas)
 	ret["ssl_cnt"] = len(in.SSLs)
 	return ret
-}
-
-// SynchronizerBuffer is thread safe map with RWMutex, used to buffering changes between two flushing process
-type SynchronizerBuffer struct {
-	sync.RWMutex
-	confMap map[string]*ApisixConfiguration
-}
-
-// NewSynchronizerBuffer will create a new SynchronizerBuffer
-func NewSynchronizerBuffer() *SynchronizerBuffer {
-	return &SynchronizerBuffer{
-		confMap: make(map[string]*ApisixConfiguration),
-	}
-}
-
-// Put will put a staged apisix configuration into buffer
-func (buf *SynchronizerBuffer) Put(key string, val *ApisixConfiguration) {
-	buf.Lock()
-	defer buf.Unlock()
-	if buf.confMap == nil {
-		buf.confMap = make(map[string]*ApisixConfiguration)
-	}
-	buf.confMap[key] = val
-}
-
-// Replcae will replace the whole buffer with provided content
-func (buf *SynchronizerBuffer) Replcae(confMap map[string]*ApisixConfiguration) {
-	buf.Lock()
-	defer buf.Unlock()
-	buf.confMap = confMap
-}
-
-// Get will get a staged apisix configuration from buffer
-func (buf *SynchronizerBuffer) Get(key string) (*ApisixConfiguration, bool) {
-	buf.RLock()
-	defer buf.RUnlock()
-	if buf.confMap == nil {
-		return nil, false
-	}
-	ret, ok := buf.confMap[key]
-	return ret, ok
-}
-
-// GetAll will get all content of cache
-func (buf *SynchronizerBuffer) GetAll() map[string]*ApisixConfiguration {
-	buf.RLock()
-	defer buf.RUnlock()
-	if buf.confMap == nil {
-		return nil
-	}
-	ret := make(map[string]*ApisixConfiguration)
-	for key, val := range buf.confMap {
-		ret[key] = val
-	}
-	return ret
-}
-
-// LockAll will obtain the write lock and get all content of cache without unlock
-func (buf *SynchronizerBuffer) LockAll() map[string]*ApisixConfiguration {
-	buf.Lock()
-	return buf.confMap
-}
-
-// Done will unlock the write lock. Done should must be called after LockAll called
-func (buf *SynchronizerBuffer) Done() {
-	buf.Unlock()
-	buf.confMap = make(map[string]*ApisixConfiguration)
 }

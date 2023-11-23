@@ -134,9 +134,6 @@ func (c *Commiter) commitGroup(ctx context.Context, stageInfoList []registry.Sta
 		go c.commitStage(ctx, stageInfo, wg)
 	}
 	wg.Wait()
-
-	// flush all buffed apisix conf to etcd/file
-	c.synchronizer.Flush(ctx)
 }
 
 func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, wg *sync.WaitGroup) {
@@ -169,14 +166,21 @@ func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, wg *s
 		eventreporter.ReportParseConfigurationSuccessEvent(ctx, stage)
 	}
 	eventreporter.ReportApplyConfigurationDoingEvent(ctx, stage)
-	c.synchronizer.Sync(
+
+	err = c.synchronizer.Sync(
 		ctx,
 		si.GatewayName,
 		si.StageName,
 		apisixConf,
 	)
+	if err != nil {
+		c.logger.Error(err, "sync stage resources to apisix failed", "stageInfo", si)
+		// retry
+		c.stageTimer.Update(si)
+		// TODO 限制retry的次数
+	}
+
 	// eventrepoter.ReportApplyConfigurationSuccessEvent(ctx, stage) // 可以由事件之前的关系推断出来
-	eventreporter.ReportLoadConfigurationDoingEvent(ctx, stage) //
 	eventreporter.ReportLoadConfigurationResultEvent(ctx, stage)
 }
 

@@ -187,7 +187,10 @@ func (w *EventAgent) bootstrapSync(ctx context.Context) error {
 
 	w.logger.Debugw("RenewStages gateway exists keys", "keys", keys)
 
-	w.synchronizer.RemoveNotExistStage(ctx, keys)
+	err = w.synchronizer.RemoveNotExistStage(ctx, keys)
+	if err != nil {
+		return err
+	}
 	w.radixTreeGetter.RemoveNotExistStage(stageList)
 
 	w.commitChan <- stageList // 全量同步

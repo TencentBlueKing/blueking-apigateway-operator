@@ -31,7 +31,6 @@ import (
 	yaml "gopkg.in/yaml.v2"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 )
 
@@ -66,23 +65,17 @@ func (f *FileConfigStore) GetAll() map[string]*apisix.ApisixConfiguration {
 // Alter ...
 func (f *FileConfigStore) Alter(
 	ctx context.Context,
-	changedConfig map[string]*apisix.ApisixConfiguration,
-	callbackFunc synchronizer.RetrySyncFunc,
-) {
+	stageName string,
+	config *apisix.ApisixConfiguration,
+) error {
 	f.mux.Lock()
 	defer f.mux.Unlock()
 
-	if len(changedConfig) == 0 {
-		return
-	}
-
 	fullConfig := apisix.NewEmptyApisixConfiguration()
-	for _, stagedConfig := range changedConfig {
-		fullConfig.MergeFrom(stagedConfig)
-	}
+	fullConfig.MergeFrom(config)
 
-	for stageName, config := range f.GetAll() {
-		if _, ok := changedConfig[stageName]; !ok {
+	for name, config := range f.GetAll() {
+		if name != stageName {
 			fullConfig.MergeFrom(config)
 		}
 	}
@@ -90,13 +83,11 @@ func (f *FileConfigStore) Alter(
 	err := f.write(ctx, fullConfig)
 	if err != nil {
 		f.logger.Error(err, "Failed render config, err")
-		for stageName, config := range changedConfig {
-			go callbackFunc(ctx, stageName, config)
-		}
-		return
+		return err
 	}
 
 	f.config = fullConfig // cache local config
+	return nil
 }
 
 func (f *FileConfigStore) write(ctx context.Context, config *apisix.ApisixConfiguration) error {

@@ -166,32 +166,22 @@ func (s *EtcdConfigStore) GetAll() map[string]*apisix.ApisixConfiguration {
 // Alter ...
 func (s *EtcdConfigStore) Alter(
 	ctx context.Context,
-	changedConfig map[string]*apisix.ApisixConfiguration,
-	callbackFunc synchronizer.RetrySyncFunc,
-) {
-	wg := &sync.WaitGroup{}
-	for stagName, conf := range changedConfig {
-		wg.Add(1)
+	stageName string,
+	config *apisix.ApisixConfiguration,
+) error {
+	// 避免闭包导致变量覆盖问题
+	st := time.Now()
+	err := s.alterByStage(ctx, stageName, config)
 
-		// 避免闭包导致变量覆盖问题
-		tempStagName := stagName
-		tempConf := conf
-		utils.GoroutineWithRecovery(ctx, func() {
-			defer wg.Done()
-			st := time.Now()
-			err := s.alterByStage(ctx, tempStagName, tempConf)
+	// metric
+	synchronizer.ReportStageConfigAlterMetric(stageName, config, st, err)
 
-			// metric
-			synchronizer.ReportStageConfigAlterMetric(tempStagName, tempConf, st, err)
-
-			if err != nil {
-				s.logger.Errorw("Alter by stage failed", "err", err, "stage", tempStagName)
-				go callbackFunc(ctx, tempStagName, tempConf)
-			}
-		})
+	if err != nil {
+		s.logger.Errorw("Alter by stage failed", "err", err, "stage", stageName)
+		return err
 	}
 
-	wg.Wait()
+	return nil
 }
 
 func (s *EtcdConfigStore) alterByStage(

@@ -9,7 +9,6 @@ import (
 	reflect "reflect"
 
 	apisix "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
-	synchronizer "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -37,15 +36,17 @@ func (m *MockApisixConfigStore) EXPECT() *MockApisixConfigStoreMockRecorder {
 }
 
 // Alter mocks base method.
-func (m *MockApisixConfigStore) Alter(ctx context.Context, changedConfig map[string]*apisix.ApisixConfiguration, callbackFunc synchronizer.RetrySyncFunc) {
+func (m *MockApisixConfigStore) Alter(ctx context.Context, stageName string, config *apisix.ApisixConfiguration) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "Alter", ctx, changedConfig, callbackFunc)
+	ret := m.ctrl.Call(m, "Alter", ctx, stageName, config)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Alter indicates an expected call of Alter.
-func (mr *MockApisixConfigStoreMockRecorder) Alter(ctx, changedConfig, callbackFunc interface{}) *gomock.Call {
+func (mr *MockApisixConfigStoreMockRecorder) Alter(ctx, stageName, config interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Alter", reflect.TypeOf((*MockApisixConfigStore)(nil).Alter), ctx, changedConfig, callbackFunc)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Alter", reflect.TypeOf((*MockApisixConfigStore)(nil).Alter), ctx, stageName, config)
 }
 
 // Get mocks base method.

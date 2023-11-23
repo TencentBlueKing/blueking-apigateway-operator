@@ -98,7 +98,7 @@ var _ = Describe("Agent", func() {
 				Ctx:         nil,
 			},
 		}, nil)
-		mockSynchronizer.EXPECT().RemoveNotExistStage(gomock.Any(), gomock.Any()).Return()
+		mockSynchronizer.EXPECT().RemoveNotExistStage(gomock.Any(), gomock.Any()).Return(nil)
 		mockRadixTreeGetter.EXPECT().RemoveNotExistStage(gomock.Any()).Return()
 
 		err := agent.bootstrapSync(context.Background())
@@ -124,7 +124,7 @@ var _ = Describe("Agent", func() {
 				Ctx:         nil,
 			},
 		}, nil)
-		mockSynchronizer.EXPECT().RemoveNotExistStage(gomock.Any(), gomock.Any()).Return()
+		mockSynchronizer.EXPECT().RemoveNotExistStage(gomock.Any(), gomock.Any()).Return(nil)
 		mockRadixTreeGetter.EXPECT().RemoveNotExistStage(gomock.Any()).Return()
 
 		agent.createWatchChannel(context.Background())
