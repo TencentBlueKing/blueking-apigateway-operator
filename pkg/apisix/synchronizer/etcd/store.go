@@ -169,7 +169,6 @@ func (s *EtcdConfigStore) Alter(
 	stageName string,
 	config *apisix.ApisixConfiguration,
 ) error {
-	// 避免闭包导致变量覆盖问题
 	st := time.Now()
 	err := s.alterByStage(ctx, stageName, config)
 
