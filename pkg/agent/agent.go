@@ -141,10 +141,11 @@ func (w *EventAgent) createWatchChannel(ctx context.Context) (<-chan *registry.R
 	ctx, cancel := context.WithCancel(ctx)
 
 	retryCount := 0
-	var watchCh <-chan *registry.ResourceMetadata
+
+	watchCh := w.resourceRegistry.Watch(ctx)
+
 	for retryCount < retryLimit {
 		w.logger.Debugw("Boostrap watch channel")
-		watchCh = w.resourceRegistry.Watch(ctx)
 
 		err := w.bootstrapSync(ctx)
 

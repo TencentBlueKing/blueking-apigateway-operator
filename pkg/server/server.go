@@ -31,6 +31,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
@@ -86,6 +87,10 @@ func (s *Server) Run(ctx context.Context, config *config.Config) error {
 		go MustServeHTTP(ctx, addrv6, "tcp6", router)
 	}
 	if config.Debug {
+		pprofRouter := router.Group("/debug/pprof")
+		pprofRouter.Use(gin.BasicAuth(gin.Accounts{
+			constant.ApiAuthAccount: config.HttpServer.AuthPassword,
+		}))
 		pprof.Register(router)
 	}
 	if config.HttpServer.BindAddress != "" {

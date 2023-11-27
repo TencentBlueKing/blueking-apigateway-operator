@@ -42,6 +42,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/radixtree"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/trace"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 var errStageNotFound = eris.Errorf("no bk gateway stage found")
@@ -131,7 +132,10 @@ func (c *Commiter) commitGroup(ctx context.Context, stageInfoList []registry.Sta
 	wg := &sync.WaitGroup{}
 	for _, stageInfo := range stageInfoList {
 		wg.Add(1)
-		go c.commitStage(ctx, stageInfo, wg)
+		tempStageInfo := stageInfo
+		utils.GoroutineWithRecovery(ctx, func() {
+			c.commitStage(ctx, tempStageInfo, wg)
+		})
 	}
 	wg.Wait()
 
