@@ -223,6 +223,7 @@ type Config struct {
 
 func newDefaultConfig() *Config {
 	return &Config{
+		Debug: true,
 		HttpServer: HttpServer{
 			BindPort:     6004,
 			AuthPassword: "DebugModel@bk",
