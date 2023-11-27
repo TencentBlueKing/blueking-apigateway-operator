@@ -246,6 +246,10 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *v1beta1.BkGa
 
 // addEvent add event to reporter event
 func addEvent(event reportEvent) {
+	// avoid gateway del that cause stage to be nil and make panic
+	if event.stage == nil || event.stage.Labels == nil {
+		return
+	}
 	// filter not need report event
 	publishID := event.stage.Labels[config.BKAPIGatewayLabelKeyGatewayPublishID]
 	if publishID == constant.NoNeedReportPublishID || publishID == "" {

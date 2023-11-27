@@ -22,6 +22,7 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
@@ -86,6 +87,10 @@ func (s *Server) Run(ctx context.Context, config *config.Config) error {
 		go MustServeHTTP(ctx, addrv6, "tcp6", router)
 	}
 	if config.Debug {
+		pprofRouter := router.Group("/debug/pprof")
+		pprofRouter.Use(gin.BasicAuth(gin.Accounts{
+			constant.ApiAuthAccount: config.HttpServer.AuthPassword,
+		}))
 		pprof.Register(router)
 	}
 	if config.HttpServer.BindAddress != "" {
