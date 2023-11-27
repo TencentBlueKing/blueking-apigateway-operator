@@ -173,9 +173,9 @@ func (e *resourceStore) incrSync() {
 	c, cancel := context.WithCancel(context.TODO())
 	defer cancel()
 	var ch clientv3.WatchChan
-	newWatch := true
+	needCreateChan := true
 	for {
-		if newWatch {
+		if needCreateChan {
 			ch = e.client.Watch(
 				clientv3.WithRequireLeader(c),
 				e.prefix,
@@ -183,7 +183,7 @@ func (e *resourceStore) incrSync() {
 				clientv3.WithPrevKV(),
 				clientv3.WithRev(e.currentRevision),
 			)
-			newWatch = false
+			needCreateChan = false
 		}
 
 		select {
@@ -202,7 +202,7 @@ func (e *resourceStore) incrSync() {
 					}
 				}
 				// reset channel
-				newWatch = true
+				needCreateChan = true
 				cancel()
 				c, cancel = context.WithCancel(context.TODO())
 				break

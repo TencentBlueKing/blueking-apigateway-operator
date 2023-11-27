@@ -256,7 +256,7 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 
 	var etcdWatchCh clientv3.WatchChan
 
-	newWatchFlag := true
+	needCreateChan := true
 
 	go func() {
 		defer func() {
@@ -265,7 +265,7 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 		}()
 
 		for {
-			if newWatchFlag {
+			if needCreateChan {
 				etcdWatchCh = r.etcdClient.Watch(
 					clientv3.WithRequireLeader(watchCtx),
 					strings.TrimSuffix(r.keyPrefix, "/")+"/",
@@ -273,7 +273,7 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 					clientv3.WithPrevKV(),
 					clientv3.WithRev(r.currentRevision),
 				)
-				newWatchFlag = false
+				needCreateChan = false
 			}
 			select {
 			case event, ok := <-etcdWatchCh:
@@ -286,7 +286,7 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 						r.currentRevision,
 					)
 					time.Sleep(time.Second * 5)
-					newWatchFlag = true
+					needCreateChan = true
 					cancel()
 					watchCtx, cancel = context.WithCancel(ctx)
 					break
@@ -310,7 +310,7 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 							r.currentRevision,
 						)
 						time.Sleep(time.Second * 5)
-						newWatchFlag = true
+						needCreateChan = true
 						cancel()
 						watchCtx, cancel = context.WithCancel(ctx)
 					}
@@ -336,8 +336,8 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 	return retCh
 }
 
+// handle event
 func (r *EtcdRegistryAdapter) handleEvent(event *clientv3.Event) (*ResourceMetadata, error) {
-	// handle event
 	switch event.Type {
 	case clientv3.EventTypePut:
 		r.logger.Debugw(
@@ -355,7 +355,7 @@ func (r *EtcdRegistryAdapter) handleEvent(event *clientv3.Event) (*ResourceMetad
 		defer span.End()
 		if err != nil {
 			span.RecordError(err)
-			return &metadata, err
+			return nil, err
 		}
 		span.SetAttributes(
 			attribute.String("resource.name", metadata.Name),
@@ -397,7 +397,7 @@ func (r *EtcdRegistryAdapter) handleEvent(event *clientv3.Event) (*ResourceMetad
 				err,
 			)
 			span.RecordError(err)
-			return &metadata, err
+			return nil, err
 		}
 		metadata.Ctx = eventCtx
 		return &metadata, nil
