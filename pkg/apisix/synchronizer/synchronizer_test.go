@@ -124,8 +124,8 @@ var _ = Describe("ApisixConfigSynchronizer", func() {
 			It("should sync new staged apisix configuration correctly", func() {
 				gatewayName := "gateway"
 				stageName := "prod"
-				ac.Sync(ctx, gatewayName, stageName, aConfig)
-				ac.Flush(ctx)
+				err := ac.Sync(ctx, gatewayName, stageName, aConfig)
+				Expect(err).Should(BeNil())
 				time.Sleep(time.Second * 5)
 
 				apisixConfig := store.Get("gateway/prod")

@@ -35,22 +35,12 @@ func (m *MockApisixConfigSynchronizer) EXPECT() *MockApisixConfigSynchronizerMoc
 	return m.recorder
 }
 
-// Flush mocks base method.
-func (m *MockApisixConfigSynchronizer) Flush(ctx context.Context) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "Flush", ctx)
-}
-
-// Flush indicates an expected call of Flush.
-func (mr *MockApisixConfigSynchronizerMockRecorder) Flush(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Flush", reflect.TypeOf((*MockApisixConfigSynchronizer)(nil).Flush), ctx)
-}
-
 // RemoveNotExistStage mocks base method.
-func (m *MockApisixConfigSynchronizer) RemoveNotExistStage(ctx context.Context, existStageKeys []string) {
+func (m *MockApisixConfigSynchronizer) RemoveNotExistStage(ctx context.Context, existStageKeys []string) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "RemoveNotExistStage", ctx, existStageKeys)
+	ret := m.ctrl.Call(m, "RemoveNotExistStage", ctx, existStageKeys)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // RemoveNotExistStage indicates an expected call of RemoveNotExistStage.
@@ -60,9 +50,11 @@ func (mr *MockApisixConfigSynchronizerMockRecorder) RemoveNotExistStage(ctx, exi
 }
 
 // Sync mocks base method.
-func (m *MockApisixConfigSynchronizer) Sync(ctx context.Context, gatewayName, stageName string, config *apisix.ApisixConfiguration) {
+func (m *MockApisixConfigSynchronizer) Sync(ctx context.Context, gatewayName, stageName string, config *apisix.ApisixConfiguration) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "Sync", ctx, gatewayName, stageName, config)
+	ret := m.ctrl.Call(m, "Sync", ctx, gatewayName, stageName, config)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Sync indicates an expected call of Sync.

@@ -26,14 +26,13 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 )
 
-// RetrySyncFunc ...
-type RetrySyncFunc func(ctx context.Context, key string, conf *apisix.ApisixConfiguration)
-
 // ApisixConfigStore ...
 type ApisixConfigStore interface {
 	Get(stageName string) *apisix.ApisixConfiguration
 	GetAll() map[string]*apisix.ApisixConfiguration
 	Alter(
-		ctx context.Context, changedConfig map[string]*apisix.ApisixConfiguration, callbackFunc RetrySyncFunc,
-	)
+		ctx context.Context,
+		stageName string,
+		config *apisix.ApisixConfiguration,
+	) error
 }
