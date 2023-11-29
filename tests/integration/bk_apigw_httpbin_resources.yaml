@@ -1,0 +1,3200 @@
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-anything-anything-delete
+  value: |
+    metadata:
+      name: integration-test-prod-anything-anything-delete
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: anything_anything_delete
+      desc: Returns anything passed in request data.
+      id: 2229
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2229
+          bk_resource_name: anything_anything_delete
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - DELETE
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /anything/{anything}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: DELETE
+        path: /anything/{anything}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-anything-anything-get
+  value: |
+    metadata:
+      name: integration-test-prod-anything-anything-get
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: anything_anything_get
+      desc: Returns anything passed in request data.
+      id: 2230
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2230
+          bk_resource_name: anything_anything_get
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /anything/{anything}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /anything/{anything}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-anything-anything-patch
+  value: |
+    metadata:
+      name: integration-test-prod-anything-anything-patch
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: anything_anything_patch
+      desc: Returns anything passed in request data.
+      id: 2231
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2231
+          bk_resource_name: anything_anything_patch
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - PATCH
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /anything/{anything}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: PATCH
+        path: /anything/{anything}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-anything-anything-post
+  value: |
+    metadata:
+      name: integration-test-prod-anything-anything-post
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: anything_anything_post
+      desc: Returns anything passed in request data.
+      id: 2232
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2232
+          bk_resource_name: anything_anything_post
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - POST
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /anything/{anything}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: POST
+        path: /anything/{anything}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-anything-anything-put
+  value: |
+    metadata:
+      name: integration-test-prod-anything-anything-put
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: anything_anything_put
+      desc: Returns anything passed in request data.
+      id: 2233
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2233
+          bk_resource_name: anything_anything_put
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - PUT
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /anything/{anything}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: PUT
+        path: /anything/{anything}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-anything-delete
+  value: |
+    metadata:
+      name: integration-test-prod-anything-delete
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: anything_delete
+      desc: Returns anything passed in request data.
+      id: 2224
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2224
+          bk_resource_name: anything_delete
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - DELETE
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /anything
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: DELETE
+        path: /anything
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-anything-get
+  value: |
+    metadata:
+      name: integration-test-prod-anything-get
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: anything_get
+      desc: Returns anything passed in request data.
+      id: 2225
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2225
+          bk_resource_name: anything_get
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /anything
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /anything
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-anything-patch
+  value: |
+    metadata:
+      name: integration-test-prod-anything-patch
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: anything_patch
+      desc: Returns anything passed in request data.
+      id: 2226
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2226
+          bk_resource_name: anything_patch
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - PATCH
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /anything
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: PATCH
+        path: /anything
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-anything-post
+  value: |
+    metadata:
+      name: integration-test-prod-anything-post
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: anything_post
+      desc: Returns anything passed in request data.
+      id: 2227
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2227
+          bk_resource_name: anything_post
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - POST
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /anything
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: POST
+        path: /anything
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-anything-put
+  value: |
+    metadata:
+      name: integration-test-prod-anything-put
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: anything_put
+      desc: Returns anything passed in request data.
+      id: 2228
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2228
+          bk_resource_name: anything_put
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - PUT
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /anything
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: PUT
+        path: /anything
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-apigw-builtin-mock-release-version
+  value: |
+    metadata:
+      name: integration-test-prod-apigw-builtin-mock-release-version
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: apigw_builtin__mock_release_version
+      desc: 获取发布信息，用于检查版本发布结果
+      id: -1
+      plugins:
+      - name: bk-mock
+        config:
+          response_status: 200
+          response_example: '{"publish_id": 13, "start_time": "2023-11-07 15:11:09+0800"}'
+          response_headers:
+            Content-Type: application/json
+      service: ''
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 60
+        read: 60
+        send: 60
+      uri: /__apigw_version
+      matchSubPath: false
+      upstream:
+        type: roundrobin
+        hashOn:
+        key:
+        checks:
+        scheme: http
+        retries:
+        retryTimeout:
+        passHost: node
+        upstreamHost:
+        tlsEnable: false
+        externalDiscoveryType:
+        externalDiscoveryConfig:
+        discoveryType:
+        serviceName:
+        nodes: []
+        timeout:
+      rewrite:
+        enabled: false
+        method:
+        path:
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-auth-basic
+  value: |
+    metadata:
+      name: integration-test-prod-auth-basic
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: auth_basic
+      desc: Prompts the user for authorization using HTTP Basic Auth.
+      id: 2235
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2235
+          bk_resource_name: auth_basic
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /basic-auth/{user}/{passwd}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /basic-auth/{user}/{passwd}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-auth-basic-hidden
+  value: |
+    metadata:
+      name: integration-test-prod-auth-basic-hidden
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: auth_basic_hidden
+      desc: Prompts the user for authorization using HTTP Basic Auth.
+      id: 2263
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2263
+          bk_resource_name: auth_basic_hidden
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /hidden-basic-auth/{user}/{passwd}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /hidden-basic-auth/{user}/{passwd}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-auth-bearer
+  value: |
+    metadata:
+      name: integration-test-prod-auth-bearer
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: auth_bearer
+      desc: Prompts the user for authorization using bearer authentication.
+      id: 2236
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2236
+          bk_resource_name: auth_bearer
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /bearer
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /bearer
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-auth-digest
+  value: |
+    metadata:
+      name: integration-test-prod-auth-digest
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: auth_digest
+      desc: Prompts the user for authorization using Digest Auth.
+      id: 2253
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2253
+          bk_resource_name: auth_digest
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /digest-auth/{qop}/{user}/{passwd}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /digest-auth/{qop}/{user}/{passwd}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-auth-digest-algorithm
+  value: |
+    metadata:
+      name: integration-test-prod-auth-digest-algorithm
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: auth_digest_algorithm
+      desc: Prompts the user for authorization using Digest Auth + Algorithm.
+      id: 2254
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2254
+          bk_resource_name: auth_digest_algorithm
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /digest-auth/{qop}/{user}/{passwd}/{algorithm}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /digest-auth/{qop}/{user}/{passwd}/{algorithm}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-auth-digest-algorithm-stale-after
+  value: |
+    metadata:
+      name: integration-test-prod-auth-digest-algorithm-stale-after
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: auth_digest_algorithm_stale_after
+      desc: Prompts the user for authorization using Digest Auth + Algorithm.
+      id: 2255
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2255
+          bk_resource_name: auth_digest_algorithm_stale_after
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /digest-auth/{qop}/{user}/{passwd}/{algorithm}/{stale_after}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /digest-auth/{qop}/{user}/{passwd}/{algorithm}/{stale_after}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-cookies
+  value: |
+    metadata:
+      name: integration-test-prod-cookies
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: cookies
+      desc: Returns cookie data.
+      id: 2241
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2241
+          bk_resource_name: cookies
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /cookies
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /cookies
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-cookies-delete
+  value: |
+    metadata:
+      name: integration-test-prod-cookies-delete
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: cookies_delete
+      desc: Deletes cookie(s) as provided by the query string and redirects to cookie list.
+      id: 2242
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2242
+          bk_resource_name: cookies_delete
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /cookies/delete
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /cookies/delete
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-cookies-set
+  value: |
+    metadata:
+      name: integration-test-prod-cookies-set
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: cookies_set
+      desc: Sets cookie(s) as provided by the query string and redirects to cookie list.
+      id: 2243
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2243
+          bk_resource_name: cookies_set
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /cookies/set
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /cookies/set
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-cookies-set-name-value
+  value: |
+    metadata:
+      name: integration-test-prod-cookies-set-name-value
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: cookies_set_name_value
+      desc: Sets a cookie and redirects to cookie list.
+      id: 2244
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2244
+          bk_resource_name: cookies_set_name_value
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /cookies/set/{name}/{value}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /cookies/set/{name}/{value}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-delete
+  value: |
+    metadata:
+      name: integration-test-prod-delete
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: delete
+      desc: The request's DELETE parameters.
+      id: 2251
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2251
+          bk_resource_name: delete
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - DELETE
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /delete
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: DELETE
+        path: /delete
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-dynamic-data-base64
+  value: |
+    metadata:
+      name: integration-test-prod-dynamic-data-base64
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: dynamic_data_base64
+      desc: Decodes base64url-encoded string.
+      id: 2234
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2234
+          bk_resource_name: dynamic_data_base64
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /base64/{value}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /base64/{value}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-dynamic-data-bytes-n
+  value: |
+    metadata:
+      name: integration-test-prod-dynamic-data-bytes-n
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: dynamic_data_bytes_n
+      desc: Returns n random bytes generated with given seed
+      id: 2238
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2238
+          bk_resource_name: dynamic_data_bytes_n
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /bytes/{n}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /bytes/{n}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-dynamic-data-delay-delete
+  value: |
+    metadata:
+      name: integration-test-prod-dynamic-data-delay-delete
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: dynamic_data_delay_delete
+      desc: Returns a delayed response (max of 10 seconds).
+      id: 2246
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2246
+          bk_resource_name: dynamic_data_delay_delete
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - DELETE
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /delay/{delay}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: DELETE
+        path: /delay/{delay}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-dynamic-data-delay-get
+  value: |
+    metadata:
+      name: integration-test-prod-dynamic-data-delay-get
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: dynamic_data_delay_get
+      desc: Returns a delayed response (max of 10 seconds).
+      id: 2247
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2247
+          bk_resource_name: dynamic_data_delay_get
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /delay/{delay}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /delay/{delay}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-dynamic-data-delay-patch
+  value: |
+    metadata:
+      name: integration-test-prod-dynamic-data-delay-patch
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: dynamic_data_delay_patch
+      desc: Returns a delayed response (max of 10 seconds).
+      id: 2248
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2248
+          bk_resource_name: dynamic_data_delay_patch
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - PATCH
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /delay/{delay}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: PATCH
+        path: /delay/{delay}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-dynamic-data-delay-post
+  value: |
+    metadata:
+      name: integration-test-prod-dynamic-data-delay-post
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: dynamic_data_delay_post
+      desc: Returns a delayed response (max of 10 seconds).
+      id: 2249
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2249
+          bk_resource_name: dynamic_data_delay_post
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - POST
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /delay/{delay}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: POST
+        path: /delay/{delay}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-dynamic-data-delay-put
+  value: |
+    metadata:
+      name: integration-test-prod-dynamic-data-delay-put
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: dynamic_data_delay_put
+      desc: Returns a delayed response (max of 10 seconds).
+      id: 2250
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2250
+          bk_resource_name: dynamic_data_delay_put
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - PUT
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /delay/{delay}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: PUT
+        path: /delay/{delay}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-dynamic-data-drip
+  value: |
+    metadata:
+      name: integration-test-prod-dynamic-data-drip
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: dynamic_data_drip
+      desc: Drips data over a duration after an optional initial delay.
+      id: 2256
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2256
+          bk_resource_name: dynamic_data_drip
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /drip
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /drip
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-dynamic-data-links
+  value: |
+    metadata:
+      name: integration-test-prod-dynamic-data-links
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: dynamic_data_links
+      desc: Generate a page containing n links to other pages which do the same.
+      id: 2272
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2272
+          bk_resource_name: dynamic_data_links
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /links/{n}/{offset}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /links/{n}/{offset}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-dynamic-data-range
+  value: |
+    metadata:
+      name: integration-test-prod-dynamic-data-range
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: dynamic_data_range
+      desc: Streams n random bytes generated with given seed, at given chunk size per packet.
+      id: 2276
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2276
+          bk_resource_name: dynamic_data_range
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /range/{numbytes}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /range/{numbytes}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-dynamic-data-stream
+  value: |
+    metadata:
+      name: integration-test-prod-dynamic-data-stream
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: dynamic_data_stream
+      desc: Stream n JSON responses
+      id: 2293
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2293
+          bk_resource_name: dynamic_data_stream
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /stream/{n}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /stream/{n}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-dynamic-data-stream-bytes
+  value: |
+    metadata:
+      name: integration-test-prod-dynamic-data-stream-bytes
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: dynamic_data_stream_bytes
+      desc: Streams n random bytes generated with given seed, at given chunk size per packet.
+      id: 2292
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2292
+          bk_resource_name: dynamic_data_stream_bytes
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /stream-bytes/{n}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /stream-bytes/{n}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-dynamic-data-uuid
+  value: |
+    metadata:
+      name: integration-test-prod-dynamic-data-uuid
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: dynamic_data_uuid
+      desc: Return a UUID4.
+      id: 2295
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2295
+          bk_resource_name: dynamic_data_uuid
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /uuid
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /uuid
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-get
+  value: |
+    metadata:
+      name: integration-test-prod-get
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: get
+      desc: The request's query parameters.
+      id: 2259
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2259
+          bk_resource_name: get
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /get
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /get
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-get-cloned
+  value: |
+    metadata:
+      name: integration-test-prod-get-cloned
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: get_cloned
+      desc: The request's query parameters.
+      id: 2260
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2260
+          bk_resource_name: get_cloned
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /get_cloned
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /get
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-image
+  value: |
+    metadata:
+      name: integration-test-prod-image
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: image
+      desc: Returns a simple image of the type suggest by the Accept header.
+      id: 2265
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2265
+          bk_resource_name: image
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /image
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /image
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-image-jpeg
+  value: |
+    metadata:
+      name: integration-test-prod-image-jpeg
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: image_jpeg
+      desc: Returns a simple JPEG image.
+      id: 2266
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2266
+          bk_resource_name: image_jpeg
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /image/jpeg
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /image/jpeg
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-image-png
+  value: |
+    metadata:
+      name: integration-test-prod-image-png
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: image_png
+      desc: Returns a simple PNG image.
+      id: 2267
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2267
+          bk_resource_name: image_png
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /image/png
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /image/png
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-image-svg
+  value: |
+    metadata:
+      name: integration-test-prod-image-svg
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: image_svg
+      desc: Returns a simple SVG image.
+      id: 2268
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2268
+          bk_resource_name: image_svg
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /image/svg
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /image/svg
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-image-webp
+  value: |
+    metadata:
+      name: integration-test-prod-image-webp
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: image_webp
+      desc: Returns a simple WEBP image.
+      id: 2269
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2269
+          bk_resource_name: image_webp
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /image/webp
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /image/webp
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-patch
+  value: |
+    metadata:
+      name: integration-test-prod-patch
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: patch
+      desc: The request's PATCH parameters.
+      id: 2273
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2273
+          bk_resource_name: patch
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - PATCH
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /patch
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: PATCH
+        path: /patch
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-post
+  value: |
+    metadata:
+      name: integration-test-prod-post
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: post
+      desc: The request's POST parameters.
+      id: 2274
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2274
+          bk_resource_name: post
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - POST
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /post
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: POST
+        path: /post
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-put
+  value: |
+    metadata:
+      name: integration-test-prod-put
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: put
+      desc: The request's PUT parameters.
+      id: 2275
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2275
+          bk_resource_name: put
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - PUT
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /put
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: PUT
+        path: /put
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-redirect-absolute
+  value: |
+    metadata:
+      name: integration-test-prod-redirect-absolute
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: redirect_absolute
+      desc: Absolutely 302 Redirects n times.
+      id: 2223
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2223
+          bk_resource_name: redirect_absolute
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /absolute-redirect/{n}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /absolute-redirect/{n}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-redirect-delete
+  value: |
+    metadata:
+      name: integration-test-prod-redirect-delete
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: redirect_delete
+      desc: 302/3XX Redirects to the given URL.
+      id: 2277
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2277
+          bk_resource_name: redirect_delete
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - DELETE
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /redirect-to
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: DELETE
+        path: /redirect-to
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-redirect-get
+  value: |
+    metadata:
+      name: integration-test-prod-redirect-get
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: redirect_get
+      desc: 302/3XX Redirects to the given URL.
+      id: 2278
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2278
+          bk_resource_name: redirect_get
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /redirect-to
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /redirect-to
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-redirect-n
+  value: |
+    metadata:
+      name: integration-test-prod-redirect-n
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: redirect_n
+      desc: 302 Redirects n times.
+      id: 2282
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2282
+          bk_resource_name: redirect_n
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /redirect/{n}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /redirect/{n}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-redirect-patch
+  value: |
+    metadata:
+      name: integration-test-prod-redirect-patch
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: redirect_patch
+      desc: 302/3XX Redirects to the given URL.
+      id: 2279
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2279
+          bk_resource_name: redirect_patch
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - PATCH
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /redirect-to
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: PATCH
+        path: /redirect-to
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-redirect-post
+  value: |
+    metadata:
+      name: integration-test-prod-redirect-post
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: redirect_post
+      desc: 302/3XX Redirects to the given URL.
+      id: 2280
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2280
+          bk_resource_name: redirect_post
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - POST
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /redirect-to
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: POST
+        path: /redirect-to
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-redirect-put
+  value: |
+    metadata:
+      name: integration-test-prod-redirect-put
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: redirect_put
+      desc: 302/3XX Redirects to the given URL.
+      id: 2281
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2281
+          bk_resource_name: redirect_put
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - PUT
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /redirect-to
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: PUT
+        path: /redirect-to
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-redirect-relative-n
+  value: |
+    metadata:
+      name: integration-test-prod-redirect-relative-n
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: redirect_relative_n
+      desc: Relatively 302 Redirects n times.
+      id: 2283
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2283
+          bk_resource_name: redirect_relative_n
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /relative-redirect/{n}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /relative-redirect/{n}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-request-headers
+  value: |
+    metadata:
+      name: integration-test-prod-request-headers
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: request_headers
+      desc: Return the incoming request's HTTP headers.
+      id: 2262
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2262
+          bk_resource_name: request_headers
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /headers
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /headers
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-request-ip
+  value: |
+    metadata:
+      name: integration-test-prod-request-ip
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: request_ip
+      desc: Returns the requester's IP Address.
+      id: 2270
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2270
+          bk_resource_name: request_ip
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /ip
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /ip
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-request-user-agent
+  value: |
+    metadata:
+      name: integration-test-prod-request-user-agent
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: request_user_agent
+      desc: Return the incoming requests's User-Agent header.
+      id: 2294
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2294
+          bk_resource_name: request_user_agent
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /user-agent
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /user-agent
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-response-cache
+  value: |
+    metadata:
+      name: integration-test-prod-response-cache
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: response_cache
+      desc: Returns a 304 if an If-Modified-Since header or If-None-Match is present. Returns the same as a GET otherwise.
+      id: 2239
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2239
+          bk_resource_name: response_cache
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /cache
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /cache
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-response-cache-value
+  value: |
+    metadata:
+      name: integration-test-prod-response-cache-value
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: response_cache_value
+      desc: Sets a Cache-Control header for n seconds.
+      id: 2240
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2240
+          bk_resource_name: response_cache_value
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /cache/{value}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /cache/{value}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-response-etag
+  value: |
+    metadata:
+      name: integration-test-prod-response-etag
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: response_etag
+      desc: Assumes the resource has the given etag and responds to If-None-Match and If-Match headers appropriately.
+      id: 2258
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2258
+          bk_resource_name: response_etag
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /etag/{etag}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /etag/{etag}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-response-format-brotli
+  value: |
+    metadata:
+      name: integration-test-prod-response-format-brotli
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: response_format_brotli
+      desc: Returns Brotli-encoded data.
+      id: 2237
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2237
+          bk_resource_name: response_format_brotli
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /brotli
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /brotli
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-response-format-deflate
+  value: |
+    metadata:
+      name: integration-test-prod-response-format-deflate
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: response_format_deflate
+      desc: Returns Deflate-encoded data.
+      id: 2245
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2245
+          bk_resource_name: response_format_deflate
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /deflate
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /deflate
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-response-format-deny
+  value: |
+    metadata:
+      name: integration-test-prod-response-format-deny
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: response_format_deny
+      desc: Returns page denied by robots.txt rules.
+      id: 2252
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2252
+          bk_resource_name: response_format_deny
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /deny
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /deny
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-response-format-encoding-utf8
+  value: |
+    metadata:
+      name: integration-test-prod-response-format-encoding-utf8
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: response_format_encoding_utf8
+      desc: Returns a UTF-8 encoded body.
+      id: 2257
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2257
+          bk_resource_name: response_format_encoding_utf8
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /encoding/utf8
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /encoding/utf8
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-response-format-gzip
+  value: |
+    metadata:
+      name: integration-test-prod-response-format-gzip
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: response_format_gzip
+      desc: Returns GZip-encoded data.
+      id: 2261
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2261
+          bk_resource_name: response_format_gzip
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /gzip
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /gzip
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-response-format-html
+  value: |
+    metadata:
+      name: integration-test-prod-response-format-html
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: response_format_html
+      desc: Returns a simple HTML document.
+      id: 2264
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2264
+          bk_resource_name: response_format_html
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /html
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /html
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-response-format-json
+  value: |
+    metadata:
+      name: integration-test-prod-response-format-json
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: response_format_json
+      desc: Returns a simple JSON document.
+      id: 2271
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2271
+          bk_resource_name: response_format_json
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /json
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /json
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-response-format-robots-txt
+  value: |
+    metadata:
+      name: integration-test-prod-response-format-robots-txt
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: response_format_robots_txt
+      desc: Returns some robots.txt rules.
+      id: 2286
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2286
+          bk_resource_name: response_format_robots_txt
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /robots.txt
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /robots.txt
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-response-format-xml
+  value: |
+    metadata:
+      name: integration-test-prod-response-format-xml
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: response_format_xml
+      desc: Returns a simple XML document.
+      id: 2296
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2296
+          bk_resource_name: response_format_xml
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /xml
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /xml
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-response-headers-get
+  value: |
+    metadata:
+      name: integration-test-prod-response-headers-get
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: response_headers_get
+      desc: Returns a set of response headers from the query string.
+      id: 2284
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2284
+          bk_resource_name: response_headers_get
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /response-headers
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /response-headers
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-response-headers-post
+  value: |
+    metadata:
+      name: integration-test-prod-response-headers-post
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: response_headers_post
+      desc: Returns a set of response headers from the query string.
+      id: 2285
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2285
+          bk_resource_name: response_headers_post
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - POST
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /response-headers
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: POST
+        path: /response-headers
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-status-delete
+  value: |
+    metadata:
+      name: integration-test-prod-status-delete
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: status_delete
+      desc: Return status code or random status code if more than one are given
+      id: 2287
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2287
+          bk_resource_name: status_delete
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - DELETE
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /status/{codes}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: DELETE
+        path: /status/{codes}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-status-get
+  value: |
+    metadata:
+      name: integration-test-prod-status-get
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: status_get
+      desc: Return status code or random status code if more than one are given
+      id: 2288
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2288
+          bk_resource_name: status_get
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - GET
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /status/{codes}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: GET
+        path: /status/{codes}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-status-patch
+  value: |
+    metadata:
+      name: integration-test-prod-status-patch
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: status_patch
+      desc: Return status code or random status code if more than one are given
+      id: 2289
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2289
+          bk_resource_name: status_patch
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - PATCH
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /status/{codes}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: PATCH
+        path: /status/{codes}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-status-post
+  value: |
+    metadata:
+      name: integration-test-prod-status-post
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: status_post
+      desc: Return status code or random status code if more than one are given
+      id: 2290
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2290
+          bk_resource_name: status_post
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - POST
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /status/{codes}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: POST
+        path: /status/{codes}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayResource/integration-test-prod-status-put
+  value: |
+    metadata:
+      name: integration-test-prod-status-put
+      labels:
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: status_put
+      desc: Return status code or random status code if more than one are given
+      id: 2291
+      plugins:
+      - name: bk-resource-context
+        config:
+          bk_resource_id: 2291
+          bk_resource_name: status_put
+          bk_resource_auth:
+            verified_app_required: false
+            verified_user_required: false
+            resource_perm_required: false
+            skip_user_verification: false
+      service: integration-test-prod-stage-prod-9
+      protocol: http
+      methods:
+      - PUT
+      timeout:
+        connect: 30
+        read: 30
+        send: 30
+      uri: /status/{codes}
+      matchSubPath: false
+      upstream:
+      rewrite:
+        enabled: true
+        method: PUT
+        path: /status/{codes}
+        headers: {}
+        stageHeaders: append
+        serviceHeaders: append
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayService/integration-test-prod-stage-prod-9
+  value: |
+    metadata:
+      name: integration-test-prod-stage-prod-9
+      labels:
+        gateway.bk.tencent.com/service-type: stage
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: _stage_service_prod
+      desc: 正式环境
+      id: stage-9
+      upstream:
+        type: roundrobin
+        hashOn:
+        key:
+        checks:
+        scheme: http
+        retries:
+        retryTimeout:
+        passHost: node
+        upstreamHost:
+        tlsEnable: false
+        externalDiscoveryType:
+        externalDiscoveryConfig:
+        discoveryType:
+        serviceName:
+        nodes:
+        - host: httpbin.com
+          port: 80
+          weight: 100
+          priority: 1
+        timeout:
+          connect: 30
+          read: 30
+          send: 30
+      rewrite:
+        enabled: false
+        headers: {}
+      plugins: []
+- key: >-
+    /bk-gateway-apigw/default/integration-test/prod/v1beta1/BkGatewayStage/integration-test-prod-prod
+  value: |
+    metadata:
+      name: integration-test-prod-prod
+      labels:
+        gateway.bk.tencent.com/publish_id: '13'
+        gateway.bk.tencent.com/gateway: integration-test
+        gateway.bk.tencent.com/stage: prod
+      annotations: {}
+    spec:
+      name: prod
+      desc: 正式环境
+      vars: {}
+      rewrite:
+        enabled: false
+        headers: {}
+      plugins:
+      - name: bk-opentelemetry
+        config: {}
+      - name: prometheus
+        config: {}
+      - name: bk-real-ip
+        config: {}
+      - name: bk-auth-validate
+        config: {}
+      - name: bk-auth-verify
+        config: {}
+      - name: bk-break-recursive-call
+        config: {}
+      - name: bk-concurrency-limit
+        config: {}
+      - name: bk-delete-sensitive
+        config: {}
+      - name: bk-log-context
+        config: {}
+      - name: bk-delete-cookie
+        config: {}
+      - name: bk-error-wrapper
+        config: {}
+      - name: bk-jwt
+        config: {}
+      - name: bk-request-id
+        config: {}
+      - name: bk-response-check
+        config: {}
+      - name: bk-permission
+        config: {}
+      - name: bk-debug
+        config: {}
+      - name: file-logger
+        config:
+          path: logs/access.log
+      - name: bk-stage-context
+        config:
+          bk_gateway_name: integration-test
+          bk_gateway_id: 8
+          bk_stage_name: prod
+          jwt_private_key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb3dJQkFBS0NBUUVBeG9HeFVscWt3bWhnaU1tSXVKa3lqOFphdU1ZRjlXS1hteUtRcWJ6YnBvTjFkNlJ4CjFNbllkNkVPTzQyVnZCKzJyM09MUkZvVnNNZUp6dkE0MFhJMzcwM0RGaTdwL0RwcHlOTUE2OGhHVlNnWDZoa1EKclQ4QVFlMXZaSGVKMUlyUWF5dHRIWUZZMkhMUWxVMGdBOEhmNFFZOXBJWXNvSGR6aFY5TmpQTmpubHZ5UlVZOQo4MXk2ZjZSeE1Fbk5QUlAzNEZnbDdTTkd3UVhkZEt6OVlDTEVEemhMMUJheCtxT2pFekM0QmFPampUd2RNa0RECllLRVRoVFhGVE9DOG11UVFLUUdUV1I4TkhWdnF4N3pnSzFrb3lzL2ZDRWRBZzBDTTRvY0VHeVFqMkxpWlFyVUgKR3ZZbGJ3ekc0dXdOR0tHTXZzRy9MaEx1NnQvSFhmZ0pHWk1wandJREFRQUJBb0lCQUZuYkowdGlJS2FuM05yTwpiNGN3UWNUM1F1WFZMYWxRUWRSRnB6cE9kUmRBOXBGNzdOTW5zMGNqcm0raXZaNzB0QnRqc0N6Mm9rN3RaQ0k2CmQxM0gyQzRKQTBBdGFGbDJqNkFLYzZaSGVCN2dFVU0wcVduaTFOa0RBNk4wd1AxbkFNVWlXVGc3N3QyN3kxTnEKSUEzVFd1WmZqdFBFc0xyS2w0NU4vNnJJR2RYNmVJaEpmU1R2cnIweExKOUNPbFc2Q0tkeGJWeHVyMHZ0dTlOcgpEc0NuMG9tM3RYaXQyZjJJSzBHU3dWYm9zUzM4Zm1HREQ1Zm5OejdhWUFpWDZIOFhKNkFUWklqbDFiSlE1OVhICmwvSkwzTndIeW1zd1Q1dWJKRjFpeTVvelhqUG9ycVJrRmpvMUdveWFFWXdFZ1pLazRYVDI3TFJucWVJV0w5d3AKdXhzVWkvRUNnWUVBOEJnM0pnSk1Id1M2RmtxaGUrd1ZEWm80YkhQRUM1M0hncEdPZFVGczRxNmFYaVFOT2RPTgptTGtoK3VCaHg1WVIrWlE4N2laMVQ2MW55MU9mTHpqc0RtVUZaV1dmRS9xanoyNWtJM0hyQVV3RDQ0ZXdIcGYvCjJJN3JldEd6QTRhV2VQTGdvakxNSlU5YkZybTBrSUFBQy8rUk8zZ3o0SWJES0M2QjR2S2VFWTBDZ1lFQTA2Z3UKNDZCajJYTHhUOTF2V1l5YXdrb3QxZFRndWVwbXdwRjF6dDNISVA5VHE3aWFhNXhnS1FYZWRVUDEzaStlK21jMApydDZzekp3Z2U3TW11UUVkaFhsbXBOUFBQT0FMRFNnR24wTzFwY2Rxa2Q2eVJoT3ZCZU1mTWZ1eko2M29kYkwrCkZneC82SWlXZktqeTR1NVorMFM4SkNNTUlqMm9sMTAzMmR4NHFvc0NnWUEybGdyVHhXbnhFMjRMYTJSVGZGVTkKQm5jVmtTeGRSNzM0WFlkNStTbjhUNTRoRVNsQW9HeHM4SXBkTTI2SHBnTG9MMSs2OVZ0dWhnbzNIQWZ4QUl3SwpxY1VVVElwaVRIVzV6MnRNODdWdVVnNEFTUFV0djNrWGowYlNZYUxGaG0vbmg3Q3lyOEhpS2F5WCtoaW5VYkt4CkI2WEpVNGJYNFV1MWN2MXN6NlJJY1FLQmdFdUpZVHFSZWpFWHFYRmtTS0gvNFJkbjI5WE5oR28xY25rTDZxeHEKVCsvQno3MmdRMVFXV2VjcUZndHB0cXlWK0RuTGJXemZRWEpBWWdOam0zVTVKYTBGOTVEcG1yTlNEZitqQWtJQwpxeWcvOUJPZEU2aVl5OFRoR3JmKzZTQkhHNGd0MmlwS1NiZldUMGFzRVFyV0g3emgrZmMzbnRQMWgxNkZ3VEg2ClVnSWpBb0dCQUlQLzVxMHUvRUYyOUVCYlJEMDYrTmpMbStYY2VMOHEzQk8xdDJIaUdqcEh0T3dNdjEzcVNuQUwKS29pTEJ3NWtORDJkdjhOVHBIR2pnMDlHN0x6L1BxSFlWUTByWWpSeENhNzlPTzVDNXE4ZERJcHlBd1Vlakk1RgovUWt6VUdJOFQvdGdxaVUwZys0dkxEQkRhY2V1c3ZRTXo3VVhXT3FyZEQwbTI0WFgweURCCi0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0t
+          bk_api_auth:
+            user_auth_type: default
+            api_type: 10
+            allow_update_api_auth: true
+            unfiltered_sensitive_keys: []
+            user_conf:
+              user_type: default
+              from_bk_token: true
+              from_username: true
+      domain: ''
+      pathPrefix: ''

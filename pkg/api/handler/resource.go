@@ -26,8 +26,10 @@ import (
 	"net/http"
 	"reflect"
 
+	apisixv1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
@@ -60,6 +62,14 @@ func NewResourceApi(
 		apisixConfStore: apiSixConfStore,
 	}
 }
+
+// ignoreCreateTimeAndUpdateTimeCmpOpt: 忽略typ 创建、更新时间
+var ignoreCreateTimeAndUpdateTimeCmpOptFunc = func(typ interface{}) cmp.Option {
+	return cmpopts.IgnoreFields(typ, "CreateTime", "UpdateTime")
+}
+
+// ignoreApisixMetadata: 忽略apisixeMetadata的部分成员
+var ignoreApisixMetadataCmpOpt = cmpopts.IgnoreFields(apisixv1.Metadata{}, "Desc", "Labels")
 
 // GetLeader get leader pod host
 func (r *ResourceHandler) GetLeader(c *gin.Context) {
@@ -256,7 +266,27 @@ func (r *ResourceHandler) diffMap(lhs, rhs interface{}, id string) map[string]in
 		if !rhsItemValue.IsValid() {
 			diff[key.String()] = cmp.Diff(val.Interface(), nil)
 		} else {
-			diffStr := cmp.Diff(val.Interface(), rhsItemValue.Interface())
+			var cmpOps []cmp.Option
+			if val.Elem().Type().Name() == "Route" {
+				cmpOps = append(
+					cmpOps,
+					ignoreCreateTimeAndUpdateTimeCmpOptFunc(apisix.Route{}),
+					ignoreApisixMetadataCmpOpt,
+				)
+			}
+			if val.Elem().Type().Name() == "Service" {
+				cmpOps = append(cmpOps,
+					ignoreCreateTimeAndUpdateTimeCmpOptFunc(apisix.Service{}),
+					ignoreApisixMetadataCmpOpt,
+				)
+			}
+			if val.Elem().Type().Name() == "SSL" {
+				cmpOps = append(cmpOps, ignoreCreateTimeAndUpdateTimeCmpOptFunc(apisix.SSL{}))
+			}
+			diffStr := cmp.Diff(
+				val.Interface(), rhsItemValue.Interface(),
+				cmpOps...,
+			)
 			if len(diffStr) != 0 {
 				diff[key.String()] = diffStr
 			}

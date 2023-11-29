@@ -16,23 +16,16 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package synchronizer
-
-//go:generate mockgen -source=$GOFILE -destination=./mock/$GOFILE -package=mock
+package integration_test
 
 import (
-	"context"
+	"testing"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-// ApisixConfigStore ...
-type ApisixConfigStore interface {
-	Get(stageName string) *apisix.ApisixConfiguration
-	GetAll() map[string]*apisix.ApisixConfiguration
-	Alter(
-		ctx context.Context,
-		stageName string,
-		config *apisix.ApisixConfiguration,
-	) error
+func TestIntegration(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Integration Suite")
 }

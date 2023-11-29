@@ -42,7 +42,10 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/radixtree"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/trace"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
+
+const maxStageRetryCount = 3
 
 var errStageNotFound = eris.Errorf("no bk gateway stage found")
 
@@ -131,12 +134,12 @@ func (c *Commiter) commitGroup(ctx context.Context, stageInfoList []registry.Sta
 	wg := &sync.WaitGroup{}
 	for _, stageInfo := range stageInfoList {
 		wg.Add(1)
-		go c.commitStage(ctx, stageInfo, wg)
+		tempStageInfo := stageInfo
+		utils.GoroutineWithRecovery(ctx, func() {
+			c.commitStage(ctx, tempStageInfo, wg)
+		})
 	}
 	wg.Wait()
-
-	// flush all buffed apisix conf to etcd/file
-	c.synchronizer.Flush(ctx)
 }
 
 func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, wg *sync.WaitGroup) {
@@ -154,7 +157,7 @@ func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, wg *s
 		if !eris.Is(err, errStageNotFound) {
 			c.logger.Error(err, "convert stage resources to apisix representation failed", "stageInfo", si)
 			// retry
-			c.stageTimer.Update(si)
+			c.retryStage(si)
 
 			span.RecordError(err)
 			return
@@ -169,15 +172,30 @@ func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, wg *s
 		eventreporter.ReportParseConfigurationSuccessEvent(ctx, stage)
 	}
 	eventreporter.ReportApplyConfigurationDoingEvent(ctx, stage)
-	c.synchronizer.Sync(
+
+	err = c.synchronizer.Sync(
 		ctx,
 		si.GatewayName,
 		si.StageName,
 		apisixConf,
 	)
+	if err != nil {
+		c.logger.Error(err, "sync stage resources to apisix failed", "stageInfo", si)
+		c.retryStage(si)
+	}
+
 	// eventrepoter.ReportApplyConfigurationSuccessEvent(ctx, stage) // 可以由事件之前的关系推断出来
-	eventreporter.ReportLoadConfigurationDoingEvent(ctx, stage) //
 	eventreporter.ReportLoadConfigurationResultEvent(ctx, stage)
+}
+
+func (c *Commiter) retryStage(si registry.StageInfo) {
+	if si.RetryCount >= maxStageRetryCount {
+		c.logger.Errorf("too many retries", "stageInfo", si)
+		return
+	}
+
+	si.RetryCount++
+	c.stageTimer.Update(si)
 }
 
 // ConvertEtcdKVToApisixConfiguration ...

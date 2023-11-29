@@ -20,6 +20,7 @@ package registry
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"reflect"
@@ -249,14 +250,14 @@ func (r *EtcdRegistryAdapter) List(ctx context.Context, key ResourceKey, obj cli
 
 // Watch ...
 func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadata {
-	etcdWatchCh := r.etcdClient.Watch(
-		ctx,
-		strings.TrimSuffix(r.keyPrefix, "/")+"/",
-		clientv3.WithPrefix(),
-		clientv3.WithPrevKV(),
-		clientv3.WithRev(r.currentRevision),
-	)
+	watchCtx, cancel := context.WithCancel(ctx)
+
 	retCh := make(chan *ResourceMetadata)
+
+	var etcdWatchCh clientv3.WatchChan
+
+	needCreateChan := true
+
 	go func() {
 		defer func() {
 			r.currentRevision = 0
@@ -264,9 +265,18 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 		}()
 
 		for {
+			if needCreateChan {
+				etcdWatchCh = r.etcdClient.Watch(
+					clientv3.WithRequireLeader(watchCtx),
+					strings.TrimSuffix(r.keyPrefix, "/")+"/",
+					clientv3.WithPrefix(),
+					clientv3.WithPrevKV(),
+					clientv3.WithRev(r.currentRevision),
+				)
+				needCreateChan = false
+			}
 			select {
 			case event, ok := <-etcdWatchCh:
-
 				// reset watch channel if get error
 				if !ok {
 					r.logger.Error(
@@ -276,27 +286,22 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 						r.currentRevision,
 					)
 					time.Sleep(time.Second * 5)
-					etcdWatchCh = r.etcdClient.Watch(
-						ctx,
-						strings.TrimSuffix(r.keyPrefix, "/")+"/",
-						clientv3.WithPrefix(),
-						clientv3.WithPrevKV(),
-						clientv3.WithRev(r.currentRevision),
-					)
+					needCreateChan = true
+					cancel()
+					watchCtx, cancel = context.WithCancel(ctx)
 					break
 				}
 
 				r.logger.Debugw("etcd event trigger", "event", event)
 				err := event.Err()
 				if err != nil {
-					switch err {
-					case v3rpc.ErrCompacted, v3rpc.ErrFutureRev:
+					switch {
+					case errors.Is(err, v3rpc.ErrCompacted), errors.Is(err, v3rpc.ErrFutureRev):
 						r.logger.Error(
 							event.Err(),
 							"Watch etcd registry failed unrecoverable, need full sync to recover",
 						)
 						return
-
 					default:
 						r.logger.Error(
 							event.Err(),
@@ -305,108 +310,23 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 							r.currentRevision,
 						)
 						time.Sleep(time.Second * 5)
-						etcdWatchCh = r.etcdClient.Watch(
-							ctx,
-							strings.TrimSuffix(r.keyPrefix, "/")+"/",
-							clientv3.WithPrefix(),
-							clientv3.WithPrevKV(),
-							clientv3.WithRev(r.currentRevision),
-						)
+						needCreateChan = true
+						cancel()
+						watchCtx, cancel = context.WithCancel(ctx)
 					}
 					// break select
 					break
 				}
-
-				// handle event
-				for i, evt := range event.Events {
-					switch event.Events[i].Type {
-					case clientv3.EventTypePut:
-						r.logger.Debugw(
-							"Etcd Put events triggeres",
-							"action",
-							evt.Type,
-							"key",
-							string(evt.Kv.Key),
-							"value",
-							string(evt.Kv.Value),
-						)
-						metadata, err := r.extractResourceMetadata(string(evt.Kv.Key))
-
-						// trace
-						eventCtx, span := trace.StartTrace(metadata.Ctx, "registry.EventPut")
-						span.SetAttributes(
-							attribute.String("resource.name", metadata.Name),
-							attribute.String("stage", metadata.StageName),
-							attribute.String("gateway", metadata.GatewayName),
-							attribute.String("resource.kind", metadata.Kind),
-						)
-
-						if err != nil {
-							r.logger.Infow(
-								"resource key is incorrect, skip it",
-								"key",
-								string(evt.Kv.Key),
-								"value",
-								string(evt.Kv.Value),
-								"err",
-								err,
-							)
-
-							span.RecordError(err)
-							span.End()
-							continue
-						}
-
-						// push to ret channel
-						metadata.Ctx = eventCtx
-						retCh <- &metadata
-
-						span.End()
-					case clientv3.EventTypeDelete:
-						r.logger.Debugw(
-							"Etcd Delete events triggeres",
-							"action",
-							evt.Type,
-							"key",
-							string(evt.PrevKv.Key),
-							"value",
-							string(evt.PrevKv.Value),
-						)
-						metadata, err := r.extractResourceMetadata(string(evt.PrevKv.Key))
-
-						// trace
-						eventCtx, span := trace.StartTrace(metadata.Ctx, "registry.EventDelete")
-						span.SetAttributes(
-							attribute.String("resource.name", metadata.Name),
-							attribute.String("stage", metadata.StageName),
-							attribute.String("gateway", metadata.GatewayName),
-							attribute.String("resource.kind", metadata.Kind),
-						)
-
-						if err != nil {
-							r.logger.Infow(
-								"deleted resource key is incorrect, skip it",
-								"key",
-								string(evt.PrevKv.Key),
-								"value",
-								string(evt.PrevKv.Value),
-								"err",
-								err,
-							)
-
-							span.RecordError(err)
-							span.End()
-							continue
-						}
-
-						// push to ret channel
-						metadata.Ctx = eventCtx
-						retCh <- &metadata
-
-						span.End()
+				for _, evt := range event.Events {
+					metadata, handleErr := r.handleEvent(evt)
+					if handleErr != nil {
+						r.logger.Errorf("handle etcd event failed:%v", handleErr)
+						continue
 					}
+					retCh <- metadata
 					r.currentRevision = event.Header.Revision
 				}
+
 			case <-ctx.Done():
 				r.logger.Infow("stop etcd watch loop canceled by context")
 				return
@@ -416,6 +336,74 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 	return retCh
 }
 
+// handle event
+func (r *EtcdRegistryAdapter) handleEvent(event *clientv3.Event) (*ResourceMetadata, error) {
+	switch event.Type {
+	case clientv3.EventTypePut:
+		r.logger.Debugw(
+			"Etcd Put events triggeres",
+			"action",
+			event.Type,
+			"key",
+			string(event.Kv.Key),
+			"value",
+			string(event.Kv.Value),
+		)
+		// trace
+		metadata, err := r.extractResourceMetadata(string(event.Kv.Key))
+		eventCtx, span := trace.StartTrace(metadata.Ctx, "registry.EventPut")
+		defer span.End()
+		if err != nil {
+			span.RecordError(err)
+			return nil, err
+		}
+		span.SetAttributes(
+			attribute.String("resource.name", metadata.Name),
+			attribute.String("stage", metadata.StageName),
+			attribute.String("gateway", metadata.GatewayName),
+			attribute.String("resource.kind", metadata.Kind),
+		)
+		metadata.Ctx = eventCtx
+		return &metadata, nil
+	case clientv3.EventTypeDelete:
+		r.logger.Debugw(
+			"Etcd Delete events triggeres",
+			"action",
+			event.Type,
+			"key",
+			string(event.PrevKv.Key),
+			"value",
+			string(event.PrevKv.Value),
+		)
+		metadata, err := r.extractResourceMetadata(string(event.PrevKv.Key))
+
+		// trace
+		eventCtx, span := trace.StartTrace(metadata.Ctx, "registry.EventDelete")
+		defer span.End()
+		span.SetAttributes(
+			attribute.String("resource.name", metadata.Name),
+			attribute.String("stage", metadata.StageName),
+			attribute.String("gateway", metadata.GatewayName),
+			attribute.String("resource.kind", metadata.Kind),
+		)
+		if err != nil {
+			r.logger.Infow(
+				"deleted resource key is incorrect, skip it",
+				"key",
+				string(event.PrevKv.Key),
+				"value",
+				string(event.PrevKv.Value),
+				"err",
+				err,
+			)
+			span.RecordError(err)
+			return nil, err
+		}
+		metadata.Ctx = eventCtx
+		return &metadata, nil
+	}
+	return nil, fmt.Errorf("err unknown event type: %s", event.Type)
+}
 func (r *EtcdRegistryAdapter) extractResourceMetadata(key string) (ResourceMetadata, error) {
 	ret := ResourceMetadata{}
 	if len(key) == 0 {

@@ -108,6 +108,10 @@ func retryEvaluator(gateway string, stage string, publishID int64, retryError *e
 		if err != nil {
 			return err
 		}
+		// The http Client and Transport guarantee that Body is always non-nil
+		// So this has to be closed or there could be a coroutine leak
+		defer res.Body.Close()
+
 		if res.StatusCode >= http.StatusInternalServerError || res.StatusCode == http.StatusTooManyRequests {
 			return retry.ErrServer
 		}
@@ -120,7 +124,6 @@ func retryEvaluator(gateway string, stage string, publishID int64, retryError *e
 		}
 		if res.StatusCode == http.StatusOK {
 			// 解析返回结果
-			defer res.Body.Close()
 			result, readErr := io.ReadAll(res.Body)
 			if readErr != nil {
 				*retryError = fmt.Errorf("read configuration [gateway: %s,state: %s] version route body err: %w",

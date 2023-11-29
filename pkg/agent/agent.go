@@ -141,10 +141,11 @@ func (w *EventAgent) createWatchChannel(ctx context.Context) (<-chan *registry.R
 	ctx, cancel := context.WithCancel(ctx)
 
 	retryCount := 0
-	var watchCh <-chan *registry.ResourceMetadata
+
+	watchCh := w.resourceRegistry.Watch(ctx)
+
 	for retryCount < retryLimit {
 		w.logger.Debugw("Boostrap watch channel")
-		watchCh = w.resourceRegistry.Watch(ctx)
 
 		err := w.bootstrapSync(ctx)
 
@@ -187,7 +188,10 @@ func (w *EventAgent) bootstrapSync(ctx context.Context) error {
 
 	w.logger.Debugw("RenewStages gateway exists keys", "keys", keys)
 
-	w.synchronizer.RemoveNotExistStage(ctx, keys)
+	err = w.synchronizer.RemoveNotExistStage(ctx, keys)
+	if err != nil {
+		return err
+	}
 	w.radixTreeGetter.RemoveNotExistStage(stageList)
 
 	w.commitChan <- stageList // 全量同步
@@ -365,7 +369,7 @@ func (w *EventAgent) secretEventCallback(
 			radixTree.Delete(obj)
 			return true, nil
 		}
-		return false, eris.Wrapf(err, "Get secret (%s) failed", obj)
+		return false, eris.Wrapf(err, "Get secret (%v) failed", obj)
 	}
 	tlsCert, err := v1beta1.GetTLSCertFromSecret(secret)
 	if err != nil {
@@ -400,7 +404,7 @@ func (w *EventAgent) gatewayTLSCallback(
 			radixTree.Delete(tlsObjKey)
 			return true, nil
 		}
-		return false, eris.Wrapf(err, "Get secret (%s) failed", secretObj)
+		return false, eris.Wrapf(err, "Get secret (%v) failed", secretObj)
 	}
 
 	tlsCert, err := v1beta1.GetTLSCertFromSecret(secret)

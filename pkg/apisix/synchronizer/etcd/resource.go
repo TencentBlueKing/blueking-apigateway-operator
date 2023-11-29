@@ -20,6 +20,7 @@ package etcd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -171,16 +172,20 @@ func (e *resourceStore) parseResource(key, value []byte) (resource apisix.Apisix
 func (e *resourceStore) incrSync() {
 	c, cancel := context.WithCancel(context.TODO())
 	defer cancel()
-
-	ch := e.client.Watch(
-		c,
-		e.prefix,
-		clientv3.WithPrefix(),
-		clientv3.WithPrevKV(),
-		clientv3.WithRev(e.currentRevision),
-	)
-
+	var ch clientv3.WatchChan
+	needCreateChan := true
 	for {
+		if needCreateChan {
+			ch = e.client.Watch(
+				clientv3.WithRequireLeader(c),
+				e.prefix,
+				clientv3.WithPrefix(),
+				clientv3.WithPrevKV(),
+				clientv3.WithRev(e.currentRevision),
+			)
+			needCreateChan = false
+		}
+
 		select {
 		case event, ok := <-ch:
 			if !ok || event.Err() != nil {
@@ -188,77 +193,80 @@ func (e *resourceStore) incrSync() {
 
 				time.Sleep(syncSleepSeconds)
 
-				switch event.Err() {
-				case v3rpc.ErrCompacted, v3rpc.ErrFutureRev:
+				switch err := event.Err(); {
+				case errors.Is(err, v3rpc.ErrCompacted), errors.Is(err, v3rpc.ErrFutureRev):
 					err := e.fullSync(c)
 					if err != nil {
 						time.Sleep(syncSleepSeconds)
 						continue
 					}
 				}
-
 				// reset channel
-				ch = e.client.Watch(
-					c,
-					e.prefix,
-					clientv3.WithPrefix(),
-					clientv3.WithPrevKV(),
-					clientv3.WithRev(e.currentRevision),
-				)
+				needCreateChan = true
+				cancel()
+				c, cancel = context.WithCancel(context.TODO())
 				break
 			}
-
-			for i := range event.Events {
-				switch event.Events[i].Type {
-				case clientv3.EventTypePut:
-					resource, err := e.parseResource(event.Events[i].Kv.Key, event.Events[i].Kv.Value)
-					if err != nil {
-						e.logger.Error(err, "Parse resource from etcd failed")
-						continue
-					}
-
-					if resource == nil {
-						continue
-					}
-
-					e.logger.Debugw(
-						"Put resource",
-						"key",
-						string(event.Events[i].Kv.Key),
-						"resourceID",
-						resource.GetID(),
-					)
-
-					e.mux.Lock()
-					e.resources[resource.GetID()] = resource
-					e.mux.Unlock()
-				case clientv3.EventTypeDelete:
-					resource, err := e.parseResource(event.Events[i].PrevKv.Key, event.Events[i].PrevKv.Value)
-					if err != nil {
-						e.logger.Error(err, "Parse resource from etcd failed")
-						continue
-					}
-
-					if resource == nil {
-						continue
-					}
-
-					e.logger.Debugw(
-						"Delete resource",
-						"key",
-						string(event.Events[i].Kv.Key),
-						"resourceID",
-						resource.GetID(),
-					)
-
-					e.mux.Lock()
-					delete(e.resources, resource.GetID())
-					e.mux.Unlock()
+			// handler event
+			for _, evt := range event.Events {
+				err := e.handlerEvent(evt)
+				if err != nil {
+					e.logger.Errorf("Handle event failed:%v", err)
+					continue
 				}
 			}
 			e.currentRevision = event.Header.Revision
 		}
 	}
+}
+
+func (e *resourceStore) handlerEvent(event *clientv3.Event) error {
+	switch event.Type {
+	case clientv3.EventTypePut:
+		resource, err := e.parseResource(event.Kv.Key, event.Kv.Value)
+		if err != nil {
+			e.logger.Error(err, "Parse resource from etcd failed")
+			return err
+		}
+
+		if resource == nil {
+			return errors.New("resource is nil")
+		}
+
+		e.logger.Debugw(
+			"Put resource",
+			"key",
+			string(event.Kv.Key),
+			"resourceID",
+			resource.GetID(),
+		)
+		e.mux.Lock()
+		e.resources[resource.GetID()] = resource
+		e.mux.Unlock()
+	case clientv3.EventTypeDelete:
+		resource, err := e.parseResource(event.PrevKv.Key, event.PrevKv.Value)
+		if err != nil {
+			e.logger.Error(err, "Parse resource from etcd failed")
+			return err
+		}
+
+		if resource == nil {
+			return errors.New("resource is nil")
+		}
+
+		e.logger.Debugw(
+			"Delete resource",
+			"key",
+			string(event.Kv.Key),
+			"resourceID",
+			resource.GetID(),
+		)
+
+		e.mux.Lock()
+		delete(e.resources, resource.GetID())
+		e.mux.Unlock()
+	}
+	return nil
 }
 
 func (e *resourceStore) getResourceCreateTime(resourceID string) int64 {

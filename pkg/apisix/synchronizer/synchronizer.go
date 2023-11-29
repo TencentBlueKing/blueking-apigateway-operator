@@ -31,29 +31,18 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 )
 
-const (
-	bufferCnt = 2
-)
-
 // ApisixConfigurationSynchronizer is implementation for Synchronizer
 type ApisixConfigSynchronizer interface {
 	Sync(
 		ctx context.Context,
 		gatewayName, stageName string,
 		config *apisix.ApisixConfiguration,
-	)
-	Flush(ctx context.Context)
-	RemoveNotExistStage(ctx context.Context, existStageKeys []string)
+	) error
+	RemoveNotExistStage(ctx context.Context, existStageKeys []string) error
 }
 
 // apisixConfigurationSynchronizer is implementation for Synchronizer
 type apisixConfigurationSynchronizer struct {
-	sync.Mutex
-
-	buffer          *apisix.SynchronizerBuffer
-	bufferInd       int
-	bufferSelection []*apisix.SynchronizerBuffer
-
 	store    ApisixConfigStore
 	flushMux sync.Mutex
 
@@ -64,13 +53,7 @@ type apisixConfigurationSynchronizer struct {
 
 // NewSynchronizer create new Synchronizer
 func NewSynchronizer(store ApisixConfigStore, apisixHealthzURI string) ApisixConfigSynchronizer {
-	bufferSelection := make([]*apisix.SynchronizerBuffer, bufferCnt)
-	for i := range bufferSelection {
-		bufferSelection[i] = apisix.NewSynchronizerBuffer()
-	}
 	syncer := &apisixConfigurationSynchronizer{
-		buffer:           bufferSelection[0],
-		bufferSelection:  bufferSelection,
 		store:            store,
 		apisixHealthzURI: apisixHealthzURI,
 		logger:           logging.GetLogger().Named("apisix-config-synchronizer"),
@@ -78,58 +61,46 @@ func NewSynchronizer(store ApisixConfigStore, apisixHealthzURI string) ApisixCon
 	return syncer
 }
 
-func (as *apisixConfigurationSynchronizer) put(
-	ctx context.Context,
-	key string,
-	config *apisix.ApisixConfiguration,
-	retry bool,
-) {
-	as.Lock()
-	defer as.Unlock()
-
-	// 一般同步事件
-	if !retry {
-		// 处理非重试的同步事件
-		as.buffer.Put(key, config)
-		return
-	}
-
-	// 处理重试的同步事件
-	_, ok := as.buffer.Get(key) // 如果已存在, 不更新
-	if ok {
-		return
-	}
-	as.logger.Debugw("Resync Message", "key", key, "content", config)
-	as.buffer.Put(key, config)
-}
-
 // Sync will sync new staged apisix configuration
 func (as *apisixConfigurationSynchronizer) Sync(
 	ctx context.Context,
 	gatewayName, stageName string,
 	config *apisix.ApisixConfiguration,
-) {
+) error {
 	key := cfg.GenStagePrimaryKey(gatewayName, stageName)
-	as.put(ctx, key, config, false)
 
-	ReportStageConfigSyncMetric(gatewayName, stageName)
-}
-
-func (as *apisixConfigurationSynchronizer) resync(ctx context.Context, key string, conf *apisix.ApisixConfiguration) {
-	as.put(ctx, key, conf, true)
-}
-
-// Flush will flush the cached apisix configuration changes
-func (as *apisixConfigurationSynchronizer) Flush(ctx context.Context) {
-	go as.flush(ctx)
-}
-
-// RemoveNotExistStage remove stages that does not exist
-func (as *apisixConfigurationSynchronizer) RemoveNotExistStage(ctx context.Context, existStageKeys []string) {
 	as.flushMux.Lock()
 	defer as.flushMux.Unlock()
 
-	changedConfig := make(map[string]*apisix.ApisixConfiguration)
+	as.logger.Debug("flush changes")
+	err := as.store.Alter(ctx, key, config)
+	if err != nil {
+		as.logger.Errorw("Failed to sync stage", "err", err, "key", key, "content", config)
+		return err
+	}
+
+	as.logger.Debug("flush virtual stage")
+	virtualStage := NewVirtualStage(as.apisixHealthzURI)
+	err = as.store.Alter(ctx, cfg.VirtualStageKey, virtualStage.MakeConfiguration())
+	if err != nil {
+		as.logger.Errorw(
+			"Failed to sync virtual stage",
+			"err", err, "key", cfg.VirtualStageKey,
+			"content", virtualStage.MakeConfiguration(),
+		)
+		return err
+	}
+
+	ReportStageConfigSyncMetric(gatewayName, stageName)
+
+	return nil
+}
+
+// RemoveNotExistStage remove stages that does not exist
+func (as *apisixConfigurationSynchronizer) RemoveNotExistStage(ctx context.Context, existStageKeys []string) error {
+	as.flushMux.Lock()
+	defer as.flushMux.Unlock()
+
 	existStageConfig := as.store.GetAll()
 
 	keySet := make(map[string]struct{})
@@ -138,40 +109,13 @@ func (as *apisixConfigurationSynchronizer) RemoveNotExistStage(ctx context.Conte
 	}
 	for key := range existStageConfig {
 		if _, ok := keySet[key]; !ok {
-			changedConfig[key] = apisix.NewEmptyApisixConfiguration()
+			err := as.store.Alter(ctx, key, apisix.NewEmptyApisixConfiguration())
+			if err != nil {
+				as.logger.Errorw("Remove not exist stage failed", "key", key, "err", err)
+				return err
+			}
 		}
 	}
-	as.store.Alter(ctx, changedConfig, as.resync)
-}
 
-func (as *apisixConfigurationSynchronizer) flush(ctx context.Context) {
-	as.Lock()
-
-	// 取出buffer中的数据, 并重置buffer
-	buffer := as.buffer
-	changedConfig := buffer.LockAll()
-	defer buffer.Done()
-
-	as.bufferInd = (as.bufferInd + 1) % bufferCnt
-	as.buffer = as.bufferSelection[as.bufferInd]
-	as.Unlock()
-
-	if len(changedConfig) == 0 {
-		// 无变更，无需flush
-		as.logger.Debug("No changes to resources has been made, do not need flush")
-		return
-	}
-
-	as.flushMux.Lock()
-	defer as.flushMux.Unlock()
-
-	as.logger.Debug("flush changes")
-	as.store.Alter(ctx, changedConfig, as.resync)
-
-	as.logger.Debug("flush virtual stage")
-	controlPlaneConfiguration := make(map[string]*apisix.ApisixConfiguration)
-	// todo: 后续version.version替换,暂时先用BuildTime
-	virtualStage := NewVirtualStage(as.apisixHealthzURI)
-	controlPlaneConfiguration[cfg.VirtualStageKey] = virtualStage.MakeConfiguration()
-	as.store.Alter(ctx, controlPlaneConfiguration, as.resync)
+	return nil
 }
