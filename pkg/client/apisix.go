@@ -105,6 +105,9 @@ func (a *ApisixClient) GetReleaseVersion(gatewayName string, stageName string,
 func retryEvaluator(gateway string, stage string, publishID int64, retryError *error,
 	resp *VersionRouteResp) retry.EvalFunc {
 	return func(err error, res *http.Response, req *http.Request) error {
+		// The http Client and Transport guarantee that Body is always non-nil
+		// So this has to be closed or there could be a coroutine leak
+		defer res.Body.Close()
 		if err != nil {
 			return err
 		}
@@ -120,7 +123,6 @@ func retryEvaluator(gateway string, stage string, publishID int64, retryError *e
 		}
 		if res.StatusCode == http.StatusOK {
 			// 解析返回结果
-			defer res.Body.Close()
 			result, readErr := io.ReadAll(res.Body)
 			if readErr != nil {
 				*retryError = fmt.Errorf("read configuration [gateway: %s,state: %s] version route body err: %w",
