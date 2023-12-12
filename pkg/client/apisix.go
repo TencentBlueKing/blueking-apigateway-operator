@@ -30,6 +30,7 @@ import (
 	"gopkg.in/eapache/go-resiliency.v1/retrier"
 	retry "gopkg.in/h2non/gentleman-retry.v2"
 	"gopkg.in/h2non/gentleman.v2"
+	"gopkg.in/h2non/gentleman.v2/plugins/transport"
 	"gopkg.in/h2non/gentleman.v2/plugins/url"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
@@ -57,6 +58,11 @@ type ApisixClient struct {
 func InitApisixClient(cfg *config.Config) {
 	apisxiOnce.Do(func() {
 		cli := gentleman.New()
+		// disable keep alive
+		tr := gentleman.NewDefaultTransport(gentleman.DefaultDialer)
+		tr.DisableKeepAlives = true
+		cli.Use(transport.Set(tr))
+
 		cli.URL(cfg.EventReporter.ApisixHost)
 		apisixClient = &ApisixClient{
 			baseClient:           baseClient{client: cli},

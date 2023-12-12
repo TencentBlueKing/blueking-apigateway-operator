@@ -174,6 +174,9 @@ func ReportLoadConfigurationDoingEvent(ctx context.Context, stage *v1beta1.BkGat
 // ReportLoadConfigurationResultEvent Report the detection result of apisix loading
 func ReportLoadConfigurationResultEvent(ctx context.Context, stage *v1beta1.BkGatewayStage) {
 	// filter not need report event
+	if stage == nil || stage.Labels == nil {
+		return
+	}
 	publishID := stage.Labels[config.BKAPIGatewayLabelKeyGatewayPublishID]
 	if publishID == constant.NoNeedReportPublishID || publishID == "" {
 		logging.GetLogger().Debugf("event[stage: %+v] is not need to report", stage.Labels)

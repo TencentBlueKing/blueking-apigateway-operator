@@ -225,5 +225,45 @@ var _ = Describe("Operator Integration", func() {
 			})
 		})
 
+		Context("test delete publish", func() {
+			It("should not error and the value should be equal to what was put", func() {
+				//load base resources
+				resources := util.GetHttpBinGatewayResource()
+				//put httpbin resources
+				for _, resource := range resources {
+					_, err := etcdCli.Put(context.Background(), resource.Key, resource.Value)
+					Expect(err).NotTo(HaveOccurred())
+				}
+
+				time.Sleep(time.Second * 10)
+
+				// delete gateway
+				_, err := etcdCli.Delete(context.Background(), "/bk-gateway-apigw/default/integration-test/prod", clientv3.WithPrefix())
+				Expect(err).NotTo(HaveOccurred())
+
+				time.Sleep(time.Second * 10)
+				apisixResource, err := etcdCli.Get(context.Background(), "/bk-gateway-apisix", clientv3.WithPrefix())
+				Expect(err).NotTo(HaveOccurred())
+				// bk-gateway-apisix/routes/micro-gateway-not-found-handling
+				// bk-gateway-apisix/routes/micro-gateway-operator-healthz-outer
+				Expect(len(apisixResource.Kvs)).To(Equal(2))
+
+				metricsAdapter, err := util.NewMetricsAdapter(operatorURL)
+
+				Expect(err).NotTo(HaveOccurred())
+
+				// assert metrics
+				Expect(metricsAdapter.GetApisixOperationCountMetric(
+					metric.ActionDelete, metric.ResultSuccess, etcd.ApisixResourceTypeRoutes),
+				// 2 micro-gateway-not-found-handling and healthz-outer
+				).To(Equal(testDataRoutesAmount))
+
+				Expect(metricsAdapter.GetApisixOperationCountMetric(
+					metric.ActionDelete, metric.ResultSuccess, etcd.ApisixResourceTypeServices),
+				// 2 micro-gateway-not-found-handling and healthz-outer
+				).To(Equal(testDataServiceAmount))
+			})
+		})
+
 	})
 })
