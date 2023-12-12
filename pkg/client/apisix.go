@@ -57,6 +57,8 @@ type ApisixClient struct {
 func InitApisixClient(cfg *config.Config) {
 	apisxiOnce.Do(func() {
 		cli := gentleman.New()
+		// disable keep alive
+		gentleman.DefaultTransport.DisableKeepAlives = true
 		cli.URL(cfg.EventReporter.ApisixHost)
 		apisixClient = &ApisixClient{
 			baseClient:           baseClient{client: cli},
