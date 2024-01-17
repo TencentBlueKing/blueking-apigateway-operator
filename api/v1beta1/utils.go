@@ -14,6 +14,7 @@ var (
 )
 
 func init() {
+	RegisterGVK(&BkGatewayStreamResource{}, &BkGatewayStreamResourceList{}, nil)
 	RegisterGVK(&BkGatewayResource{}, &BkGatewayResourceList{}, nil)
 	RegisterGVK(&BkGatewayService{}, &BkGatewayServiceList{}, nil)
 	RegisterGVK(&BkGatewayStage{}, &BkGatewayStageList{}, nil)

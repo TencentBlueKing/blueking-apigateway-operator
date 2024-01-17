@@ -274,6 +274,14 @@ func (r *KubeAgentRunner) registerController(
 		r.logger.Error(err, "unable to create controller", "controller", "BkGatewayResource")
 		os.Exit(1)
 	}
+	if err = (&controllers.BkGatewayStreamResourceReconciler{
+		Client:  mgr.GetClient(),
+		Scheme:  mgr.GetScheme(),
+		Handler: handler,
+	}).SetupWithManager(mgr); err != nil {
+		r.logger.Error(err, "unable to create controller", "controller", "BkGatewayStreamResource")
+		os.Exit(1)
+	}
 	if err = (&controllers.BkGatewayConfigReconciler{
 		Client:  mgr.GetClient(),
 		Scheme:  mgr.GetScheme(),

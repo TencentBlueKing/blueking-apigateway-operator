@@ -61,7 +61,6 @@ type CmpReporter struct {
 }
 
 func (r *CmpReporter) PushStep(ps cmp.PathStep) {
-
 }
 
 func (r *CmpReporter) PopStep() {
@@ -101,6 +100,7 @@ func (d *configDiffer) diff(
 	put = &apisix.ApisixConfiguration{}
 	delete = &apisix.ApisixConfiguration{}
 	put.Routes, delete.Routes = d.diffRoutes(old.Routes, new.Routes)
+	put.StreamRoutes, delete.StreamRoutes = d.diffStreamRoutes(old.StreamRoutes, new.StreamRoutes)
 	put.Services, delete.Services = d.diffServices(old.Services, new.Services)
 	put.PluginMetadatas, delete.PluginMetadatas = d.diffPluginMetadatas(old.PluginMetadatas, new.PluginMetadatas)
 	put.SSLs, delete.SSLs = d.diffSSLs(old.SSLs, new.SSLs)
@@ -134,6 +134,45 @@ func (d *configDiffer) diffRoutes(
 				Gateway:      newRes.Labels[config.BKAPIGatewayLabelKeyGatewayName],
 				Stage:        newRes.Labels[config.BKAPIGatewayLabelKeyGatewayStage],
 				ResourceType: ApisixResourceTypeRoutes,
+			}),
+		) {
+			putList[key] = newRes
+		}
+		delete(oldResMap, key)
+	}
+	for key, oldRes := range oldResMap {
+		deleteList[key] = oldRes
+	}
+	return putList, deleteList
+}
+
+func (d *configDiffer) diffStreamRoutes(
+	old map[string]*apisix.StreamRoute,
+	new map[string]*apisix.StreamRoute,
+) (putList map[string]*apisix.StreamRoute, deleteList map[string]*apisix.StreamRoute) {
+	oldResMap := make(map[string]*apisix.StreamRoute)
+	putList = make(map[string]*apisix.StreamRoute)
+	deleteList = make(map[string]*apisix.StreamRoute)
+	for key, oldRes := range old {
+		oldResMap[key] = oldRes
+	}
+	for key, newRes := range new {
+		oldRes, ok := oldResMap[key]
+		if !ok {
+			putList[key] = newRes
+			continue
+		}
+
+		if !cmp.Equal(
+			oldRes,
+			newRes,
+			cmp.Transformer("transformerMap", transformMap),
+			cmpopts.IgnoreFields(apisix.StreamRoute{}, "Desc", "Labels"),
+			ignoreCreateTimeAndUpdateTimeCmpOptFunc(apisix.StreamRoute{}),
+			cmp.Reporter(&CmpReporter{
+				Gateway:      newRes.Labels[config.BKAPIGatewayLabelKeyGatewayName],
+				Stage:        newRes.Labels[config.BKAPIGatewayLabelKeyGatewayStage],
+				ResourceType: ApisixResourceTypeStreamRoutes,
 			}),
 		) {
 			putList[key] = newRes

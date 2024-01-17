@@ -1,0 +1,12 @@
+apiVersion: gateway.bk.tencent.com/v1beta1
+kind: BkGatewayStreamResource
+metadata:
+  labels:
+    app.kubernetes.io/name: bkgatewaystreamresource
+    app.kubernetes.io/instance: bkgatewaystreamresource-sample
+    app.kubernetes.io/part-of: github.com/TencentBlueKing/blueking-apigateway-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: github.com/TencentBlueKing/blueking-apigateway-operator
+  name: bkgatewaystreamresource-sample
+spec:
+  # TODO(user): Add fields here

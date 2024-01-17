@@ -180,6 +180,55 @@ func (c *Converter) convertResource(
 	return newRoute, nil
 }
 
+// convertStreamResource convert bk gateway stream resource to stream route
+func (c *Converter) convertStreamResource(
+	resource *v1beta1.BkGatewayStreamResource,
+	services []*v1beta1.BkGatewayService,
+) (*apisix.StreamRoute, error) {
+	var err error
+	if resource == nil {
+		return nil, eris.Errorf("resource or resource.spec.http cannot be empty")
+	}
+	newRoute := &apisix.StreamRoute{
+		StreamRoute: apisixv1.StreamRoute{
+			ID:         c.getID(resource.Spec.ID.String(), getObjectName(resource.GetName(), resource.GetNamespace())),
+			Desc:       resource.Spec.Desc,
+			Labels:     c.getLabel(),
+			ServerPort: int32(resource.Spec.ServerPort),
+			SNI:        resource.Spec.SNI,
+		},
+		ServerAddr: resource.Spec.ServerAddr,
+		RemoteAddr: resource.Spec.RemoteAddr,
+		Status:     utils.IntPtr(1),
+	}
+
+	if resource.Spec.Upstream != nil {
+		newRoute.Upstream, err = c.convertUpstream(resource.TypeMeta, resource.ObjectMeta, resource.Spec.Upstream)
+		if err != nil {
+			return nil, eris.Wrapf(err, "convert upstream of stream resource %s/%s failed",
+				resource.GetName(), resource.GetNamespace())
+		}
+	}
+
+	if len(resource.Spec.Service) != 0 {
+		for _, svc := range services {
+			if svc.Name == resource.Spec.Service {
+				newRoute.ServiceID = c.getID(svc.Spec.ID, getObjectName(svc.Name, svc.Namespace))
+				break
+			}
+		}
+
+		if len(newRoute.ServiceID) == 0 {
+			c.logger.Error(nil, "No such service match routes requirement", "stream resource", resource.ObjectMeta)
+			newRoute.ServiceID = resource.Spec.Service
+		}
+	}
+
+	c.logger.Debugw("convert stream resource to route", "resource", resource, "route", newRoute)
+
+	return newRoute, nil
+}
+
 func (c *Converter) convertPlugin(plugin *v1beta1.BkGatewayPlugin) (string, map[string]interface{}) {
 	pluginName := plugin.Name
 	if len(plugin.Config.Raw) == 0 {

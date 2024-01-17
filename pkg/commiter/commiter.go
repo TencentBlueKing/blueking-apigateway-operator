@@ -212,6 +212,10 @@ func (c *Commiter) ConvertEtcdKVToApisixConfiguration(
 	if err != nil {
 		return nil, stage, err
 	}
+	streamResList, err := c.listStreamResources(ctx, si)
+	if err != nil {
+		return nil, stage, err
+	}
 	svcList, err := c.listServices(ctx, si)
 	if err != nil {
 		return nil, stage, err
@@ -243,7 +247,7 @@ func (c *Commiter) ConvertEtcdKVToApisixConfiguration(
 	if err != nil {
 		return nil, stage, err
 	}
-	conf, err := cvt.Convert(ctx, resList, svcList, sslList, pluginMetadatas)
+	conf, err := cvt.Convert(ctx, resList, streamResList, svcList, sslList, pluginMetadatas)
 
 	metric.ReportResourceCountHelper(si.GatewayName, si.StageName, conf, ReportResourceConvertedMetric)
 
@@ -275,6 +279,21 @@ func (c *Commiter) listResources(
 		return nil, eris.Wrapf(err, "list bkgateway resource failed")
 	}
 	var retList []*v1beta1.BkGatewayResource
+	for ind := range resourceList.Items {
+		retList = append(retList, &resourceList.Items[ind])
+	}
+	return retList, nil
+}
+
+func (c *Commiter) listStreamResources(
+	ctx context.Context,
+	stageInfo registry.StageInfo,
+) ([]*v1beta1.BkGatewayStreamResource, error) {
+	resourceList := &v1beta1.BkGatewayStreamResourceList{}
+	if err := c.resourceRegistry.List(ctx, registry.ResourceKey{StageInfo: stageInfo}, resourceList); err != nil {
+		return nil, eris.Wrapf(err, "list bkgateway stream resource failed")
+	}
+	var retList []*v1beta1.BkGatewayStreamResource
 	for ind := range resourceList.Items {
 		retList = append(retList, &resourceList.Items[ind])
 	}
