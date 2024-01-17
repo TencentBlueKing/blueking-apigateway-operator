@@ -39,6 +39,7 @@ type BkGatewayStreamResourceReconciler struct {
 	Scheme *runtime.Scheme
 }
 
+//nolint:lll
 //+kubebuilder:rbac:groups=gateway.bk.tencent.com,resources=bkgatewaystreamresources,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=gateway.bk.tencent.com,resources=bkgatewaystreamresources/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=gateway.bk.tencent.com,resources=bkgatewaystreamresources/finalizers,verbs=update

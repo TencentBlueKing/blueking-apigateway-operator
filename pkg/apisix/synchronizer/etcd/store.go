@@ -78,7 +78,11 @@ func NewEtcdConfigStore(client *clientv3.Client, prefix string, putInterval time
 func (s *EtcdConfigStore) Init() {
 	wg := &sync.WaitGroup{}
 	for _, resourceType := range []string{
-		ApisixResourceTypeRoutes, ApisixResourceTypeStreamRoutes, ApisixResourceTypeServices, ApisixResourceTypeSSL, ApisixResourceTypePluginMetadata,
+		ApisixResourceTypeRoutes,
+		ApisixResourceTypeStreamRoutes,
+		ApisixResourceTypeServices,
+		ApisixResourceTypeSSL,
+		ApisixResourceTypePluginMetadata,
 	} {
 		wg.Add(1)
 
