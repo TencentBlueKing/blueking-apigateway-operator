@@ -167,7 +167,7 @@ func (d *configDiffer) diffStreamRoutes(
 			oldRes,
 			newRes,
 			cmp.Transformer("transformerMap", transformMap),
-			cmpopts.IgnoreFields(apisix.StreamRoute{}, "Desc", "Labels"),
+			ignoreApisixMetadataCmpOpt,
 			ignoreCreateTimeAndUpdateTimeCmpOptFunc(apisix.StreamRoute{}),
 			cmp.Reporter(&CmpReporter{
 				Gateway:      newRes.Labels[config.BKAPIGatewayLabelKeyGatewayName],

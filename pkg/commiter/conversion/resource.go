@@ -190,15 +190,16 @@ func (c *Converter) convertStreamResource(
 		return nil, eris.Errorf("resource or resource.spec.http cannot be empty")
 	}
 	newRoute := &apisix.StreamRoute{
-		StreamRoute: apisixv1.StreamRoute{
-			ID:         c.getID(resource.Spec.ID.String(), getObjectName(resource.GetName(), resource.GetNamespace())),
-			Desc:       resource.Spec.Desc,
-			Labels:     c.getLabel(),
-			ServerPort: int32(resource.Spec.ServerPort),
-			SNI:        resource.Spec.SNI,
+		Metadata: apisixv1.Metadata{
+			ID:     c.getID(resource.Spec.ID.String(), getObjectName(resource.GetName(), resource.GetNamespace())),
+			Name:   getObjectName(resource.GetName(), resource.GetNamespace()),
+			Desc:   resource.Spec.Desc,
+			Labels: c.getLabel(),
 		},
 		ServerAddr: resource.Spec.ServerAddr,
 		RemoteAddr: resource.Spec.RemoteAddr,
+		ServerPort: resource.Spec.ServerPort,
+		SNI:        resource.Spec.SNI,
 		Status:     utils.IntPtr(1),
 	}
 

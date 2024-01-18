@@ -290,11 +290,13 @@ func NewPluginMetadata(name string, config map[string]interface{}) *PluginMetada
 
 // +k8s:deepcopy-gen=true
 type StreamRoute struct {
-	apisixv1.StreamRoute `json:",inline" yaml:",inline"`
-	Status               *int `json:"status,omitempty" yaml:"status,omitempty"`
+	apisixv1.Metadata `json:",inline" yaml:",inline"`
+	Status            *int `json:"status,omitempty" yaml:"status,omitempty"`
 
 	RemoteAddr string    `json:"remote_addr,omitempty" yaml:"remote_addr,omitempty"`
 	ServerAddr string    `json:"server_addr,omitempty" yaml:"server_addr,omitempty"`
+	ServerPort int       `json:"server_port,omitempty" yaml:"server_port,omitempty"`
+	SNI        string    `json:"sni,omitempty" yaml:"sni,omitempty"`
 	Upstream   *Upstream `json:"upstream,omitempty" yaml:"upstream,omitempty"`
 	ServiceID  string    `json:"service_id,omitempty" yaml:"service_id,omitempty"`
 

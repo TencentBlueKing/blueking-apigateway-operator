@@ -313,17 +313,18 @@ func TestConvert(t *testing.T) {
 				},
 				StreamRoutes: map[string]*apisix.StreamRoute{
 					"gateway.stage.test-stream-resource": {
-						StreamRoute: apisixv1.StreamRoute{
+						Metadata: apisixv1.Metadata{
 							ID:   "gateway.stage.test-stream-resource",
+							Name: "test-stream-resource",
 							Desc: "test resource",
 							Labels: map[string]string{
 								config.BKAPIGatewayLabelKeyGatewayName:  "gateway",
 								config.BKAPIGatewayLabelKeyGatewayStage: "stage",
 							},
-							ServerPort: 8080,
-							SNI:        "test.example.com",
 						},
-						Status: utils.IntPtr(1),
+						Status:     utils.IntPtr(1),
+						ServerPort: 8080,
+						SNI:        "test.example.com",
 						Upstream: &apisix.Upstream{
 							Type: utils.StringPtr("roundrobin"),
 							Nodes: []v1beta1.BkGatewayNode{
@@ -437,17 +438,18 @@ func TestConvert(t *testing.T) {
 				},
 				StreamRoutes: map[string]*apisix.StreamRoute{
 					"gateway.stage.test-stream-resource": {
-						StreamRoute: apisixv1.StreamRoute{
+						Metadata: apisixv1.Metadata{
 							ID:   "gateway.stage.test-stream-resource",
+							Name: "test-stream-resource",
 							Desc: "test resource",
 							Labels: map[string]string{
 								config.BKAPIGatewayLabelKeyGatewayName:  "gateway",
 								config.BKAPIGatewayLabelKeyGatewayStage: "stage",
 							},
-							ServerPort: 8080,
-							SNI:        "test.example.com",
 						},
-						Status: utils.IntPtr(1),
+						ServerPort: 8080,
+						SNI:        "test.example.com",
+						Status:     utils.IntPtr(1),
 						Upstream: &apisix.Upstream{
 							Type: utils.StringPtr("roundrobin"),
 							Nodes: []v1beta1.BkGatewayNode{
@@ -565,17 +567,18 @@ func TestConvert(t *testing.T) {
 				},
 				StreamRoutes: map[string]*apisix.StreamRoute{
 					"gateway.stage.test-stream-resource": {
-						StreamRoute: apisixv1.StreamRoute{
+						Metadata: apisixv1.Metadata{
 							ID:   "gateway.stage.test-stream-resource",
+							Name: "test-stream-resource",
 							Desc: "test resource",
 							Labels: map[string]string{
 								config.BKAPIGatewayLabelKeyGatewayName:  "gateway",
 								config.BKAPIGatewayLabelKeyGatewayStage: "stage",
 							},
-							ServerPort: 8080,
-							SNI:        "test.example.com",
 						},
-						Status: utils.IntPtr(1),
+						Status:     utils.IntPtr(1),
+						ServerPort: 8080,
+						SNI:        "test.example.com",
 						Upstream: &apisix.Upstream{
 							Type: utils.StringPtr("roundrobin"),
 							Nodes: []v1beta1.BkGatewayNode{

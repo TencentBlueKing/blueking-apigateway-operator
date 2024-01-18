@@ -248,8 +248,9 @@ var _ = Describe("Commiter", func() {
 			},
 			StreamRoutes: map[string]*apisix.StreamRoute{
 				"gateway.stage.test-stream-resource": {
-					StreamRoute: apisixv1.StreamRoute{
+					Metadata: apisixv1.Metadata{
 						ID:   "gateway.stage.test-stream-resource",
+						Name: "test-stream-resource",
 						Desc: "test stream resource",
 						Labels: map[string]string{
 							config.BKAPIGatewayLabelKeyGatewayName:  "gateway",
