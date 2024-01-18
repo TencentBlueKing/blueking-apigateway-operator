@@ -14,7 +14,6 @@ var (
 )
 
 func init() {
-	RegisterGVK(&BkGatewayStreamResource{}, &BkGatewayStreamResourceList{}, nil)
 	RegisterGVK(&BkGatewayResource{}, &BkGatewayResourceList{}, nil)
 	RegisterGVK(&BkGatewayService{}, &BkGatewayServiceList{}, nil)
 	RegisterGVK(&BkGatewayStage{}, &BkGatewayStageList{}, nil)
@@ -24,6 +23,9 @@ func init() {
 	RegisterGVK(&BkGatewayEndpoints{}, &BkGatewayEndpointsList{}, nil)
 	RegisterGVK(&BkGatewayInstance{}, &BkGatewayInstanceList{}, nil)
 	RegisterGVK(&v1.Secret{}, &v1.SecretList{}, &v1.SchemeGroupVersion)
+
+	// stream resource 只针对专项网关, 支持tcp/udp代理使用
+	RegisterGVK(&BkGatewayStreamResource{}, &BkGatewayStreamResourceList{}, nil)
 }
 
 // RegisterGVK ...

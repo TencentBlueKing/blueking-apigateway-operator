@@ -37,6 +37,14 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
+var apisixResourceTypes = []string{
+	ApisixResourceTypeRoutes,
+	ApisixResourceTypeStreamRoutes,
+	ApisixResourceTypeServices,
+	ApisixResourceTypeSSL,
+	ApisixResourceTypePluginMetadata,
+}
+
 // EtcdConfigStore ...
 type EtcdConfigStore struct {
 	client *clientv3.Client
@@ -67,7 +75,7 @@ func NewEtcdConfigStore(client *clientv3.Client, prefix string, putInterval time
 
 	s.logger.Infow("Create etcd config store", "prefix", prefix)
 
-	if len(s.stores) != 5 {
+	if len(s.stores) != len(apisixResourceTypes) {
 		s.logger.Error("Create etcd config store failed")
 		return nil, fmt.Errorf("create etcd config store failed")
 	}
@@ -77,13 +85,7 @@ func NewEtcdConfigStore(client *clientv3.Client, prefix string, putInterval time
 
 func (s *EtcdConfigStore) Init() {
 	wg := &sync.WaitGroup{}
-	for _, resourceType := range []string{
-		ApisixResourceTypeRoutes,
-		ApisixResourceTypeStreamRoutes,
-		ApisixResourceTypeServices,
-		ApisixResourceTypeSSL,
-		ApisixResourceTypePluginMetadata,
-	} {
+	for _, resourceType := range apisixResourceTypes {
 		wg.Add(1)
 
 		// 避免闭包导致变量覆盖问题
@@ -233,9 +235,7 @@ func (s *EtcdConfigStore) alterByStage(
 
 		s.logger.Infof(
 			"put conf count:[route:%d,stream_route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
-			len(
-				putConf.Routes,
-			),
+			len(putConf.Routes),
 			len(putConf.StreamRoutes),
 			len(putConf.Services),
 			len(putConf.PluginMetadatas),
@@ -263,9 +263,7 @@ func (s *EtcdConfigStore) alterByStage(
 		}
 		s.logger.Infof(
 			"del conf count:[route:%d,stream_route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
-			len(
-				deleteConf.Routes,
-			),
+			len(deleteConf.Routes),
 			len(deleteConf.StreamRoutes),
 			len(deleteConf.Services),
 			len(deleteConf.PluginMetadatas),
