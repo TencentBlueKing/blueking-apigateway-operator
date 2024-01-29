@@ -233,7 +233,7 @@ func newDefaultConfig() *Config {
 			LeaderElectionName:          "election.gateway.bk.tencent.com",
 			LeaderElectionLeaseDuration: 30,
 			LeaderElectionRenewDuration: 25,
-			LeaderElectionRetryDuration: 20,
+			LeaderElectionRetryDuration: 5, // retry_count= Ceil(RenewDeadline / RetryPeriod)
 		},
 		Dashboard: Dashboard{
 			Etcd: Etcd{
