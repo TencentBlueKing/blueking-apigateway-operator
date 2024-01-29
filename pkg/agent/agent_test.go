@@ -172,10 +172,13 @@ var _ = Describe("Agent", func() {
 		})
 
 		It("Secret event", func() {
-			patchGuard := sm.Patch((*EventAgent).handleSecret, func(_ *EventAgent, event *registry.ResourceMetadata) error {
-				fmt.Println("monkey patch")
-				return nil
-			})
+			patchGuard := sm.Patch(
+				(*EventAgent).handleSecret,
+				func(_ *EventAgent, event *registry.ResourceMetadata) error {
+					fmt.Println("monkey patch")
+					return nil
+				},
+			)
 			defer patchGuard.Unpatch()
 
 			agent.handleEvent(&registry.ResourceMetadata{
@@ -197,10 +200,13 @@ var _ = Describe("Agent", func() {
 		})
 
 		It("tls event", func() {
-			patchGuard := sm.Patch((*EventAgent).handleSecret, func(_ *EventAgent, event *registry.ResourceMetadata) error {
-				fmt.Println("monkey patch")
-				return nil
-			})
+			patchGuard := sm.Patch(
+				(*EventAgent).handleSecret,
+				func(_ *EventAgent, event *registry.ResourceMetadata) error {
+					fmt.Println("monkey patch")
+					return nil
+				},
+			)
 			defer patchGuard.Unpatch()
 
 			agent.handleEvent(&registry.ResourceMetadata{
@@ -221,10 +227,13 @@ var _ = Describe("Agent", func() {
 		})
 
 		It("empty event", func() {
-			patchGuard := sm.Patch((*EventAgent).handleSecret, func(_ *EventAgent, event *registry.ResourceMetadata) error {
-				fmt.Println("monkey patch")
-				return nil
-			})
+			patchGuard := sm.Patch(
+				(*EventAgent).handleSecret,
+				func(_ *EventAgent, event *registry.ResourceMetadata) error {
+					fmt.Println("monkey patch")
+					return nil
+				},
+			)
 			defer patchGuard.Unpatch()
 
 			agent.handleEvent(&registry.ResourceMetadata{
@@ -245,10 +254,13 @@ var _ = Describe("Agent", func() {
 		})
 
 		It("retry event", func() {
-			patchGuard := sm.Patch((*EventAgent).handleSecret, func(_ *EventAgent, event *registry.ResourceMetadata) error {
-				fmt.Println("monkey patch")
-				return errors.New("retry")
-			})
+			patchGuard := sm.Patch(
+				(*EventAgent).handleSecret,
+				func(_ *EventAgent, event *registry.ResourceMetadata) error {
+					fmt.Println("monkey patch")
+					return errors.New("retry")
+				},
+			)
 			defer patchGuard.Unpatch()
 
 			agent.handleEvent(&registry.ResourceMetadata{

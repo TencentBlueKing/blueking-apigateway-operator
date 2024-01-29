@@ -131,7 +131,6 @@ func NewKubeLeaderElector(lockType, name, ns, kubeconfig string,
 		},
 		Name: hostName,
 	})
-
 	if err != nil {
 		cl.logger.Error(err, "create client-go leader elector failed")
 		return nil, eris.Wrapf(err, "create client-go leader elector failed")

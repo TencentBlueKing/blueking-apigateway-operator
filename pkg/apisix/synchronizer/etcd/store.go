@@ -37,6 +37,14 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
+var apisixResourceTypes = []string{
+	ApisixResourceTypeRoutes,
+	ApisixResourceTypeStreamRoutes,
+	ApisixResourceTypeServices,
+	ApisixResourceTypeSSL,
+	ApisixResourceTypePluginMetadata,
+}
+
 // EtcdConfigStore ...
 type EtcdConfigStore struct {
 	client *clientv3.Client
@@ -67,7 +75,7 @@ func NewEtcdConfigStore(client *clientv3.Client, prefix string, putInterval time
 
 	s.logger.Infow("Create etcd config store", "prefix", prefix)
 
-	if len(s.stores) != 4 {
+	if len(s.stores) != len(apisixResourceTypes) {
 		s.logger.Error("Create etcd config store failed")
 		return nil, fmt.Errorf("create etcd config store failed")
 	}
@@ -77,9 +85,7 @@ func NewEtcdConfigStore(client *clientv3.Client, prefix string, putInterval time
 
 func (s *EtcdConfigStore) Init() {
 	wg := &sync.WaitGroup{}
-	for _, resourceType := range []string{
-		ApisixResourceTypeRoutes, ApisixResourceTypeServices, ApisixResourceTypeSSL, ApisixResourceTypePluginMetadata,
-	} {
+	for _, resourceType := range apisixResourceTypes {
 		wg.Add(1)
 
 		// 避免闭包导致变量覆盖问题
@@ -106,6 +112,10 @@ func (s *EtcdConfigStore) Get(stageName string) *apisix.ApisixConfiguration {
 	for key, val := range routes {
 		ret.Routes[key] = val.(*apisix.Route)
 	}
+	streamRoutes := s.stores[ApisixResourceTypeStreamRoutes].getStageResources(stageName)
+	for key, val := range streamRoutes {
+		ret.StreamRoutes[key] = val.(*apisix.StreamRoute)
+	}
 	services := s.stores[ApisixResourceTypeServices].getStageResources(stageName)
 	for key, val := range services {
 		ret.Services[key] = val.(*apisix.Service)
@@ -131,6 +141,15 @@ func (s *EtcdConfigStore) GetAll() map[string]*apisix.ApisixConfiguration {
 			configMap[stageName] = apisix.NewEmptyApisixConfiguration()
 		}
 		configMap[stageName].Routes[key] = route.(*apisix.Route)
+	}
+
+	streamRouteMap := s.stores[ApisixResourceTypeStreamRoutes].getAllResources()
+	for key, route := range streamRouteMap {
+		stageName := route.GetStageFromLabel()
+		if _, ok := configMap[stageName]; !ok {
+			configMap[stageName] = apisix.NewEmptyApisixConfiguration()
+		}
+		configMap[stageName].StreamRoutes[key] = route.(*apisix.StreamRoute)
 	}
 
 	serviceMap := s.stores[ApisixResourceTypeServices].getAllResources()
@@ -210,15 +229,26 @@ func (s *EtcdConfigStore) alterByStage(
 			return fmt.Errorf("batch put routes failed: %w", err)
 		}
 
+		if err = s.batchPutResource(ctx, ApisixResourceTypeStreamRoutes, putConf.StreamRoutes); err != nil {
+			return fmt.Errorf("batch put stream routes failed: %w", err)
+		}
+
 		s.logger.Infof(
-			"put conf count:[route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
-			len(putConf.Routes), len(putConf.Services), len(putConf.PluginMetadatas), len(putConf.SSLs),
+			"put conf count:[route:%d,stream_route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
+			len(putConf.Routes),
+			len(putConf.StreamRoutes),
+			len(putConf.Services),
+			len(putConf.PluginMetadatas),
+			len(putConf.SSLs),
 		)
 	}
 
 	// delete resources
 	if deleteConf != nil {
 		// NOTE: 删除的顺序和创建的顺序相反, 错误的顺序会导致apisix的异常
+		if err = s.batchDeleteResource(ctx, ApisixResourceTypeStreamRoutes, deleteConf.StreamRoutes); err != nil {
+			return fmt.Errorf("batch delete stream routes failed: %w", err)
+		}
 		if err = s.batchDeleteResource(ctx, ApisixResourceTypeRoutes, deleteConf.Routes); err != nil {
 			return fmt.Errorf("batch delete routes failed: %w", err)
 		}
@@ -232,8 +262,12 @@ func (s *EtcdConfigStore) alterByStage(
 			return fmt.Errorf("batch delete ssl failed: %w", err)
 		}
 		s.logger.Infof(
-			"del conf count:[route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
-			len(deleteConf.Routes), len(deleteConf.Services), len(deleteConf.PluginMetadatas), len(deleteConf.SSLs),
+			"del conf count:[route:%d,stream_route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
+			len(deleteConf.Routes),
+			len(deleteConf.StreamRoutes),
+			len(deleteConf.Services),
+			len(deleteConf.PluginMetadatas),
+			len(deleteConf.SSLs),
 		)
 	}
 

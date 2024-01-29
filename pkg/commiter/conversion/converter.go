@@ -91,6 +91,7 @@ func NewConverter(
 func (c *Converter) Convert(
 	ctx context.Context,
 	resources []*v1beta1.BkGatewayResource,
+	streamResources []*v1beta1.BkGatewayStreamResource,
 	services []*v1beta1.BkGatewayService,
 	ssls []*v1beta1.BkGatewayTLS,
 	pluginMetadatas []*v1beta1.BkGatewayPluginMetadata,
@@ -112,6 +113,14 @@ func (c *Converter) Convert(
 			return nil, eris.Wrapf(err, "convert resource failed")
 		}
 		apisixConfig.Routes[route.GetID()] = route
+	}
+
+	for _, res := range streamResources {
+		route, err := c.convertStreamResource(res, services)
+		if err != nil {
+			return nil, eris.Wrapf(err, "convert steam resource failed")
+		}
+		apisixConfig.StreamRoutes[route.GetID()] = route
 	}
 
 	for _, svc := range services {
