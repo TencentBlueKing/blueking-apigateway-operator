@@ -288,10 +288,55 @@ func NewPluginMetadata(name string, config map[string]interface{}) *PluginMetada
 	return &ret
 }
 
+// +k8s:deepcopy-gen=true
+type StreamRoute struct {
+	apisixv1.Metadata `json:",inline" yaml:",inline"`
+	Status            *int `json:"status,omitempty" yaml:"status,omitempty"`
+
+	RemoteAddr string    `json:"remote_addr,omitempty" yaml:"remote_addr,omitempty"`
+	ServerAddr string    `json:"server_addr,omitempty" yaml:"server_addr,omitempty"`
+	ServerPort int       `json:"server_port,omitempty" yaml:"server_port,omitempty"`
+	SNI        string    `json:"sni,omitempty" yaml:"sni,omitempty"`
+	Upstream   *Upstream `json:"upstream,omitempty" yaml:"upstream,omitempty"`
+	ServiceID  string    `json:"service_id,omitempty" yaml:"service_id,omitempty"`
+
+	CreateTime int64 `json:"create_time,omitempty" yaml:"create_time,omitempty"`
+	UpdateTime int64 `json:"update_time,omitempty" yaml:"update_time,omitempty"`
+}
+
+// GetID will return the resource id
+func (r *StreamRoute) GetID() string {
+	return r.ID
+}
+
+// GetStageFromLabel will build the stage key from resource label
+func (r *StreamRoute) GetStageFromLabel() string {
+	return config.GenStagePrimaryKey(
+		r.Labels[config.BKAPIGatewayLabelKeyGatewayName],
+		r.Labels[config.BKAPIGatewayLabelKeyGatewayStage],
+	)
+}
+
+// GetCreateTime GetCreateTime
+func (r *StreamRoute) GetCreateTime() int64 { return r.CreateTime }
+
+// GetUpdateTime GetUpdateTime
+func (r *StreamRoute) GetUpdateTime() int64 { return r.UpdateTime }
+
+// SetCreateTime SetCreateTime
+func (r *StreamRoute) SetCreateTime(t int64) { r.CreateTime = t }
+
+// SetUpdateTime SetUpdateTime
+func (r *StreamRoute) SetUpdateTime(t int64) { r.UpdateTime = t }
+
+// ClearDesc clear desc
+func (r *StreamRoute) ClearUnusedFields() { r.Desc = "" }
+
 // ApisixConfigurationStandalone apisix configuration structure
 // +k8s:deepcopy-gen=true
 type ApisixConfigurationStandalone struct {
 	Routes          []*Route          `json:"routes,omitempty" yaml:"routes,omitempty"`
+	StreamRoutes    []*StreamRoute    `json:"stream_routes,omitempty" yaml:"stream_routes,omitempty"`
 	Services        []*Service        `json:"services,omitempty" yaml:"services,omitempty"`
 	PluginMetadatas []*PluginMetadata `json:"plugin_metadata,omitempty" yaml:"plugin_metadata,omitempty"`
 	SSLs            []*SSL            `json:"ssls,omitempty" yaml:"ssls,omitempty"`
@@ -301,6 +346,7 @@ type ApisixConfigurationStandalone struct {
 // +k8s:deepcopy-gen=true
 type ApisixConfiguration struct {
 	Routes          map[string]*Route          `json:"routes,omitempty" yaml:"routes,omitempty"`
+	StreamRoutes    map[string]*StreamRoute    `json:"stream_routes,omitempty" yaml:"stream_routes,omitempty"`
 	Services        map[string]*Service        `json:"services,omitempty" yaml:"services,omitempty"`
 	PluginMetadatas map[string]*PluginMetadata `json:"plugin_metadata,omitempty" yaml:"plugin_metadata,omitempty"`
 	SSLs            map[string]*SSL            `json:"ssls,omitempty" yaml:"ssls,omitempty"`
@@ -310,6 +356,7 @@ type ApisixConfiguration struct {
 func NewEmptyApisixConfiguration() *ApisixConfiguration {
 	return &ApisixConfiguration{
 		Routes:          make(map[string]*Route),
+		StreamRoutes:    make(map[string]*StreamRoute),
 		Services:        make(map[string]*Service),
 		PluginMetadatas: make(map[string]*PluginMetadata),
 		SSLs:            make(map[string]*SSL),
@@ -323,6 +370,9 @@ func (in *ApisixConfiguration) MergeFrom(out *ApisixConfiguration) {
 	}
 	for key, val := range out.Routes {
 		in.Routes[key] = val
+	}
+	for key, val := range out.StreamRoutes {
+		in.StreamRoutes[key] = val
 	}
 	for key, val := range out.Services {
 		in.Services[key] = val
@@ -355,6 +405,9 @@ func (in *ApisixConfiguration) ToStandalone() *ApisixConfigurationStandalone {
 	for _, val := range in.Routes {
 		ret.Routes = append(ret.Routes, val)
 	}
+	for _, val := range in.StreamRoutes {
+		ret.StreamRoutes = append(ret.StreamRoutes, val)
+	}
 	for _, val := range in.Services {
 		ret.Services = append(ret.Services, val)
 	}
@@ -376,6 +429,9 @@ func (in *ApisixConfigurationStandalone) ToApisix() *ApisixConfiguration {
 	for _, val := range in.Routes {
 		ret.Routes[val.GetID()] = val
 	}
+	for _, val := range in.StreamRoutes {
+		ret.StreamRoutes[val.GetID()] = val
+	}
 	for _, val := range in.Services {
 		ret.Services[val.GetID()] = val
 	}
@@ -389,28 +445,33 @@ func (in *ApisixConfigurationStandalone) ToApisix() *ApisixConfiguration {
 }
 
 // ExtractStagedConfiguration will extract a staged scoped apisix configuration with provided stage key
-func (in *ApisixConfiguration) ExtractStagedConfiguration(stagename string) *ApisixConfiguration {
+func (in *ApisixConfiguration) ExtractStagedConfiguration(stageName string) *ApisixConfiguration {
 	if in == nil {
 		return nil
 	}
 	ret := NewEmptyApisixConfiguration()
 	for key, val := range in.Routes {
-		if val.GetStageFromLabel() == stagename {
+		if val.GetStageFromLabel() == stageName {
 			ret.Routes[key] = val
 		}
 	}
+	for key, val := range in.StreamRoutes {
+		if val.GetStageFromLabel() == stageName {
+			ret.StreamRoutes[key] = val
+		}
+	}
 	for key, val := range in.Services {
-		if val.GetStageFromLabel() == stagename {
+		if val.GetStageFromLabel() == stageName {
 			ret.Services[key] = val
 		}
 	}
 	for key, val := range in.SSLs {
-		if val.GetStageFromLabel() == stagename {
+		if val.GetStageFromLabel() == stageName {
 			ret.SSLs[key] = val
 		}
 	}
 	for key, val := range in.PluginMetadatas {
-		if val.GetStageFromLabel() == stagename {
+		if val.GetStageFromLabel() == stageName {
 			ret.PluginMetadatas[key] = val
 		}
 	}
@@ -425,6 +486,9 @@ func (in *ApisixConfiguration) ToStagedConfiguration() map[string]*ApisixConfigu
 	ret := make(map[string]*ApisixConfiguration)
 	stages := make(map[string]struct{})
 	for _, val := range in.Routes {
+		stages[val.GetStageFromLabel()] = struct{}{}
+	}
+	for _, val := range in.StreamRoutes {
 		stages[val.GetStageFromLabel()] = struct{}{}
 	}
 	for _, val := range in.SSLs {

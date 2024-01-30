@@ -59,7 +59,6 @@ var _ = Describe("EmbeddedEtcd", func() {
 		etcd.Close()
 		// Remove the etcd data directory
 		_ = os.RemoveAll(etcd.Config().Dir)
-
 	})
 
 	It("should be able to put and get a key", func() {

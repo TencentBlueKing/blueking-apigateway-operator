@@ -212,6 +212,10 @@ func (c *Commiter) ConvertEtcdKVToApisixConfiguration(
 	if err != nil {
 		return nil, stage, err
 	}
+	streamResList, err := c.listStreamResources(ctx, si)
+	if err != nil {
+		return nil, stage, err
+	}
 	svcList, err := c.listServices(ctx, si)
 	if err != nil {
 		return nil, stage, err
@@ -243,7 +247,7 @@ func (c *Commiter) ConvertEtcdKVToApisixConfiguration(
 	if err != nil {
 		return nil, stage, err
 	}
-	conf, err := cvt.Convert(ctx, resList, svcList, sslList, pluginMetadatas)
+	conf, err := cvt.Convert(ctx, resList, streamResList, svcList, sslList, pluginMetadatas)
 
 	metric.ReportResourceCountHelper(si.GatewayName, si.StageName, conf, ReportResourceConvertedMetric)
 
@@ -274,7 +278,22 @@ func (c *Commiter) listResources(
 	if err := c.resourceRegistry.List(ctx, registry.ResourceKey{StageInfo: stageInfo}, resourceList); err != nil {
 		return nil, eris.Wrapf(err, "list bkgateway resource failed")
 	}
-	var retList []*v1beta1.BkGatewayResource
+	var retList = make([]*v1beta1.BkGatewayResource, 0, len(resourceList.Items))
+	for ind := range resourceList.Items {
+		retList = append(retList, &resourceList.Items[ind])
+	}
+	return retList, nil
+}
+
+func (c *Commiter) listStreamResources(
+	ctx context.Context,
+	stageInfo registry.StageInfo,
+) ([]*v1beta1.BkGatewayStreamResource, error) {
+	resourceList := &v1beta1.BkGatewayStreamResourceList{}
+	if err := c.resourceRegistry.List(ctx, registry.ResourceKey{StageInfo: stageInfo}, resourceList); err != nil {
+		return nil, eris.Wrapf(err, "list bkgateway stream resource failed")
+	}
+	var retList = make([]*v1beta1.BkGatewayStreamResource, 0, len(resourceList.Items))
 	for ind := range resourceList.Items {
 		retList = append(retList, &resourceList.Items[ind])
 	}
@@ -289,7 +308,7 @@ func (c *Commiter) listServices(
 	if err := c.resourceRegistry.List(ctx, registry.ResourceKey{StageInfo: stageInfo}, serviceList); err != nil {
 		return nil, eris.Wrapf(err, "list bkgateway service failed")
 	}
-	var retList []*v1beta1.BkGatewayService
+	var retList = make([]*v1beta1.BkGatewayService, 0, len(serviceList.Items))
 	for ind := range serviceList.Items {
 		retList = append(retList, &serviceList.Items[ind])
 	}
@@ -304,7 +323,7 @@ func (c *Commiter) listPluginMetadatas(
 	if err := c.resourceRegistry.List(ctx, registry.ResourceKey{StageInfo: stageInfo}, pluginMetadataList); err != nil {
 		return nil, eris.Wrapf(err, "list bkgateway plugin_metadata failed")
 	}
-	var retList []*v1beta1.BkGatewayPluginMetadata
+	var retList = make([]*v1beta1.BkGatewayPluginMetadata, 0, len(pluginMetadataList.Items))
 	for ind := range pluginMetadataList.Items {
 		retList = append(retList, &pluginMetadataList.Items[ind])
 	}
@@ -316,7 +335,7 @@ func (c *Commiter) listSSLs(ctx context.Context, stageInfo registry.StageInfo) (
 	if err := c.resourceRegistry.List(ctx, registry.ResourceKey{StageInfo: stageInfo}, sslList); err != nil {
 		return nil, eris.Wrapf(err, "list bkgateway ssl failed")
 	}
-	var retList []*v1beta1.BkGatewayTLS
+	var retList = make([]*v1beta1.BkGatewayTLS, 0, len(sslList.Items))
 	for ind := range sslList.Items {
 		retList = append(retList, &sslList.Items[ind])
 	}
