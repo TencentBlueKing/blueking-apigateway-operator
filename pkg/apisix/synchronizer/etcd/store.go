@@ -233,14 +233,18 @@ func (s *EtcdConfigStore) alterByStage(
 			return fmt.Errorf("batch put stream routes failed: %w", err)
 		}
 
-		s.logger.Infof(
-			"put conf count:[route:%d,stream_route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
-			len(putConf.Routes),
-			len(putConf.StreamRoutes),
-			len(putConf.Services),
-			len(putConf.PluginMetadatas),
-			len(putConf.SSLs),
-		)
+		if len(putConf.Routes)+len(putConf.StreamRoutes)+len(putConf.Services)+
+			len(putConf.PluginMetadatas)+len(putConf.SSLs) > 0 {
+			s.logger.Infof(
+				"put gateway[key=%s] conf count:[route:%d,stream_route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
+				stageKey,
+				len(putConf.Routes),
+				len(putConf.StreamRoutes),
+				len(putConf.Services),
+				len(putConf.PluginMetadatas),
+				len(putConf.SSLs),
+			)
+		}
 	}
 
 	// delete resources
@@ -261,14 +265,18 @@ func (s *EtcdConfigStore) alterByStage(
 		if err = s.batchDeleteResource(ctx, ApisixResourceTypeSSL, deleteConf.SSLs); err != nil {
 			return fmt.Errorf("batch delete ssl failed: %w", err)
 		}
-		s.logger.Infof(
-			"del conf count:[route:%d,stream_route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
-			len(deleteConf.Routes),
-			len(deleteConf.StreamRoutes),
-			len(deleteConf.Services),
-			len(deleteConf.PluginMetadatas),
-			len(deleteConf.SSLs),
-		)
+		if len(deleteConf.Routes)+len(deleteConf.StreamRoutes)+len(deleteConf.Services)+
+			len(deleteConf.PluginMetadatas)+len(deleteConf.SSLs) > 0 {
+			s.logger.Infof(
+				"del gateway[key=%s] conf count:[route:%d,stream_route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
+				stageKey,
+				len(deleteConf.Routes),
+				len(deleteConf.StreamRoutes),
+				len(deleteConf.Services),
+				len(deleteConf.PluginMetadatas),
+				len(deleteConf.SSLs),
+			)
+		}
 	}
 
 	if deleteConf == nil && putConf == nil {
