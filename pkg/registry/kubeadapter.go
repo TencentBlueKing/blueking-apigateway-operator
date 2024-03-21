@@ -23,7 +23,7 @@ import (
 	"reflect"
 	"sync"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	"github.com/smallnest/chanx"
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/labels"
@@ -124,7 +124,7 @@ func (r *K8SRegistryAdapter) List(ctx context.Context, key ResourceKey, obj clie
 // Watch creates and returns a channel that produces update events of resources.
 func (r *K8SRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadata {
 	retCh := make(chan *ResourceMetadata)
-	id := uuid.NewV1()
+	id := uuid.New()
 	// 100 is only the initial capacity, chanx will extend the buffer size when it is full.
 	ubc := chanx.NewUnboundedChan(100)
 	r.watchChMap.Store(id, ubc)
