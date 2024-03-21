@@ -279,6 +279,10 @@ func (c *Converter) convertUpstream(
 		retUpstream.UpstreamHost = utils.StringPtr(upstream.UpstreamHost)
 	}
 
+	if upstream.Retries != 0 {
+		retUpstream.Retries = utils.IntPtr(upstream.Retries)
+	}
+
 	if upstream.RetryTimeout != nil {
 		retUpstream.RetryTimeout = upstream.RetryTimeout
 	}
