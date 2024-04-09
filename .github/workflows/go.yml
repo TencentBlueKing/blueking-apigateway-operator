@@ -23,6 +23,13 @@ jobs:
       with:
         version: v1.52.2
 
+    - name: Aqua Security Trivy
+      uses: aquasecurity/trivy-action@0.19.0
+      continue-on-error: true
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+
     - name: Test
       run: |
           go install github.com/onsi/ginkgo/v2/ginkgo@v2.3.1 && make test
