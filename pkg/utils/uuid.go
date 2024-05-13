@@ -19,7 +19,7 @@
 package utils
 
 import (
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 )
 
 var idstr string
@@ -31,7 +31,7 @@ func init() {
 // GetUUID ...
 func GetUUID() string {
 	// only used in local net, because mac addr may leak
-	return uuid.NewV1().String()
+	return uuid.New().String()
 }
 
 // GetGeneratedUUID ...

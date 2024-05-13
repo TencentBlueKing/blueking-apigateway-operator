@@ -70,9 +70,9 @@ var _ = Describe("Operator Integration", func() {
 	Describe("test publish httpbin resource", func() {
 		Context("test new agteway publish", func() {
 			It("should not error and the value should be equal to what was put", func() {
-				//load resources
+				// load resources
 				resources := util.GetHttpBinGatewayResource()
-				//put httpbin resources
+				// put httpbin resources
 				for _, resource := range resources {
 					_, err := etcdCli.Put(context.Background(), resource.Key, resource.Value)
 					Expect(err).NotTo(HaveOccurred())
@@ -141,15 +141,14 @@ var _ = Describe("Operator Integration", func() {
 				})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(len(*diffResourceResult)).To(Equal(0))
-
 			})
 		})
 
 		Context("test update publish", func() {
 			It("should not error and the value should be equal to what was put", func() {
-				//load base resources
+				// load base resources
 				resources := util.GetHttpBinGatewayResource()
-				//put httpbin resources
+				// put httpbin resources
 				var versionRoute util.EtcdConfig
 				for _, resource := range resources {
 					if strings.Contains(resource.Key, versionRouteKey) {
@@ -221,15 +220,14 @@ var _ = Describe("Operator Integration", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(len(*diffResourceResult)).To(Equal(0))
-
 			})
 		})
 
 		Context("test delete publish", func() {
 			It("should not error and the value should be equal to what was put", func() {
-				//load base resources
+				// load base resources
 				resources := util.GetHttpBinGatewayResource()
-				//put httpbin resources
+				// put httpbin resources
 				for _, resource := range resources {
 					_, err := etcdCli.Put(context.Background(), resource.Key, resource.Value)
 					Expect(err).NotTo(HaveOccurred())
@@ -238,7 +236,11 @@ var _ = Describe("Operator Integration", func() {
 				time.Sleep(time.Second * 10)
 
 				// delete gateway
-				_, err := etcdCli.Delete(context.Background(), "/bk-gateway-apigw/default/integration-test/prod", clientv3.WithPrefix())
+				_, err := etcdCli.Delete(
+					context.Background(),
+					"/bk-gateway-apigw/default/integration-test/prod",
+					clientv3.WithPrefix(),
+				)
 				Expect(err).NotTo(HaveOccurred())
 
 				time.Sleep(time.Second * 10)
@@ -264,6 +266,5 @@ var _ = Describe("Operator Integration", func() {
 				).To(Equal(testDataServiceAmount))
 			})
 		})
-
 	})
 })

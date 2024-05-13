@@ -49,6 +49,7 @@ const (
 	skippedValueEtcdEmptyObject = "{}"
 
 	ApisixResourceTypeRoutes         = "routes"
+	ApisixResourceTypeStreamRoutes   = "stream_routes"
 	ApisixResourceTypeServices       = "services"
 	ApisixResourceTypeSSL            = "ssls"
 	ApisixResourceTypePluginMetadata = "plugin_metadata"
@@ -146,6 +147,8 @@ func (e *resourceStore) parseResource(key, value []byte) (resource apisix.Apisix
 	switch resourceType {
 	case ApisixResourceTypeRoutes:
 		resource = &apisix.Route{}
+	case ApisixResourceTypeStreamRoutes:
+		resource = &apisix.StreamRoute{}
 	case ApisixResourceTypeServices:
 		resource = &apisix.Service{}
 	case ApisixResourceTypeSSL:

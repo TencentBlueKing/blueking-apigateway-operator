@@ -104,6 +104,32 @@ var _ = Describe("ApisixConfigSynchronizer", func() {
 					},
 				},
 			},
+			StreamRoutes: map[string]*apisix.StreamRoute{
+				"gateway.stage.test-stream-resource": {
+					Metadata: apisixv1.Metadata{
+						ID:   "gateway.stage.test-stream-resource",
+						Desc: "test resource",
+						Labels: map[string]string{
+							config.BKAPIGatewayLabelKeyGatewayName:  "gateway",
+							config.BKAPIGatewayLabelKeyGatewayStage: "prod",
+						},
+					},
+					Status:     utils.IntPtr(1),
+					ServerPort: 8080,
+					SNI:        "test.example.com",
+					Upstream: &apisix.Upstream{
+						Type: utils.StringPtr("roundrobin"),
+						Nodes: []v1beta1.BkGatewayNode{
+							{
+								Host:     "127.0.0.1",
+								Port:     9090,
+								Weight:   10,
+								Priority: utils.IntPtr(-1),
+							},
+						},
+					},
+				},
+			},
 			Services:        make(map[string]*apisix.Service),
 			PluginMetadatas: make(map[string]*apisix.PluginMetadata),
 			SSLs:            make(map[string]*apisix.SSL),
@@ -132,11 +158,10 @@ var _ = Describe("ApisixConfigSynchronizer", func() {
 
 				result := cmp.Equal(
 					apisixConfig, aConfig,
-					cmpopts.IgnoreFields(apisixv1.Metadata{}, "Desc", "Labels"))
+					cmpopts.IgnoreFields(apisixv1.Metadata{}, "Desc", "Labels"),
+				)
 				Expect(result).Should(BeTrue())
-
 			})
 		})
 	})
-
 })

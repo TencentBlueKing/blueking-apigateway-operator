@@ -147,3 +147,29 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
+  - bkgatewaystreamresources
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
+  - bkgatewaystreamresources/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
+  - bkgatewaystreamresources/status
+  verbs:
+  - get
+  - patch
+  - update

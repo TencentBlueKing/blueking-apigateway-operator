@@ -205,12 +205,13 @@ func getRadixTree(t *testing.T) radixtree.RadixTree {
 
 func TestConvert(t *testing.T) {
 	testCases := []struct {
-		title          string
-		inputStage     *v1beta1.BkGatewayStage
-		inputResources []*v1beta1.BkGatewayResource
-		inputServices  []*v1beta1.BkGatewayService
-		hasErr         bool
-		outConfig      *apisix.ApisixConfiguration
+		title                string
+		inputStage           *v1beta1.BkGatewayStage
+		inputResources       []*v1beta1.BkGatewayResource
+		inputStreamResources []*v1beta1.BkGatewayStreamResource
+		inputServices        []*v1beta1.BkGatewayService
+		hasErr               bool
+		outConfig            *apisix.ApisixConfiguration
 	}{
 		{
 			title:      "convert empty stage",
@@ -250,6 +251,30 @@ func TestConvert(t *testing.T) {
 					},
 				},
 			},
+			inputStreamResources: []*v1beta1.BkGatewayStreamResource{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "test-stream-resource",
+						Namespace: "test",
+					},
+					Spec: v1beta1.BkGatewayStreamResourceSpec{
+						Desc: "test resource",
+						Upstream: &v1beta1.BkGatewayUpstreamConfig{
+							Type: "roundrobin",
+							Nodes: []v1beta1.BkGatewayNode{
+								{
+									Host:     "127.0.0.1:9090",
+									Port:     8080,
+									Weight:   10,
+									Priority: utils.IntPtr(-1),
+								},
+							},
+						},
+						ServerPort: 8080,
+						SNI:        "test.example.com",
+					},
+				},
+			},
 			outConfig: &apisix.ApisixConfiguration{
 				Routes: map[string]*apisix.Route{
 					"gateway.stage.test-resource": {
@@ -273,6 +298,33 @@ func TestConvert(t *testing.T) {
 							},
 						},
 						Status: utils.IntPtr(1),
+						Upstream: &apisix.Upstream{
+							Type: utils.StringPtr("roundrobin"),
+							Nodes: []v1beta1.BkGatewayNode{
+								{
+									Host:     "127.0.0.1",
+									Port:     9090,
+									Weight:   10,
+									Priority: utils.IntPtr(-1),
+								},
+							},
+						},
+					},
+				},
+				StreamRoutes: map[string]*apisix.StreamRoute{
+					"gateway.stage.test-stream-resource": {
+						Metadata: apisixv1.Metadata{
+							ID:   "gateway.stage.test-stream-resource",
+							Name: "test-stream-resource",
+							Desc: "test resource",
+							Labels: map[string]string{
+								config.BKAPIGatewayLabelKeyGatewayName:  "gateway",
+								config.BKAPIGatewayLabelKeyGatewayStage: "stage",
+							},
+						},
+						Status:     utils.IntPtr(1),
+						ServerPort: 8080,
+						SNI:        "test.example.com",
 						Upstream: &apisix.Upstream{
 							Type: utils.StringPtr("roundrobin"),
 							Nodes: []v1beta1.BkGatewayNode{
@@ -324,6 +376,30 @@ func TestConvert(t *testing.T) {
 					},
 				},
 			},
+			inputStreamResources: []*v1beta1.BkGatewayStreamResource{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "test-stream-resource",
+						Namespace: "test",
+					},
+					Spec: v1beta1.BkGatewayStreamResourceSpec{
+						Desc: "test resource",
+						Upstream: &v1beta1.BkGatewayUpstreamConfig{
+							Type: "roundrobin",
+							Nodes: []v1beta1.BkGatewayNode{
+								{
+									Host:     "127.0.0.1:9090",
+									Port:     8080,
+									Weight:   10,
+									Priority: utils.IntPtr(-1),
+								},
+							},
+						},
+						ServerPort: 8080,
+						SNI:        "test.example.com",
+					},
+				},
+			},
 			outConfig: &apisix.ApisixConfiguration{
 				Routes: map[string]*apisix.Route{
 					"gateway.stage.test-resource": {
@@ -347,6 +423,33 @@ func TestConvert(t *testing.T) {
 							},
 						},
 						Status: utils.IntPtr(1),
+						Upstream: &apisix.Upstream{
+							Type: utils.StringPtr("roundrobin"),
+							Nodes: []v1beta1.BkGatewayNode{
+								{
+									Host:     "127.0.0.1",
+									Port:     9090,
+									Weight:   10,
+									Priority: utils.IntPtr(-1),
+								},
+							},
+						},
+					},
+				},
+				StreamRoutes: map[string]*apisix.StreamRoute{
+					"gateway.stage.test-stream-resource": {
+						Metadata: apisixv1.Metadata{
+							ID:   "gateway.stage.test-stream-resource",
+							Name: "test-stream-resource",
+							Desc: "test resource",
+							Labels: map[string]string{
+								config.BKAPIGatewayLabelKeyGatewayName:  "gateway",
+								config.BKAPIGatewayLabelKeyGatewayStage: "stage",
+							},
+						},
+						ServerPort: 8080,
+						SNI:        "test.example.com",
+						Status:     utils.IntPtr(1),
 						Upstream: &apisix.Upstream{
 							Type: utils.StringPtr("roundrobin"),
 							Nodes: []v1beta1.BkGatewayNode{
@@ -398,6 +501,30 @@ func TestConvert(t *testing.T) {
 					},
 				},
 			},
+			inputStreamResources: []*v1beta1.BkGatewayStreamResource{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "test-stream-resource",
+						Namespace: "test",
+					},
+					Spec: v1beta1.BkGatewayStreamResourceSpec{
+						Desc: "test resource",
+						Upstream: &v1beta1.BkGatewayUpstreamConfig{
+							Type: "roundrobin",
+							Nodes: []v1beta1.BkGatewayNode{
+								{
+									Host:     "127.0.0.1:9090",
+									Port:     8080,
+									Weight:   10,
+									Priority: utils.IntPtr(-1),
+								},
+							},
+						},
+						ServerPort: 8080,
+						SNI:        "test.example.com",
+					},
+				},
+			},
 			outConfig: &apisix.ApisixConfiguration{
 				Routes: map[string]*apisix.Route{
 					"gateway.stage.test-resource": {
@@ -438,6 +565,33 @@ func TestConvert(t *testing.T) {
 						},
 					},
 				},
+				StreamRoutes: map[string]*apisix.StreamRoute{
+					"gateway.stage.test-stream-resource": {
+						Metadata: apisixv1.Metadata{
+							ID:   "gateway.stage.test-stream-resource",
+							Name: "test-stream-resource",
+							Desc: "test resource",
+							Labels: map[string]string{
+								config.BKAPIGatewayLabelKeyGatewayName:  "gateway",
+								config.BKAPIGatewayLabelKeyGatewayStage: "stage",
+							},
+						},
+						Status:     utils.IntPtr(1),
+						ServerPort: 8080,
+						SNI:        "test.example.com",
+						Upstream: &apisix.Upstream{
+							Type: utils.StringPtr("roundrobin"),
+							Nodes: []v1beta1.BkGatewayNode{
+								{
+									Host:     "127.0.0.1",
+									Port:     9090,
+									Weight:   10,
+									Priority: utils.IntPtr(-1),
+								},
+							},
+						},
+					},
+				},
 				Services:        make(map[string]*apisix.Service),
 				PluginMetadatas: make(map[string]*apisix.PluginMetadata),
 				SSLs:            make(map[string]*apisix.SSL),
@@ -453,7 +607,14 @@ func TestConvert(t *testing.T) {
 			t.Fatalf("expect no err but get err %s", err.Error())
 			continue
 		}
-		apisixConf, err := tmpConverter.Convert(context.Background(), test.inputResources, test.inputServices, nil, nil)
+		apisixConf, err := tmpConverter.Convert(
+			context.Background(),
+			test.inputResources,
+			test.inputStreamResources,
+			test.inputServices,
+			nil,
+			nil,
+		)
 		if err != nil {
 			if test.hasErr == true {
 				continue
@@ -466,12 +627,13 @@ func TestConvert(t *testing.T) {
 
 func TestConvertForCert(t *testing.T) {
 	testCases := []struct {
-		title          string
-		inputStage     *v1beta1.BkGatewayStage
-		inputResources []*v1beta1.BkGatewayResource
-		inputServices  []*v1beta1.BkGatewayService
-		hasErr         bool
-		outConfig      *apisix.ApisixConfiguration
+		title                string
+		inputStage           *v1beta1.BkGatewayStage
+		inputResources       []*v1beta1.BkGatewayResource
+		inputStreamResources []*v1beta1.BkGatewayStreamResource
+		inputServices        []*v1beta1.BkGatewayService
+		hasErr               bool
+		outConfig            *apisix.ApisixConfiguration
 	}{
 		{
 			title:      "convert cert with host succ",
@@ -509,6 +671,7 @@ func TestConvertForCert(t *testing.T) {
 					},
 				},
 			},
+			inputStreamResources: []*v1beta1.BkGatewayStreamResource{},
 			outConfig: &apisix.ApisixConfiguration{
 				Routes: map[string]*apisix.Route{
 					"gateway.stage.test-resource": {
@@ -595,6 +758,7 @@ c9TCEaBGVFyH5ZMhzcSvLq8k8bU=
 						},
 					},
 				},
+				StreamRoutes:    make(map[string]*apisix.StreamRoute),
 				Services:        make(map[string]*apisix.Service),
 				PluginMetadatas: make(map[string]*apisix.PluginMetadata),
 				SSLs:            make(map[string]*apisix.SSL),
@@ -642,6 +806,7 @@ c9TCEaBGVFyH5ZMhzcSvLq8k8bU=
 					},
 				},
 			},
+			inputStreamResources: []*v1beta1.BkGatewayStreamResource{},
 			outConfig: &apisix.ApisixConfiguration{
 				Routes: map[string]*apisix.Route{
 					"gateway.stage.test-resource": {
@@ -733,6 +898,7 @@ c9TCEaBGVFyH5ZMhzcSvLq8k8bU=
 						},
 					},
 				},
+				StreamRoutes:    make(map[string]*apisix.StreamRoute),
 				Services:        make(map[string]*apisix.Service),
 				PluginMetadatas: make(map[string]*apisix.PluginMetadata),
 				SSLs:            make(map[string]*apisix.SSL),
@@ -775,7 +941,8 @@ c9TCEaBGVFyH5ZMhzcSvLq8k8bU=
 					},
 				},
 			},
-			outConfig: nil,
+			inputStreamResources: []*v1beta1.BkGatewayStreamResource{},
+			outConfig:            nil,
 		},
 
 		{
@@ -820,7 +987,8 @@ c9TCEaBGVFyH5ZMhzcSvLq8k8bU=
 					},
 				},
 			},
-			outConfig: nil,
+			inputStreamResources: []*v1beta1.BkGatewayStreamResource{},
+			outConfig:            nil,
 		},
 	}
 	tree := getRadixTree(t)
@@ -829,7 +997,14 @@ c9TCEaBGVFyH5ZMhzcSvLq8k8bU=
 		tmpConverter, _ := NewConverter("", "gateway", test.inputStage, &UpstreamConfig{
 			CertDetectTree: tree,
 		}, nil)
-		apisixConf, err := tmpConverter.Convert(context.Background(), test.inputResources, test.inputServices, nil, nil)
+		apisixConf, err := tmpConverter.Convert(
+			context.Background(),
+			test.inputResources,
+			test.inputStreamResources,
+			test.inputServices,
+			nil,
+			nil,
+		)
 		assert.Equal(t, test.hasErr, err != nil, "err: (%+v), apisixConf: (%s)", err, marshallIgnoreErr(apisixConf))
 		if test.hasErr {
 			continue

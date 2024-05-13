@@ -706,7 +706,6 @@ var _ = Describe("Etcdadapter Operations", Ordered, func() {
 				Expect(stage.Key()).To(BeElementOf([]string{"gateway/stage", "gateway/stage2"}))
 			}
 		})
-
 	})
 
 	Context("Watch", Ordered, func() {

@@ -21,7 +21,14 @@ jobs:
     - name: Lint
       uses: golangci/golangci-lint-action@v3
       with:
-        version: v1.52.2
+        version: v1.55.2
+
+    - name: Aqua Security Trivy
+      uses: aquasecurity/trivy-action@0.19.0
+      continue-on-error: true
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
 
     - name: Test
       run: |

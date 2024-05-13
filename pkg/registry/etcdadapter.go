@@ -404,6 +404,7 @@ func (r *EtcdRegistryAdapter) handleEvent(event *clientv3.Event) (*ResourceMetad
 	}
 	return nil, fmt.Errorf("err unknown event type: %s", event.Type)
 }
+
 func (r *EtcdRegistryAdapter) extractResourceMetadata(key string) (ResourceMetadata, error) {
 	ret := ResourceMetadata{}
 	if len(key) == 0 {
