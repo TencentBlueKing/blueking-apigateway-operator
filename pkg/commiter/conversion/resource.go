@@ -37,18 +37,6 @@ import (
 )
 
 const (
-	// pluginNameBKProxyRewrite plugin name for proxy rewrite
-	pluginNameBKProxyRewrite = "bk-proxy-rewrite"
-
-	// stageHeadersModeInherit inherit mode for stage headers
-	stageHeadersModeInherit = "inherit"
-
-	// stageHeadersModeOverride override mode for stage headers
-	stageHeadersModeOverride = "override"
-
-	// stageHeadersModeAppend append mode for stage headers
-	stageHeadersModeAppend = "append"
-
 	passHostPass    = "pass"
 	passHostNode    = "node"
 	passHostRewrite = "rewrite"
