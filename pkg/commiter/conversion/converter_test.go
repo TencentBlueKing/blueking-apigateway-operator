@@ -55,13 +55,6 @@ func getStage() *v1beta1.BkGatewayStage {
 			Vars: map[string]string{
 				"runMode": "prod",
 			},
-			Rewrite: &v1beta1.BkGatewayRewrite{
-				Enabled: true,
-				Headers: map[string]string{
-					"key1": "value1",
-					"key2": "value2",
-				},
-			},
 			Plugins: []*v1beta1.BkGatewayPlugin{
 				{
 					Name: "limit-req",
