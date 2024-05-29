@@ -127,10 +127,11 @@ func (c *Converter) convertResource(
 
 	pluginsMap := make(map[string]interface{})
 	if resource.Spec.Rewrite != nil && resource.Spec.Rewrite.Enabled {
-		pluginsMap, err = c.getProxyRewrite(resource.Spec.Rewrite, resource)
+		proxyRewrite, err := c.getProxyRewrite(resource.Spec.Rewrite, resource)
 		if err != nil {
 			return nil, err
 		}
+		pluginsMap[pluginNameBKProxyRewrite] = proxyRewrite
 	}
 
 	if len(resource.Spec.Plugins) != 0 {
@@ -470,9 +471,7 @@ func (c *Converter) getProxyRewrite(
 		rewritePluginConfig["method"] = rewrite.Method
 	}
 
-	return map[string]interface{}{
-		pluginNameBKProxyRewrite: rewritePluginConfig,
-	}, nil
+	return rewritePluginConfig, nil
 }
 
 func (c *Converter) appendStagePlugins(stagePlugins map[string]interface{}) {

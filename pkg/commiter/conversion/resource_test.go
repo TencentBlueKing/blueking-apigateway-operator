@@ -196,12 +196,10 @@ var _ = Describe("resource", func() {
 			)
 			gomega.Expect(err).To(gomega.BeNil())
 			gomega.Expect(rewrite).To(gomega.Equal(map[string]interface{}{
-				pluginNameBKProxyRewrite: map[string]interface{}{
-					"uri":                "/rewrite/${bk_api_subpath_match_param_name}",
-					"match_subpath":      true,
-					"subpath_param_name": "bk_api_subpath_match_param_name",
-					"method":             "GET",
-				},
+				"uri":                "/rewrite/${bk_api_subpath_match_param_name}",
+				"match_subpath":      true,
+				"subpath_param_name": "bk_api_subpath_match_param_name",
+				"method":             "GET",
 			}))
 		})
 
@@ -232,9 +230,7 @@ var _ = Describe("resource", func() {
 			)
 			gomega.Expect(err).To(gomega.BeNil())
 			gomega.Expect(rewrite).To(gomega.Equal(map[string]interface{}{
-				pluginNameBKProxyRewrite: map[string]interface{}{
-					"method": "GET",
-				},
+				"method": "GET",
 			}))
 		})
 
@@ -263,10 +259,8 @@ var _ = Describe("resource", func() {
 			)
 			gomega.Expect(err).To(gomega.BeNil())
 			gomega.Expect(rewrite).To(gomega.Equal(map[string]interface{}{
-				pluginNameBKProxyRewrite: map[string]interface{}{
-					"uri":    "/rewrite",
-					"method": "GET",
-				},
+				"uri":    "/rewrite",
+				"method": "GET",
 			}))
 		})
 	})
