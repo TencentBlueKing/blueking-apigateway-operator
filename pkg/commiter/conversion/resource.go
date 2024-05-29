@@ -19,6 +19,7 @@
 package conversion
 
 import (
+	"fmt"
 	"net"
 	"strconv"
 	"strings"
@@ -37,6 +38,9 @@ import (
 )
 
 const (
+	// pluginNameBKProxyRewrite plugin name for proxy rewrite
+	pluginNameBKProxyRewrite = "bk-proxy-rewrite"
+
 	passHostPass    = "pass"
 	passHostNode    = "node"
 	passHostRewrite = "rewrite"
@@ -122,6 +126,12 @@ func (c *Converter) convertResource(
 	}
 
 	pluginsMap := make(map[string]interface{})
+	if resource.Spec.Rewrite != nil && resource.Spec.Rewrite.Enabled {
+		pluginsMap, err = c.getProxyRewrite(resource.Spec.Rewrite, resource)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	if len(resource.Spec.Plugins) != 0 {
 		for _, p := range resource.Spec.Plugins {
@@ -430,6 +440,39 @@ func (c *Converter) externalExternalServiceNodes(
 		)
 	}
 	return nil, eris.Errorf("external service converter not register")
+}
+
+func (c *Converter) getProxyRewrite(
+	rewrite *v1beta1.BkGatewayResourceHTTPRewrite,
+	resource *v1beta1.BkGatewayResource,
+) (map[string]interface{}, error) {
+	if !rewrite.Enabled {
+		return map[string]interface{}{}, nil
+	}
+
+	rewritePluginConfig := make(map[string]interface{})
+	if len(rewrite.Path) != 0 {
+		upstreamURI := render.GetUpstreamURIRender().Render(rewrite.Path, c.stage.Spec.Vars)
+		if resource.Spec.MatchSubPath {
+			rewritePluginConfig["uri"] = fmt.Sprintf(
+				"%s/${%s}",
+				strings.TrimSuffix(upstreamURI, "/"),
+				config.BKAPIGatewaySubpathMatchParamName,
+			)
+			rewritePluginConfig["match_subpath"] = true
+			rewritePluginConfig["subpath_param_name"] = config.BKAPIGatewaySubpathMatchParamName
+		} else {
+			rewritePluginConfig["uri"] = upstreamURI
+		}
+	}
+
+	if len(rewrite.Method) != 0 && rewrite.Method != "ANY" {
+		rewritePluginConfig["method"] = rewrite.Method
+	}
+
+	return map[string]interface{}{
+		pluginNameBKProxyRewrite: rewritePluginConfig,
+	}, nil
 }
 
 func (c *Converter) appendStagePlugins(stagePlugins map[string]interface{}) {
