@@ -44,6 +44,8 @@ type reportEvent struct {
 	Event  constant.EventName
 	status constant.EventStatus
 	detail map[string]interface{}
+	// event timestamp
+	ts int64
 }
 
 type versionProbe struct {
@@ -115,6 +117,7 @@ func ReportParseConfigurationDoingEvent(ctx context.Context, stage *v1beta1.BkGa
 		Event:  constant.EventNameParseConfiguration,
 		status: constant.EventStatusDoing,
 		detail: nil,
+		ts:     time.Now().Unix(),
 	}
 	addEvent(event)
 }
@@ -127,6 +130,7 @@ func ReportParseConfigurationFailureEvent(ctx context.Context, stage *v1beta1.Bk
 		Event:  constant.EventNameParseConfiguration,
 		status: constant.EventStatusFailure,
 		detail: map[string]interface{}{"err_msg": err.Error()},
+		ts:     time.Now().Unix(),
 	}
 	addEvent(event)
 }
@@ -137,6 +141,7 @@ func ReportParseConfigurationSuccessEvent(ctx context.Context, stage *v1beta1.Bk
 		stage:  stage,
 		Event:  constant.EventNameParseConfiguration,
 		status: constant.EventStatusSuccess,
+		ts:     time.Now().Unix(),
 	}
 	addEvent(event)
 }
@@ -147,6 +152,7 @@ func ReportApplyConfigurationDoingEvent(ctx context.Context, stage *v1beta1.BkGa
 		stage:  stage,
 		Event:  constant.EventNameApplyConfiguration,
 		status: constant.EventStatusDoing,
+		ts:     time.Now().Unix(),
 	}
 	addEvent(event)
 }
@@ -157,6 +163,7 @@ func ReportApplyConfigurationSuccessEvent(ctx context.Context, stage *v1beta1.Bk
 		stage:  stage,
 		Event:  constant.EventNameApplyConfiguration,
 		status: constant.EventStatusSuccess,
+		ts:     time.Now().Unix(),
 	}
 	addEvent(event)
 }
@@ -167,6 +174,7 @@ func ReportLoadConfigurationDoingEvent(ctx context.Context, stage *v1beta1.BkGat
 		stage:  stage,
 		Event:  constant.EventNameLoadConfiguration,
 		status: constant.EventStatusDoing,
+		ts:     time.Now().Unix(),
 	}
 	addEvent(event)
 }
@@ -219,6 +227,7 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *v1beta1.BkGa
 					"publish_id": versionInfo.PublishID,
 					"start_time": versionInfo.StartTime,
 				},
+				ts: time.Now().Unix(),
 			}
 			reporter.eventChain <- event
 		})
@@ -230,6 +239,7 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *v1beta1.BkGa
 					Event:  constant.EventNameLoadConfiguration,
 					status: constant.EventStatusFailure,
 					detail: map[string]interface{}{"err_msg": err.Error()},
+					ts:     time.Now().Unix(),
 				}
 				reporter.eventChain <- event
 			}
@@ -241,6 +251,7 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *v1beta1.BkGa
 				Event:  constant.EventNameLoadConfiguration,
 				status: constant.EventStatusFailure,
 				detail: map[string]interface{}{"err_msg": "version publish probe timeout"},
+				ts:     time.Now().Unix(),
 			}
 			reporter.eventChain <- event
 		}
@@ -276,6 +287,7 @@ func (r *Reporter) reportEvent(event reportEvent) {
 	eventReq := parseEventInfo(event.stage)
 	eventReq.Name = event.Event
 	eventReq.Status = event.status
+	eventReq.Ts = event.ts
 	if len(event.detail) != 0 {
 		eventReq.Detail = event.detail
 	}
