@@ -30,4 +30,5 @@ type ReportEventReq struct {
 	Name          constant.EventName     `json:"name"`
 	Status        constant.EventStatus   `json:"status"`
 	Detail        map[string]interface{} `json:"detail"`
+	Ts            int64                  `json:"ts"`
 }
