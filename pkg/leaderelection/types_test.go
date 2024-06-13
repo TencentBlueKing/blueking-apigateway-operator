@@ -20,9 +20,8 @@ package leaderelection_test
 
 import (
 	"context"
-	"testing"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/prometheus/client_golang/prometheus"
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -33,11 +32,6 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/tests/util"
 )
-
-func TestLeaderElection(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "LeaderElection Suite")
-}
 
 var _ = Describe("EtcdLeaderElector", func() {
 	var (
