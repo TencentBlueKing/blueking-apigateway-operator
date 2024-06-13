@@ -29,8 +29,6 @@ import (
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/leaderelection"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 
@@ -60,12 +58,9 @@ type KubeLeaderElector struct {
 }
 
 // NewKubeLeaderElector New create client
-func NewKubeLeaderElector(lockType, name, ns, kubeconfig string,
+func NewKubeLeaderElector(lockType, name, ns string, k8sClientSet kubernetes.Interface,
 	leaseDuration, renewDuration, retryPeriod time.Duration,
 ) (LeaderElector, error) {
-	var restConfig *rest.Config
-	var err error
-
 	cl := new(KubeLeaderElector)
 	cl.lockType = lockType
 	cl.name = name
@@ -81,26 +76,6 @@ func NewKubeLeaderElector(lockType, name, ns, kubeconfig string,
 	if err != nil {
 		cl.logger.Error(err, "get hostname failed")
 		return nil, err
-	}
-
-	// create kubernetes client for leader election
-	if len(kubeconfig) != 0 {
-		restConfig, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
-		if err != nil {
-			cl.logger.Error(err, fmt.Sprintf("create internal client with kubeconfig %s failed", kubeconfig))
-			return nil, eris.Wrapf(err, "create internal client with kubeconfig %s failed", kubeconfig)
-		}
-	} else {
-		restConfig, err = rest.InClusterConfig()
-		if err != nil {
-			cl.logger.Error(err, "build incluster config failed")
-			return nil, eris.Wrapf(err, "buidl incluster config failed")
-		}
-	}
-	k8sClientSet, err := kubernetes.NewForConfig(restConfig)
-	if err != nil {
-		cl.logger.Error(err, "create client set from config failed")
-		return nil, eris.Wrapf(err, "create client set from config failed")
 	}
 
 	id := fmt.Sprintf("%s_%s_%s", hostName, uuid.NewUUID(), config.InstanceIP)

@@ -27,8 +27,10 @@ import (
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/client-go/kubernetes"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
+	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
@@ -154,10 +156,25 @@ func (r *KubeAgentRunner) initLeaderElector() {
 		if len(apisixPrefixSplits) >= 2 {
 			electionNameWithApisixPrefix += "-" + apisixPrefixSplits[1]
 		}
+
+		// create kubernetes client for leader election
+		restConfig, err := rest.InClusterConfig()
+		if err != nil {
+			r.logger.Error(err, "build incluster config failed")
+			os.Exit(1)
+			return
+		}
+		k8sClientSet, err := kubernetes.NewForConfig(restConfig)
+		if err != nil {
+			r.logger.Error(err, "create client set from config failed")
+			os.Exit(1)
+			return
+		}
+
 		leader, err := leaderelection.NewKubeLeaderElector(r.cfg.KubeExtension.LeaderElectionType,
 			electionNameWithApisixPrefix,
 			config.InstanceNamespace,
-			"",
+			k8sClientSet,
 			time.Duration(r.cfg.KubeExtension.LeaderElectionLeaseDuration)*time.Second,
 			time.Duration(r.cfg.KubeExtension.LeaderElectionRenewDuration)*time.Second,
 			time.Duration(r.cfg.KubeExtension.LeaderElectionRetryDuration)*time.Second,
