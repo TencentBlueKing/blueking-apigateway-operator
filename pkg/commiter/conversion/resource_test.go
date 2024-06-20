@@ -157,10 +157,10 @@ var _ = Describe("resource", func() {
 		})
 	})
 
-	Describe("mergeRewrite", func() {
+	Describe("getProxyRewrite", func() {
 		It("rewrite not enable", func() {
 			c := &Converter{}
-			rewrite, err := c.mergeRewrite(
+			rewrite, err := c.getProxyRewrite(
 				&v1beta1.BkGatewayResourceHTTPRewrite{Enabled: false},
 				&v1beta1.BkGatewayResource{},
 			)
@@ -182,16 +182,11 @@ var _ = Describe("resource", func() {
 					},
 				},
 			}
-			rewrite, err := c.mergeRewrite(
+			rewrite, err := c.getProxyRewrite(
 				&v1beta1.BkGatewayResourceHTTPRewrite{
-					Enabled:          true,
-					Path:             "/rewrite",
-					Method:           "GET",
-					StageHeadersMode: stageHeadersModeAppend,
-					Headers: map[string]string{
-						"test":  "value",
-						"test1": "value",
-					},
+					Enabled: true,
+					Path:    "/rewrite",
+					Method:  "GET",
 				},
 				&v1beta1.BkGatewayResource{
 					Spec: v1beta1.BkGatewayResourceSpec{
@@ -201,16 +196,10 @@ var _ = Describe("resource", func() {
 			)
 			gomega.Expect(err).To(gomega.BeNil())
 			gomega.Expect(rewrite).To(gomega.Equal(map[string]interface{}{
-				pluginNameBKProxyRewrite: map[string]interface{}{
-					"uri":                "/rewrite/${bk_api_subpath_match_param_name}",
-					"match_subpath":      true,
-					"subpath_param_name": "bk_api_subpath_match_param_name",
-					"method":             "GET",
-					"headers": map[string]interface{}{
-						"test":  "value",
-						"test1": "value",
-					},
-				},
+				"uri":                "/rewrite/${bk_api_subpath_match_param_name}",
+				"match_subpath":      true,
+				"subpath_param_name": "bk_api_subpath_match_param_name",
+				"method":             "GET",
 			}))
 		})
 
@@ -228,15 +217,10 @@ var _ = Describe("resource", func() {
 					},
 				},
 			}
-			rewrite, err := c.mergeRewrite(
+			rewrite, err := c.getProxyRewrite(
 				&v1beta1.BkGatewayResourceHTTPRewrite{
-					Enabled:          true,
-					Method:           "GET",
-					StageHeadersMode: stageHeadersModeAppend,
-					Headers: map[string]string{
-						"test":  "value",
-						"test1": "value",
-					},
+					Enabled: true,
+					Method:  "GET",
 				},
 				&v1beta1.BkGatewayResource{
 					Spec: v1beta1.BkGatewayResourceSpec{
@@ -246,13 +230,7 @@ var _ = Describe("resource", func() {
 			)
 			gomega.Expect(err).To(gomega.BeNil())
 			gomega.Expect(rewrite).To(gomega.Equal(map[string]interface{}{
-				pluginNameBKProxyRewrite: map[string]interface{}{
-					"method": "GET",
-					"headers": map[string]interface{}{
-						"test":  "value",
-						"test1": "value",
-					},
-				},
+				"method": "GET",
 			}))
 		})
 
@@ -263,23 +241,15 @@ var _ = Describe("resource", func() {
 						Vars: map[string]string{},
 						Rewrite: &v1beta1.BkGatewayRewrite{
 							Enabled: true,
-							Headers: map[string]string{
-								"test": "test",
-							},
 						},
 					},
 				},
 			}
-			rewrite, err := c.mergeRewrite(
+			rewrite, err := c.getProxyRewrite(
 				&v1beta1.BkGatewayResourceHTTPRewrite{
-					Enabled:          true,
-					Path:             "/rewrite",
-					Method:           "GET",
-					StageHeadersMode: stageHeadersModeAppend,
-					Headers: map[string]string{
-						"test":  "value",
-						"test1": "value",
-					},
+					Enabled: true,
+					Path:    "/rewrite",
+					Method:  "GET",
 				},
 				&v1beta1.BkGatewayResource{
 					Spec: v1beta1.BkGatewayResourceSpec{
@@ -289,14 +259,8 @@ var _ = Describe("resource", func() {
 			)
 			gomega.Expect(err).To(gomega.BeNil())
 			gomega.Expect(rewrite).To(gomega.Equal(map[string]interface{}{
-				pluginNameBKProxyRewrite: map[string]interface{}{
-					"uri":    "/rewrite",
-					"method": "GET",
-					"headers": map[string]interface{}{
-						"test":  "value",
-						"test1": "value",
-					},
-				},
+				"uri":    "/rewrite",
+				"method": "GET",
 			}))
 		})
 	})

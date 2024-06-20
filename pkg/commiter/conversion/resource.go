@@ -41,15 +41,6 @@ const (
 	// pluginNameBKProxyRewrite plugin name for proxy rewrite
 	pluginNameBKProxyRewrite = "bk-proxy-rewrite"
 
-	// stageHeadersModeInherit inherit mode for stage headers
-	stageHeadersModeInherit = "inherit"
-
-	// stageHeadersModeOverride override mode for stage headers
-	stageHeadersModeOverride = "override"
-
-	// stageHeadersModeAppend append mode for stage headers
-	stageHeadersModeAppend = "append"
-
 	passHostPass    = "pass"
 	passHostNode    = "node"
 	passHostRewrite = "rewrite"
@@ -136,10 +127,11 @@ func (c *Converter) convertResource(
 
 	pluginsMap := make(map[string]interface{})
 	if resource.Spec.Rewrite != nil && resource.Spec.Rewrite.Enabled {
-		pluginsMap, err = c.mergeRewrite(resource.Spec.Rewrite, resource)
+		proxyRewrite, err := c.getProxyRewrite(resource.Spec.Rewrite, resource)
 		if err != nil {
 			return nil, err
 		}
+		pluginsMap[pluginNameBKProxyRewrite] = proxyRewrite
 	}
 
 	if len(resource.Spec.Plugins) != 0 {
@@ -451,7 +443,7 @@ func (c *Converter) externalExternalServiceNodes(
 	return nil, eris.Errorf("external service converter not register")
 }
 
-func (c *Converter) mergeRewrite(
+func (c *Converter) getProxyRewrite(
 	rewrite *v1beta1.BkGatewayResourceHTTPRewrite,
 	resource *v1beta1.BkGatewayResource,
 ) (map[string]interface{}, error) {
@@ -479,51 +471,7 @@ func (c *Converter) mergeRewrite(
 		rewritePluginConfig["method"] = rewrite.Method
 	}
 
-	switch rewrite.StageHeadersMode {
-	case stageHeadersModeInherit:
-		if c.stage.Spec.Rewrite != nil && c.stage.Spec.Rewrite.Enabled {
-			if c.stage.Spec.Rewrite.Headers == nil || len(c.stage.Spec.Rewrite.Headers) == 0 {
-				break
-			}
-			rewritePluginConfig["headers"] = c.stage.Spec.Rewrite.Headers
-		}
-
-	case stageHeadersModeOverride:
-		if rewrite.Headers == nil || len(rewrite.Headers) == 0 {
-			break
-		}
-		rewritePluginConfig["headers"] = rewrite.Headers
-
-	case stageHeadersModeAppend:
-		newHeaders := make(map[string]string)
-		if c.stage.Spec.Rewrite != nil && c.stage.Spec.Rewrite.Enabled {
-			for k, v := range c.stage.Spec.Rewrite.Headers {
-				newHeaders[k] = v
-			}
-		}
-
-		for k, v := range rewrite.Headers {
-			newHeaders[k] = v
-		}
-
-		if len(newHeaders) == 0 {
-			break
-		}
-		rewritePluginConfig["headers"] = newHeaders
-
-	default:
-		return nil, eris.Errorf("invalid rewrite stageHeaders Mode")
-	}
-
-	if _, ok := rewritePluginConfig["headers"]; ok {
-		rewritePluginConfig["headers"] = apisix.MapStringToMapInterface(
-			rewritePluginConfig["headers"].(map[string]string),
-		)
-	}
-
-	return map[string]interface{}{
-		pluginNameBKProxyRewrite: rewritePluginConfig,
-	}, nil
+	return rewritePluginConfig, nil
 }
 
 func (c *Converter) appendStagePlugins(stagePlugins map[string]interface{}) {
