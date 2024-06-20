@@ -28,6 +28,9 @@ import (
 	"github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/runtime"
 
+	apisixv1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/agent/timer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
@@ -38,8 +41,6 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 	registryMock "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry/mock"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
-	apisixv1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var _ = Describe("Commiter", func() {
