@@ -22,7 +22,7 @@ import (
 	"sync"
 	"time"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/rotisserie/eris"
 	"go.uber.org/zap"
 

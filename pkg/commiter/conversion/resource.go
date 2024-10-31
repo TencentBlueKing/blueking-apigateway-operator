@@ -325,7 +325,7 @@ func (c *Converter) convertUpstream(
 		}
 	}
 
-	if len(upstream.ServiceName) != 0 && (retUpstream.Nodes == nil || len(retUpstream.Nodes) == 0) {
+	if len(upstream.ServiceName) != 0 && len(retUpstream.Nodes) == 0 {
 		retUpstream.ServiceName = utils.StringPtr(upstream.ServiceName)
 	}
 
