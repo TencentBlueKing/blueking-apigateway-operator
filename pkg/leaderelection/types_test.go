@@ -54,7 +54,6 @@ var _ = Describe("EtcdLeaderElector", func() {
 		config.InstanceName = "test-instance2"
 		elector2, err = leaderelection.NewEtcdLeaderElector(etcdClient, "test-prefix")
 		Expect(err).To(BeNil())
-
 	})
 
 	Describe("NewEtcdLeaderElector", func() {
@@ -62,7 +61,6 @@ var _ = Describe("EtcdLeaderElector", func() {
 			Expect(elector1).NotTo(BeNil())
 			Expect(elector2).NotTo(BeNil())
 		})
-
 	})
 
 	Describe("Run", func() {
@@ -106,7 +104,6 @@ var _ = Describe("KubeLeaderElector", func() {
 			25, 5,
 		)
 		Expect(err).To(BeNil())
-
 	})
 
 	Describe("Run", func() {

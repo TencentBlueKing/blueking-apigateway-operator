@@ -24,7 +24,7 @@ init:
 	pip install pre-commit
 	pre-commit install
 	# for golangci-lint
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.55.2
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.61.0
 	# for make mock
 	go install github.com/golang/mock/mockgen@v1.6.0
 	# for ginkgo
@@ -140,6 +140,6 @@ undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/confi
 	kustomize build config/default | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
 
 integration: docker-build
-	cd tests/integration && docker-compose down && docker-compose up -d && ginkgo -ldflags="-s=false" -gcflags="-l";docker-compose down
+	cd tests/integration && docker compose down && docker compose up -d && ginkgo -ldflags="-s=false" -gcflags="-l";docker compose down
 
 
