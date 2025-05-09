@@ -40,6 +40,7 @@ const (
 	syncResourceURL = "/v1/resources/sync"
 )
 
+// ResourceClient is a client for the resource API.
 type ResourceClient struct {
 	baseClient
 	Apikey string

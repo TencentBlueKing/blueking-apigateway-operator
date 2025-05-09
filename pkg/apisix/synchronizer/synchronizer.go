@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package synchronizer provides the functionality to synchronize the API Gateway configuration.
 package synchronizer
 
 //go:generate mockgen -source=$GOFILE -destination=./mock/$GOFILE -package=mock
@@ -31,7 +32,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 )
 
-// ApisixConfigurationSynchronizer is implementation for Synchronizer
+// ApisixConfigSynchronizer is implementation for Synchronizer
 type ApisixConfigSynchronizer interface {
 	Sync(
 		ctx context.Context,

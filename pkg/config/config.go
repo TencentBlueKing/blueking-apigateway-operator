@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package config provides the configuration for the BlueKing API Gateway Operator.
 package config
 
 import (
@@ -121,7 +122,7 @@ type Operator struct {
 	EtcdPutInterval time.Duration
 }
 
-// VersionProbe
+// VersionProbe ...
 type VersionProbe struct {
 	BufferSize int
 	Retry      Retry
@@ -129,17 +130,19 @@ type VersionProbe struct {
 	WaitTime   time.Duration
 }
 
-// Retry
+// Retry ...
 type Retry struct {
 	Count    int
 	Interval time.Duration
 }
 
+// Instance ...
 type Instance struct {
 	ID     string
 	Secret string
 }
 
+// EventReporter ...
 type EventReporter struct {
 	CoreAPIHost        string
 	ApisixHost         string

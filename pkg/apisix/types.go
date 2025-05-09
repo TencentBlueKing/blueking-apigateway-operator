@@ -80,7 +80,7 @@ func (s *Service) SetCreateTime(t int64) { s.CreateTime = t }
 // SetUpdateTime SetUpdateTime
 func (s *Service) SetUpdateTime(t int64) { s.UpdateTime = t }
 
-// ClearDesc clear desc
+// ClearUnusedFields clear desc
 func (s *Service) ClearUnusedFields() { s.Desc = "" }
 
 // Upstream route upstream
@@ -146,11 +146,11 @@ func (r *Route) SetCreateTime(t int64) { r.CreateTime = t }
 // SetUpdateTime SetUpdateTime
 func (r *Route) SetUpdateTime(t int64) { r.UpdateTime = t }
 
-// ClearDesc clear desc
+// ClearUnusedFields clear desc
 func (r *Route) ClearUnusedFields() { r.Desc = "" }
 
-// +k8s:deepcopy-gen=true
 // SSL ...
+// +k8s:deepcopy-gen=true
 type SSL struct {
 	apisixv1.Ssl `json:",inline" yaml:",inline"`
 
@@ -183,11 +183,11 @@ func (s *SSL) SetCreateTime(t int64) { s.CreateTime = t }
 // SetUpdateTime SetUpdateTime
 func (s *SSL) SetUpdateTime(t int64) { s.UpdateTime = t }
 
-// ClearDesc clear desc
+// ClearUnusedFields clear desc
 func (s *SSL) ClearUnusedFields() {}
 
-// +k8s:deepcopy-gen=true
 // PluginMetadata is resource definition for apisix plugin_metadata
+// +k8s:deepcopy-gen=true
 type PluginMetadata struct {
 	runtime.RawExtension `json:",inline" yaml:",inline"`
 
@@ -273,7 +273,7 @@ func (pm *PluginMetadata) SetCreateTime(t int64) {}
 // SetUpdateTime SetUpdateTime
 func (pm *PluginMetadata) SetUpdateTime(t int64) {}
 
-// ClearDesc clear desc
+// ClearUnusedFields clear desc
 func (pm *PluginMetadata) ClearUnusedFields() {}
 
 // NewPluginMetadata will build a new plugin metadata object
@@ -288,6 +288,7 @@ func NewPluginMetadata(name string, config map[string]interface{}) *PluginMetada
 	return &ret
 }
 
+// StreamRoute apisix stream route object
 // +k8s:deepcopy-gen=true
 type StreamRoute struct {
 	apisixv1.Metadata `json:",inline" yaml:",inline"`
@@ -329,7 +330,7 @@ func (r *StreamRoute) SetCreateTime(t int64) { r.CreateTime = t }
 // SetUpdateTime SetUpdateTime
 func (r *StreamRoute) SetUpdateTime(t int64) { r.UpdateTime = t }
 
-// ClearDesc clear desc
+// ClearUnusedFields clear desc
 func (r *StreamRoute) ClearUnusedFields() { r.Desc = "" }
 
 // ApisixConfigurationStandalone apisix configuration structure

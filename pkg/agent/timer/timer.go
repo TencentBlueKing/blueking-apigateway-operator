@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package timer provides the functionality to manage the timer for the BlueKing API Gateway Operator.
 package timer
 
 import (

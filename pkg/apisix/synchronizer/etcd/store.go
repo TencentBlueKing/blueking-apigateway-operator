@@ -83,6 +83,7 @@ func NewEtcdConfigStore(client *clientv3.Client, prefix string, putInterval time
 	return s, nil
 }
 
+// Init initializes the etcd config store
 func (s *EtcdConfigStore) Init() {
 	wg := &sync.WaitGroup{}
 	for _, resourceType := range apisixResourceTypes {

@@ -159,7 +159,11 @@ func (r *EtcdRegistryAdapter) convertStages(kvs []*mvccpb.KeyValue) []StageInfo 
 }
 
 // List ...
-func (r *EtcdRegistryAdapter) List(ctx context.Context, key ResourceKey, obj client.ObjectList) error {
+func (r *EtcdRegistryAdapter) List(
+	ctx context.Context,
+	key ResourceKey,
+	obj client.ObjectList,
+) error {
 	startedTime := time.Now()
 	if key.GatewayName == "" || key.StageName == "" {
 		return eris.Errorf("Gateway and stage must be specified when list etcd resources")
@@ -251,11 +255,8 @@ func (r *EtcdRegistryAdapter) List(ctx context.Context, key ResourceKey, obj cli
 // Watch ...
 func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadata {
 	watchCtx, cancel := context.WithCancel(ctx)
-
 	retCh := make(chan *ResourceMetadata)
-
 	var etcdWatchCh clientv3.WatchChan
-
 	needCreateChan := true
 
 	go func() {
@@ -279,9 +280,7 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 			case event, ok := <-etcdWatchCh:
 				// reset watch channel if get error
 				if !ok {
-					r.logger.Error(
-						nil,
-						"Watch etcd registry failed: channel break, will recover from cached revision",
+					r.logger.Error(nil, "Watch etcd registry failed: channel break, will recover from cached revision",
 						"revision",
 						r.currentRevision,
 					)
@@ -297,17 +296,14 @@ func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadat
 				if err != nil {
 					switch {
 					case errors.Is(err, v3rpc.ErrCompacted), errors.Is(err, v3rpc.ErrFutureRev):
-						r.logger.Error(
-							event.Err(),
+						r.logger.Error(event.Err(),
 							"Watch etcd registry failed unrecoverable, need full sync to recover",
 						)
 						return
 					default:
-						r.logger.Error(
-							event.Err(),
+						r.logger.Error(event.Err(),
 							"Watch etcd registry failed: other error, will recover from cached revision",
-							"revision",
-							r.currentRevision,
+							"revision", r.currentRevision,
 						)
 						time.Sleep(time.Second * 5)
 						needCreateChan = true

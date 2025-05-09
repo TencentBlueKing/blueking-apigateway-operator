@@ -36,11 +36,13 @@ const (
 	ApisixOperationCountMetric        = "apisix_operation_count"
 )
 
+// EtcdConfig is the config for the etcd
 type EtcdConfig struct {
 	Key   string `yaml:"key"`
 	Value string `yaml:"value"`
 }
 
+// MetricsAdapter is the adapter for the metrics
 type MetricsAdapter struct {
 	Metrics map[string]*dto.MetricFamily
 }

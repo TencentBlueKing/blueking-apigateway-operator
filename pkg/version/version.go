@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package version provides the version information for the BlueKing API Gateway Operator.
 package version
 
 var (

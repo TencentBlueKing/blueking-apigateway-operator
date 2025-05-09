@@ -31,6 +31,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+
+	// init auth
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -182,36 +184,24 @@ func (d *DiscoveryOperatorFrame) cleanUpOutdatedEndpoints() error {
 	for _, eps := range epsList.Items {
 		namelist := strings.Split(eps.Name, ".")
 		if len(namelist) != 3 {
-			setupLog.Error(
-				nil,
+			setupLog.Error(nil,
 				"Split endpoints name to service name and registry name failed, skip startup checking for this endpoints",
-				"separator",
-				types.EndpointsNameSeparator,
-				"endpointsName",
-				eps.Name,
+				"separator", types.EndpointsNameSeparator, "endpointsName", eps.Name,
 			)
 			continue
 		}
 		if d.opts.Registry.Name() != namelist[0] {
-			setupLog.Error(
-				nil,
+			setupLog.Error(nil,
 				"Endpoints name does not equals to registry name, skip startup checking for this endpoints",
-				"registryName",
-				d.opts.Registry.Name(),
-				"endpointsNameIndex0",
-				namelist[0],
+				"registryName", d.opts.Registry.Name(), "endpointsNameIndex0", namelist[0],
 			)
 			continue
 		}
 		factory, ok := types.AbbObjectFactoryMapping[namelist[1]]
 		if !ok {
-			setupLog.Error(
-				nil,
+			setupLog.Error(nil,
 				"resource type does not support, skip startup checking for this endpoints",
-				"registryName",
-				d.opts.Registry.Name(),
-				"endpointsName",
-				eps.Name,
+				"registryName", d.opts.Registry.Name(), "endpointsName", eps.Name,
 			)
 			continue
 		}
@@ -219,31 +209,22 @@ func (d *DiscoveryOperatorFrame) cleanUpOutdatedEndpoints() error {
 		err := cli.Get(context.Background(), client.ObjectKey{Namespace: eps.Namespace, Name: namelist[2]}, obj)
 		if err != nil {
 			if k8serrors.IsNotFound(err) {
-				setupLog.Info(
-					"BkGatewayService not found, clean endpoints",
-					"service",
-					fmt.Sprintf("%s/%s", eps.Namespace, namelist[1]),
-					"endpoints",
-					fmt.Sprintf("%s/%s", eps.Namespace, eps.Name),
+				setupLog.Info("BkGatewayService not found, clean endpoints",
+					"service", fmt.Sprintf("%s/%s", eps.Namespace, namelist[1]),
+					"endpoints", fmt.Sprintf("%s/%s", eps.Namespace, eps.Name),
 				)
 				innerErr := cli.Delete(context.Background(), &eps)
 				if innerErr != nil {
-					setupLog.Error(
-						innerErr,
-						"Delete BkGatewayService failed",
-						"endpoints",
-						fmt.Sprintf("%s/%s", eps.Namespace, eps.Name),
+					setupLog.Error(innerErr,
+						"Delete BkGatewayService failed", "endpoints", fmt.Sprintf("%s/%s", eps.Namespace, eps.Name),
 					)
 					continue
 				}
 			} else {
-				setupLog.Error(
-					err,
+				setupLog.Error(err,
 					"Get BkGatewayService failed",
-					"service",
-					fmt.Sprintf("%s/%s", eps.Namespace, namelist[1]),
-					"endpoints",
-					fmt.Sprintf("%s/%s", eps.Namespace, eps.Name),
+					"service", fmt.Sprintf("%s/%s", eps.Namespace, namelist[1]),
+					"endpoints", fmt.Sprintf("%s/%s", eps.Namespace, eps.Name),
 				)
 				continue
 			}
@@ -260,22 +241,15 @@ func (d *DiscoveryOperatorFrame) cleanUpOutdatedEndpoints() error {
 			}
 		}
 		if discoveryType != d.opts.Registry.Name() {
-			setupLog.Info(
-				"BkGatewayService do not use this registry, clean endpoints",
-				"service",
-				fmt.Sprintf("%s/%s", eps.Namespace, namelist[1]),
-				"endpoints",
-				fmt.Sprintf("%s/%s", eps.Namespace, eps.Name),
-				"configType",
-				discoveryType,
+			setupLog.Info("BkGatewayService do not use this registry, clean endpoints",
+				"service", fmt.Sprintf("%s/%s", eps.Namespace, namelist[1]),
+				"endpoints", fmt.Sprintf("%s/%s", eps.Namespace, eps.Name),
+				"configType", discoveryType,
 			)
 			err = cli.Delete(context.Background(), &eps)
 			if err != nil {
-				setupLog.Error(
-					err,
-					"Delete BkGatewayService failed",
-					"endpoints",
-					fmt.Sprintf("%s/%s", eps.Namespace, eps.Name),
+				setupLog.Error(err, "Delete BkGatewayService failed",
+					"endpoints", fmt.Sprintf("%s/%s", eps.Namespace, eps.Name),
 				)
 				continue
 			}

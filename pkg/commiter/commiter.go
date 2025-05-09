@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package commiter provides the functionality to commit changes
 package commiter
 
 import (

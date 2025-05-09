@@ -45,6 +45,7 @@ func (m *prometheusSwitchMetric) Off(name string) {
 	m.gauge.WithLabelValues(name).Set(0)
 }
 
+// ReportLeaderElectionMetric ...
 func ReportLeaderElectionMetric(hostname string) {
 	metric.LeaderElectionGauge.WithLabelValues(hostname).Set(1)
 }
