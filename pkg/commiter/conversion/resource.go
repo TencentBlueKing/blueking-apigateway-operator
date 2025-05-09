@@ -246,39 +246,30 @@ func (c *Converter) convertUpstream(
 	retUpstream := &apisix.Upstream{
 		Checks: upstream.Checks.ConvertToAPISIXv1Check(),
 	}
-
 	if len(upstream.Type) != 0 {
 		retUpstream.Type = utils.StringPtr(upstream.Type)
 	}
-
 	if len(upstream.HashOn) != 0 {
 		retUpstream.HashOn = utils.StringPtr(upstream.HashOn)
 	}
-
 	if len(upstream.Key) != 0 {
 		retUpstream.Key = utils.StringPtr(upstream.Key)
 	}
-
 	if len(upstream.Scheme) != 0 {
 		retUpstream.Scheme = utils.StringPtr(upstream.Scheme)
 	}
-
 	if len(upstream.PassHost) != 0 {
 		retUpstream.PassHost = utils.StringPtr(upstream.PassHost)
 	}
-
 	if len(upstream.UpstreamHost) != 0 {
 		retUpstream.UpstreamHost = utils.StringPtr(upstream.UpstreamHost)
 	}
-
 	if upstream.Retries != 0 {
 		retUpstream.Retries = utils.IntPtr(upstream.Retries)
 	}
-
 	if upstream.RetryTimeout != nil {
 		retUpstream.RetryTimeout = upstream.RetryTimeout
 	}
-
 	if upstream.Timeout != nil {
 		retUpstream.Timeout = c.convertHTTPTimeout(upstream.Timeout)
 	}
@@ -335,7 +326,6 @@ func (c *Converter) convertUpstream(
 			c.logger.Error(err, "", "type", typeMeta, "obj", objMeta)
 			return retUpstream, err
 		}
-
 		if upstream.PassHost == passHostRewrite {
 			if len(upstream.UpstreamHost) == 0 {
 				err := eris.New("upstream upstreamHost should be set when passHost is rewrite")
@@ -356,7 +346,6 @@ func (c *Converter) convertUpstream(
 				ClientKey:  tlsCert.Key,
 			}
 		}
-
 		if upstream.PassHost == passHostNode {
 			if len(retUpstream.Nodes) == 0 {
 				err := eris.New("upstream nodes should be set when passHost is node")
@@ -371,18 +360,8 @@ func (c *Converter) convertUpstream(
 					c.logger.Error(err, "", "node", node, "type", typeMeta, "obj", objMeta)
 					return retUpstream, err
 				}
-				c.logger.Debugw(
-					"Matched cert",
-					"node",
-					node,
-					"prefix",
-					prefix,
-					"certs",
-					tlsCerts,
-					"type",
-					typeMeta,
-					"obj",
-					objMeta,
+				c.logger.Debugw("Matched cert",
+					"node", node, "prefix", prefix, "certs", tlsCerts, "type", typeMeta, "obj", objMeta,
 				)
 				for _, cert := range tlsCerts {
 					certMatchCount[cert]++
@@ -391,16 +370,8 @@ func (c *Converter) convertUpstream(
 
 			for cert, count := range certMatchCount {
 				if count == len(retUpstream.Nodes) {
-					c.logger.Debugw(
-						"Matched cert for all node",
-						"nodes",
-						retUpstream.Nodes,
-						"certs",
-						cert,
-						"type",
-						typeMeta,
-						"obj",
-						objMeta,
+					c.logger.Debugw("Matched cert for all node",
+						"nodes", retUpstream.Nodes, "certs", cert, "type", typeMeta, "obj", objMeta,
 					)
 					retUpstream.TLS = &apisix.UpstreamTLS{
 						ClientCert: cert.Cert,

@@ -17,6 +17,8 @@
  */
 
 // +kubebuilder:validation:Optional
+
+// Package v1beta1 provides the API types for the BlueKing API Gateway Operator.
 package v1beta1
 
 import (
