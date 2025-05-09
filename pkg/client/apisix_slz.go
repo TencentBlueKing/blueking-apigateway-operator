@@ -18,6 +18,7 @@
 
 package client
 
+// VersionRouteResp is a response with the publish_id and start_time
 type VersionRouteResp struct {
 	PublishID int64  `json:"publish_id"`
 	StartTime string `json:"start_time"` // dashboard生成虚拟路由时间

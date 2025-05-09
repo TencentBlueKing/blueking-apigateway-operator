@@ -36,6 +36,7 @@ const (
 	SystemError = "InternalServerError"
 )
 
+// CommonResp is the common response structure for the API.
 type CommonResp struct {
 	Data  interface{} `json:"data"`
 	Error struct {

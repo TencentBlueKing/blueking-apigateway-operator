@@ -38,6 +38,7 @@ var coreAPIClient *CoreAPIClient
 
 var coreOnce sync.Once
 
+// CoreAPIClient core api client
 type CoreAPIClient struct {
 	baseClient
 	microGatewayInstanceID string

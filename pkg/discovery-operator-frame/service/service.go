@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package service provides the service for the BlueKing API Gateway Operator.
 package service
 
 import (

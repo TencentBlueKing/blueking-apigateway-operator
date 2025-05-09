@@ -46,6 +46,7 @@ var apisixClient *ApisixClient
 
 var apisxiOnce sync.Once
 
+// ApisixClient is client for apisix
 type ApisixClient struct {
 	baseClient
 	// apisix版本探测次数
@@ -72,6 +73,7 @@ func InitApisixClient(cfg *config.Config) {
 	})
 }
 
+// GetApisixClient get apisix client
 func GetApisixClient() *ApisixClient {
 	return apisixClient
 }

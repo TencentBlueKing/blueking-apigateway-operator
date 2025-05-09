@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package agent handle the event from resource registry
 package agent
 
 import (
@@ -251,34 +252,24 @@ func (w *EventAgent) handleSecret(event *registry.ResourceMetadata) error {
 	switch event.Kind {
 	case "Secret":
 		var radixTree radixtree.RadixTree = w.radixTreeGetter.Get(event.StageInfo)
-		shouldProcess, err := w.secretEventCallback(
-			ctx,
-			registry.ResourceKey{StageInfo: event.StageInfo, ResourceName: event.Name},
-			radixTree,
-		)
+		shouldProcess, err := w.secretEventCallback(ctx,
+			registry.ResourceKey{StageInfo: event.StageInfo, ResourceName: event.Name}, radixTree)
 		if err != nil {
 			w.logger.Error(err, "Reconcile secret failed", "event", event)
 			return err
 		}
 		if shouldProcess {
-			w.logger.Debugw(
-				"Receive secret event",
-				"gatewayName",
-				event.StageInfo.GatewayName,
+			w.logger.Debugw("Receive secret event", "gatewayName", event.StageInfo.GatewayName,
 				"stageName",
 				event.StageInfo.StageName,
 			)
-
 			w.stageTimer.Update(event.StageInfo)
 		}
 	case v1beta1.BkGatewayTLSTypeName:
 		var radixTree radixtree.RadixTree = w.radixTreeGetter.Get(event.StageInfo)
 		tlsObj := &v1beta1.BkGatewayTLS{}
-		err := w.resourceRegistry.Get(
-			ctx,
-			registry.ResourceKey{StageInfo: event.StageInfo, ResourceName: event.Name},
-			tlsObj,
-		)
+		err := w.resourceRegistry.Get(ctx,
+			registry.ResourceKey{StageInfo: event.StageInfo, ResourceName: event.Name}, tlsObj)
 		if err != nil {
 			w.logger.Error(err, "Get BkGaetwayTLS failed", "event", event)
 			return err
@@ -286,11 +277,9 @@ func (w *EventAgent) handleSecret(event *registry.ResourceMetadata) error {
 		// ignore
 		var shouldProcess bool
 		if len(tlsObj.Spec.SNIs) != 0 {
-			shouldProcess, err = w.gatewayTLSCallback(
-				ctx,
+			shouldProcess, err = w.gatewayTLSCallback(ctx,
 				registry.ResourceKey{ResourceName: tlsObj.Spec.GatewayTLSSecretRef, StageInfo: event.StageInfo},
-				radixTree,
-				tlsObj,
+				radixTree, tlsObj,
 			)
 		}
 		if err != nil {
@@ -298,13 +287,8 @@ func (w *EventAgent) handleSecret(event *registry.ResourceMetadata) error {
 			return err
 		}
 		if shouldProcess {
-			w.logger.Debugw(
-				"Receive tls event",
-				"gatewayName",
-				event.StageInfo.GatewayName,
-				"stageName",
-				event.StageInfo.StageName,
-			)
+			w.logger.Debugw("Receive tls event", "gatewayName", event.StageInfo.GatewayName,
+				"stageName", event.StageInfo.StageName)
 			w.stageTimer.Update(event.StageInfo)
 		}
 	default:
@@ -319,7 +303,6 @@ func (w *EventAgent) handleSecret(event *registry.ResourceMetadata) error {
 			w.stageTimer.Update(event.StageInfo)
 		}
 	}
-
 	return nil
 }
 

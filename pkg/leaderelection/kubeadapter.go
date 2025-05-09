@@ -135,6 +135,7 @@ func (c *KubeLeaderElector) onStoppedLeading() {
 	go c.elector.Run(c.ctx)
 }
 
+// OnNewLeader ...
 func (c *KubeLeaderElector) OnNewLeader(reportedLeader string) {
 	c.logger.Infof("leader changed: %s", reportedLeader)
 	log.Printf("leader changed: %s\n", reportedLeader)

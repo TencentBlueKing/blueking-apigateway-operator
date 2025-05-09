@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package cert provides the functionality to fetch TLS certificates from Kubernetes secrets.
 package cert
 
 import (

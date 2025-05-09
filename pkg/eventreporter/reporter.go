@@ -54,6 +54,7 @@ type versionProbe struct {
 	waitTime time.Duration // control version probe wait time
 }
 
+// Reporter is a struct that contains the event chain, report chain, close channel, and version probe.
 type Reporter struct {
 	eventChain   chan reportEvent
 	reportChain  chan struct{} // control reporter concurrency
@@ -61,7 +62,7 @@ type Reporter struct {
 	versionProbe versionProbe
 }
 
-// InitReporter
+// InitReporter initializes the reporter
 func InitReporter(cfg *config.Config) {
 	reporterOnce.Do(func() {
 		reporter = &Reporter{
@@ -93,7 +94,7 @@ func Start(ctx context.Context) {
 	})
 }
 
-// Shutdown
+// Shutdown shuts down the reporter
 // Note: Here you need to close the eventChain data source committer first,
 //
 //	and then close the close, otherwise writing to the eventChain will panic

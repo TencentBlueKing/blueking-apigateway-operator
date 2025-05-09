@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package api provides the API routes for the BlueKing API Gateway Operator.
 package api
 
 import (
@@ -28,6 +29,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 )
 
+// Register registers the API routes
 func Register(
 	r *gin.RouterGroup,
 	leaderElector leaderelection.LeaderElector,

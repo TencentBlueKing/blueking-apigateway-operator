@@ -52,6 +52,7 @@ var ignoreCreateTimeAndUpdateTimeCmpOptFunc = func(typ interface{}) cmp.Option {
 	return cmpopts.IgnoreFields(typ, "CreateTime", "UpdateTime")
 }
 
+// CmpReporter ...
 type CmpReporter struct {
 	Gateway      string
 	Stage        string
@@ -60,12 +61,15 @@ type CmpReporter struct {
 	DiffReported bool
 }
 
+// PushStep ...
 func (r *CmpReporter) PushStep(ps cmp.PathStep) {
 }
 
+// PopStep ...
 func (r *CmpReporter) PopStep() {
 }
 
+// Report ...
 func (r *CmpReporter) Report(rs cmp.Result) {
 	// report sync cmp metric
 	if !r.CmpReported {
