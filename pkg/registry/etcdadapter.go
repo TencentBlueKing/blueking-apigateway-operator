@@ -199,13 +199,8 @@ func (r *EtcdRegistryAdapter) List(
 		return err
 	}
 	if resp.Count > math.MaxInt32 {
-		r.logger.Error(
-			nil,
-			"etcd resource count is larger than MaxInt32, error may occurred in 32 bit CPU",
-			"count",
-			resp.Count,
-			"key",
-			key,
+		r.logger.Error(nil, "etcd resource count is larger than MaxInt32, error may occurred in 32 bit CPU",
+			"count", resp.Count, "key", key,
 		)
 	}
 
@@ -222,17 +217,9 @@ func (r *EtcdRegistryAdapter) List(
 
 		if !ok {
 			metric.ReportRegistryAction(gvk.Kind, metric.ActionList, metric.ResultFail, startedTime)
-			r.logger.Error(
-				nil,
-				"Cast objlist item into client.Object failed",
-				"key",
-				key,
-				"objListType",
-				objListType,
-				"itemType",
-				objTyp,
-				"inlistItemType",
-				itemPtrValue.Type(),
+			r.logger.Error(nil, "Cast objlist item into client.Object failed",
+				"key", key, "objListType", objListType,
+				"itemType", objTyp, "inlistItemType", itemPtrValue.Type(),
 			)
 			return eris.Errorf("Cast objlist item into client.Object failed")
 		}
