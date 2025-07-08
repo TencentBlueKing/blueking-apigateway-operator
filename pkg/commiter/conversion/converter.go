@@ -1,7 +1,7 @@
 /*
  * TencentBlueKing is pleased to support the open source community by making
  * 蓝鲸智云 - API 网关(BlueKing - APIGateway) available.
- * Copyright (C) 2017 THL A29 Limited, a Tencent company. All rights reserved.
+ * Copyright (C) 2025 Tencent. All rights reserved.
  * Licensed under the MIT License (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
@@ -64,10 +64,10 @@ type Converter struct {
 
 // NewConverter create converter
 func NewConverter(
-	namespace, gatewayName string,
-	stage *v1beta1.BkGatewayStage,
-	upstreamConfig *UpstreamConfig,
-	sslConfig *SSLConfig,
+namespace, gatewayName string,
+stage *v1beta1.BkGatewayStage,
+upstreamConfig *UpstreamConfig,
+sslConfig *SSLConfig,
 ) (*Converter, error) {
 	stageName := stage.Spec.Name
 	if len(stageName) == 0 {
@@ -89,12 +89,12 @@ func NewConverter(
 
 // Convert ...
 func (c *Converter) Convert(
-	ctx context.Context,
-	resources []*v1beta1.BkGatewayResource,
-	streamResources []*v1beta1.BkGatewayStreamResource,
-	services []*v1beta1.BkGatewayService,
-	ssls []*v1beta1.BkGatewayTLS,
-	pluginMetadatas []*v1beta1.BkGatewayPluginMetadata,
+ctx context.Context,
+resources []*v1beta1.BkGatewayResource,
+streamResources []*v1beta1.BkGatewayStreamResource,
+services []*v1beta1.BkGatewayService,
+ssls []*v1beta1.BkGatewayTLS,
+pluginMetadatas []*v1beta1.BkGatewayPluginMetadata,
 ) (*apisix.ApisixConfiguration, error) {
 	if c.stage == nil {
 		return nil, eris.New("no stage defined")
@@ -104,7 +104,7 @@ func (c *Converter) Convert(
 	for _, res := range resources {
 		// 如果publish_id为-1，则跳过版本探测路由(id=-1)的写入
 		if res.Spec.ID.String() == constant.ApisixVersionRouteID &&
-			c.stage.Labels[config.BKAPIGatewayLabelKeyGatewayPublishID] == constant.NoNeedReportPublishID {
+		c.stage.Labels[config.BKAPIGatewayLabelKeyGatewayPublishID] == constant.NoNeedReportPublishID {
 			continue
 		}
 

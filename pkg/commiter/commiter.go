@@ -1,7 +1,7 @@
 /*
  * TencentBlueKing is pleased to support the open source community by making
  * 蓝鲸智云 - API 网关(BlueKing - APIGateway) available.
- * Copyright (C) 2017 THL A29 Limited, a Tencent company. All rights reserved.
+ * Copyright (C) 2025 Tencent. All rights reserved.
  * Licensed under the MIT License (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
@@ -70,11 +70,11 @@ type Commiter struct {
 
 // NewCommiter 创建Commiter
 func NewCommiter(
-	resourceRegistry registry.Registry,
-	synchronizer synchronizer.ApisixConfigSynchronizer,
-	radixTreeGetter radixtree.RadixTreeGetter,
-	stageTimer *timer.StageTimer,
-	kubeClient client.Client,
+resourceRegistry registry.Registry,
+synchronizer synchronizer.ApisixConfigSynchronizer,
+radixTreeGetter radixtree.RadixTreeGetter,
+stageTimer *timer.StageTimer,
+kubeClient client.Client,
 ) *Commiter {
 	return &Commiter{
 		resourceRegistry: resourceRegistry,
@@ -201,8 +201,8 @@ func (c *Commiter) retryStage(si registry.StageInfo) {
 
 // ConvertEtcdKVToApisixConfiguration ...
 func (c *Commiter) ConvertEtcdKVToApisixConfiguration(
-	ctx context.Context,
-	si registry.StageInfo,
+ctx context.Context,
+si registry.StageInfo,
 ) (*apisix.ApisixConfiguration, *v1beta1.BkGatewayStage, error) {
 	stage, err := c.getStage(ctx, si)
 	if err != nil {
@@ -272,8 +272,8 @@ func (c *Commiter) getStage(ctx context.Context, stageInfo registry.StageInfo) (
 }
 
 func (c *Commiter) listResources(
-	ctx context.Context,
-	stageInfo registry.StageInfo,
+ctx context.Context,
+stageInfo registry.StageInfo,
 ) ([]*v1beta1.BkGatewayResource, error) {
 	resourceList := &v1beta1.BkGatewayResourceList{}
 	if err := c.resourceRegistry.List(ctx, registry.ResourceKey{StageInfo: stageInfo}, resourceList); err != nil {
@@ -287,8 +287,8 @@ func (c *Commiter) listResources(
 }
 
 func (c *Commiter) listStreamResources(
-	ctx context.Context,
-	stageInfo registry.StageInfo,
+ctx context.Context,
+stageInfo registry.StageInfo,
 ) ([]*v1beta1.BkGatewayStreamResource, error) {
 	resourceList := &v1beta1.BkGatewayStreamResourceList{}
 	if err := c.resourceRegistry.List(ctx, registry.ResourceKey{StageInfo: stageInfo}, resourceList); err != nil {
@@ -302,8 +302,8 @@ func (c *Commiter) listStreamResources(
 }
 
 func (c *Commiter) listServices(
-	ctx context.Context,
-	stageInfo registry.StageInfo,
+ctx context.Context,
+stageInfo registry.StageInfo,
 ) ([]*v1beta1.BkGatewayService, error) {
 	serviceList := &v1beta1.BkGatewayServiceList{}
 	if err := c.resourceRegistry.List(ctx, registry.ResourceKey{StageInfo: stageInfo}, serviceList); err != nil {
@@ -317,8 +317,8 @@ func (c *Commiter) listServices(
 }
 
 func (c *Commiter) listPluginMetadatas(
-	ctx context.Context,
-	stageInfo registry.StageInfo,
+ctx context.Context,
+stageInfo registry.StageInfo,
 ) ([]*v1beta1.BkGatewayPluginMetadata, error) {
 	pluginMetadataList := &v1beta1.BkGatewayPluginMetadataList{}
 	if err := c.resourceRegistry.List(ctx, registry.ResourceKey{StageInfo: stageInfo}, pluginMetadataList); err != nil {

@@ -1,7 +1,7 @@
 /*
  * TencentBlueKing is pleased to support the open source community by making
  * 蓝鲸智云 - API 网关(BlueKing - APIGateway) available.
- * Copyright (C) 2017 THL A29 Limited, a Tencent company. All rights reserved.
+ * Copyright (C) 2025 Tencent. All rights reserved.
  * Licensed under the MIT License (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
@@ -65,11 +65,11 @@ type EventAgent struct {
 
 // NewEventAgent ...
 func NewEventAgent(
-	resourceRegistry registry.Registry,
-	commitCh chan []registry.StageInfo,
-	synchronizer synchronizer.ApisixConfigSynchronizer,
-	radixTreeGetter radixtree.RadixTreeGetter,
-	stageTimer *timer.StageTimer,
+resourceRegistry registry.Registry,
+commitCh chan []registry.StageInfo,
+synchronizer synchronizer.ApisixConfigSynchronizer,
+radixTreeGetter radixtree.RadixTreeGetter,
+stageTimer *timer.StageTimer,
 ) *EventAgent {
 	return &EventAgent{
 		resourceRegistry: resourceRegistry,
@@ -214,7 +214,7 @@ func (w *EventAgent) handleEvent(event *registry.ResourceMetadata) {
 	}
 
 	if event.IsEmpty() || event.Kind == "Secret" ||
-		event.Kind == v1beta1.BkGatewayTLSTypeName {
+	event.Kind == v1beta1.BkGatewayTLSTypeName {
 		err := w.handleSecret(event)
 		if err != nil {
 			event.RetryCount += 1
@@ -341,9 +341,9 @@ func (w *EventAgent) handleTicker(ctx context.Context) {
 }
 
 func (w *EventAgent) secretEventCallback(
-	ctx context.Context,
-	obj registry.ResourceKey,
-	radixTree radixtree.RadixTree,
+ctx context.Context,
+obj registry.ResourceKey,
+radixTree radixtree.RadixTree,
 ) (bool, error) {
 	secret := &v1.Secret{}
 	err := w.resourceRegistry.Get(ctx, obj, secret)
@@ -368,10 +368,10 @@ func (w *EventAgent) secretEventCallback(
 }
 
 func (w *EventAgent) gatewayTLSCallback(
-	ctx context.Context,
-	secretObj registry.ResourceKey,
-	radixTree radixtree.RadixTree,
-	tlsObj *v1beta1.BkGatewayTLS,
+ctx context.Context,
+secretObj registry.ResourceKey,
+radixTree radixtree.RadixTree,
+tlsObj *v1beta1.BkGatewayTLS,
 ) (bool, error) {
 	if len(tlsObj.Spec.SNIs) == 0 {
 		return false, nil

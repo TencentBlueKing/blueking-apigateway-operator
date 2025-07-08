@@ -1,7 +1,7 @@
 /*
  * TencentBlueKing is pleased to support the open source community by making
  * 蓝鲸智云 - API 网关(BlueKing - APIGateway) available.
- * Copyright (C) 2017 THL A29 Limited, a Tencent company. All rights reserved.
+ * Copyright (C) 2025 Tencent. All rights reserved.
  * Licensed under the MIT License (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
@@ -80,7 +80,7 @@ func GetApisixClient() *ApisixClient {
 
 // GetReleaseVersion get apisix release info
 func (a *ApisixClient) GetReleaseVersion(gatewayName string, stageName string,
-	publishID string,
+publishID string,
 ) (*VersionRouteResp, error) {
 	request := a.client.Request()
 	request.Path(getPublishVersionURL)
@@ -112,7 +112,7 @@ func (a *ApisixClient) GetReleaseVersion(gatewayName string, stageName string,
 
 // retryEvaluator retry strategy
 func retryEvaluator(gateway string, stage string, publishID int64, retryError *error,
-	resp *VersionRouteResp,
+resp *VersionRouteResp,
 ) retry.EvalFunc {
 	return func(err error, res *http.Response, req *http.Request) error {
 		if err != nil {

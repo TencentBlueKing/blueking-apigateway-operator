@@ -1,7 +1,7 @@
 /*
  * TencentBlueKing is pleased to support the open source community by making
  * 蓝鲸智云 - API 网关(BlueKing - APIGateway) available.
- * Copyright (C) 2017 THL A29 Limited, a Tencent company. All rights reserved.
+ * Copyright (C) 2025 Tencent. All rights reserved.
  * Licensed under the MIT License (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
@@ -185,9 +185,9 @@ func (s *EtcdConfigStore) GetAll() map[string]*apisix.ApisixConfiguration {
 
 // Alter ...
 func (s *EtcdConfigStore) Alter(
-	ctx context.Context,
-	stageName string,
-	config *apisix.ApisixConfiguration,
+ctx context.Context,
+stageName string,
+config *apisix.ApisixConfiguration,
 ) error {
 	st := time.Now()
 	err := s.alterByStage(ctx, stageName, config)
@@ -204,7 +204,7 @@ func (s *EtcdConfigStore) Alter(
 }
 
 func (s *EtcdConfigStore) alterByStage(
-	ctx context.Context, stageKey string, conf *apisix.ApisixConfiguration,
+ctx context.Context, stageKey string, conf *apisix.ApisixConfiguration,
 ) (err error) {
 	// get cached config
 	oldConf := s.Get(stageKey)
@@ -235,7 +235,7 @@ func (s *EtcdConfigStore) alterByStage(
 		}
 
 		if len(putConf.Routes)+len(putConf.StreamRoutes)+len(putConf.Services)+
-			len(putConf.PluginMetadatas)+len(putConf.SSLs) > 0 {
+		len(putConf.PluginMetadatas)+len(putConf.SSLs) > 0 {
 			s.logger.Infof(
 				"put gateway[key=%s] conf count:[route:%d,stream_route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
 				stageKey,
@@ -267,7 +267,7 @@ func (s *EtcdConfigStore) alterByStage(
 			return fmt.Errorf("batch delete ssl failed: %w", err)
 		}
 		if len(deleteConf.Routes)+len(deleteConf.StreamRoutes)+len(deleteConf.Services)+
-			len(deleteConf.PluginMetadatas)+len(deleteConf.SSLs) > 0 {
+		len(deleteConf.PluginMetadatas)+len(deleteConf.SSLs) > 0 {
 			s.logger.Infof(
 				"del gateway[key=%s] conf count:[route:%d,stream_route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
 				stageKey,

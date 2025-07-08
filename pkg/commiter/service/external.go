@@ -1,7 +1,7 @@
 /*
  * TencentBlueKing is pleased to support the open source community by making
  * 蓝鲸智云 - API 网关(BlueKing - APIGateway) available.
- * Copyright (C) 2017 THL A29 Limited, a Tencent company. All rights reserved.
+ * Copyright (C) 2025 Tencent. All rights reserved.
  * Licensed under the MIT License (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
@@ -37,9 +37,9 @@ import (
 // ExternalNodeDiscoverer ...
 type ExternalNodeDiscoverer interface {
 	GetNodes(
-		kind, workNamespace, serviceType, serviceName string,
-		gatewayName string,
-		stageName string,
+	kind, workNamespace, serviceType, serviceName string,
+	gatewayName string,
+	stageName string,
 	) ([]v1beta1.BkGatewayNode, error)
 }
 
@@ -57,9 +57,9 @@ func NewRegistryExternalNodeDiscoverer(resourceRegistry registry.Registry) Exter
 
 // GetNodes get upstream nodes according to external service name
 func (rd *RegistryExternalNodeDiscoverer) GetNodes(
-	kind, workNamespace, serviceType, serviceName string,
-	gatewayName string,
-	stageName string,
+kind, workNamespace, serviceType, serviceName string,
+gatewayName string,
+stageName string,
 ) ([]v1beta1.BkGatewayNode, error) {
 	eps := &v1beta1.BkGatewayEndpoints{}
 	if err := rd.resourceRegistry.Get(context.TODO(), registry.ResourceKey{

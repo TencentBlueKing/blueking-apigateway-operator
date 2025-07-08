@@ -1,7 +1,7 @@
 /*
  * TencentBlueKing is pleased to support the open source community by making
  * 蓝鲸智云 - API 网关(BlueKing - APIGateway) available.
- * Copyright (C) 2017 THL A29 Limited, a Tencent company. All rights reserved.
+ * Copyright (C) 2025 Tencent. All rights reserved.
  * Licensed under the MIT License (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
@@ -109,8 +109,8 @@ func (r *BkGatewayResourceReconciler) servicePredicate() predicate.Predicate {
 				return true
 			}
 			r.Logger.V(1).
-				Info("New BkGatewayResource does not associate with this discovery operator, skip", "svc",
-					conf.GetNamespace()+"/"+conf.GetName(), "upstreamConfig", conf.Spec.Upstream)
+			Info("New BkGatewayResource does not associate with this discovery operator, skip", "svc",
+				conf.GetNamespace()+"/"+conf.GetName(), "upstreamConfig", conf.Spec.Upstream)
 			return false
 		},
 		UpdateFunc: func(e event.UpdateEvent) bool {
@@ -124,14 +124,14 @@ func (r *BkGatewayResourceReconciler) servicePredicate() predicate.Predicate {
 			}
 			// old or new service external discovery type matched
 			if (newconf.Spec.Upstream != nil && newconf.Spec.Upstream.ExternalDiscoveryType == r.Registry.Name()) ||
-				(oldconf.Spec.Upstream != nil && oldconf.Spec.Upstream.ExternalDiscoveryType == r.Registry.Name()) {
+			(oldconf.Spec.Upstream != nil && oldconf.Spec.Upstream.ExternalDiscoveryType == r.Registry.Name()) {
 				return true
 			}
 			r.Logger.V(1).
-				Info(
-					"BkGatewayResource does not associate with this discovery operator or spec does not changed, skip",
-					"svc", newconf.GetNamespace()+"/"+newconf.GetName(), "upstreamConfig", newconf.Spec.Upstream,
-				)
+			Info(
+				"BkGatewayResource does not associate with this discovery operator or spec does not changed, skip",
+				"svc", newconf.GetNamespace()+"/"+newconf.GetName(), "upstreamConfig", newconf.Spec.Upstream,
+			)
 			return false
 		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
@@ -147,8 +147,8 @@ func (r *BkGatewayResourceReconciler) servicePredicate() predicate.Predicate {
 				return true
 			}
 			r.Logger.V(1).
-				Info("Deleted BkGatewayResource does not associate with this discovery operator, skip",
-					"svc", conf.GetNamespace()+"/"+conf.GetName(), "upstreamConfig", conf.Spec.Upstream)
+			Info("Deleted BkGatewayResource does not associate with this discovery operator, skip",
+				"svc", conf.GetNamespace()+"/"+conf.GetName(), "upstreamConfig", conf.Spec.Upstream)
 			return false
 		},
 	}

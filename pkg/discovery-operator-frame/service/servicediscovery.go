@@ -1,7 +1,7 @@
 /*
  * TencentBlueKing is pleased to support the open source community by making
  * 蓝鲸智云 - API 网关(BlueKing - APIGateway) available.
- * Copyright (C) 2017 THL A29 Limited, a Tencent company. All rights reserved.
+ * Copyright (C) 2025 Tencent. All rights reserved.
  * Licensed under the MIT License (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
@@ -108,7 +108,7 @@ func (sd *ServiceDiscoveryImpl) Apply(svc *Service) error {
 		return err
 	}
 	if sd.config.gatewaySvc != nil &&
-		sd.config.gatewaySvc.Upstream.ServiceName == svc.Upstream.ServiceName {
+	sd.config.gatewaySvc.Upstream.ServiceName == svc.Upstream.ServiceName {
 		if reflect.DeepEqual(sd.config.discoveryConfig, newConfig) {
 			sd.logger.Info(
 				"Config of new service is same as old one, skip applying",
@@ -358,7 +358,7 @@ func (sd *ServiceDiscoveryImpl) updateEndpoints(spec *gatewayv1beta1.BkGatewayEn
 		delete(newNodesMap, host)
 	}
 	if !needUpdate &&
-		(len(newNodesMap) != 0 || sd.keyLabelChanged(endpoints.Labels)) {
+	(len(newNodesMap) != 0 || sd.keyLabelChanged(endpoints.Labels)) {
 		needUpdate = true
 	}
 	if !needUpdate {
@@ -423,8 +423,8 @@ func (sd *ServiceDiscoveryImpl) setLabels(labels map[string]string) map[string]s
 
 func (sd *ServiceDiscoveryImpl) keyLabelChanged(labels map[string]string) bool {
 	return !checkLabelSame(labels, sd.config.gatewaySvc.Labels, config.BKAPIGatewayLabelKeyGatewayName) ||
-		!checkLabelSame(labels, sd.config.gatewaySvc.Labels, config.BKAPIGatewayLabelKeyGatewayStage) ||
-		labels[types.ManagedByLabelTag] != sd.registry.Name()
+	!checkLabelSame(labels, sd.config.gatewaySvc.Labels, config.BKAPIGatewayLabelKeyGatewayStage) ||
+	labels[types.ManagedByLabelTag] != sd.registry.Name()
 }
 
 func checkLabelSame(lhs, rhs map[string]string, key string) bool {
