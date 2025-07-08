@@ -112,7 +112,7 @@ var _ = Describe("Operator Integration", func() {
 				// assert apisix operation count
 				Expect(metricsAdapter.GetApisixOperationCountMetric(
 					metric.ActionPut, metric.ResultSuccess, etcd.ApisixResourceTypeRoutes),
-					// 2 micro-gateway-not-found-handling and healthz-outer
+				// 2 micro-gateway-not-found-handling and healthz-outer
 				).To(Equal(testDataRoutesAmount + 2))
 
 				Expect(metricsAdapter.GetApisixOperationCountMetric(
@@ -257,12 +257,12 @@ var _ = Describe("Operator Integration", func() {
 				// assert metrics
 				Expect(metricsAdapter.GetApisixOperationCountMetric(
 					metric.ActionDelete, metric.ResultSuccess, etcd.ApisixResourceTypeRoutes),
-					// 2 micro-gateway-not-found-handling and healthz-outer
+				// 2 micro-gateway-not-found-handling and healthz-outer
 				).To(Equal(testDataRoutesAmount))
 
 				Expect(metricsAdapter.GetApisixOperationCountMetric(
 					metric.ActionDelete, metric.ResultSuccess, etcd.ApisixResourceTypeServices),
-					// 2 micro-gateway-not-found-handling and healthz-outer
+				// 2 micro-gateway-not-found-handling and healthz-outer
 				).To(Equal(testDataServiceAmount))
 			})
 		})

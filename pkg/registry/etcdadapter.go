@@ -160,9 +160,9 @@ func (r *EtcdRegistryAdapter) convertStages(kvs []*mvccpb.KeyValue) []StageInfo 
 
 // List ...
 func (r *EtcdRegistryAdapter) List(
-ctx context.Context,
-key ResourceKey,
-obj client.ObjectList,
+	ctx context.Context,
+	key ResourceKey,
+	obj client.ObjectList,
 ) error {
 	startedTime := time.Now()
 	if key.GatewayName == "" || key.StageName == "" {
@@ -416,9 +416,9 @@ func (r *EtcdRegistryAdapter) extractResourceMetadata(key string) (ResourceMetad
 }
 
 func (r *EtcdRegistryAdapter) yamlUnmarshal(
-gvk schema.GroupVersionKind,
-kv *mvccpb.KeyValue,
-obj client.Object,
+	gvk schema.GroupVersionKind,
+	kv *mvccpb.KeyValue,
+	obj client.Object,
 ) error {
 	// convert yaml formated spec content into map
 	temp := make(map[string]interface{})

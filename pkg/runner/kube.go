@@ -255,9 +255,9 @@ func (r *KubeAgentRunner) Run(ctx context.Context) {
 }
 
 func (r *KubeAgentRunner) registerController(
-mgr manager.Manager,
-issuer *token.Issuer,
-handler registry.KubeEventHandler,
+	mgr manager.Manager,
+	issuer *token.Issuer,
+	handler registry.KubeEventHandler,
 ) {
 	var err error
 

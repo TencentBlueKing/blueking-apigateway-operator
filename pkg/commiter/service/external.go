@@ -37,9 +37,9 @@ import (
 // ExternalNodeDiscoverer ...
 type ExternalNodeDiscoverer interface {
 	GetNodes(
-	kind, workNamespace, serviceType, serviceName string,
-	gatewayName string,
-	stageName string,
+		kind, workNamespace, serviceType, serviceName string,
+		gatewayName string,
+		stageName string,
 	) ([]v1beta1.BkGatewayNode, error)
 }
 
@@ -57,9 +57,9 @@ func NewRegistryExternalNodeDiscoverer(resourceRegistry registry.Registry) Exter
 
 // GetNodes get upstream nodes according to external service name
 func (rd *RegistryExternalNodeDiscoverer) GetNodes(
-kind, workNamespace, serviceType, serviceName string,
-gatewayName string,
-stageName string,
+	kind, workNamespace, serviceType, serviceName string,
+	gatewayName string,
+	stageName string,
 ) ([]v1beta1.BkGatewayNode, error) {
 	eps := &v1beta1.BkGatewayEndpoints{}
 	if err := rd.resourceRegistry.Get(context.TODO(), registry.ResourceKey{

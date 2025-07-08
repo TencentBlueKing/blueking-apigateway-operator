@@ -80,7 +80,7 @@ func GetApisixClient() *ApisixClient {
 
 // GetReleaseVersion get apisix release info
 func (a *ApisixClient) GetReleaseVersion(gatewayName string, stageName string,
-publishID string,
+	publishID string,
 ) (*VersionRouteResp, error) {
 	request := a.client.Request()
 	request.Path(getPublishVersionURL)
@@ -112,7 +112,7 @@ publishID string,
 
 // retryEvaluator retry strategy
 func retryEvaluator(gateway string, stage string, publishID int64, retryError *error,
-resp *VersionRouteResp,
+	resp *VersionRouteResp,
 ) retry.EvalFunc {
 	return func(err error, res *http.Response, req *http.Request) error {
 		if err != nil {

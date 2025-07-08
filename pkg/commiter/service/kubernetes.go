@@ -114,7 +114,7 @@ func (kd *KubernetesNodeDiscoverer) GetNodes(workNamespace, serviceName string) 
 		var targetPort int
 		for _, subsetPort := range subset.Ports {
 			if svcPort.TargetPort.String() == subsetPort.Name ||
-			svcPort.TargetPort.IntValue() == int(subsetPort.Port) {
+				svcPort.TargetPort.IntValue() == int(subsetPort.Port) {
 				targetPort = int(subsetPort.Port)
 
 				break

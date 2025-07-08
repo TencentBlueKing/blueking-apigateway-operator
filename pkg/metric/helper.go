@@ -22,9 +22,9 @@ import "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 
 // ReportResourceCountHelper ...
 func ReportResourceCountHelper(
-gateway, stage string,
-conf *apisix.ApisixConfiguration,
-handler func(string, string, string, int),
+	gateway, stage string,
+	conf *apisix.ApisixConfiguration,
+	handler func(string, string, string, int),
 ) {
 	if conf != nil {
 		handler(gateway, stage, "routes", len(conf.Routes))

@@ -64,10 +64,10 @@ type Converter struct {
 
 // NewConverter create converter
 func NewConverter(
-namespace, gatewayName string,
-stage *v1beta1.BkGatewayStage,
-upstreamConfig *UpstreamConfig,
-sslConfig *SSLConfig,
+	namespace, gatewayName string,
+	stage *v1beta1.BkGatewayStage,
+	upstreamConfig *UpstreamConfig,
+	sslConfig *SSLConfig,
 ) (*Converter, error) {
 	stageName := stage.Spec.Name
 	if len(stageName) == 0 {
@@ -89,12 +89,12 @@ sslConfig *SSLConfig,
 
 // Convert ...
 func (c *Converter) Convert(
-ctx context.Context,
-resources []*v1beta1.BkGatewayResource,
-streamResources []*v1beta1.BkGatewayStreamResource,
-services []*v1beta1.BkGatewayService,
-ssls []*v1beta1.BkGatewayTLS,
-pluginMetadatas []*v1beta1.BkGatewayPluginMetadata,
+	ctx context.Context,
+	resources []*v1beta1.BkGatewayResource,
+	streamResources []*v1beta1.BkGatewayStreamResource,
+	services []*v1beta1.BkGatewayService,
+	ssls []*v1beta1.BkGatewayTLS,
+	pluginMetadatas []*v1beta1.BkGatewayPluginMetadata,
 ) (*apisix.ApisixConfiguration, error) {
 	if c.stage == nil {
 		return nil, eris.New("no stage defined")
@@ -104,7 +104,7 @@ pluginMetadatas []*v1beta1.BkGatewayPluginMetadata,
 	for _, res := range resources {
 		// 如果publish_id为-1，则跳过版本探测路由(id=-1)的写入
 		if res.Spec.ID.String() == constant.ApisixVersionRouteID &&
-		c.stage.Labels[config.BKAPIGatewayLabelKeyGatewayPublishID] == constant.NoNeedReportPublishID {
+			c.stage.Labels[config.BKAPIGatewayLabelKeyGatewayPublishID] == constant.NoNeedReportPublishID {
 			continue
 		}
 

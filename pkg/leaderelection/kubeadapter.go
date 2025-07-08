@@ -59,7 +59,7 @@ type KubeLeaderElector struct {
 
 // NewKubeLeaderElector New create client
 func NewKubeLeaderElector(lockType, name, ns string, k8sClientSet kubernetes.Interface,
-leaseDuration, renewDuration, retryPeriod time.Duration,
+	leaseDuration, renewDuration, retryPeriod time.Duration,
 ) (LeaderElector, error) {
 	cl := new(KubeLeaderElector)
 	cl.lockType = lockType

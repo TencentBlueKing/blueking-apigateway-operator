@@ -108,7 +108,7 @@ func (sd *ServiceDiscoveryImpl) Apply(svc *Service) error {
 		return err
 	}
 	if sd.config.gatewaySvc != nil &&
-	sd.config.gatewaySvc.Upstream.ServiceName == svc.Upstream.ServiceName {
+		sd.config.gatewaySvc.Upstream.ServiceName == svc.Upstream.ServiceName {
 		if reflect.DeepEqual(sd.config.discoveryConfig, newConfig) {
 			sd.logger.Info(
 				"Config of new service is same as old one, skip applying",
@@ -358,7 +358,7 @@ func (sd *ServiceDiscoveryImpl) updateEndpoints(spec *gatewayv1beta1.BkGatewayEn
 		delete(newNodesMap, host)
 	}
 	if !needUpdate &&
-	(len(newNodesMap) != 0 || sd.keyLabelChanged(endpoints.Labels)) {
+		(len(newNodesMap) != 0 || sd.keyLabelChanged(endpoints.Labels)) {
 		needUpdate = true
 	}
 	if !needUpdate {
@@ -423,8 +423,8 @@ func (sd *ServiceDiscoveryImpl) setLabels(labels map[string]string) map[string]s
 
 func (sd *ServiceDiscoveryImpl) keyLabelChanged(labels map[string]string) bool {
 	return !checkLabelSame(labels, sd.config.gatewaySvc.Labels, config.BKAPIGatewayLabelKeyGatewayName) ||
-	!checkLabelSame(labels, sd.config.gatewaySvc.Labels, config.BKAPIGatewayLabelKeyGatewayStage) ||
-	labels[types.ManagedByLabelTag] != sd.registry.Name()
+		!checkLabelSame(labels, sd.config.gatewaySvc.Labels, config.BKAPIGatewayLabelKeyGatewayStage) ||
+		labels[types.ManagedByLabelTag] != sd.registry.Name()
 }
 
 func checkLabelSame(lhs, rhs map[string]string, key string) bool {

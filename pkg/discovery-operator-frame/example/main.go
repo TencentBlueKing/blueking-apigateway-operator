@@ -36,10 +36,10 @@ type TestRegistry struct{}
 
 // Watch ...
 func (t *TestRegistry) Watch(
-ctx context.Context,
-svcName, namespace string,
-svcConfig map[string]interface{},
-callBack types.CallBack,
+	ctx context.Context,
+	svcName, namespace string,
+	svcConfig map[string]interface{},
+	callBack types.CallBack,
 ) error {
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
@@ -74,8 +74,8 @@ callBack types.CallBack,
 
 // List ...
 func (t *TestRegistry) List(
-svcName, namespace string,
-svcConfig map[string]interface{},
+	svcName, namespace string,
+	svcConfig map[string]interface{},
 ) (*gatewayv1beta1.BkGatewayEndpointsSpec, error) {
 	eps := &gatewayv1beta1.BkGatewayEndpointsSpec{
 		Nodes: []gatewayv1beta1.BkGatewayNode{

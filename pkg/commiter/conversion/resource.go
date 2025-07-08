@@ -67,8 +67,8 @@ func calculateMatchSubPathRoutePriority(path string) int {
 
 // convertResource convert bk gateway resource to route
 func (c *Converter) convertResource(
-resource *v1beta1.BkGatewayResource,
-services []*v1beta1.BkGatewayService,
+	resource *v1beta1.BkGatewayResource,
+	services []*v1beta1.BkGatewayService,
 ) (*apisix.Route, error) {
 	var err error
 	if resource == nil {
@@ -95,10 +95,10 @@ services []*v1beta1.BkGatewayService,
 	// 	newRoute.Metadata.Labels[config.BKAPIGatewayLabelKeyResourceName] = resName
 	// }
 	uriWithoutSuffixSlash := c.getOptionalUriGatewayPrefix() +
-	strings.TrimSuffix(
-		strings.TrimSuffix(c.stage.Spec.PathPrefix, "/")+"/"+strings.TrimPrefix(resource.Spec.URI, "/"),
-		"/",
-	)
+		strings.TrimSuffix(
+			strings.TrimSuffix(c.stage.Spec.PathPrefix, "/")+"/"+strings.TrimPrefix(resource.Spec.URI, "/"),
+			"/",
+		)
 
 	uriWithoutSuffixSlash = render.GetURIRender().Render(uriWithoutSuffixSlash, c.stage.Spec.Vars)
 	// to enable prefix match, apisix.router.http = radixtree_uri should be set in config.yaml
@@ -174,8 +174,8 @@ services []*v1beta1.BkGatewayService,
 
 // convertStreamResource convert bk gateway stream resource to stream route
 func (c *Converter) convertStreamResource(
-resource *v1beta1.BkGatewayStreamResource,
-services []*v1beta1.BkGatewayService,
+	resource *v1beta1.BkGatewayStreamResource,
+	services []*v1beta1.BkGatewayService,
 ) (*apisix.StreamRoute, error) {
 	var err error
 	if resource == nil {
@@ -239,9 +239,9 @@ func (c *Converter) convertPlugin(plugin *v1beta1.BkGatewayPlugin) (string, map[
 
 //nolint:gocyclo
 func (c *Converter) convertUpstream(
-typeMeta metav1.TypeMeta,
-objMeta metav1.ObjectMeta,
-upstream *v1beta1.BkGatewayUpstreamConfig,
+	typeMeta metav1.TypeMeta,
+	objMeta metav1.ObjectMeta,
+	upstream *v1beta1.BkGatewayUpstreamConfig,
 ) (*apisix.Upstream, error) {
 	retUpstream := &apisix.Upstream{
 		Checks: upstream.Checks.ConvertToAPISIXv1Check(),
@@ -397,9 +397,9 @@ func (c *Converter) convertKubernetesServiceNodes(ns, svcName string) ([]v1beta1
 }
 
 func (c *Converter) externalExternalServiceNodes(
-typeMeta metav1.TypeMeta,
-objMeta metav1.ObjectMeta,
-svcType string,
+	typeMeta metav1.TypeMeta,
+	objMeta metav1.ObjectMeta,
+	svcType string,
 ) ([]v1beta1.BkGatewayNode, error) {
 	if c.upstreamConfig.ExternalNodeDiscoverer != nil {
 		return c.upstreamConfig.ExternalNodeDiscoverer.GetNodes(
@@ -415,8 +415,8 @@ svcType string,
 }
 
 func (c *Converter) getProxyRewrite(
-rewrite *v1beta1.BkGatewayResourceHTTPRewrite,
-resource *v1beta1.BkGatewayResource,
+	rewrite *v1beta1.BkGatewayResourceHTTPRewrite,
+	resource *v1beta1.BkGatewayResource,
 ) (map[string]interface{}, error) {
 	if !rewrite.Enabled {
 		return map[string]interface{}{}, nil

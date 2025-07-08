@@ -64,9 +64,9 @@ func (m *mockKV) Delete(ctx context.Context, key string, opts ...clientv3.OpOpti
 }
 
 func (m *mockKV) Compact(
-ctx context.Context,
-rev int64,
-opts ...clientv3.CompactOption,
+	ctx context.Context,
+	rev int64,
+	opts ...clientv3.CompactOption,
 ) (*clientv3.CompactResponse, error) {
 	return nil, nil
 }

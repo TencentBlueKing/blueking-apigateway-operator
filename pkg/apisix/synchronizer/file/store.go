@@ -64,9 +64,9 @@ func (f *FileConfigStore) GetAll() map[string]*apisix.ApisixConfiguration {
 
 // Alter ...
 func (f *FileConfigStore) Alter(
-ctx context.Context,
-stageName string,
-config *apisix.ApisixConfiguration,
+	ctx context.Context,
+	stageName string,
+	config *apisix.ApisixConfiguration,
 ) error {
 	f.mux.Lock()
 	defer f.mux.Unlock()

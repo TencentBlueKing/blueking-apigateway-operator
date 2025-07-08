@@ -80,8 +80,8 @@ var _ = Describe("Commiter", func() {
 
 	It("ConvertEtcdKVToApisixConfiguration", func() {
 		patchGuard := sm.Patch((*Commiter).listResources, func(
-		_ *Commiter, ctx context.Context,
-		stageInfo registry.StageInfo,
+			_ *Commiter, ctx context.Context,
+			stageInfo registry.StageInfo,
 		) ([]*v1beta1.BkGatewayResource, error) {
 			return []*v1beta1.BkGatewayResource{
 				{
@@ -117,8 +117,8 @@ var _ = Describe("Commiter", func() {
 		defer patchGuard.Unpatch()
 
 		patchGuard = sm.Patch((*Commiter).listStreamResources, func(
-		_ *Commiter, ctx context.Context,
-		stageInfo registry.StageInfo,
+			_ *Commiter, ctx context.Context,
+			stageInfo registry.StageInfo,
 		) ([]*v1beta1.BkGatewayStreamResource, error) {
 			return []*v1beta1.BkGatewayStreamResource{
 				{
@@ -146,8 +146,8 @@ var _ = Describe("Commiter", func() {
 		defer patchGuard.Unpatch()
 
 		patchGuard = sm.Patch((*Commiter).getStage, func(
-		_ *Commiter, ctx context.Context,
-		stageInfo registry.StageInfo,
+			_ *Commiter, ctx context.Context,
+			stageInfo registry.StageInfo,
 		) (*v1beta1.BkGatewayStage, error) {
 			return &v1beta1.BkGatewayStage{
 				ObjectMeta: metav1.ObjectMeta{
@@ -182,25 +182,25 @@ var _ = Describe("Commiter", func() {
 		defer patchGuard.Unpatch()
 
 		patchGuard = sm.Patch((*Commiter).listServices, func(
-		_ *Commiter, ctx context.Context,
-		stageInfo registry.StageInfo,
+			_ *Commiter, ctx context.Context,
+			stageInfo registry.StageInfo,
 		) ([]*v1beta1.BkGatewayService, error) {
 			return []*v1beta1.BkGatewayService{}, nil
 		})
 		defer patchGuard.Unpatch()
 
 		patchGuard = sm.Patch((*Commiter).listPluginMetadatas, func(
-		_ *Commiter, ctx context.Context,
-		stageInfo registry.StageInfo,
+			_ *Commiter, ctx context.Context,
+			stageInfo registry.StageInfo,
 		) ([]*v1beta1.BkGatewayPluginMetadata, error) {
 			return []*v1beta1.BkGatewayPluginMetadata{}, nil
 		})
 		defer patchGuard.Unpatch()
 
 		patchGuard = sm.Patch((*Commiter).listSSLs, func(
-		_ *Commiter,
-		ctx context.Context,
-		stageInfo registry.StageInfo,
+			_ *Commiter,
+			ctx context.Context,
+			stageInfo registry.StageInfo,
 		) ([]*v1beta1.BkGatewayTLS, error) {
 			return []*v1beta1.BkGatewayTLS{}, nil
 		})

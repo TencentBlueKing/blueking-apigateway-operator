@@ -70,11 +70,11 @@ type Commiter struct {
 
 // NewCommiter 创建Commiter
 func NewCommiter(
-resourceRegistry registry.Registry,
-synchronizer synchronizer.ApisixConfigSynchronizer,
-radixTreeGetter radixtree.RadixTreeGetter,
-stageTimer *timer.StageTimer,
-kubeClient client.Client,
+	resourceRegistry registry.Registry,
+	synchronizer synchronizer.ApisixConfigSynchronizer,
+	radixTreeGetter radixtree.RadixTreeGetter,
+	stageTimer *timer.StageTimer,
+	kubeClient client.Client,
 ) *Commiter {
 	return &Commiter{
 		resourceRegistry: resourceRegistry,
@@ -201,8 +201,8 @@ func (c *Commiter) retryStage(si registry.StageInfo) {
 
 // ConvertEtcdKVToApisixConfiguration ...
 func (c *Commiter) ConvertEtcdKVToApisixConfiguration(
-ctx context.Context,
-si registry.StageInfo,
+	ctx context.Context,
+	si registry.StageInfo,
 ) (*apisix.ApisixConfiguration, *v1beta1.BkGatewayStage, error) {
 	stage, err := c.getStage(ctx, si)
 	if err != nil {
@@ -272,8 +272,8 @@ func (c *Commiter) getStage(ctx context.Context, stageInfo registry.StageInfo) (
 }
 
 func (c *Commiter) listResources(
-ctx context.Context,
-stageInfo registry.StageInfo,
+	ctx context.Context,
+	stageInfo registry.StageInfo,
 ) ([]*v1beta1.BkGatewayResource, error) {
 	resourceList := &v1beta1.BkGatewayResourceList{}
 	if err := c.resourceRegistry.List(ctx, registry.ResourceKey{StageInfo: stageInfo}, resourceList); err != nil {
@@ -287,8 +287,8 @@ stageInfo registry.StageInfo,
 }
 
 func (c *Commiter) listStreamResources(
-ctx context.Context,
-stageInfo registry.StageInfo,
+	ctx context.Context,
+	stageInfo registry.StageInfo,
 ) ([]*v1beta1.BkGatewayStreamResource, error) {
 	resourceList := &v1beta1.BkGatewayStreamResourceList{}
 	if err := c.resourceRegistry.List(ctx, registry.ResourceKey{StageInfo: stageInfo}, resourceList); err != nil {
@@ -302,8 +302,8 @@ stageInfo registry.StageInfo,
 }
 
 func (c *Commiter) listServices(
-ctx context.Context,
-stageInfo registry.StageInfo,
+	ctx context.Context,
+	stageInfo registry.StageInfo,
 ) ([]*v1beta1.BkGatewayService, error) {
 	serviceList := &v1beta1.BkGatewayServiceList{}
 	if err := c.resourceRegistry.List(ctx, registry.ResourceKey{StageInfo: stageInfo}, serviceList); err != nil {
@@ -317,8 +317,8 @@ stageInfo registry.StageInfo,
 }
 
 func (c *Commiter) listPluginMetadatas(
-ctx context.Context,
-stageInfo registry.StageInfo,
+	ctx context.Context,
+	stageInfo registry.StageInfo,
 ) ([]*v1beta1.BkGatewayPluginMetadata, error) {
 	pluginMetadataList := &v1beta1.BkGatewayPluginMetadataList{}
 	if err := c.resourceRegistry.List(ctx, registry.ResourceKey{StageInfo: stageInfo}, pluginMetadataList); err != nil {

@@ -67,8 +67,8 @@ func BaseErrorJSONResponse(c *gin.Context, errorCode string, message string, sta
 
 // NewErrorJSONResponse ...
 func NewErrorJSONResponse(
-errorCode string,
-statusCode int,
+	errorCode string,
+	statusCode int,
 ) func(c *gin.Context, message string) {
 	return func(c *gin.Context, message string) {
 		BaseErrorJSONResponse(c, errorCode, message, statusCode)

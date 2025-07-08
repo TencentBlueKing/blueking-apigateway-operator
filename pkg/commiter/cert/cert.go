@@ -32,8 +32,8 @@ import (
 // TLSCertFetcher ...
 type TLSCertFetcher interface {
 	GetTLSCertFromSecret(
-	ctx context.Context,
-	gatewayName, stageName, secretRef, namespace string,
+		ctx context.Context,
+		gatewayName, stageName, secretRef, namespace string,
 	) (*v1beta1.TLSCert, error)
 }
 
@@ -51,8 +51,8 @@ func NewRegistryTLSCertFetcher(resourceRegistry registry.Registry) TLSCertFetche
 
 // GetTLSCertFromSecret ...
 func (f *RegistryTLSCertFetcher) GetTLSCertFromSecret(
-ctx context.Context,
-gatewayName, stageName, secretRef, namespace string,
+	ctx context.Context,
+	gatewayName, stageName, secretRef, namespace string,
 ) (*v1beta1.TLSCert, error) {
 	if secretRef == "" {
 		return nil, eris.Errorf("No secret reference provided")

@@ -109,12 +109,12 @@ func (r *BkGatewayServiceReconciler) servicePredicate() predicate.Predicate {
 				return true
 			}
 			r.Logger.V(1).
-			Info("New BkGatewayService does not associate with this discovery operator, skip",
-				"svc",
-				conf.GetNamespace()+"/"+conf.GetName(),
-				"externalDiscoveryType",
-				conf.Spec.Upstream.ExternalDiscoveryType,
-			)
+				Info("New BkGatewayService does not associate with this discovery operator, skip",
+					"svc",
+					conf.GetNamespace()+"/"+conf.GetName(),
+					"externalDiscoveryType",
+					conf.Spec.Upstream.ExternalDiscoveryType,
+				)
 			return false
 		},
 		UpdateFunc: func(e event.UpdateEvent) bool {
@@ -128,17 +128,17 @@ func (r *BkGatewayServiceReconciler) servicePredicate() predicate.Predicate {
 			}
 			// old or new service external discovery type matched
 			if (newconf.Spec.Upstream != nil && newconf.Spec.Upstream.ExternalDiscoveryType == r.Registry.Name()) ||
-			(oldconf.Spec.Upstream != nil && oldconf.Spec.Upstream.ExternalDiscoveryType == r.Registry.Name()) {
+				(oldconf.Spec.Upstream != nil && oldconf.Spec.Upstream.ExternalDiscoveryType == r.Registry.Name()) {
 				return true
 			}
 			r.Logger.V(1).
-			Info(
-				"BkGatewayService does not associate with this discovery operator or spec does not changed, skip",
-				"svc",
-				newconf.GetNamespace()+"/"+newconf.GetName(),
-				"externalDiscoveryType",
-				newconf.Spec.Upstream.ExternalDiscoveryConfig,
-			)
+				Info(
+					"BkGatewayService does not associate with this discovery operator or spec does not changed, skip",
+					"svc",
+					newconf.GetNamespace()+"/"+newconf.GetName(),
+					"externalDiscoveryType",
+					newconf.Spec.Upstream.ExternalDiscoveryConfig,
+				)
 			return false
 		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
@@ -154,8 +154,8 @@ func (r *BkGatewayServiceReconciler) servicePredicate() predicate.Predicate {
 				return true
 			}
 			r.Logger.V(1).
-			Info("Deleted BkGatewayService does not associate with this discovery operator, skip",
-				"svc", conf.GetNamespace()+"/"+conf.GetName(), "externalDiscoveryType", conf.Spec.Upstream.ExternalDiscoveryConfig)
+				Info("Deleted BkGatewayService does not associate with this discovery operator, skip",
+					"svc", conf.GetNamespace()+"/"+conf.GetName(), "externalDiscoveryType", conf.Spec.Upstream.ExternalDiscoveryConfig)
 			return false
 		},
 	}

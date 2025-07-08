@@ -54,11 +54,11 @@ func (l *listCommand) Init() {
 	cmd.Flags().String("stage", "", "stage name for list command")
 	cmd.Flags().Int64("resource_id", -1, "resource ID for list command, default(-1) for all resources in stage")
 	cmd.Flags().
-	String(
-		"resource_name",
-		"",
-		"resource name for list command, empty for all resources in stage. Can not be set with resource_id simultaneously",
-	)
+		String(
+			"resource_name",
+			"",
+			"resource name for list command, empty for all resources in stage. Can not be set with resource_id simultaneously",
+		)
 	cmd.Flags().StringP("write-out", "w", "json", "response write out format (simple, json, yaml)")
 	cmd.Flags().Bool("all", false, "list all gateway resources")
 	cmd.MarkFlagsRequiredTogether("gateway", "stage")

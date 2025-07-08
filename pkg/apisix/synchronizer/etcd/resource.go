@@ -133,7 +133,7 @@ func (e *resourceStore) parseResource(key, value []byte) (resource apisix.Apisix
 		return nil, nil
 	}
 	if string(value) == skippedValueEtcdInitDir ||
-	string(value) == skippedValueEtcdEmptyObject {
+		string(value) == skippedValueEtcdEmptyObject {
 		return nil, nil
 	}
 

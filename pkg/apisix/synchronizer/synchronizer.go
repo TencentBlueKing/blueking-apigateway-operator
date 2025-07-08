@@ -35,9 +35,9 @@ import (
 // ApisixConfigSynchronizer is implementation for Synchronizer
 type ApisixConfigSynchronizer interface {
 	Sync(
-	ctx context.Context,
-	gatewayName, stageName string,
-	config *apisix.ApisixConfiguration,
+		ctx context.Context,
+		gatewayName, stageName string,
+		config *apisix.ApisixConfiguration,
 	) error
 	RemoveNotExistStage(ctx context.Context, existStageKeys []string) error
 }
@@ -64,9 +64,9 @@ func NewSynchronizer(store ApisixConfigStore, apisixHealthzURI string) ApisixCon
 
 // Sync will sync new staged apisix configuration
 func (as *apisixConfigurationSynchronizer) Sync(
-ctx context.Context,
-gatewayName, stageName string,
-config *apisix.ApisixConfiguration,
+	ctx context.Context,
+	gatewayName, stageName string,
+	config *apisix.ApisixConfiguration,
 ) error {
 	key := cfg.GenStagePrimaryKey(gatewayName, stageName)
 

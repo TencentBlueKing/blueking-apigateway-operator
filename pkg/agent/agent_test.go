@@ -333,10 +333,10 @@ var _ = Describe("Agent", func() {
 		It("secret event", func() {
 			mockRadixTreeGetter.EXPECT().Get(gomock.Any()).Return(nil)
 			patchGuard := sm.Patch((*EventAgent).secretEventCallback, func(
-			_ *EventAgent,
-			ctx context.Context,
-			obj registry.ResourceKey,
-			radixTree radixtree.RadixTree,
+				_ *EventAgent,
+				ctx context.Context,
+				obj registry.ResourceKey,
+				radixTree radixtree.RadixTree,
 			) (bool, error) {
 				fmt.Println("monkey patch")
 				return true, nil

@@ -33,12 +33,12 @@ import (
 
 // NewRouter do the router initialization
 func NewRouter(
-leaderElector leaderelection.LeaderElector,
-registry registry.Registry,
-committer *commiter.Commiter,
-apiSixConfStore synchronizer.ApisixConfigStore,
-router *gin.Engine,
-conf *config.Config,
+	leaderElector leaderelection.LeaderElector,
+	registry registry.Registry,
+	committer *commiter.Commiter,
+	apiSixConfStore synchronizer.ApisixConfigStore,
+	router *gin.Engine,
+	conf *config.Config,
 ) *gin.Engine {
 	router.GET("/ping", func(c *gin.Context) {
 		utils.SuccessJSONResponse(c, "ok")

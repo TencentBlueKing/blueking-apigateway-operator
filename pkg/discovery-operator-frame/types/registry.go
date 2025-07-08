@@ -52,17 +52,17 @@ type Registry interface {
 	// If context is done, return watch function without error.
 	// It is IMPORTANT to exit function when context is done, or memory leak would happen.
 	Watch(
-	ctx context.Context,
-	svcName string,
-	namespace string,
-	svcConfig map[string]interface{},
-	callBack CallBack,
+		ctx context.Context,
+		svcName string,
+		namespace string,
+		svcConfig map[string]interface{},
+		callBack CallBack,
 	) error
 	// List will list the endpoints of service name with service discovery config.
 	List(
-	svcName string,
-	namespace string,
-	svcConfig map[string]interface{},
+		svcName string,
+		namespace string,
+		svcConfig map[string]interface{},
 	) (*gatewayv1beta1.BkGatewayEndpointsSpec, error)
 	// DiscoveryMethods will inform the operator frame which method should be considered to discover the service endpoints.
 	DiscoveryMethods() SupportMethods

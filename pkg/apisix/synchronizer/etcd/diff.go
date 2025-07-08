@@ -93,7 +93,7 @@ func (r *CmpReporter) Report(rs cmp.Result) {
 }
 
 func (d *configDiffer) diff(
-old, new *apisix.ApisixConfiguration,
+	old, new *apisix.ApisixConfiguration,
 ) (put *apisix.ApisixConfiguration, delete *apisix.ApisixConfiguration) {
 	if old == nil {
 		return new, nil
@@ -112,8 +112,8 @@ old, new *apisix.ApisixConfiguration,
 }
 
 func (d *configDiffer) diffRoutes(
-old map[string]*apisix.Route,
-new map[string]*apisix.Route,
+	old map[string]*apisix.Route,
+	new map[string]*apisix.Route,
 ) (putList map[string]*apisix.Route, deleteList map[string]*apisix.Route) {
 	oldResMap := make(map[string]*apisix.Route)
 	putList = make(map[string]*apisix.Route)
@@ -151,8 +151,8 @@ new map[string]*apisix.Route,
 }
 
 func (d *configDiffer) diffStreamRoutes(
-old map[string]*apisix.StreamRoute,
-new map[string]*apisix.StreamRoute,
+	old map[string]*apisix.StreamRoute,
+	new map[string]*apisix.StreamRoute,
 ) (putList map[string]*apisix.StreamRoute, deleteList map[string]*apisix.StreamRoute) {
 	oldResMap := make(map[string]*apisix.StreamRoute)
 	putList = make(map[string]*apisix.StreamRoute)
@@ -190,8 +190,8 @@ new map[string]*apisix.StreamRoute,
 }
 
 func (d *configDiffer) diffServices(
-old map[string]*apisix.Service,
-new map[string]*apisix.Service,
+	old map[string]*apisix.Service,
+	new map[string]*apisix.Service,
 ) (putList map[string]*apisix.Service, deleteList map[string]*apisix.Service) {
 	oldResMap := make(map[string]*apisix.Service)
 	putList = make(map[string]*apisix.Service)
@@ -228,8 +228,8 @@ new map[string]*apisix.Service,
 }
 
 func (d *configDiffer) diffPluginMetadatas(
-old map[string]*apisix.PluginMetadata,
-new map[string]*apisix.PluginMetadata,
+	old map[string]*apisix.PluginMetadata,
+	new map[string]*apisix.PluginMetadata,
 ) (putList map[string]*apisix.PluginMetadata, deleteList map[string]*apisix.PluginMetadata) {
 	oldResMap := make(map[string]*apisix.PluginMetadata)
 	putList = make(map[string]*apisix.PluginMetadata)
@@ -259,8 +259,8 @@ new map[string]*apisix.PluginMetadata,
 }
 
 func (d *configDiffer) diffSSLs(
-old map[string]*apisix.SSL,
-new map[string]*apisix.SSL,
+	old map[string]*apisix.SSL,
+	new map[string]*apisix.SSL,
 ) (putList map[string]*apisix.SSL, deleteList map[string]*apisix.SSL) {
 	oldResMap := make(map[string]*apisix.SSL)
 	putList = make(map[string]*apisix.SSL)

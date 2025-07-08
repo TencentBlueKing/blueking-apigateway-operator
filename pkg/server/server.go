@@ -52,10 +52,10 @@ type Server struct {
 
 // NewServer ...
 func NewServer(
-leaderElector leaderelection.LeaderElector,
-registry registry.Registry,
-apisixConfStore synchronizer.ApisixConfigStore,
-commiter *commiter.Commiter,
+	leaderElector leaderelection.LeaderElector,
+	registry registry.Registry,
+	apisixConfStore synchronizer.ApisixConfigStore,
+	commiter *commiter.Commiter,
 ) *Server {
 	return &Server{
 		LeaderElector:   leaderElector,

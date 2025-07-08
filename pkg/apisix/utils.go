@@ -20,9 +20,9 @@ package apisix
 
 // ReportResourceCount ...
 func ReportResourceCount(
-gateway, stage, resType string,
-conf *ApisixConfiguration,
-handler func(string, string, string, int),
+	gateway, stage, resType string,
+	conf *ApisixConfiguration,
+	handler func(string, string, string, int),
 ) {
 	if conf != nil {
 		handler(gateway, stage, "routes", len(conf.Routes))

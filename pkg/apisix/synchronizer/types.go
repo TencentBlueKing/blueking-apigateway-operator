@@ -31,8 +31,8 @@ type ApisixConfigStore interface {
 	Get(stageName string) *apisix.ApisixConfiguration
 	GetAll() map[string]*apisix.ApisixConfiguration
 	Alter(
-	ctx context.Context,
-	stageName string,
-	config *apisix.ApisixConfiguration,
+		ctx context.Context,
+		stageName string,
+		config *apisix.ApisixConfiguration,
 	) error
 }

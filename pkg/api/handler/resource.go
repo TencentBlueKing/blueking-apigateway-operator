@@ -50,10 +50,10 @@ type ResourceHandler struct {
 
 // NewResourceApi constructor of resource handler
 func NewResourceApi(
-leaderElector leaderelection.LeaderElector,
-registry registry.Registry,
-committer *commiter.Commiter,
-apiSixConfStore synchronizer.ApisixConfigStore,
+	leaderElector leaderelection.LeaderElector,
+	registry registry.Registry,
+	committer *commiter.Commiter,
+	apiSixConfStore synchronizer.ApisixConfigStore,
 ) *ResourceHandler {
 	return &ResourceHandler{
 		LeaderElector:   leaderElector,
@@ -225,8 +225,8 @@ func (r *ResourceHandler) listHandler(ctx context.Context, req *ListReq) (ListIn
 }
 
 func (r *ResourceHandler) diffWithRouteID(
-lhs, rhs *apisix.ApisixConfiguration,
-routeID string,
+	lhs, rhs *apisix.ApisixConfiguration,
+	routeID string,
 ) *StageScopedApisixResources {
 	ret := &StageScopedApisixResources{
 		Routes:         r.diffMap(lhs.Routes, rhs.Routes, routeID),
@@ -306,9 +306,9 @@ func (r *ResourceHandler) diffMap(lhs, rhs interface{}, id string) map[string]in
 }
 
 func (r *ResourceHandler) getRouteIDByResourceIdentity(
-conf *apisix.ApisixConfiguration,
-gateway, stage string,
-resource *ResourceInfo,
+	conf *apisix.ApisixConfiguration,
+	gateway, stage string,
+	resource *ResourceInfo,
 ) (string, error) {
 	if conf == nil || resource == nil {
 		return "", errors.New("resource id not found")
@@ -330,5 +330,5 @@ func (r *ResourceHandler) isDiffResultEmpty(result *StageScopedApisixResources) 
 		return true
 	}
 	return len(result.Routes) == 0 && len(result.Services) == 0 && len(result.Ssl) == 0 &&
-	len(result.PluginMetadata) == 0
+		len(result.PluginMetadata) == 0
 }

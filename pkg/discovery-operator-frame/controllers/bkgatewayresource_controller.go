@@ -109,8 +109,8 @@ func (r *BkGatewayResourceReconciler) servicePredicate() predicate.Predicate {
 				return true
 			}
 			r.Logger.V(1).
-			Info("New BkGatewayResource does not associate with this discovery operator, skip", "svc",
-				conf.GetNamespace()+"/"+conf.GetName(), "upstreamConfig", conf.Spec.Upstream)
+				Info("New BkGatewayResource does not associate with this discovery operator, skip", "svc",
+					conf.GetNamespace()+"/"+conf.GetName(), "upstreamConfig", conf.Spec.Upstream)
 			return false
 		},
 		UpdateFunc: func(e event.UpdateEvent) bool {
@@ -124,14 +124,14 @@ func (r *BkGatewayResourceReconciler) servicePredicate() predicate.Predicate {
 			}
 			// old or new service external discovery type matched
 			if (newconf.Spec.Upstream != nil && newconf.Spec.Upstream.ExternalDiscoveryType == r.Registry.Name()) ||
-			(oldconf.Spec.Upstream != nil && oldconf.Spec.Upstream.ExternalDiscoveryType == r.Registry.Name()) {
+				(oldconf.Spec.Upstream != nil && oldconf.Spec.Upstream.ExternalDiscoveryType == r.Registry.Name()) {
 				return true
 			}
 			r.Logger.V(1).
-			Info(
-				"BkGatewayResource does not associate with this discovery operator or spec does not changed, skip",
-				"svc", newconf.GetNamespace()+"/"+newconf.GetName(), "upstreamConfig", newconf.Spec.Upstream,
-			)
+				Info(
+					"BkGatewayResource does not associate with this discovery operator or spec does not changed, skip",
+					"svc", newconf.GetNamespace()+"/"+newconf.GetName(), "upstreamConfig", newconf.Spec.Upstream,
+				)
 			return false
 		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
@@ -147,8 +147,8 @@ func (r *BkGatewayResourceReconciler) servicePredicate() predicate.Predicate {
 				return true
 			}
 			r.Logger.V(1).
-			Info("Deleted BkGatewayResource does not associate with this discovery operator, skip",
-				"svc", conf.GetNamespace()+"/"+conf.GetName(), "upstreamConfig", conf.Spec.Upstream)
+				Info("Deleted BkGatewayResource does not associate with this discovery operator, skip",
+					"svc", conf.GetNamespace()+"/"+conf.GetName(), "upstreamConfig", conf.Spec.Upstream)
 			return false
 		},
 	}
