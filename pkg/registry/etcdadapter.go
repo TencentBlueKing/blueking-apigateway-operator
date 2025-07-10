@@ -135,7 +135,6 @@ func (r *EtcdRegistryAdapter) ListStages(ctx context.Context) ([]StageInfo, erro
 	return stageList, nil
 }
 
-// convertStages convert stages from etcd kvs
 func (r *EtcdRegistryAdapter) convertStages(kvs []*mvccpb.KeyValue) []StageInfo {
 	stageMap := make(map[string]StageInfo)
 	for _, kv := range kvs {
@@ -158,7 +157,6 @@ func (r *EtcdRegistryAdapter) convertStages(kvs []*mvccpb.KeyValue) []StageInfo 
 	return stageList
 }
 
-// List ...
 func (r *EtcdRegistryAdapter) List(
 	ctx context.Context,
 	key ResourceKey,
@@ -416,7 +414,7 @@ func (r *EtcdRegistryAdapter) extractResourceMetadata(key string) (ResourceMetad
 }
 
 func (r *EtcdRegistryAdapter) yamlUnmarshal(
-	gvk schema.GroupVersionKind,
+	_ schema.GroupVersionKind,
 	kv *mvccpb.KeyValue,
 	obj client.Object,
 ) error {

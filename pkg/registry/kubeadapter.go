@@ -152,7 +152,7 @@ func (r *K8SRegistryAdapter) KubeEventHandler(rm *ResourceMetadata) {
 		rm.Ctx = context.Background()
 	}
 
-	r.watchChMap.Range(func(key, value interface{}) bool {
+	r.watchChMap.Range(func(_, value interface{}) bool {
 		ubc := value.(*chanx.UnboundedChan)
 		ubc.In <- rm
 		return true

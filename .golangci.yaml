@@ -1,52 +1,88 @@
+version: "2"
 run:
-  # default concurrency is a available CPU number
   concurrency: 4
-  # timeout for analysis, e.g. 30s, 5m, default is 1m
-  timeout: 2m
-  # exit code when at least one issue was found, default is 1
   issues-exit-code: 1
-  # include test files or not, default is true
   tests: false
-  # default is true. Enables skipping of directories:
-  #   vendor$, third_party$, testdata$, examples$, Godeps$, builtin$
-  skip-dirs-use-default: true
-
-  issues.exclude-files:
-    - ".*/mock/.*.go"
-    - ".*testing.go"
-
 linters:
-  # enable-all: true
-  # disable-all: true
-  disable:
-    - errcheck
   enable:
-    - nilerr
-    - nakedret
-    - lll
-    - gofmt
     - gocritic
     - gocyclo
-    - whitespace
-    - stylecheck
+    - lll
     - misspell
+    - nakedret
+    - nilerr
+    - staticcheck
+    - whitespace
+    - revive
+  disable:
+    - errcheck
+  settings:
+    staticcheck:
+      checks:
+        - all
+        - -QF1008
+        - -QF1001
+        - -ST1003
+        - -ST1011
+    revive:
+      severity: error
+      enable-all-rules: false
+      directives:
+        - name: specify-disable-reason
+          severity: error
+      rules:
+        - name: exported
+          severity: error
+          disabled: false
+          exclude: [ "" ]
+          arguments:
+            - "check-private-receivers"
+            - "disableStutteringCheck"
+            - "disable-checks-on-constants"
+            - "disable-checks-on-types"
+            - "disable-checks-on-variables"
+
+    lll:
+      # Max line length, lines longer will be reported.
+      # '\t' is counted as 1 character by default, and can be changed with the tab-width option.
+      # Default: 120.
+      line-length: 120
+      # Tab width in spaces.
+      # Default: 1
+      tab-width: 1
+
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
     - goimports
-    # - bodyclose
-    # - nestif
-    # - gofumpt
-    # - godox
-    # - wsl
-    # - funlen
-    # - golint
-    # - cyclop
-  fast: false
-
-linters-settings:
-  stylecheck:
-    checks: ["-ST1000", "-ST1016", "-ST1020", "-ST1021", "-ST1022"]
-
-  goimports:
-    # A comma-separated list of prefixes, which, if set, checks import paths
-    # with the given prefixes are grouped after 3rd-party packages.
-    # Default: ""
-    local-prefixes: "github.com/TencentBlueKing/blueking-apigateway-operator"
+  settings:
+    gofmt:
+      # Simplify code: gofmt with `-s` option.
+      # Default: true
+      simplify: false
+      # Apply the rewrite rules to the source before reformatting.
+      # https://pkg.go.dev/cmd/gofmt
+      # Default: []
+      rewrite-rules:
+        - pattern: 'a[b:len(a)]'
+          replacement: 'a[b:]'
+    goimports:
+      local-prefixes:
+        - github.com/TencentBlueKing/blueking-apigateway-operator
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

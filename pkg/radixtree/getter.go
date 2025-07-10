@@ -43,12 +43,12 @@ func NewSingleRadixTreeGetter() RadixTreeGetter {
 }
 
 // Get ...
-func (t *SingleRadixTreeGetter) Get(stage registry.StageInfo) RadixTree {
+func (t *SingleRadixTreeGetter) Get(_ registry.StageInfo) RadixTree {
 	return t.tree
 }
 
 // RemoveNotExistStage ...
-func (t *SingleRadixTreeGetter) RemoveNotExistStage(existStageList []registry.StageInfo) {}
+func (t *SingleRadixTreeGetter) RemoveNotExistStage(_ []registry.StageInfo) {}
 
 // StageRadixTreeGetter ...
 type StageRadixTreeGetter struct {

@@ -56,7 +56,7 @@ func NewRequestEmptyResponse() (*http.Request, *httptest.ResponseRecorder) {
 type errReader int
 
 // Read ...
-func (errReader) Read(p []byte) (n int, err error) {
+func (errReader) Read(_ []byte) (n int, err error) {
 	return 0, errors.New("test error")
 }
 

@@ -40,7 +40,7 @@ const (
 	sampleTypeAlwaysOn           = "always_on"
 	sampleTypeAlwaysOff          = "always_off"
 	sampleTypeParentBaseAlwaysOn = "parent_based_always_on"
-	sampleTypeTraceIdRatio       = "trace_id_ratio"
+	// sampleTypeTraceIdRatio       = "trace_id_ratio"
 )
 
 // Tracer global tracer

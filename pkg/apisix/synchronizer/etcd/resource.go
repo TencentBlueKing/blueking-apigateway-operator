@@ -171,7 +171,7 @@ func (e *resourceStore) parseResource(key, value []byte) (resource apisix.Apisix
 	return resource, nil
 }
 
-//nolint:gosimple
+// nolint: staticcheck
 func (e *resourceStore) incrSync() {
 	c, cancel := context.WithCancel(context.TODO())
 	defer cancel()

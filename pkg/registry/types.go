@@ -50,8 +50,8 @@ func (s *StageInfo) Key() string {
 }
 
 // IsEmpty checks if the stage info is absent
-func (si StageInfo) IsEmpty() bool {
-	return si.GatewayName == "" && si.StageName == ""
+func (s StageInfo) IsEmpty() bool {
+	return s.GatewayName == "" && s.StageName == ""
 }
 
 // ResourceMetadata describes the metadata of a resource object, which includes the

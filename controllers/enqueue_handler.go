@@ -13,14 +13,14 @@ type enqueueHandler struct {
 	handler registry.KubeEventHandler
 }
 
-func (h *enqueueHandler) Create(e event.CreateEvent, q workqueue.RateLimitingInterface) {
+func (h *enqueueHandler) Create(e event.CreateEvent, _ workqueue.RateLimitingInterface) {
 	rm := buildResourceMetadata(e.Object.GetName(), e.Object.GetLabels(), e.Object.GetObjectKind().GroupVersionKind())
 	if rm != nil {
 		h.handler.KubeEventHandler(rm)
 	}
 }
 
-func (h *enqueueHandler) Update(e event.UpdateEvent, q workqueue.RateLimitingInterface) {
+func (h *enqueueHandler) Update(e event.UpdateEvent, _ workqueue.RateLimitingInterface) {
 	rmOld := buildResourceMetadata(
 		e.ObjectOld.GetName(),
 		e.ObjectOld.GetLabels(),
@@ -40,14 +40,14 @@ func (h *enqueueHandler) Update(e event.UpdateEvent, q workqueue.RateLimitingInt
 	}
 }
 
-func (h *enqueueHandler) Delete(e event.DeleteEvent, q workqueue.RateLimitingInterface) {
+func (h *enqueueHandler) Delete(e event.DeleteEvent, _ workqueue.RateLimitingInterface) {
 	rm := buildResourceMetadata(e.Object.GetName(), e.Object.GetLabels(), e.Object.GetObjectKind().GroupVersionKind())
 	if rm != nil {
 		h.handler.KubeEventHandler(rm)
 	}
 }
 
-func (h *enqueueHandler) Generic(e event.GenericEvent, q workqueue.RateLimitingInterface) {
+func (h *enqueueHandler) Generic(e event.GenericEvent, _ workqueue.RateLimitingInterface) {
 	rm := buildResourceMetadata(e.Object.GetName(), e.Object.GetLabels(), e.Object.GetObjectKind().GroupVersionKind())
 	if rm != nil {
 		h.handler.KubeEventHandler(rm)

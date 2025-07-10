@@ -21,10 +21,10 @@ SHELL = /usr/bin/env bash -o pipefail
 
 
 init:
-	pip install pre-commit
+	pip3 install pre-commit
 	pre-commit install
 	# for golangci-lint
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.61.0
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v2.1.6
 	# for make mock
 	go install github.com/golang/mock/mockgen@v1.6.0
 	# for ginkgo
@@ -94,7 +94,7 @@ vet: fmt ## Run go vet against code.
 	go vet ./...
 
 lint: vet
-	golangci-lint run
+	golangci-lint run ./...
 
 .PHONY: test
 test: ## Run tests.

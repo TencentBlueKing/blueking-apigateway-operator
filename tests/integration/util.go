@@ -47,8 +47,8 @@ type MetricsAdapter struct {
 	Metrics map[string]*dto.MetricFamily
 }
 
-// GetHttpBinGatewayResource returns the httpbin gateway resource
-func GetHttpBinGatewayResource() []EtcdConfig {
+// GetHTTPBinGatewayResource returns the httpbin gateway resource
+func GetHTTPBinGatewayResource() []EtcdConfig {
 	var resources []EtcdConfig
 	data, err := os.ReadFile("bk_apigw_httpbin_resources.yaml")
 	if err != nil {
