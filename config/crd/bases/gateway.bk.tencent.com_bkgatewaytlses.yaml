@@ -4,21 +4,20 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
-  name: bkgatewaypluginmetadata.gateway.bk.tencent.com
+  name: bkgatewaytlses.gateway.bk.tencent.com
 spec:
   group: gateway.bk.tencent.com
   names:
-    kind: BkGatewayPluginMetadata
-    listKind: BkGatewayPluginMetadataList
-    plural: bkgatewaypluginmetadata
-    singular: bkgatewaypluginmetadata
+    kind: BkGatewayTLS
+    listKind: BkGatewayTLSList
+    plural: bkgatewaytlses
+    singular: bkgatewaytls
   scope: Namespaced
   versions:
   - name: v1beta1
     schema:
       openAPIV3Schema:
-        description: BkGatewayPluginMetadata is the Schema for the bkgatewaypluginmetadatas
-          API
+        description: BkGatewayTLS is the Schema for the BkGatewayTLS API
         properties:
           apiVersion:
             description: |-
@@ -38,16 +37,23 @@ spec:
           metadata:
             type: object
           spec:
-            description: BkGatewayPluginMetadataSpec defines the desired state of
-              BkGatewayPluginMetadata
+            description: BkGatewayTLSSpec defines the desired state of BkGatewayTLS
             properties:
-              config:
-                type: object
-                x-kubernetes-preserve-unknown-fields: true
+              desc:
+                type: string
+              gatewayTLSSecretRef:
+                type: string
+              id:
+                description: |-
+                  INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                  Important: Run "make" to regenerate code after modifying this file
+                type: string
               name:
                 type: string
-            required:
-            - config
+              snis:
+                items:
+                  type: string
+                type: array
             type: object
         type: object
     served: true

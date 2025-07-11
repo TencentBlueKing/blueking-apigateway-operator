@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package synchronizer ...
 package synchronizer
 
 //go:generate mockgen -source=$GOFILE -destination=./mock/$GOFILE -package=mock

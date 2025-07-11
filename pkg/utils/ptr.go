@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package utils contains some common utils
 package utils
 
 // IntPtr convert int to int pointer

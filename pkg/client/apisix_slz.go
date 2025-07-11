@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package client ...
 package client
 
 // VersionRouteResp is a response with the publish_id and start_time

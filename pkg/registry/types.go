@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package registry ...
 package registry
 
 //go:generate mockgen -source=$GOFILE -destination=./mock/$GOFILE -package=mock

@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package registry ...
 package registry
 
 import (
@@ -157,6 +158,7 @@ func (r *EtcdRegistryAdapter) convertStages(kvs []*mvccpb.KeyValue) []StageInfo 
 	return stageList
 }
 
+// List ...
 func (r *EtcdRegistryAdapter) List(
 	ctx context.Context,
 	key ResourceKey,

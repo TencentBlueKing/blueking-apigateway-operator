@@ -5,6 +5,7 @@ run:
   tests: false
 linters:
   enable:
+    - revive
     - gocritic
     - gocyclo
     - lll
@@ -13,7 +14,6 @@ linters:
     - nilerr
     - staticcheck
     - whitespace
-    - revive
   disable:
     - errcheck
   settings:
@@ -27,14 +27,15 @@ linters:
     revive:
       severity: error
       enable-all-rules: false
-      directives:
-        - name: specify-disable-reason
-          severity: error
       rules:
+        - name: package-comments
+          severity: error
+          disabled: false
+          exclude: []
         - name: exported
           severity: error
           disabled: false
-          exclude: [ "" ]
+          exclude: []
           arguments:
             - "check-private-receivers"
             - "disableStutteringCheck"
@@ -53,15 +54,47 @@ linters:
 
   exclusions:
     generated: lax
-    presets:
-      - comments
-      - common-false-positives
-      - legacy
-      - std-error-handling
     paths:
       - third_party$
       - builtin$
+      - tests/integration/*.go
       - examples$
+issues:
+  # Maximum issues count per one linter.
+  # Set to 0 to disable.
+  # Default: 50
+  max-issues-per-linter: 0
+  # Maximum count of issues with the same text.
+  # Set to 0 to disable.
+  # Default: 3
+  max-same-issues: 0
+  # Make issues output unique by line.
+  # Default: true
+  uniq-by-line: false
+  # Show only new issues: if there are unstaged changes or untracked files,
+  # only those changes are analyzed, else only changes in HEAD~ are analyzed.
+  # It's a super-useful option for integration of golangci-lint into existing large codebase.
+  # It's not practical to fix all existing issues at the moment of integration:
+  # much better don't allow issues in new code.
+  #
+  # Default: false
+  new: true
+  # Show only new issues created after the best common ancestor (merge-base against HEAD).
+  # Default: ""
+  new-from-merge-base: main
+  # Show only new issues created after git revision `REV`.
+  # Default: ""
+  new-from-rev: HEAD
+  # Show only new issues created in git patch with set file path.
+  # Default: ""
+  new-from-patch: ""
+  # Show issues in any part of update files (requires new-from-rev or new-from-patch).
+  # Default: false
+  whole-files: true
+  # Fix found issues (if it's supported by the linter).
+  # Default: false
+  fix: true
+
 formatters:
   enable:
     - gofmt
@@ -84,5 +117,6 @@ formatters:
     generated: lax
     paths:
       - third_party$
+      - tests/integration/*.go
       - builtin$
       - examples$

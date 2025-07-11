@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package service ...
 package service
 
 import (
@@ -159,8 +160,6 @@ func (sd *ServiceDiscoveryImpl) Apply(svc *Service) error {
 }
 
 // StopDiscovery stop the discovery
-//
-//nolint:gosimple
 func (sd *ServiceDiscoveryImpl) StopDiscovery() {
 	sd.config.registryCancle()
 
@@ -290,7 +289,6 @@ func (sd *ServiceDiscoveryImpl) periodlyListSync(config *RegistryConfig, period 
 					"config",
 					config.discoveryConfig,
 				)
-				break
 			}
 		}
 	}

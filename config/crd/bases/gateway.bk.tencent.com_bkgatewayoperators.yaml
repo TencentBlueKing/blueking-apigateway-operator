@@ -3,8 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.9.2
-  creationTimestamp: null
+    controller-gen.kubebuilder.io/version: v0.18.0
   name: bkgatewayoperators.gateway.bk.tencent.com
 spec:
   group: gateway.bk.tencent.com
@@ -21,14 +20,19 @@ spec:
         description: BkGatewayOperator is the Schema for the BkGatewayOperator API
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
@@ -37,6 +41,7 @@ spec:
             properties:
               configSchema:
                 type: object
+                x-kubernetes-preserve-unknown-fields: true
               discoveryType:
                 type: string
             type: object
@@ -47,8 +52,9 @@ spec:
                 description: Message message for bk gateway stage
                 type: string
               readyUntil:
-                description: when operator status is Ready and time pass the ReadyUntil,
-                  operator should regard status as NotReady
+                description: |-
+                  when operator status is Ready and time pass the ReadyUntil, operator
+                  should regard status as NotReady
                 format: date-time
                 type: string
               status:
