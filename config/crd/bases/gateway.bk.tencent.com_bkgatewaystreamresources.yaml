@@ -3,7 +3,8 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
   name: bkgatewaystreamresources.gateway.bk.tencent.com
 spec:
   group: gateway.bk.tencent.com
@@ -21,19 +22,14 @@ spec:
           API
         properties:
           apiVersion:
-            description: |-
-              APIVersion defines the versioned schema of this representation of an object.
-              Servers should convert recognized schemas to the latest internal value, and
-              may reject unrecognized values.
-              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
             type: string
           kind:
-            description: |-
-              Kind is a string value representing the REST resource this object represents.
-              Servers may infer this from the endpoint the client submits requests to.
-              Cannot be updated.
-              In CamelCase.
-              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
             type: string
           metadata:
             type: object
@@ -73,10 +69,10 @@ spec:
                 nullable: true
                 properties:
                   checks:
-                    description: |-
-                      UpstreamHealthCheck defines the active and/or passive health check for an Upstream,
-                      with the upstream health check feature, pods can be kicked out or joined in quickly,
-                      if the feedback of Kubernetes liveness/readiness probe is long.
+                    description: UpstreamHealthCheck defines the active and/or passive
+                      health check for an Upstream, with the upstream health check
+                      feature, pods can be kicked out or joined in quickly, if the
+                      feedback of Kubernetes liveness/readiness probe is long.
                     nullable: true
                     properties:
                       active:
@@ -88,9 +84,9 @@ spec:
                             nullable: true
                             type: integer
                           healthy:
-                            description: |-
-                              UpstreamActiveHealthCheckHealthy defines the conditions to judge whether
-                              an upstream node is healthy with the active manner.
+                            description: UpstreamActiveHealthCheckHealthy defines
+                              the conditions to judge whether an upstream node is
+                              healthy with the active manner.
                             nullable: true
                             properties:
                               httpStatuses:
@@ -129,9 +125,9 @@ spec:
                           type:
                             type: string
                           unhealthy:
-                            description: |-
-                              UpstreamActiveHealthCheckUnhealthy defines the conditions to judge whether
-                              an upstream node is unhealthy with the active manager.
+                            description: UpstreamActiveHealthCheckUnhealthy defines
+                              the conditions to judge whether an upstream node is
+                              unhealthy with the active manager.
                             nullable: true
                             properties:
                               httpFailures:
@@ -159,9 +155,9 @@ spec:
                         nullable: true
                         properties:
                           healthy:
-                            description: |-
-                              UpstreamPassiveHealthCheckHealthy defines the conditions to judge whether
-                              an upstream node is healthy with the passive manner.
+                            description: UpstreamPassiveHealthCheckHealthy defines
+                              the conditions to judge whether an upstream node is
+                              healthy with the passive manner.
                             nullable: true
                             properties:
                               httpStatuses:
@@ -176,9 +172,9 @@ spec:
                           type:
                             type: string
                           unhealthy:
-                            description: |-
-                              UpstreamPassiveHealthCheckUnhealthy defines the conditions to judge whether
-                              an upstream node is unhealthy with the passive manager.
+                            description: UpstreamPassiveHealthCheckUnhealthy defines
+                              the conditions to judge whether an upstream node is
+                              unhealthy with the passive manager.
                             nullable: true
                             properties:
                               httpFailures:

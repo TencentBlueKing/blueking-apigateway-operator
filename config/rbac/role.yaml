@@ -2,18 +2,13 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
+  creationTimestamp: null
   name: manager-role
 rules:
 - apiGroups:
   - gateway.bk.tencent.com
   resources:
   - bkgatewayconfigs
-  - bkgatewayinstances
-  - bkgatewaypluginmetadatas
-  - bkgatewayresources
-  - bkgatewayservices
-  - bkgatewaystages
-  - bkgatewaystreamresources
   verbs:
   - create
   - delete
@@ -26,21 +21,153 @@ rules:
   - gateway.bk.tencent.com
   resources:
   - bkgatewayconfigs/finalizers
-  - bkgatewayinstances/finalizers
-  - bkgatewayresources/finalizers
-  - bkgatewayservices/finalizers
-  - bkgatewaystages/finalizers
-  - bkgatewaystreamresources/finalizers
   verbs:
   - update
 - apiGroups:
   - gateway.bk.tencent.com
   resources:
   - bkgatewayconfigs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
+  - bkgatewayinstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
+  - bkgatewayinstances/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
   - bkgatewayinstances/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
+  - bkgatewaypluginmetadatas
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
+  - bkgatewayresources
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
+  - bkgatewayresources/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
   - bkgatewayresources/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
+  - bkgatewayservices
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
+  - bkgatewayservices/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
   - bkgatewayservices/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
+  - bkgatewaystages
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
+  - bkgatewaystages/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
   - bkgatewaystages/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
+  - bkgatewaystreamresources
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
+  - bkgatewaystreamresources/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - gateway.bk.tencent.com
+  resources:
   - bkgatewaystreamresources/status
   verbs:
   - get
