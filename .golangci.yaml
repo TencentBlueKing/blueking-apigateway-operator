@@ -60,16 +60,6 @@ linters:
       - tests/integration/*.go
       - examples$
 issues:
-  # Maximum issues count per one linter.
-  # Set to 0 to disable.
-  # Default: 50
-  max-issues-per-linter: 0
-  # Maximum count of issues with the same text.
-  # Set to 0 to disable.
-  # Default: 3
-  max-same-issues: 0
-  # Make issues output unique by line.
-  # Default: true
   uniq-by-line: false
   # Show only new issues: if there are unstaged changes or untracked files,
   # only those changes are analyzed, else only changes in HEAD~ are analyzed.
@@ -78,10 +68,10 @@ issues:
   # much better don't allow issues in new code.
   #
   # Default: false
-  new: true
+  new: false
   # Show only new issues created after the best common ancestor (merge-base against HEAD).
   # Default: ""
-  new-from-merge-base: main
+  new-from-merge-base: master
   # Show only new issues created after git revision `REV`.
   # Default: ""
   new-from-rev: HEAD
