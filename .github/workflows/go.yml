@@ -18,6 +18,10 @@ jobs:
       with:
         go-version: 1.24.3
 
+    - name: Init
+      run: make init
+
+
     - name: Lint
       uses: golangci/golangci-lint-action@v8
       with:

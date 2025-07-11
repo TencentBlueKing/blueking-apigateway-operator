@@ -39,7 +39,7 @@ SHELL = /usr/bin/env bash -o pipefail
 
 
 init: $(LOCALBIN)
-	pip3 install pre-commit
+	pip install pre-commit
 	pre-commit install
 	# for golangci-lint
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(LOCALBIN) $(GOLANGCI_LINT_VERSION)
