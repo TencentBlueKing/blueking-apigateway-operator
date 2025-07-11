@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package controllers ...
 package controllers
 
 import (
@@ -27,13 +28,13 @@ import (
 type EmptyFilter struct{}
 
 // Create implement EventFilter
-func (uf *EmptyFilter) Create(e event.CreateEvent, q workqueue.RateLimitingInterface) {}
+func (uf *EmptyFilter) Create(event.CreateEvent, workqueue.RateLimitingInterface) {}
 
 // Update implement EventFilter
-func (uf *EmptyFilter) Update(e event.UpdateEvent, q workqueue.RateLimitingInterface) {}
+func (uf *EmptyFilter) Update(event.UpdateEvent, workqueue.RateLimitingInterface) {}
 
 // Delete implement EventFilter
-func (uf *EmptyFilter) Delete(e event.DeleteEvent, q workqueue.RateLimitingInterface) {}
+func (uf *EmptyFilter) Delete(event.DeleteEvent, workqueue.RateLimitingInterface) {}
 
 // Generic implement EventFilter
-func (uf *EmptyFilter) Generic(e event.GenericEvent, q workqueue.RateLimitingInterface) {}
+func (uf *EmptyFilter) Generic(event.GenericEvent, workqueue.RateLimitingInterface) {}

@@ -251,7 +251,7 @@ func (w *EventAgent) handleSecret(event *registry.ResourceMetadata) error {
 
 	switch event.Kind {
 	case "Secret":
-		var radixTree radixtree.RadixTree = w.radixTreeGetter.Get(event.StageInfo)
+		var radixTree = w.radixTreeGetter.Get(event.StageInfo)
 		shouldProcess, err := w.secretEventCallback(ctx,
 			registry.ResourceKey{StageInfo: event.StageInfo, ResourceName: event.Name}, radixTree)
 		if err != nil {
@@ -266,7 +266,7 @@ func (w *EventAgent) handleSecret(event *registry.ResourceMetadata) error {
 			w.stageTimer.Update(event.StageInfo)
 		}
 	case v1beta1.BkGatewayTLSTypeName:
-		var radixTree radixtree.RadixTree = w.radixTreeGetter.Get(event.StageInfo)
+		var radixTree = w.radixTreeGetter.Get(event.StageInfo)
 		tlsObj := &v1beta1.BkGatewayTLS{}
 		err := w.resourceRegistry.Get(ctx,
 			registry.ResourceKey{StageInfo: event.StageInfo, ResourceName: event.Name}, tlsObj)

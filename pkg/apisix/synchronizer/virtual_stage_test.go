@@ -1,3 +1,4 @@
+// Package synchronizer_test ...
 /*
  * TencentBlueKing is pleased to support the open source community by making
  * 蓝鲸智云 - API 网关(BlueKing - APIGateway) available.

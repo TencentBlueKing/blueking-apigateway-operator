@@ -1,3 +1,4 @@
+// Package radixtree ...
 /*
  * TencentBlueKing is pleased to support the open source community by making
  * 蓝鲸智云 - API 网关(BlueKing - APIGateway) available.
@@ -16,6 +17,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package radixtree ...
 package radixtree
 
 //go:generate mockgen -source=$GOFILE -destination=./mock/$GOFILE -package=mock
@@ -43,12 +45,12 @@ func NewSingleRadixTreeGetter() RadixTreeGetter {
 }
 
 // Get ...
-func (t *SingleRadixTreeGetter) Get(stage registry.StageInfo) RadixTree {
+func (t *SingleRadixTreeGetter) Get(_ registry.StageInfo) RadixTree {
 	return t.tree
 }
 
 // RemoveNotExistStage ...
-func (t *SingleRadixTreeGetter) RemoveNotExistStage(existStageList []registry.StageInfo) {}
+func (t *SingleRadixTreeGetter) RemoveNotExistStage(_ []registry.StageInfo) {}
 
 // StageRadixTreeGetter ...
 type StageRadixTreeGetter struct {

@@ -1,3 +1,4 @@
+// Package integration ...
 /*
  * TencentBlueKing is pleased to support the open source community by making
  * 蓝鲸智云 - API 网关(BlueKing - APIGateway) available.
@@ -16,6 +17,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package integration ...
 package integration
 
 import (
@@ -47,8 +49,8 @@ type MetricsAdapter struct {
 	Metrics map[string]*dto.MetricFamily
 }
 
-// GetHttpBinGatewayResource returns the httpbin gateway resource
-func GetHttpBinGatewayResource() []EtcdConfig {
+// GetHTTPBinGatewayResource returns the httpbin gateway resource
+func GetHTTPBinGatewayResource() []EtcdConfig {
 	var resources []EtcdConfig
 	data, err := os.ReadFile("bk_apigw_httpbin_resources.yaml")
 	if err != nil {

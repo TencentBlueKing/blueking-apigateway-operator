@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package service ...
 package service
 
 import (
@@ -159,8 +160,6 @@ func (sd *ServiceDiscoveryImpl) Apply(svc *Service) error {
 }
 
 // StopDiscovery stop the discovery
-//
-//nolint:gosimple
 func (sd *ServiceDiscoveryImpl) StopDiscovery() {
 	sd.config.registryCancle()
 
@@ -168,21 +167,18 @@ func (sd *ServiceDiscoveryImpl) StopDiscovery() {
 	go func(config *RegistryConfig) {
 		checkTicker := time.NewTicker(time.Minute)
 		defer checkTicker.Stop()
-		for {
-			select {
-			case <-checkTicker.C:
-				if config.innerStatus == innerStatusIdle {
-					sd.logger.V(1).
-						Info("Registry List/Watch goroutine stopped successfully with old config", "config", config.discoveryConfig)
-					return
-				}
-				sd.logger.Error(
-					nil,
-					"Registry List/Watch goroutine does not stop with old config, watching out for memory leaks",
-					"config",
-					config.discoveryConfig,
-				)
+		for range checkTicker.C {
+			if config.innerStatus == innerStatusIdle {
+				sd.logger.V(1).
+					Info("Registry List/Watch goroutine stopped successfully with old config", "config", config.discoveryConfig)
+				return
 			}
+			sd.logger.Error(
+				nil,
+				"Registry List/Watch goroutine does not stop with old config, watching out for memory leaks",
+				"config",
+				config.discoveryConfig,
+			)
 		}
 	}(sd.config)
 }
@@ -293,7 +289,6 @@ func (sd *ServiceDiscoveryImpl) periodlyListSync(config *RegistryConfig, period 
 					"config",
 					config.discoveryConfig,
 				)
-				break
 			}
 		}
 	}

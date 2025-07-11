@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package etcd ...
 package etcd
 
 import (
@@ -171,7 +172,7 @@ func (e *resourceStore) parseResource(key, value []byte) (resource apisix.Apisix
 	return resource, nil
 }
 
-//nolint:gosimple
+// nolint: staticcheck
 func (e *resourceStore) incrSync() {
 	c, cancel := context.WithCancel(context.TODO())
 	defer cancel()

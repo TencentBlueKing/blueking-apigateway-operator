@@ -421,13 +421,12 @@ func ParseDuration(d *intstr.IntOrString) time.Duration {
 	if d.Type == intstr.Int {
 		ret := time.Duration(d.IntVal) * time.Second
 		return ret
-	} else {
-		ret, err := time.ParseDuration(d.StrVal)
-		if err != nil {
-			return time.Duration(0)
-		}
-		return ret
 	}
+	ret, err := time.ParseDuration(d.StrVal)
+	if err != nil {
+		return time.Duration(0)
+	}
+	return ret
 }
 
 // FormatDuration ...

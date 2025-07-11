@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package utils ...
 package utils
 
 // StringInSlice see if a string is in a string slice
@@ -28,16 +29,21 @@ func StringInSlice(target string, strs []string) bool {
 	return false
 }
 
-// TruncateBytes truncate []byte to specific length
+// TruncateBytes ...
 func TruncateBytes(content []byte, length int) []byte {
+	// If the length of the content is greater than the specified length,
+	// return a slice of the content up to the specified length
 	if len(content) > length {
 		return content[:length]
 	}
+	// Otherwise, return the content as is
 	return content
 }
 
 // TruncateBytesToString ...
 func TruncateBytesToString(content []byte, length int) string {
+	// Call the TruncateBytes function with the byte slice and integer as parameters
 	s := TruncateBytes(content, length)
+	// Convert the byte slice to a string and return it
 	return string(s)
 }

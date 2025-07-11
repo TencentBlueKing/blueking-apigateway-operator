@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package agent ...
 package agent
 
 import (
@@ -25,7 +26,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 )
 
-var commitTimeWindow time.Duration = 5 * time.Second
+var commitTimeWindow = 5 * time.Second
 
 // Init ...
 func Init(cfg *config.Config) {

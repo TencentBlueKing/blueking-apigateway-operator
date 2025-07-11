@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package metric ...
 package metric
 
 import "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"

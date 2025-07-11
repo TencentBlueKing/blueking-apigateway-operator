@@ -1,3 +1,4 @@
+// Package runner ...
 /*
  * TencentBlueKing is pleased to support the open source community by making
  * 蓝鲸智云 - API 网关(BlueKing - APIGateway) available.
@@ -16,6 +17,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package runner ...
 package runner
 
 import (

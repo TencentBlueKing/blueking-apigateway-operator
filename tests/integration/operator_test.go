@@ -23,12 +23,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer/etcd"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	clientv3 "go.etcd.io/etcd/client/v3"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer/etcd"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
 	util "github.com/TencentBlueKing/blueking-apigateway-operator/tests/integration"
@@ -71,7 +72,7 @@ var _ = Describe("Operator Integration", func() {
 		Context("test new agteway publish", func() {
 			It("should not error and the value should be equal to what was put", func() {
 				// load resources
-				resources := util.GetHttpBinGatewayResource()
+				resources := util.GetHTTPBinGatewayResource()
 				// put httpbin resources
 				for _, resource := range resources {
 					_, err := etcdCli.Put(context.Background(), resource.Key, resource.Value)
@@ -147,7 +148,7 @@ var _ = Describe("Operator Integration", func() {
 		Context("test update publish", func() {
 			It("should not error and the value should be equal to what was put", func() {
 				// load base resources
-				resources := util.GetHttpBinGatewayResource()
+				resources := util.GetHTTPBinGatewayResource()
 				// put httpbin resources
 				var versionRoute util.EtcdConfig
 				for _, resource := range resources {
@@ -226,7 +227,7 @@ var _ = Describe("Operator Integration", func() {
 		Context("test delete publish", func() {
 			It("should not error and the value should be equal to what was put", func() {
 				// load base resources
-				resources := util.GetHttpBinGatewayResource()
+				resources := util.GetHTTPBinGatewayResource()
 				// put httpbin resources
 				for _, resource := range resources {
 					_, err := etcdCli.Put(context.Background(), resource.Key, resource.Value)

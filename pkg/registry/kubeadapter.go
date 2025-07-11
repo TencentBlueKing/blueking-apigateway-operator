@@ -1,3 +1,4 @@
+// Package registry ...
 /*
  * TencentBlueKing is pleased to support the open source community by making
  * 蓝鲸智云 - API 网关(BlueKing - APIGateway) available.
@@ -16,6 +17,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package registry ...
 package registry
 
 import (
@@ -152,7 +154,7 @@ func (r *K8SRegistryAdapter) KubeEventHandler(rm *ResourceMetadata) {
 		rm.Ctx = context.Background()
 	}
 
-	r.watchChMap.Range(func(key, value interface{}) bool {
+	r.watchChMap.Range(func(_, value interface{}) bool {
 		ubc := value.(*chanx.UnboundedChan)
 		ubc.In <- rm
 		return true

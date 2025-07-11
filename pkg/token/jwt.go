@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package token ...
 package token
 
 import (
@@ -86,7 +87,7 @@ func (i *Issuer) SetSecret(secret string) {
 }
 
 // doSignJwtToken sign jwt token for status reporting
-func (i *Issuer) doSignJwtToken(sub, secret, name string, t time.Time) (string, error) {
+func (i *Issuer) doSignJwtToken(sub, name string, t time.Time) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub":  sub,
 		"name": name,
@@ -114,7 +115,7 @@ func (i *Issuer) setToken() {
 		i.logger.Debug("clean jwt token successfully")
 		return
 	}
-	tokenString, err := i.doSignJwtToken(i.sub, i.secret, i.name, timeNow)
+	tokenString, err := i.doSignJwtToken(i.sub, i.name, timeNow)
 	if err != nil {
 		i.logger.Error(err, "sign jwt token failed")
 		return

@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package registry ...
 package registry
 
 //go:generate mockgen -source=$GOFILE -destination=./mock/$GOFILE -package=mock
@@ -50,8 +51,8 @@ func (s *StageInfo) Key() string {
 }
 
 // IsEmpty checks if the stage info is absent
-func (si StageInfo) IsEmpty() bool {
-	return si.GatewayName == "" && si.StageName == ""
+func (s StageInfo) IsEmpty() bool {
+	return s.GatewayName == "" && s.StageName == ""
 }
 
 // ResourceMetadata describes the metadata of a resource object, which includes the

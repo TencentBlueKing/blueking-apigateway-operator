@@ -1,3 +1,4 @@
+// Package leaderelection ...
 /*
  * TencentBlueKing is pleased to support the open source community by making
  * 蓝鲸智云 - API 网关(BlueKing - APIGateway) available.
@@ -16,6 +17,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package leaderelection ...
 package leaderelection
 
 import (
@@ -27,6 +29,7 @@ import (
 
 type prometheusMetricsProvider struct{}
 
+// NewLeaderMetric  ...
 func (p *prometheusMetricsProvider) NewLeaderMetric() leaderelection.SwitchMetric {
 	return &prometheusSwitchMetric{
 		gauge: metric.LeaderElectionGauge,
@@ -37,10 +40,12 @@ type prometheusSwitchMetric struct {
 	gauge *prometheus.GaugeVec
 }
 
+// On ...
 func (m *prometheusSwitchMetric) On(name string) {
 	m.gauge.WithLabelValues(name).Set(1)
 }
 
+// Off ...
 func (m *prometheusSwitchMetric) Off(name string) {
 	m.gauge.WithLabelValues(name).Set(0)
 }
