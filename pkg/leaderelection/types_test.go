@@ -92,7 +92,7 @@ var _ = Describe("KubeLeaderElector", func() {
 			"test-namespace",
 			fakeKubeClient,
 			30,
-			25, 5,
+			5, 3,
 		)
 		Expect(err).To(BeNil())
 		elector2, err = leaderelection.NewKubeLeaderElector(
@@ -101,7 +101,7 @@ var _ = Describe("KubeLeaderElector", func() {
 			"test-namespace",
 			fakeKubeClient,
 			30,
-			25, 5,
+			5, 3,
 		)
 		Expect(err).To(BeNil())
 	})
