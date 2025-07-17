@@ -22,23 +22,20 @@ package client
 import (
 	"errors"
 	"fmt"
-	"net"
-	"net/http"
-	"strings"
-
 	gentleman "gopkg.in/h2non/gentleman.v2"
 	"gopkg.in/h2non/gentleman.v2/plugins/auth"
 	"gopkg.in/h2non/gentleman.v2/plugins/body"
+	"net/http"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 )
 
 const (
-	getLeaderURL    = "/v1/leader"
-	diffResourceURL = "/v1/resources/diff"
-	listResourceURL = "/v1/resources/list"
-	syncResourceURL = "/v1/resources/sync"
+	getLeaderURL                   = "/v1/open/leader/"
+	ResourceApigwURL               = "/v1/open/resources/apigw/"
+	ResourceApigwCountURL          = "/v1/open/resources/apigw/count/"
+	ResourceApigwCurrentVersionURL = "/v1/open/resources/apigw/current-version/"
 )
 
 // ResourceClient is a client for the resource API.
@@ -95,7 +92,7 @@ func GetLeaderResourceClient(apiKey string) (*ResourceClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	leaderHost := getHostFromLeaderName(leader)
+	leaderHost := GetHostFromLeaderName(leader)
 	if leaderHost == "" {
 		return nil, errors.New("empty leader host")
 	}
@@ -111,46 +108,48 @@ func (r *ResourceClient) GetLeader() (string, error) {
 	return leader, r.doHttpRequest(request, sendAndDecodeResp(&leader))
 }
 
-// Diff resource both gateway and apiSix
-func (r *ResourceClient) Diff(req *DiffReq) (*DiffInfo, error) {
+// ApigwList apigw 资源列表
+func (r *ResourceClient) ApigwList(req *ApigwListRequest) (ApigwListInfo, error) {
 	request := r.client.Request()
-	request.Path(diffResourceURL)
+	request.Path(ResourceApigwURL)
 	request.Method(http.MethodPost)
 	request.Use(body.JSON(req))
-	var res DiffInfo
-	return &res, r.doHttpRequest(request, sendAndDecodeResp(&res))
-}
-
-// List Resource
-func (r *ResourceClient) List(req *ListReq) (ListInfo, error) {
-	request := r.client.Request()
-	request.Path(listResourceURL)
-	request.Method(http.MethodPost)
-	request.Use(body.JSON(req))
-	var res ListInfo
+	var res ApigwListInfo
 	return res, r.doHttpRequest(request, sendAndDecodeResp(&res))
 }
 
-// Sync Resource between gateway and apiSix
-func (r *ResourceClient) Sync(req *SyncReq) error {
+// ApigwStageResourceCount apigw 资源数量
+func (r *ResourceClient) ApigwStageResourceCount(req *ApigwListRequest) (ApigwListResourceCountResponse, error) {
 	request := r.client.Request()
-	request.Path(syncResourceURL)
+	request.Path(ResourceApigwCountURL)
 	request.Method(http.MethodPost)
 	request.Use(body.JSON(req))
-	return r.doHttpRequest(request, sendAndDecodeResp(nil))
+	var res ApigwListResourceCountResponse
+	return res, r.doHttpRequest(request, sendAndDecodeResp(&res))
 }
 
-// getHostFromLeaderName eg: in:somename-ip1,ip2 out: http://ip1:port
-func getHostFromLeaderName(leader string) string {
+// ApigwStageCurrentVersion apigw 环境发布版本
+func (r *ResourceClient) ApigwStageCurrentVersion(req *ApigwListRequest) (ApigwListCurrentVersionPublishIDResponse, error) {
+	request := r.client.Request()
+	request.Path(ResourceApigwCurrentVersionURL)
+	request.Method(http.MethodPost)
+	request.Use(body.JSON(req))
+	var res ApigwListCurrentVersionPublishIDResponse
+	return res, r.doHttpRequest(request, sendAndDecodeResp(&res))
+}
+
+// GetHostFromLeaderName eg: in:somename-ip1,ip2 out: http://ip1:port
+func GetHostFromLeaderName(leader string) string {
 	// format somename-ip1,ip2,ip3
-	splitRes := strings.Split(leader, "_")
-	addrAll := splitRes[len(splitRes)-1]
-	if len(addrAll) == 0 {
-		return ""
-	}
-	addrList := strings.Split(addrAll, ",")
-	if ip := net.ParseIP(addrList[0]); ip == nil {
-		return ""
-	}
-	return fmt.Sprintf("http://%s:%d", addrList[0], serverBindPort)
+	//splitRes := strings.Split(leader, "_")
+	//addrAll := splitRes[len(splitRes)-1]
+	//if len(addrAll) == 0 {
+	//	return ""
+	//}
+	//addrList := strings.Split(addrAll, ",")
+	//if ip := net.ParseIP(addrList[0]); ip == nil {
+	//	return ""
+	//}
+	//return fmt.Sprintf("http://%s:%d", addrList[0], serverBindPort)
+	return fmt.Sprintf("http://0.0.0.0:%d", serverBindPort)
 }

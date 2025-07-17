@@ -20,9 +20,9 @@
 package server
 
 import (
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apis/open"
 	"github.com/gin-gonic/gin"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/api"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
@@ -47,11 +47,11 @@ func NewRouter(
 	router.GET("/healthz", func(c *gin.Context) {
 		utils.SuccessJSONResponse(c, "ok")
 	})
-	operatorRouter := router.Group("/v1")
+	operatorRouter := router.Group("/v1/open")
 	operatorRouter.Use(gin.BasicAuth(gin.Accounts{
 		constant.ApiAuthAccount: conf.HttpServer.AuthPassword,
 	}))
 	operatorRouter.Use(gin.Recovery())
-	api.Register(operatorRouter, leaderElector, registry, committer, apiSixConfStore)
+	open.Register(operatorRouter, leaderElector, registry, committer, apiSixConfStore)
 	return router
 }

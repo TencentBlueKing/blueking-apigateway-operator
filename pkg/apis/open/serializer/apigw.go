@@ -16,8 +16,8 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package client ...
-package client
+// Package serializer ...
+package serializer
 
 // StageScopedApisixResources apisix resource
 type StageScopedApisixResources struct {

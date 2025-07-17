@@ -1,7 +1,7 @@
 /*
  * TencentBlueKing is pleased to support the open source community by making
  * 蓝鲸智云 - API 网关(BlueKing - APIGateway) available.
- * Copyright (C) 2025 Tencent. All rights reserved.
+ * Copyright (C) 2017 THL A29 Limited, a Tencent company. All rights reserved.
  * Licensed under the MIT License (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
@@ -16,13 +16,12 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package api provides the API routes for the BlueKing API Gateway Operator.
-package api
+package open
 
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/api/handler"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apis/open/handler"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
@@ -39,8 +38,9 @@ func Register(
 ) {
 	// register resource api
 	resourceApi := handler.NewResourceApi(leaderElector, registry, committer, apiSixConfStore)
-	r.GET("/leader", resourceApi.GetLeader)
-	r.POST("/resources/diff", resourceApi.Diff)
-	r.POST("/resources/list", resourceApi.List)
-	r.POST("/resources/sync", resourceApi.Sync)
+	r.GET("/leader/", resourceApi.GetLeader)
+	r.POST("/resources/apigw/", resourceApi.ApigwList)
+	r.POST("/resources/apigw/count/", resourceApi.ApigwStageResourceCount)
+	r.POST("/resources/apigw/current-version/", resourceApi.ApigwStageCurrentVersion)
+
 }
