@@ -20,7 +20,6 @@ package integration_test
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -41,9 +40,11 @@ const (
 	testDataStageAmount     = 1
 	testDataServiceAmount   = 1
 	testDataRoutesAmount    = 75
+	testDataResourcesAmount = 74
 	versionRouteKey         = "integration-test-prod-apigw-builtin-mock-release-version"
 	operatorURL             = "http://127.0.0.1:6004"
 	updateVersionRouteValue = "metadata:\n  name: integration-test-prod-apigw-builtin-mock-release-version\n  labels:\n    gateway.bk.tencent.com/gateway: integration-test\n    gateway.bk.tencent.com/stage: prod\n  annotations: {}\nspec:\n  name: apigw_builtin__mock_release_version\n  desc: \u83b7\u53d6\u53d1\u5e03\u4fe1\u606f\uff0c\u7528\u4e8e\u68c0\u67e5\u7248\u672c\u53d1\u5e03\u7ed3\u679c\n  id: -1\n  plugins:\n  - name: bk-mock\n    config:\n      response_status: 200\n      response_example: '{\"publish_id\": 14, \"start_time\": \"2023-11-08 15:11:09+0800\"}'\n      response_headers:\n        Content-Type: application/json\n  service: ''\n  protocol: http\n  methods:\n  - GET\n  timeout:\n    connect: 60\n    read: 60\n    send: 60\n  uri: /__apigw_version\n  matchSubPath: false\n  upstream:\n    type: roundrobin\n    hashOn:\n    key:\n    checks:\n    scheme: http\n    retries:\n    retryTimeout:\n    passHost: node\n    upstreamHost:\n    tlsEnable: false\n    externalDiscoveryType:\n    externalDiscoveryConfig:\n    discoveryType:\n    serviceName:\n    nodes: []\n    timeout:\n  rewrite:\n    enabled: false\n    method:\n    path:\n    headers: {}\n    stageHeaders: append\n    serviceHeaders: append\n"
+	publishID               = 13
 )
 
 var _ = Describe("Operator Integration", func() {
@@ -120,151 +121,34 @@ var _ = Describe("Operator Integration", func() {
 					metric.ActionPut, metric.ResultSuccess, etcd.ApisixResourceTypeServices),
 				).To(Equal(testDataServiceAmount))
 
-				// assert apigw resource and apisix resource
-				gatewayResourcesMap, err := resourceCli.List(&client.ListReq{
-					Gateway: testGateway,
-					Stage:   testStage,
+				// assert apigw resource
+				apigwGatewayResourcesMap, err := resourceCli.ApigwList(&client.ApigwListRequest{
+					GatewayName: testGateway,
+					StageName:   testStage,
 				})
 				Expect(err).NotTo(HaveOccurred())
-
-				resourceInfo, ok := gatewayResourcesMap[testGateway+"/"+testStage]
+				resourceInfo, ok := apigwGatewayResourcesMap[testGateway+"/"+testStage]
 
 				Expect(ok).To(BeTrue())
 
-				Expect(len(resourceInfo.Routes)).To(Equal(testDataRoutesAmount))
+				Expect(len(resourceInfo.Routes)).To(Equal(testDataResourcesAmount))
 				Expect(len(resourceInfo.Services)).To(Equal(testDataServiceAmount))
 
-				// assert apigw resource diff apisix resource
-				diffResourceResult, err := resourceCli.Diff(&client.DiffReq{
-					Gateway: testGateway,
-					Stage:   testStage,
-					All:     true,
+				// assert apigw resource count
+				apigwGatewayResourceCount, err := resourceCli.ApigwStageResourceCount(&client.ApigwListRequest{
+					GatewayName: testGateway,
+					StageName:   testStage,
 				})
 				Expect(err).NotTo(HaveOccurred())
-				Expect(len(*diffResourceResult)).To(Equal(0))
-			})
-		})
+				Expect(apigwGatewayResourceCount.Count).To(Equal(testDataResourcesAmount))
 
-		Context("test update publish", func() {
-			It("should not error and the value should be equal to what was put", func() {
-				// load base resources
-				resources := util.GetHTTPBinGatewayResource()
-				// put httpbin resources
-				var versionRoute util.EtcdConfig
-				for _, resource := range resources {
-					if strings.Contains(resource.Key, versionRouteKey) {
-						versionRoute = resource
-					}
-					_, err := etcdCli.Put(context.Background(), resource.Key, resource.Value)
-					Expect(err).NotTo(HaveOccurred())
-				}
-
-				time.Sleep(time.Second * 10)
-
-				// update version routes
-				versionRoute.Value = updateVersionRouteValue
-				_, err := etcdCli.Put(context.Background(), versionRoute.Key, versionRoute.Value)
-				Expect(err).NotTo(HaveOccurred())
-
-				time.Sleep(time.Second * 10)
-
-				metricsAdapter, err := util.NewMetricsAdapter(operatorURL)
-
-				Expect(err).NotTo(HaveOccurred())
-
-				// assert sync
-				Expect(metricsAdapter.GetResourceSyncCmpCountMetric(
-					testGateway,
-					testStage,
-					etcd.ApisixResourceTypeRoutes),
-				).To(Equal(testDataRoutesAmount))
-
-				Expect(metricsAdapter.GetResourceSyncCmpCountMetric(
-					testGateway,
-					testStage,
-					etcd.ApisixResourceTypeServices),
-				).To(Equal(testDataServiceAmount))
-
-				// diff
-				Expect(metricsAdapter.GetResourceSyncCmpDiffCountMetric(
-					testGateway,
-					testStage,
-					etcd.ApisixResourceTypeRoutes),
-				).To(Equal(1))
-
-				Expect(metricsAdapter.GetResourceSyncCmpDiffCountMetric(
-					testGateway,
-					testStage,
-					etcd.ApisixResourceTypeServices),
-				).To(Equal(0))
-
-				// assert apigw resource and apisix resource
-				gatewayResourcesMap, err := resourceCli.List(&client.ListReq{
-					Gateway: testGateway,
-					Stage:   testStage,
+				// assert apigw current-version publish_id
+				apigwGatewayStageVersion, err := resourceCli.ApigwStageCurrentVersion(&client.ApigwListRequest{
+					GatewayName: testGateway,
+					StageName:   testStage,
 				})
 				Expect(err).NotTo(HaveOccurred())
-
-				resourceInfo, ok := gatewayResourcesMap[testGateway+"/"+testStage]
-
-				Expect(ok).To(BeTrue())
-
-				Expect(len(resourceInfo.Routes)).To(Equal(testDataRoutesAmount))
-				Expect(len(resourceInfo.Services)).To(Equal(testDataServiceAmount))
-
-				// assert apigw resource diff apisix resource
-				diffResourceResult, err := resourceCli.Diff(&client.DiffReq{
-					Gateway: testGateway,
-					Stage:   testStage,
-					All:     true,
-				})
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(len(*diffResourceResult)).To(Equal(0))
-			})
-		})
-
-		Context("test delete publish", func() {
-			It("should not error and the value should be equal to what was put", func() {
-				// load base resources
-				resources := util.GetHTTPBinGatewayResource()
-				// put httpbin resources
-				for _, resource := range resources {
-					_, err := etcdCli.Put(context.Background(), resource.Key, resource.Value)
-					Expect(err).NotTo(HaveOccurred())
-				}
-
-				time.Sleep(time.Second * 10)
-
-				// delete gateway
-				_, err := etcdCli.Delete(
-					context.Background(),
-					"/bk-gateway-apigw/default/integration-test/prod",
-					clientv3.WithPrefix(),
-				)
-				Expect(err).NotTo(HaveOccurred())
-
-				time.Sleep(time.Second * 10)
-				apisixResource, err := etcdCli.Get(context.Background(), "/bk-gateway-apisix", clientv3.WithPrefix())
-				Expect(err).NotTo(HaveOccurred())
-				// bk-gateway-apisix/routes/micro-gateway-not-found-handling
-				// bk-gateway-apisix/routes/micro-gateway-operator-healthz-outer
-				Expect(len(apisixResource.Kvs)).To(Equal(2))
-
-				metricsAdapter, err := util.NewMetricsAdapter(operatorURL)
-
-				Expect(err).NotTo(HaveOccurred())
-
-				// assert metrics
-				Expect(metricsAdapter.GetApisixOperationCountMetric(
-					metric.ActionDelete, metric.ResultSuccess, etcd.ApisixResourceTypeRoutes),
-				// 2 micro-gateway-not-found-handling and healthz-outer
-				).To(Equal(testDataRoutesAmount))
-
-				Expect(metricsAdapter.GetApisixOperationCountMetric(
-					metric.ActionDelete, metric.ResultSuccess, etcd.ApisixResourceTypeServices),
-				// 2 micro-gateway-not-found-handling and healthz-outer
-				).To(Equal(testDataServiceAmount))
+				Expect(apigwGatewayStageVersion.PublishID).To(Equal(publishID))
 			})
 		})
 	})

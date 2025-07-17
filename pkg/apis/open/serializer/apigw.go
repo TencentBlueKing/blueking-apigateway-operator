@@ -16,8 +16,8 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package client ...
-package client
+// Package serializer ...
+package serializer
 
 // StageScopedApisixResources apisix resource
 type StageScopedApisixResources struct {
@@ -38,9 +38,9 @@ type ResourceInfo struct {
 
 // ApigwListRequest apigw list api req
 type ApigwListRequest struct {
-	GatewayName string        `json:"gateway_name,omitempty"`
-	StageName   string        `json:"stage_name,omitempty"`
-	Resource    *ResourceInfo `json:"resource,omitempty"`
+	GatewayName string `json:"gateway_name,omitempty"`
+	StageName   string `json:"stage_name,omitempty"`
+	Resource    ResourceInfo
 }
 
 // ApigwListResourceCountResponse apigw 资源数量
