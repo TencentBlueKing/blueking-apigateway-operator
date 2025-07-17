@@ -20,8 +20,9 @@
 package server
 
 import (
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apis/open"
 	"github.com/gin-gonic/gin"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apis/open"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"

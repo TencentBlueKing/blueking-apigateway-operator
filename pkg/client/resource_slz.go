@@ -45,10 +45,10 @@ type ApigwListRequest struct {
 
 // ApigwListResourceCountResponse apigw 资源数量
 type ApigwListResourceCountResponse struct {
-	Count int64 `json:"count"`
+	Count int `json:"count"`
 }
 
 // ApigwListCurrentVersionPublishIDResponse apigw 环境发布版本
 type ApigwListCurrentVersionPublishIDResponse struct {
-	PublishID int64 `json:"publish_id"`
+	PublishID int `json:"publish_id"`
 }

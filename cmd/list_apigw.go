@@ -21,9 +21,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
 )
 
 type listApigwCommand struct {
@@ -50,12 +52,7 @@ func (l *listApigwCommand) Init() {
 	cmd.Flags().String("gateway_name", "", "gateway name for list apigw command")
 	cmd.Flags().String("stage_name", "", "stage name for list apigw command")
 	cmd.Flags().Int64("resource_id", 0, "resource ID for list apigw command")
-	cmd.Flags().
-		String(
-			"resource_name",
-			"",
-			"resource name for list apigw command, empty for all resources in stage. Can not be set with resource_id simultaneously",
-		)
+	cmd.Flags().String("resource_name", "", "resource name for list apigw command")
 	cmd.Flags().StringP("write-out", "w", "json", "response write out format (simple, json, yaml)")
 	cmd.Flags().Bool("count", false, "gateway resources count")
 	cmd.Flags().Bool("current-version", false, "gateway stage version")
@@ -73,6 +70,7 @@ func (l *listApigwCommand) Init() {
 	l.cmd = cmd
 }
 
+// RunE ...
 func (l *listApigwCommand) RunE(cmd *cobra.Command, args []string) error {
 	initClient()
 

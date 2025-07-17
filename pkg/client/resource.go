@@ -22,10 +22,13 @@ package client
 import (
 	"errors"
 	"fmt"
+	"net"
+	"net/http"
+	"strings"
+
 	gentleman "gopkg.in/h2non/gentleman.v2"
 	"gopkg.in/h2non/gentleman.v2/plugins/auth"
 	"gopkg.in/h2non/gentleman.v2/plugins/body"
-	"net/http"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
@@ -129,7 +132,9 @@ func (r *ResourceClient) ApigwStageResourceCount(req *ApigwListRequest) (ApigwLi
 }
 
 // ApigwStageCurrentVersion apigw 环境发布版本
-func (r *ResourceClient) ApigwStageCurrentVersion(req *ApigwListRequest) (ApigwListCurrentVersionPublishIDResponse, error) {
+func (r *ResourceClient) ApigwStageCurrentVersion(
+	req *ApigwListRequest,
+) (ApigwListCurrentVersionPublishIDResponse, error) {
 	request := r.client.Request()
 	request.Path(ResourceApigwCurrentVersionURL)
 	request.Method(http.MethodPost)
@@ -141,15 +146,14 @@ func (r *ResourceClient) ApigwStageCurrentVersion(req *ApigwListRequest) (ApigwL
 // GetHostFromLeaderName eg: in:somename-ip1,ip2 out: http://ip1:port
 func GetHostFromLeaderName(leader string) string {
 	// format somename-ip1,ip2,ip3
-	//splitRes := strings.Split(leader, "_")
-	//addrAll := splitRes[len(splitRes)-1]
-	//if len(addrAll) == 0 {
-	//	return ""
-	//}
-	//addrList := strings.Split(addrAll, ",")
-	//if ip := net.ParseIP(addrList[0]); ip == nil {
-	//	return ""
-	//}
-	//return fmt.Sprintf("http://%s:%d", addrList[0], serverBindPort)
-	return fmt.Sprintf("http://0.0.0.0:%d", serverBindPort)
+	splitRes := strings.Split(leader, "_")
+	addrAll := splitRes[len(splitRes)-1]
+	if len(addrAll) == 0 {
+		return ""
+	}
+	addrList := strings.Split(addrAll, ",")
+	if ip := net.ParseIP(addrList[0]); ip == nil {
+		return ""
+	}
+	return fmt.Sprintf("http://%s:%d", addrList[0], serverBindPort)
 }
