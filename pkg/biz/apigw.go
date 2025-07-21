@@ -60,7 +60,9 @@ func GetApigwResourcesByStage(
 	if isExcludeReleaseVersion {
 		// 资源列表中排除 apigw-builtin-mock-release-version
 		resourceIDKey := genResourceIDKey(gatewayName, stageName, config.ReleaseVersionResourceID)
-		delete(apiSixResources.Routes, resourceIDKey)
+		if _, ok := apiSixResources.Routes[resourceIDKey]; ok {
+			delete(apiSixResources.Routes, resourceIDKey)
+		}
 	}
 	return apiSixResources, nil
 }
