@@ -24,7 +24,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
@@ -35,6 +34,11 @@ import (
 // genResourceIDKey 生成资源 ID 查询的 key
 func genResourceIDKey(gatewayName, stageName string, resourceID int64) string {
 	return fmt.Sprintf("%s.%s.%d", gatewayName, stageName, resourceID)
+}
+
+// genResourceNameKey 生成资源名称查询的 key
+func genResourceNameKey(gatewayName, stageName string, resourceName string) string {
+	return fmt.Sprintf("%s-%s-%s", gatewayName, stageName, resourceName)
 }
 
 // GetApigwResourcesByStage 根据网关查询资源
@@ -55,10 +59,28 @@ func GetApigwResourcesByStage(
 	}
 	if isExcludeReleaseVersion {
 		// 资源列表中排除 apigw-builtin-mock-release-version
-		resourceIDKey := genResourceIDKey(gatewayName, stageName, -1)
+		resourceIDKey := genResourceIDKey(gatewayName, stageName, config.ReleaseVersionResourceID)
 		delete(apiSixResources.Routes, resourceIDKey)
 	}
 	return apiSixResources, nil
+}
+
+// GetApigwResourceCount 获取 apigw 指定环境的资源数量
+func GetApigwResourceCount(
+	ctx context.Context,
+	commiter *commiter.Commiter,
+	gatewayName string,
+	stageName string,
+) (int64, error) {
+	si := registry.StageInfo{
+		GatewayName: gatewayName,
+		StageName:   stageName,
+	}
+	count, err := commiter.GetResourceCount(ctx, si)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 // ListApigwResources 获取 apigw 指定环境的资源列表
@@ -89,23 +111,29 @@ func GetApigwResource(
 ) (map[string]*apisix.ApisixConfiguration, error) {
 	configMap := make(map[string]*apisix.ApisixConfiguration)
 	stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
+
+	// by resourceName
+	if resourceName != "" {
+		si := registry.StageInfo{
+			GatewayName: gatewayName,
+			StageName:   stageName,
+		}
+		resourceNameKey := genResourceNameKey(gatewayName, stageName, resourceName)
+		apiSixResources, _, err := commiter.ConvertEtcdResourceToApisixConfiguration(ctx, si, resourceNameKey)
+		if err != nil {
+			return nil, err
+		}
+		configMap[stageKey] = apiSixResources
+		return configMap, nil
+	}
+
+	// by resourceID
 	apiSixResources, err := GetApigwResourcesByStage(ctx, commiter, gatewayName, stageName, true)
 	if err != nil {
 		return nil, err
 	}
-	resourceNameKey := fmt.Sprintf(
-		"%s-%s-%s",
-		gatewayName,
-		stageName,
-		strings.ReplaceAll(resourceName, "_", "-"),
-	)
 	resourceIDKey := genResourceIDKey(gatewayName, stageName, resourceID)
 	for _, route := range apiSixResources.Routes {
-		if resourceName != "" && route.Name == resourceNameKey {
-			apiSixResources.Routes = map[string]*apisix.Route{route.ID: route}
-			configMap[stageKey] = apiSixResources
-			return configMap, nil
-		}
 		if resourceID != 0 && route.ID == resourceIDKey {
 			apiSixResources.Routes = map[string]*apisix.Route{route.ID: route}
 			configMap[stageKey] = apiSixResources
@@ -115,40 +143,45 @@ func GetApigwResource(
 	return configMap, nil
 }
 
-// GetApigwStageCurrentVersion 获取 apigw 指定环境的发布版本
-func GetApigwStageCurrentVersion(
+// GetApigwStageCurrentVersionInfo 获取 apigw 指定环境的发布版本信息
+func GetApigwStageCurrentVersionInfo(
 	ctx context.Context,
 	commiter *commiter.Commiter,
 	gatewayName string,
 	stageName string,
-) (int, error) {
+) (map[string]interface{}, error) {
 	si := registry.StageInfo{
 		GatewayName: gatewayName,
 		StageName:   stageName,
 	}
-	apiSixResources, _, err := commiter.ConvertEtcdKVToApisixConfiguration(ctx, si)
+
+	resourceNameKey := genResourceNameKey(gatewayName, stageName, "apigw-builtin-mock-release-version")
+	apiSixResources, _, err := commiter.ConvertEtcdResourceToApisixConfiguration(ctx, si, resourceNameKey)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	var exampleData struct {
-		PublishID int    `json:"publish_id"`
-		StartTime string `json:"start_time"`
+
+	if len(apiSixResources.Routes) == 0 {
+		return nil, errors.New("current-version not found")
 	}
-	resourceIDKey := genResourceIDKey(gatewayName, stageName, -1)
-	for _, route := range apiSixResources.Routes {
-		if route.ID == resourceIDKey {
-			for _, plugin := range route.Plugins {
-				pluginData := plugin.(map[string]interface{})
-				ResponseExample, ok := pluginData["response_example"].(string)
-				if !ok {
-					return 0, errors.New("response_example is empty")
-				}
-				if err := json.Unmarshal([]byte(ResponseExample), &exampleData); err != nil {
-					return 0, err
-				}
-				return exampleData.PublishID, nil
-			}
+
+	resourceIDKey := genResourceIDKey(gatewayName, stageName, config.ReleaseVersionResourceID)
+	plugins := apiSixResources.Routes[resourceIDKey].Plugins
+
+	for _, plugin := range plugins {
+		pluginData := plugin.(map[string]interface{})
+		responseExample := pluginData["response_example"].(string)
+		if responseExample == "" {
+			continue
 		}
+		versionInfo := make(map[string]interface{})
+		err := json.Unmarshal([]byte(responseExample), &versionInfo)
+		if err != nil {
+			return nil, errors.New("current-version unmarshal error: " + err.Error())
+		}
+
+		return versionInfo, nil
 	}
-	return 0, errors.New("current-version not found")
+
+	return nil, errors.New("current-version not found")
 }

@@ -157,6 +157,34 @@ func (c *Converter) Convert(
 	return apisixConfig, nil
 }
 
+// ConvertResource ...
+func (c *Converter) ConvertResource(
+	resource *v1beta1.BkGatewayResource,
+	services []*v1beta1.BkGatewayService,
+) (*apisix.ApisixConfiguration, error) {
+	if c.stage == nil {
+		return nil, eris.New("no stage defined")
+	}
+	apisixConfig := apisix.NewEmptyApisixConfiguration()
+
+	route, err := c.convertResource(resource, services)
+	if err != nil {
+		return nil, eris.Wrapf(err, "convert resource failed")
+	}
+	apisixConfig.Routes[route.GetID()] = route
+
+	for _, svc := range services {
+		if svc.Name == resource.Spec.Service {
+			svc, err := c.convertService(svc)
+			if err != nil {
+				return nil, eris.Wrapf(err, "convert service failed")
+			}
+			apisixConfig.Services[svc.GetID()] = svc
+		}
+	}
+	return apisixConfig, nil
+}
+
 func (c *Converter) getResourceName(specName string, labels map[string]string) (string, error) {
 	if len(specName) != 0 {
 		return specName, nil

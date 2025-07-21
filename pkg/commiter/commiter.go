@@ -255,6 +255,65 @@ func (c *Commiter) ConvertEtcdKVToApisixConfiguration(
 	return conf, stage, err
 }
 
+// ConvertEtcdResourceToApisixConfiguration 转换 etcd 资源
+func (c *Commiter) ConvertEtcdResourceToApisixConfiguration(
+	ctx context.Context,
+	si registry.StageInfo,
+	resourceName string,
+) (*apisix.ApisixConfiguration, *v1beta1.BkGatewayStage, error) {
+	stage, err := c.getStage(ctx, si)
+	if err != nil {
+		return nil, nil, err
+	}
+	eventreporter.ReportParseConfigurationDoingEvent(ctx, stage)
+	resInfo, err := c.getResource(ctx, si, resourceName)
+	if err != nil {
+		return nil, stage, err
+	}
+	svcList, err := c.listServices(ctx, si)
+	if err != nil {
+		return nil, stage, err
+	}
+
+	// 单一stage的转换
+	cvt, err := conversion.NewConverter(
+		config.InstanceNamespace,
+		si.GatewayName,
+		stage,
+		&conversion.UpstreamConfig{
+			CertDetectTree:           c.radixTreeGetter.Get(si),
+			InternalDiscoveryPlugins: internalDiscoveryType,
+			NodeDiscoverer:           service.NewKubernetesNodeDiscoverer(c.kubeClient),
+			ExternalNodeDiscoverer:   service.NewRegistryExternalNodeDiscoverer(c.resourceRegistry),
+		},
+		&conversion.SSLConfig{
+			CertFetcher: cert.NewRegistryTLSCertFetcher(c.resourceRegistry),
+		},
+	)
+	if err != nil {
+		return nil, stage, err
+	}
+
+	conf, err := cvt.ConvertResource(resInfo, svcList)
+
+	metric.ReportResourceCountHelper(si.GatewayName, si.StageName, conf, ReportResourceConvertedMetric)
+
+	return conf, stage, err
+}
+
+// GetResourceCount 获取资源数量
+func (c *Commiter) GetResourceCount(
+	ctx context.Context,
+	stageInfo registry.StageInfo,
+) (int64, error) {
+	resourceList := &v1beta1.BkGatewayResourceList{}
+	count, err := c.resourceRegistry.Count(ctx, registry.ResourceKey{StageInfo: stageInfo}, resourceList)
+	if err != nil {
+		return 0, eris.Wrapf(err, "list bkgateway resource failed")
+	}
+	return count, nil
+}
+
 func (c *Commiter) getStage(ctx context.Context, stageInfo registry.StageInfo) (*v1beta1.BkGatewayStage, error) {
 	stageList := &v1beta1.BkGatewayStageList{}
 	if err := c.resourceRegistry.List(ctx, registry.ResourceKey{StageInfo: stageInfo}, stageList); err != nil {
@@ -269,6 +328,22 @@ func (c *Commiter) getStage(ctx context.Context, stageInfo registry.StageInfo) (
 		stageList.Items[0].Labels[config.BKAPIGatewayLabelKeyGatewayPublishID] = constant.NoNeedReportPublishID
 	}
 	return &stageList.Items[0], nil
+}
+
+func (c *Commiter) getResource(
+	ctx context.Context,
+	stageInfo registry.StageInfo,
+	resourceName string,
+) (*v1beta1.BkGatewayResource, error) {
+	resourceInfo := &v1beta1.BkGatewayResource{}
+	if err := c.resourceRegistry.Get(
+		ctx,
+		registry.ResourceKey{StageInfo: stageInfo, ResourceName: resourceName},
+		resourceInfo,
+	); err != nil {
+		return nil, eris.Wrapf(err, "get bkgateway resource failed")
+	}
+	return resourceInfo, nil
 }
 
 func (c *Commiter) listResources(

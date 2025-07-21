@@ -58,6 +58,15 @@ func (m *MockRegistry) List(ctx context.Context, key registry.ResourceKey, obj c
 	return ret0
 }
 
+// Count mocks base method.
+func (m *MockRegistry) Count(ctx context.Context, key registry.ResourceKey, obj client.ObjectList) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Count", ctx, key, obj)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
 // List indicates an expected call of List.
 func (mr *MockRegistryMockRecorder) List(ctx, key, obj interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()

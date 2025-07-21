@@ -79,6 +79,7 @@ type Registry interface {
 	Get(ctx context.Context, key ResourceKey, obj client.Object) error
 	ListStages(ctx context.Context) ([]StageInfo, error)
 	List(ctx context.Context, key ResourceKey, obj client.ObjectList) error
+	Count(ctx context.Context, key ResourceKey, obj client.ObjectList) (int64, error)
 
 	// Watch returns a channel for reading the resource metadata when it has been updated.
 	Watch(ctx context.Context) <-chan *ResourceMetadata

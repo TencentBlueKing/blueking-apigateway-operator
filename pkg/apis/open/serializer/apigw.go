@@ -38,17 +38,15 @@ type ResourceInfo struct {
 
 // ApigwListRequest apigw list api req
 type ApigwListRequest struct {
-	GatewayName string `json:"gateway_name,omitempty"`
-	StageName   string `json:"stage_name,omitempty"`
-	Resource    ResourceInfo
+	GatewayName string       `json:"gateway_name,omitempty"`
+	StageName   string       `json:"stage_name,omitempty"`
+	Resource    ResourceInfo `json:"resource,omitempty"`
 }
 
 // ApigwListResourceCountResponse apigw 资源数量
 type ApigwListResourceCountResponse struct {
-	Count int `json:"count"`
+	Count int64 `json:"count"`
 }
 
-// ApigwListCurrentVersionPublishIDResponse apigw 环境发布版本
-type ApigwListCurrentVersionPublishIDResponse struct {
-	PublishID int `json:"publish_id"`
-}
+// ApigwListCurrentVersionInfoResponse apigw 环境发布版本信息
+type ApigwListCurrentVersionInfoResponse map[string]interface{}

@@ -140,7 +140,7 @@ var _ = Describe("Operator Integration", func() {
 					StageName:   testStage,
 				})
 				Expect(err).NotTo(HaveOccurred())
-				Expect(apigwGatewayResourceCount.Count).To(Equal(testDataResourcesAmount))
+				Expect(apigwGatewayResourceCount.Count).To(Equal(int64(testDataRoutesAmount)))
 
 				// assert apigw current-version publish_id
 				apigwGatewayStageVersion, err := resourceCli.ApigwStageCurrentVersion(&client.ApigwListRequest{
@@ -148,7 +148,11 @@ var _ = Describe("Operator Integration", func() {
 					StageName:   testStage,
 				})
 				Expect(err).NotTo(HaveOccurred())
-				Expect(apigwGatewayStageVersion.PublishID).To(Equal(publishID))
+				res := client.ApigwListCurrentVersionInfoResponse{
+					"publish_id": float64(publishID),
+					"start_time": "2023-11-07 15:11:09+0800",
+				}
+				Expect(apigwGatewayStageVersion).To(Equal(res))
 			})
 		})
 	})

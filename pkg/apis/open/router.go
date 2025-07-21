@@ -40,7 +40,7 @@ func Register(
 	// register resource api
 	resourceApi := handler.NewResourceApi(leaderElector, registry, committer, apiSixConfStore)
 	r.GET("/leader/", resourceApi.GetLeader)
-	r.POST("/resources/apigw/", resourceApi.ApigwList)
-	r.POST("/resources/apigw/count/", resourceApi.ApigwStageResourceCount)
-	r.POST("/resources/apigw/current-version/", resourceApi.ApigwStageCurrentVersion)
+	r.POST("/apigw/resources/", resourceApi.ApigwList)
+	r.POST("/apigw/resources/count/", resourceApi.ApigwStageResourceCount)
+	r.POST("/apigw/resources/current-version/", resourceApi.ApigwStageCurrentVersion)
 }

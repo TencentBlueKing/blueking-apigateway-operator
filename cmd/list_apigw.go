@@ -109,15 +109,14 @@ func (l *listApigwCommand) RunE(cmd *cobra.Command, args []string) error {
 		fmt.Printf("count: %d\n", resp.Count)
 		return nil
 	}
-	// 查询指定环境下的发布版本
+	// 查询指定环境下的发布版本信息
 	if currentVersion {
 		resp, err := cli.ApigwStageCurrentVersion(apigwListRequest)
 		if err != nil {
 			logger.Error(err, "Apigw current-version request failed")
 			return err
 		}
-		fmt.Printf("current-version publish_id: %d", resp.PublishID)
-		return nil
+		return printJson(resp)
 	}
 	// 查询指定环境下的资源列表
 	resp, err := cli.ApigwList(apigwListRequest)

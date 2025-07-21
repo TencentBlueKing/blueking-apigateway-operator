@@ -36,9 +36,9 @@ import (
 
 const (
 	getLeaderURL                   = "/v1/open/leader/"
-	ResourceApigwURL               = "/v1/open/resources/apigw/"
-	ResourceApigwCountURL          = "/v1/open/resources/apigw/count/"
-	ResourceApigwCurrentVersionURL = "/v1/open/resources/apigw/current-version/"
+	ResourceApigwURL               = "/v1/open/apigw/resources/"
+	ResourceApigwCountURL          = "/v1/open/apigw/resources/count/"
+	ResourceApigwCurrentVersionURL = "/v1/open/apigw/resources/current-version/"
 )
 
 // ResourceClient is a client for the resource API.
@@ -134,12 +134,12 @@ func (r *ResourceClient) ApigwStageResourceCount(req *ApigwListRequest) (ApigwLi
 // ApigwStageCurrentVersion apigw 环境发布版本
 func (r *ResourceClient) ApigwStageCurrentVersion(
 	req *ApigwListRequest,
-) (ApigwListCurrentVersionPublishIDResponse, error) {
+) (ApigwListCurrentVersionInfoResponse, error) {
 	request := r.client.Request()
 	request.Path(ResourceApigwCurrentVersionURL)
 	request.Method(http.MethodPost)
 	request.Use(body.JSON(req))
-	var res ApigwListCurrentVersionPublishIDResponse
+	var res ApigwListCurrentVersionInfoResponse
 	return res, r.doHttpRequest(request, sendAndDecodeResp(&res))
 }
 

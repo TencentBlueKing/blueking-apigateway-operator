@@ -82,12 +82,12 @@ func (r *ResourceHandler) ApigwStageResourceCount(c *gin.Context) {
 		utils.BadRequestErrorJSONResponse(c, utils.ValidationErrorMessage(err))
 		return
 	}
-	apiSixResources, err := biz.GetApigwResourcesByStage(c, r.committer, req.GatewayName, req.StageName, true)
+	count, err := biz.GetApigwResourceCount(c, r.committer, req.GatewayName, req.StageName)
 	if err != nil {
 		utils.BaseErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("apigw count:%+v", err.Error()), http.StatusOK)
 		return
 	}
-	output := serializer.ApigwListResourceCountResponse{Count: len(apiSixResources.Routes)}
+	output := serializer.ApigwListResourceCountResponse{Count: count}
 	utils.SuccessJSONResponse(c, output)
 }
 
@@ -98,13 +98,11 @@ func (r *ResourceHandler) ApigwStageCurrentVersion(c *gin.Context) {
 		utils.BadRequestErrorJSONResponse(c, utils.ValidationErrorMessage(err))
 		return
 	}
-	publishID, err := biz.GetApigwStageCurrentVersion(c, r.committer, req.GatewayName, req.StageName)
+	versionInfo, err := biz.GetApigwStageCurrentVersionInfo(c, r.committer, req.GatewayName, req.StageName)
 	if err != nil {
 		utils.BaseErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("apigw version:%+v", err.Error()), http.StatusOK)
 		return
 	}
-	output := serializer.ApigwListCurrentVersionPublishIDResponse{
-		PublishID: publishID,
-	}
+	output := serializer.ApigwListCurrentVersionInfoResponse(versionInfo)
 	utils.SuccessJSONResponse(c, output)
 }

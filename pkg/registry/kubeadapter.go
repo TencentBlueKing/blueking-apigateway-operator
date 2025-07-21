@@ -25,6 +25,8 @@ import (
 	"reflect"
 	"sync"
 
+	"github.com/rotisserie/eris"
+
 	"github.com/google/uuid"
 	"github.com/smallnest/chanx"
 	"go.uber.org/zap"
@@ -121,6 +123,14 @@ func (r *K8SRegistryAdapter) List(ctx context.Context, key ResourceKey, obj clie
 		labelSelector = labelSelector.Add(*sr)
 	}
 	return r.kubeClient.List(ctx, obj, &client.ListOptions{Namespace: r.namespace, LabelSelector: labelSelector})
+}
+
+// Count ...
+func (r *K8SRegistryAdapter) Count(ctx context.Context, key ResourceKey, obj client.ObjectList) (int64, error) {
+	if err := r.List(ctx, key, obj); err != nil {
+		return 0, eris.Wrapf(err, "list bkgateway resource failed")
+	}
+	return int64(len(obj.(*v1beta1.BkGatewayResourceList).Items)), nil
 }
 
 // Watch creates and returns a channel that produces update events of resources.

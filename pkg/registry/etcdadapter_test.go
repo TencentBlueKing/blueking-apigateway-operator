@@ -647,6 +647,78 @@ var _ = Describe("Etcdadapter Operations", Ordered, func() {
 		})
 	})
 
+	Context("Count", Ordered, func() {
+		BeforeAll(func() {
+			// List 空
+			kv.On("Get", "/test/gateway/empty2/v1beta1/BkGatewayResource/").Return(&clientv3.GetResponse{
+				Count: 0,
+				Kvs:   []*mvccpb.KeyValue{},
+			}, nil)
+
+			res := v1beta1.BkGatewayResource{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						config.BKAPIGatewayLabelKeyGatewayName:  "gateway",
+						config.BKAPIGatewayLabelKeyGatewayStage: "stage1",
+					},
+				},
+			}
+			res.Name = "resource"
+			res.Spec.Name = "test_resource"
+			by, err := yaml.Marshal(res)
+			Expect(err).ShouldNot(HaveOccurred())
+			kv.On("Get", "/test/gateway/one/v1beta1/BkGatewayResource/").Return(&clientv3.GetResponse{
+				Count: 1,
+				Kvs: []*mvccpb.KeyValue{
+					{
+						Key:   []byte("/test/gateway/one/v1beta1/BkGatewayResource/resource"),
+						Value: by,
+					},
+				},
+			}, nil)
+
+			res2 := v1beta1.BkGatewayResource{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						config.BKAPIGatewayLabelKeyGatewayName:  "gateway",
+						config.BKAPIGatewayLabelKeyGatewayStage: "stage1",
+					},
+				},
+			}
+			res2.Name = "resource2"
+			res2.Spec.Name = "test_resource2"
+			by, err = yaml.Marshal(res)
+			Expect(err).ShouldNot(HaveOccurred())
+			by2, err := yaml.Marshal(res2)
+			Expect(err).ShouldNot(HaveOccurred())
+			kv.On("Get", "/test/gateway/stage1/v1beta1/BkGatewayResource/").Return(&clientv3.GetResponse{
+				Count: 2,
+				Kvs: []*mvccpb.KeyValue{
+					{
+						Key:   []byte("/test/gateway/stage1/v1beta1/BkGatewayResource/resource"),
+						Value: by,
+					},
+					{
+						Key:   []byte("/test/gateway/stage1/v1beta1/BkGatewayResource/resource2"),
+						Value: by2,
+					},
+				},
+			}, nil)
+		})
+
+		It("Will Count BkGatewayResources with multiple items", func() {
+			list := &v1beta1.BkGatewayResourceList{}
+			count, err := testRegistry.Count(context.Background(), ResourceKey{
+				StageInfo: StageInfo{
+					GatewayName: "gateway",
+					StageName:   "stage1",
+				},
+			}, list)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(count).Should(Equal(int64(2)))
+		})
+	})
+
 	Context("ListStage", Ordered, func() {
 		BeforeAll(func() {
 			kv.On("Get", "/test/").Return(
