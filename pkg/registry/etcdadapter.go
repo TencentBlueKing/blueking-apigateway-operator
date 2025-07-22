@@ -239,6 +239,29 @@ func (r *EtcdRegistryAdapter) List(
 	return nil
 }
 
+// Count 查询 apigw 资源数量
+func (r *EtcdRegistryAdapter) Count(
+	ctx context.Context,
+	key ResourceKey,
+	obj client.ObjectList,
+) (int64, error) {
+	if key.GatewayName == "" || key.StageName == "" {
+		return 0, eris.Errorf("Gateway and stage must be specified when list etcd resources")
+	}
+
+	gvk, ok := v1beta1.GetGVK(obj)
+	if !ok {
+		return 0, eris.Errorf("Get gvk from object failed, key: %+v", key)
+	}
+
+	etcdKey := fmt.Sprintf("%s/%s/%s/%s/%s/", r.keyPrefix, key.GatewayName, key.StageName, gvk.Version, gvk.Kind)
+	resp, err := r.etcdClient.Get(ctx, etcdKey, clientv3.WithPrefix(), clientv3.WithCountOnly())
+	if err != nil {
+		return 0, err
+	}
+	return resp.Count, nil
+}
+
 // Watch ...
 func (r *EtcdRegistryAdapter) Watch(ctx context.Context) <-chan *ResourceMetadata {
 	watchCtx, cancel := context.WithCancel(ctx)

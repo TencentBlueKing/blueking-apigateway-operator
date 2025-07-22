@@ -16,42 +16,35 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package server ...
-package server
+// Package open provides the API routes for the BlueKing API Gateway Operator.
+package open
 
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apis/open"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apis/open/handler"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
-// NewRouter do the router initialization
-func NewRouter(
+// Register registers the API routes
+func Register(
+	r *gin.RouterGroup,
 	leaderElector leaderelection.LeaderElector,
 	registry registry.Registry,
 	committer *commiter.Commiter,
 	apiSixConfStore synchronizer.ApisixConfigStore,
-	router *gin.Engine,
-	conf *config.Config,
-) *gin.Engine {
-	router.GET("/ping", func(c *gin.Context) {
-		utils.SuccessJSONResponse(c, "ok")
-	})
-	router.GET("/healthz", func(c *gin.Context) {
-		utils.SuccessJSONResponse(c, "ok")
-	})
-	operatorRouter := router.Group("/v1/open")
-	operatorRouter.Use(gin.BasicAuth(gin.Accounts{
-		constant.ApiAuthAccount: conf.HttpServer.AuthPassword,
-	}))
-	operatorRouter.Use(gin.Recovery())
-	open.Register(operatorRouter, leaderElector, registry, committer, apiSixConfStore)
-	return router
+) {
+	// register resource api
+	resourceApi := handler.NewResourceApi(leaderElector, registry, committer, apiSixConfStore)
+	r.GET("/leader/", resourceApi.GetLeader)
+	r.POST("/apigw/resources/", resourceApi.ApigwList)
+	r.POST("/apigw/resources/count/", resourceApi.ApigwStageResourceCount)
+	r.POST("/apigw/resources/current-version/", resourceApi.ApigwStageCurrentVersion)
+
+	r.POST("/apisix/resources/", resourceApi.ApisixList)
+	r.POST("/apisix/resources/count/", resourceApi.ApisixStageResourceCount)
+	r.POST("/apisix/resources/current-version/", resourceApi.ApisixStageCurrentVersion)
 }

@@ -256,4 +256,50 @@ var _ = Describe("Test KubeAdapter", Ordered, func() {
 			}
 		})
 	})
+
+	Context("Count", Ordered, func() {
+		var client client.Client
+
+		BeforeEach(func() {
+			// Set the client with two initial resource objects
+			client = builder.WithObjects(
+				&v1beta1.BkGatewayResource{
+					ObjectMeta: v1.ObjectMeta{
+						Namespace: namespace,
+						Name:      "t1",
+						Labels: map[string]string{
+							config.BKAPIGatewayLabelKeyGatewayName:  "default",
+							config.BKAPIGatewayLabelKeyGatewayStage: "prod",
+							config.BKAPIGatewayLabelKeyResourceName: "t1",
+						},
+					},
+				},
+				&v1beta1.BkGatewayResource{
+					ObjectMeta: v1.ObjectMeta{
+						Namespace: namespace,
+						Name:      "t2",
+						Labels: map[string]string{
+							config.BKAPIGatewayLabelKeyGatewayName:  "default",
+							config.BKAPIGatewayLabelKeyGatewayStage: "prod",
+							config.BKAPIGatewayLabelKeyResourceName: "t2",
+						},
+					},
+				},
+			).Build()
+			regAdapter.kubeClient = client
+		})
+
+		It("resource count", func() {
+			objList := &v1beta1.BkGatewayResourceList{}
+			count, err := regAdapter.Count(
+				context.Background(),
+				ResourceKey{StageInfo: StageInfo{GatewayName: "default", StageName: "prod"}},
+				objList,
+			)
+
+			Expect(err).Should(BeNil())
+			Expect(count).To(Equal(int64(2)))
+		})
+	})
+
 })

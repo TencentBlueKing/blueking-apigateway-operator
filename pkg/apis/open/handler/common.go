@@ -16,31 +16,35 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package api provides the API routes for the BlueKing API Gateway Operator.
-package api
+// Package handler  ...
+package handler
 
 import (
-	"github.com/gin-gonic/gin"
-
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/api/handler"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 )
 
-// Register registers the API routes
-func Register(
-	r *gin.RouterGroup,
+// ResourceHandler resource api handler
+type ResourceHandler struct {
+	LeaderElector   leaderelection.LeaderElector
+	registry        registry.Registry
+	committer       *commiter.Commiter
+	apisixConfStore synchronizer.ApisixConfigStore
+}
+
+// NewResourceApi constructor of resource handler
+func NewResourceApi(
 	leaderElector leaderelection.LeaderElector,
 	registry registry.Registry,
 	committer *commiter.Commiter,
 	apiSixConfStore synchronizer.ApisixConfigStore,
-) {
-	// register resource api
-	resourceApi := handler.NewResourceApi(leaderElector, registry, committer, apiSixConfStore)
-	r.GET("/leader", resourceApi.GetLeader)
-	r.POST("/resources/diff", resourceApi.Diff)
-	r.POST("/resources/list", resourceApi.List)
-	r.POST("/resources/sync", resourceApi.Sync)
+) *ResourceHandler {
+	return &ResourceHandler{
+		LeaderElector:   leaderElector,
+		registry:        registry,
+		committer:       committer,
+		apisixConfStore: apiSixConfStore,
+	}
 }

@@ -51,6 +51,9 @@ const (
 	envPodIP        = "BK_GATEWAY_POD_IP"
 )
 
+// ReleaseVersionResourceID 发布版本资源 ID
+const ReleaseVersionResourceID = -1
+
 // InstanceName ...
 var (
 	InstanceName      string

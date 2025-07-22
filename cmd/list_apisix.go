@@ -22,28 +22,26 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/rotisserie/eris"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/api/handler"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
 )
 
-type listCommand struct {
+type listApisixCommand struct {
 	cmd *cobra.Command
 }
 
-var listCmd = &listCommand{}
+var listApisixCmd = &listApisixCommand{}
 
 func init() {
-	listCmd.Init()
+	listApisixCmd.Init()
 }
 
 // Init ...
-func (l *listCommand) Init() {
+func (l *listApisixCommand) Init() {
 	cmd := &cobra.Command{
-		Use:          "list",
+		Use:          "list-apisix",
 		Short:        "list resources in apisix",
 		SilenceUsage: true,
 		PreRun:       preRun,
@@ -51,18 +49,15 @@ func (l *listCommand) Init() {
 	}
 
 	cmd.Flags()
-	cmd.Flags().String("gateway", "", "gateway name for list command")
-	cmd.Flags().String("stage", "", "stage name for list command")
-	cmd.Flags().Int64("resource_id", -1, "resource ID for list command, default(-1) for all resources in stage")
-	cmd.Flags().
-		String(
-			"resource_name",
-			"",
-			"resource name for list command, empty for all resources in stage. Can not be set with resource_id simultaneously",
-		)
+	cmd.Flags().String("gateway_name", "", "gateway name for list apisix command")
+	cmd.Flags().String("stage_name", "", "stage name for list apisix command")
+	cmd.Flags().Int64("resource_id", 0, "resource ID for list apisix command")
+	cmd.Flags().String("resource_name", "", "resource name for list apisix command")
 	cmd.Flags().StringP("write-out", "w", "json", "response write out format (simple, json, yaml)")
-	cmd.Flags().Bool("all", false, "list all gateway resources")
-	cmd.MarkFlagsRequiredTogether("gateway", "stage")
+	cmd.Flags().Bool("count", false, "gateway resources count")
+	cmd.Flags().Bool("current-version", false, "gateway stage version")
+	cmd.MarkFlagRequired("gateway_name")
+	cmd.MarkFlagRequired("stage_name")
 	cmd.MarkFlagsMutuallyExclusive("resource_id", "resource_name")
 
 	cmd.Flags().StringVarP(&cfgFile, "config", "c", "", "config file (default is config.yml;required)")
@@ -76,7 +71,7 @@ func (l *listCommand) Init() {
 }
 
 // RunE ...
-func (l *listCommand) RunE(cmd *cobra.Command, args []string) error {
+func (l *listApisixCommand) RunE(cmd *cobra.Command, args []string) error {
 	initClient()
 
 	cli, err := client.GetLeaderResourceClient(globalConfig.HttpServer.AuthPassword)
@@ -88,33 +83,45 @@ func (l *listCommand) RunE(cmd *cobra.Command, args []string) error {
 		logger.Error(err, "GetLeaderResourcesClient failed")
 		return err
 	}
-	req := &handler.ListReq{}
-	req.Gateway, _ = cmd.Flags().GetString("gateway")
-	req.Stage, _ = cmd.Flags().GetString("stage")
-	resName, _ := cmd.Flags().GetString("resource_name")
-	resID, _ := cmd.Flags().GetInt64("resource_id")
 
-	req.Resource = &handler.ResourceInfo{
-		ResourceId:   resID,
-		ResourceName: resName,
-	}
-	req.All, _ = cmd.Flags().GetBool("all")
+	gatewayName, _ := cmd.Flags().GetString("gateway_name")
+	stageName, _ := cmd.Flags().GetString("stage_name")
+	resourceName, _ := cmd.Flags().GetString("resource_name")
+	resourceID, _ := cmd.Flags().GetInt64("resource_id")
+	count, _ := cmd.Flags().GetBool("count")
+	currentVersion, _ := cmd.Flags().GetBool("current-version")
 
-	if err := l.validateRequest(req); err != nil {
-		return err
-	}
-	listReq := &client.ListReq{
-		Gateway: req.Gateway,
-		Stage:   req.Stage,
+	apisixListRequest := &client.ApisixListRequest{
+		GatewayName: gatewayName,
+		StageName:   stageName,
 		Resource: &client.ResourceInfo{
-			ResourceId:   req.Resource.ResourceId,
-			ResourceName: req.Resource.ResourceName,
+			ID:   resourceID,
+			Name: resourceName,
 		},
-		All: req.All,
 	}
-	resp, err := cli.List(listReq)
+	// 查询指定环境下的资源数量
+	if count {
+		resp, err := cli.ApisixStageResourceCount(apisixListRequest)
+		if err != nil {
+			logger.Error(err, "apisix count request failed")
+			return err
+		}
+		fmt.Printf("count: %d\n", resp.Count)
+		return nil
+	}
+	// 查询指定环境下的发布版本信息
+	if currentVersion {
+		resp, err := cli.ApisixStageCurrentVersion(apisixListRequest)
+		if err != nil {
+			logger.Error(err, "apisix current-version request failed")
+			return err
+		}
+		return printJson(resp)
+	}
+	// 查询指定环境下的资源列表
+	resp, err := cli.ApisixList(apisixListRequest)
 	if err != nil {
-		logger.Error(err, "List request failed")
+		logger.Error(err, "List apisix request failed")
 		return err
 	}
 	format, _ := cmd.Flags().GetString("write-out")
@@ -126,14 +133,14 @@ func (l *listCommand) RunE(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (l *listCommand) formatOutput(listInfo client.ListInfo, format string) error {
+func (l *listApisixCommand) formatOutput(apisixListInfo client.ApisixListInfo, format string) error {
 	switch format {
 	case "json":
-		return printJson(listInfo)
+		return printJson(apisixListInfo)
 	case "yaml":
-		return printYaml(listInfo)
+		return printYaml(apisixListInfo)
 	case "simple":
-		for stage, listResources := range listInfo {
+		for stage, listResources := range apisixListInfo {
 			fmt.Printf("Stage: %s\n", stage)
 			l.printResource("Routes", listResources.Routes)
 			l.printResource("Services", listResources.Services)
@@ -144,7 +151,7 @@ func (l *listCommand) formatOutput(listInfo client.ListInfo, format string) erro
 	return nil
 }
 
-func (l *listCommand) printResource(typeName string, fields map[string]interface{}) {
+func (l *listApisixCommand) printResource(typeName string, fields map[string]interface{}) {
 	fmt.Printf("\t%s:\n", typeName)
 	if fields == nil {
 		return
@@ -152,11 +159,4 @@ func (l *listCommand) printResource(typeName string, fields map[string]interface
 	for id := range fields {
 		fmt.Printf("\t\t%s\n", id)
 	}
-}
-
-func (l *listCommand) validateRequest(req *handler.ListReq) error {
-	if len(req.Gateway) == 0 && !req.All {
-		return eris.New("--gateway --stage, or --all should be set")
-	}
-	return nil
 }

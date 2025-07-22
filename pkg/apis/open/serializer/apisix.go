@@ -16,49 +16,17 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package client ...
-package client
-
-// StageScopedApisixResources apisix resource
-type StageScopedApisixResources struct {
-	Routes         map[string]interface{} `json:"routes,omitempty"`
-	Services       map[string]interface{} `json:"services,omitempty"`
-	PluginMetadata map[string]interface{} `json:"plugin_metadata,omitempty"`
-	Ssl            map[string]interface{} `json:"ssl,omitempty"`
-}
-
-// ApigwListInfo apigw 资源列表
-type ApigwListInfo map[string]*StageScopedApisixResources
-
-// ResourceInfo resource
-type ResourceInfo struct {
-	ID   int64  `json:"resource_id"`
-	Name string `json:"resource_name"`
-}
-
-// ApigwListRequest apigw list api req
-type ApigwListRequest struct {
-	GatewayName string        `json:"gateway_name,omitempty"`
-	StageName   string        `json:"stage_name,omitempty"`
-	Resource    *ResourceInfo `json:"resource,omitempty"`
-}
-
-// ApigwListResourceCountResponse apigw 资源数量
-type ApigwListResourceCountResponse struct {
-	Count int64 `json:"count"`
-}
-
-// ApigwListCurrentVersionInfoResponse apigw 环境发布版本信息
-type ApigwListCurrentVersionInfoResponse map[string]interface{}
+// Package serializer ...
+package serializer
 
 // ApisixListInfo apisix 资源列表
 type ApisixListInfo map[string]*StageScopedApisixResources
 
 // ApisixListRequest apisix list api req
 type ApisixListRequest struct {
-	GatewayName string        `json:"gateway_name,omitempty"`
-	StageName   string        `json:"stage_name,omitempty"`
-	Resource    *ResourceInfo `json:"resource,omitempty"`
+	GatewayName string       `json:"gateway_name,omitempty"`
+	StageName   string       `json:"stage_name,omitempty"`
+	Resource    ResourceInfo `json:"resource,omitempty"`
 }
 
 // ApisixListResourceCountResponse apisix 资源数量
