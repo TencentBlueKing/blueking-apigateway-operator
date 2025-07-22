@@ -21,41 +21,14 @@ package biz
 
 import (
 	"context"
-	"crypto/md5"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"fmt"
-	"strings"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 )
-
-func toLowerDashCase(s string) string {
-	return strings.ToLower(strings.ReplaceAll(s, "_", "-"))
-}
-
-// genResourceIDKey 生成资源 ID 查询的 key
-func genResourceIDKey(gatewayName, stageName string, resourceID int64) string {
-	return toLowerDashCase(fmt.Sprintf("%s.%s.%d", gatewayName, stageName, resourceID))
-}
-
-// genResourceNameKey 生成资源名称查询的 key
-func genResourceNameKey(gatewayName, stageName string, resourceName string) string {
-	key := toLowerDashCase(fmt.Sprintf("%s-%s-%s", gatewayName, stageName, resourceName))
-
-	// key 长度大于 64 需要转换
-	if len(key) > 64 {
-		hash := md5.Sum([]byte(key[55:]))
-		hashStr := hex.EncodeToString(hash[:])[:8]
-
-		key = fmt.Sprintf("%s.%s", key[:55], hashStr)
-	}
-	return key
-}
 
 // GetApigwResourcesByStage 根据网关查询资源
 func GetApigwResourcesByStage(

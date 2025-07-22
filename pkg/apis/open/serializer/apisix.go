@@ -19,26 +19,20 @@
 // Package serializer ...
 package serializer
 
-// ApigwListInfo apigw 资源列表
-type ApigwListInfo map[string]*StageScopedApisixResources
+// ApisixListInfo apisix 资源列表
+type ApisixListInfo map[string]*StageScopedApisixResources
 
-// ResourceInfo resource
-type ResourceInfo struct {
-	ID   int64  `json:"resource_id"`
-	Name string `json:"resource_name"`
+// ApisixListRequest apisix list api req
+type ApisixListRequest struct {
+	GatewayName string        `json:"gateway_name,omitempty"`
+	StageName   string        `json:"stage_name,omitempty"`
+	Resource    *ResourceInfo `json:"resource,omitempty"`
 }
 
-// ApigwListRequest apigw list api req
-type ApigwListRequest struct {
-	GatewayName string       `json:"gateway_name,omitempty"`
-	StageName   string       `json:"stage_name,omitempty"`
-	Resource    ResourceInfo `json:"resource,omitempty"`
-}
-
-// ApigwListResourceCountResponse apigw 资源数量
-type ApigwListResourceCountResponse struct {
+// ApisixListResourceCountResponse apisix 资源数量
+type ApisixListResourceCountResponse struct {
 	Count int64 `json:"count"`
 }
 
-// ApigwListCurrentVersionInfoResponse apigw 环境发布版本信息
-type ApigwListCurrentVersionInfoResponse map[string]interface{}
+// ApisixListCurrentVersionInfoResponse apisix 环境发布版本信息
+type ApisixListCurrentVersionInfoResponse map[string]interface{}

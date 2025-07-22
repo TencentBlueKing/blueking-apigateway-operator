@@ -16,29 +16,35 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package serializer ...
-package serializer
+// Package biz  ...
+package biz
 
-// ApigwListInfo apigw 资源列表
-type ApigwListInfo map[string]*StageScopedApisixResources
+import (
+	"crypto/md5"
+	"encoding/hex"
+	"fmt"
+	"strings"
+)
 
-// ResourceInfo resource
-type ResourceInfo struct {
-	ID   int64  `json:"resource_id"`
-	Name string `json:"resource_name"`
+func toLowerDashCase(s string) string {
+	return strings.ToLower(strings.ReplaceAll(s, "_", "-"))
 }
 
-// ApigwListRequest apigw list api req
-type ApigwListRequest struct {
-	GatewayName string       `json:"gateway_name,omitempty"`
-	StageName   string       `json:"stage_name,omitempty"`
-	Resource    ResourceInfo `json:"resource,omitempty"`
+// genResourceIDKey 生成资源 ID 查询的 key
+func genResourceIDKey(gatewayName, stageName string, resourceID int64) string {
+	return toLowerDashCase(fmt.Sprintf("%s.%s.%d", gatewayName, stageName, resourceID))
 }
 
-// ApigwListResourceCountResponse apigw 资源数量
-type ApigwListResourceCountResponse struct {
-	Count int64 `json:"count"`
-}
+// genResourceNameKey 生成资源名称查询的 key
+func genResourceNameKey(gatewayName, stageName string, resourceName string) string {
+	key := toLowerDashCase(fmt.Sprintf("%s-%s-%s", gatewayName, stageName, resourceName))
 
-// ApigwListCurrentVersionInfoResponse apigw 环境发布版本信息
-type ApigwListCurrentVersionInfoResponse map[string]interface{}
+	// key 长度大于 64 需要转换
+	if len(key) > 64 {
+		hash := md5.Sum([]byte(key[55:]))
+		hashStr := hex.EncodeToString(hash[:])[:8]
+
+		key = fmt.Sprintf("%s.%s", key[:55], hashStr)
+	}
+	return key
+}

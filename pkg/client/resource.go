@@ -35,10 +35,13 @@ import (
 )
 
 const (
-	getLeaderURL                   = "/v1/open/leader/"
-	ResourceApigwURL               = "/v1/open/apigw/resources/"
-	ResourceApigwCountURL          = "/v1/open/apigw/resources/count/"
-	ResourceApigwCurrentVersionURL = "/v1/open/apigw/resources/current-version/"
+	getLeaderURL                    = "/v1/open/leader/"
+	ResourceApigwURL                = "/v1/open/apigw/resources/"
+	ResourceApigwCountURL           = "/v1/open/apigw/resources/count/"
+	ResourceApigwCurrentVersionURL  = "/v1/open/apigw/resources/current-version/"
+	ResourceApisixURL               = "/v1/open/apisix/resources/"
+	ResourceApisixCountURL          = "/v1/open/apisix/resources/count/"
+	ResourceApisixCurrentVersionURL = "/v1/open/apisix/resources/current-version/"
 )
 
 // ResourceClient is a client for the resource API.
@@ -140,6 +143,38 @@ func (r *ResourceClient) ApigwStageCurrentVersion(
 	request.Method(http.MethodPost)
 	request.Use(body.JSON(req))
 	var res ApigwListCurrentVersionInfoResponse
+	return res, r.doHttpRequest(request, sendAndDecodeResp(&res))
+}
+
+// ApisixList apisix 资源列表
+func (r *ResourceClient) ApisixList(req *ApisixListRequest) (ApisixListInfo, error) {
+	request := r.client.Request()
+	request.Path(ResourceApisixURL)
+	request.Method(http.MethodPost)
+	request.Use(body.JSON(req))
+	var res ApisixListInfo
+	return res, r.doHttpRequest(request, sendAndDecodeResp(&res))
+}
+
+// ApisixStageResourceCount apisix 资源数量
+func (r *ResourceClient) ApisixStageResourceCount(req *ApisixListRequest) (ApisixListResourceCountResponse, error) {
+	request := r.client.Request()
+	request.Path(ResourceApisixCountURL)
+	request.Method(http.MethodPost)
+	request.Use(body.JSON(req))
+	var res ApisixListResourceCountResponse
+	return res, r.doHttpRequest(request, sendAndDecodeResp(&res))
+}
+
+// ApisixStageCurrentVersion apisix 环境发布版本
+func (r *ResourceClient) ApisixStageCurrentVersion(
+	req *ApisixListRequest,
+) (ApisixListCurrentVersionInfoResponse, error) {
+	request := r.client.Request()
+	request.Path(ResourceApisixCurrentVersionURL)
+	request.Method(http.MethodPost)
+	request.Use(body.JSON(req))
+	var res ApisixListCurrentVersionInfoResponse
 	return res, r.doHttpRequest(request, sendAndDecodeResp(&res))
 }
 

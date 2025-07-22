@@ -50,3 +50,21 @@ type ApigwListResourceCountResponse struct {
 
 // ApigwListCurrentVersionInfoResponse apigw 环境发布版本信息
 type ApigwListCurrentVersionInfoResponse map[string]interface{}
+
+// ApisixListInfo apisix 资源列表
+type ApisixListInfo map[string]*StageScopedApisixResources
+
+// ApisixListRequest apisix list api req
+type ApisixListRequest struct {
+	GatewayName string        `json:"gateway_name,omitempty"`
+	StageName   string        `json:"stage_name,omitempty"`
+	Resource    *ResourceInfo `json:"resource,omitempty"`
+}
+
+// ApisixListResourceCountResponse apisix 资源数量
+type ApisixListResourceCountResponse struct {
+	Count int64 `json:"count"`
+}
+
+// ApisixListCurrentVersionInfoResponse apisix 环境发布版本信息
+type ApisixListCurrentVersionInfoResponse map[string]interface{}

@@ -28,31 +28,31 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
 )
 
-type listApigwCommand struct {
+type listApisixCommand struct {
 	cmd *cobra.Command
 }
 
-var listApigwCmd = &listApigwCommand{}
+var listApisixCmd = &listApisixCommand{}
 
 func init() {
-	listApigwCmd.Init()
+	listApisixCmd.Init()
 }
 
 // Init ...
-func (l *listApigwCommand) Init() {
+func (l *listApisixCommand) Init() {
 	cmd := &cobra.Command{
-		Use:          "list-apigw",
-		Short:        "list resources in apigw",
+		Use:          "list-apisix",
+		Short:        "list resources in apisix",
 		SilenceUsage: true,
 		PreRun:       preRun,
 		RunE:         l.RunE,
 	}
 
 	cmd.Flags()
-	cmd.Flags().String("gateway_name", "", "gateway name for list apigw command")
-	cmd.Flags().String("stage_name", "", "stage name for list apigw command")
-	cmd.Flags().Int64("resource_id", 0, "resource ID for list apigw command")
-	cmd.Flags().String("resource_name", "", "resource name for list apigw command")
+	cmd.Flags().String("gateway_name", "", "gateway name for list apisix command")
+	cmd.Flags().String("stage_name", "", "stage name for list apisix command")
+	cmd.Flags().Int64("resource_id", 0, "resource ID for list apisix command")
+	cmd.Flags().String("resource_name", "", "resource name for list apisix command")
 	cmd.Flags().StringP("write-out", "w", "json", "response write out format (simple, json, yaml)")
 	cmd.Flags().Bool("count", false, "gateway resources count")
 	cmd.Flags().Bool("current-version", false, "gateway stage version")
@@ -71,7 +71,7 @@ func (l *listApigwCommand) Init() {
 }
 
 // RunE ...
-func (l *listApigwCommand) RunE(cmd *cobra.Command, args []string) error {
+func (l *listApisixCommand) RunE(cmd *cobra.Command, args []string) error {
 	initClient()
 
 	cli, err := client.GetLeaderResourceClient(globalConfig.HttpServer.AuthPassword)
@@ -91,7 +91,7 @@ func (l *listApigwCommand) RunE(cmd *cobra.Command, args []string) error {
 	count, _ := cmd.Flags().GetBool("count")
 	currentVersion, _ := cmd.Flags().GetBool("current-version")
 
-	apigwListRequest := &client.ApigwListRequest{
+	apisixListRequest := &client.ApisixListRequest{
 		GatewayName: gatewayName,
 		StageName:   stageName,
 		Resource: &client.ResourceInfo{
@@ -101,9 +101,9 @@ func (l *listApigwCommand) RunE(cmd *cobra.Command, args []string) error {
 	}
 	// 查询指定环境下的资源数量
 	if count {
-		resp, err := cli.ApigwStageResourceCount(apigwListRequest)
+		resp, err := cli.ApisixStageResourceCount(apisixListRequest)
 		if err != nil {
-			logger.Error(err, "Apigw count request failed")
+			logger.Error(err, "apisix count request failed")
 			return err
 		}
 		fmt.Printf("count: %d\n", resp.Count)
@@ -111,17 +111,17 @@ func (l *listApigwCommand) RunE(cmd *cobra.Command, args []string) error {
 	}
 	// 查询指定环境下的发布版本信息
 	if currentVersion {
-		resp, err := cli.ApigwStageCurrentVersion(apigwListRequest)
+		resp, err := cli.ApisixStageCurrentVersion(apisixListRequest)
 		if err != nil {
-			logger.Error(err, "Apigw current-version request failed")
+			logger.Error(err, "apisix current-version request failed")
 			return err
 		}
 		return printJson(resp)
 	}
 	// 查询指定环境下的资源列表
-	resp, err := cli.ApigwList(apigwListRequest)
+	resp, err := cli.ApisixList(apisixListRequest)
 	if err != nil {
-		logger.Error(err, "List Apigw request failed")
+		logger.Error(err, "List apisix request failed")
 		return err
 	}
 	format, _ := cmd.Flags().GetString("write-out")
@@ -133,14 +133,14 @@ func (l *listApigwCommand) RunE(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (l *listApigwCommand) formatOutput(apigwListInfo client.ApigwListInfo, format string) error {
+func (l *listApisixCommand) formatOutput(apisixListInfo client.ApisixListInfo, format string) error {
 	switch format {
 	case "json":
-		return printJson(apigwListInfo)
+		return printJson(apisixListInfo)
 	case "yaml":
-		return printYaml(apigwListInfo)
+		return printYaml(apisixListInfo)
 	case "simple":
-		for stage, listResources := range apigwListInfo {
+		for stage, listResources := range apisixListInfo {
 			fmt.Printf("Stage: %s\n", stage)
 			l.printResource("Routes", listResources.Routes)
 			l.printResource("Services", listResources.Services)
@@ -151,7 +151,7 @@ func (l *listApigwCommand) formatOutput(apigwListInfo client.ApigwListInfo, form
 	return nil
 }
 
-func (l *listApigwCommand) printResource(typeName string, fields map[string]interface{}) {
+func (l *listApisixCommand) printResource(typeName string, fields map[string]interface{}) {
 	fmt.Printf("\t%s:\n", typeName)
 	if fields == nil {
 		return

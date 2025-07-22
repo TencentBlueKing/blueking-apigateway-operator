@@ -43,4 +43,8 @@ func Register(
 	r.POST("/apigw/resources/", resourceApi.ApigwList)
 	r.POST("/apigw/resources/count/", resourceApi.ApigwStageResourceCount)
 	r.POST("/apigw/resources/current-version/", resourceApi.ApigwStageCurrentVersion)
+
+	r.POST("/apisix/resources/", resourceApi.ApisixList)
+	r.POST("/apisix/resources/count/", resourceApi.ApisixStageResourceCount)
+	r.POST("/apisix/resources/current-version/", resourceApi.ApisixStageCurrentVersion)
 }
