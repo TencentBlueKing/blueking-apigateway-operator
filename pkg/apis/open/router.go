@@ -16,7 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package open ...
+// Package open provides the API routes for the BlueKing API Gateway Operator.
 package open
 
 import (

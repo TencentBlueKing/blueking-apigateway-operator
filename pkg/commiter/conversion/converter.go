@@ -157,8 +157,8 @@ func (c *Converter) Convert(
 	return apisixConfig, nil
 }
 
-// ConvertResource ...
-func (c *Converter) ConvertResource(
+// CliConvertResource apigw cli 转换资源
+func (c *Converter) CliConvertResource(
 	resource *v1beta1.BkGatewayResource,
 	services []*v1beta1.BkGatewayService,
 ) (*apisix.ApisixConfiguration, error) {

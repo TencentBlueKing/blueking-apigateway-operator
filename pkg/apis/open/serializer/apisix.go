@@ -24,9 +24,9 @@ type ApisixListInfo map[string]*StageScopedApisixResources
 
 // ApisixListRequest apisix list api req
 type ApisixListRequest struct {
-	GatewayName string        `json:"gateway_name,omitempty"`
-	StageName   string        `json:"stage_name,omitempty"`
-	Resource    *ResourceInfo `json:"resource,omitempty"`
+	GatewayName string       `json:"gateway_name,omitempty"`
+	StageName   string       `json:"stage_name,omitempty"`
+	Resource    ResourceInfo `json:"resource,omitempty"`
 }
 
 // ApisixListResourceCountResponse apisix 资源数量

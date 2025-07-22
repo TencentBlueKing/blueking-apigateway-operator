@@ -255,8 +255,8 @@ func (c *Commiter) ConvertEtcdKVToApisixConfiguration(
 	return conf, stage, err
 }
 
-// ConvertEtcdResourceToApisixConfiguration 转换 etcd 资源
-func (c *Commiter) ConvertEtcdResourceToApisixConfiguration(
+// CliConvertEtcdResourceToApisixConfiguration apigw cli 转换 etcd 资源为 apisix configuration
+func (c *Commiter) CliConvertEtcdResourceToApisixConfiguration(
 	ctx context.Context,
 	si registry.StageInfo,
 	resourceName string,
@@ -265,7 +265,6 @@ func (c *Commiter) ConvertEtcdResourceToApisixConfiguration(
 	if err != nil {
 		return nil, nil, err
 	}
-	eventreporter.ReportParseConfigurationDoingEvent(ctx, stage)
 	resInfo, err := c.getResource(ctx, si, resourceName)
 	if err != nil {
 		return nil, stage, err
@@ -294,15 +293,13 @@ func (c *Commiter) ConvertEtcdResourceToApisixConfiguration(
 		return nil, stage, err
 	}
 
-	conf, err := cvt.ConvertResource(resInfo, svcList)
-
-	metric.ReportResourceCountHelper(si.GatewayName, si.StageName, conf, ReportResourceConvertedMetric)
+	conf, err := cvt.CliConvertResource(resInfo, svcList)
 
 	return conf, stage, err
 }
 
-// GetResourceCount 获取资源数量
-func (c *Commiter) GetResourceCount(
+// CliGetResourceCount apigw cli 查询资源数量
+func (c *Commiter) CliGetResourceCount(
 	ctx context.Context,
 	stageInfo registry.StageInfo,
 ) (int64, error) {

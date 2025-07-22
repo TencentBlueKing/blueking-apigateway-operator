@@ -67,7 +67,7 @@ func GetApigwResourceCount(
 		GatewayName: gatewayName,
 		StageName:   stageName,
 	}
-	count, err := commiter.GetResourceCount(ctx, si)
+	count, err := commiter.CliGetResourceCount(ctx, si)
 	if err != nil {
 		return 0, err
 	}
@@ -110,7 +110,7 @@ func GetApigwResource(
 			StageName:   stageName,
 		}
 		resourceNameKey := genResourceNameKey(gatewayName, stageName, resourceName)
-		apiSixResources, _, err := commiter.ConvertEtcdResourceToApisixConfiguration(ctx, si, resourceNameKey)
+		apiSixResources, _, err := commiter.CliConvertEtcdResourceToApisixConfiguration(ctx, si, resourceNameKey)
 		if err != nil {
 			return nil, err
 		}
@@ -147,7 +147,7 @@ func GetApigwStageCurrentVersionInfo(
 	}
 
 	resourceNameKey := genResourceNameKey(gatewayName, stageName, "apigw-builtin-mock-release-version")
-	apiSixResources, _, err := commiter.ConvertEtcdResourceToApisixConfiguration(ctx, si, resourceNameKey)
+	apiSixResources, _, err := commiter.CliConvertEtcdResourceToApisixConfiguration(ctx, si, resourceNameKey)
 	if err != nil {
 		return nil, err
 	}
