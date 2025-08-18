@@ -1,5 +1,5 @@
 ## debug cli tool
-Provide functions such as comparison, manual synchronization, and viewing of APISIX resources on the data plane for the configuration data of the control plane and the gateway configuration data of the data plane
+Provide resource query and environment release version query functions for configuring data for the control plane and gateway configuration data for the data plane
 ## Features
 
 ```shell
@@ -7,78 +7,63 @@ micro-gateway-operator --help
 ```
 output：
 ```shell
-bk-gateway operator for apisix
-
-Usage:
-  micro-gateway-operator [flags]
-  micro-gateway-operator [command]
-
-Available Commands:
-  completion  Generate the autocompletion script for the specified shell
-  diff        diff between bkgateway resources and apisix storage
-  help        Help about any command
-  list        list resources in apisix
-  sync        sync bkgateway resources into apisix storage
-
-Flags:
-  -c, --config string   config file (default is config.yml;required)
-  -h, --help            help for micro-gateway-operator
-  -v, --version         version for micro-gateway-operator
+bk-gateway operator for apisix                                                                                                                                                                          
+                                                                                                                                                                                                        
+Usage:                                                                                                                                                                                                  
+  bk-apigateway-operator [flags]                                                                                                                                                                        
+  bk-apigateway-operator [command]                                                                                                                                                                      
+                                                                                                                                                                                                        
+Available Commands:                                                                                                                                                                                     
+  completion  Generate the autocompletion script for the specified shell                                                                                                                                
+  help        Help about any command                                                                                                                                                                    
+  list-apigw  list resources in apigw                                                                                                                                                                   
+  list-apisix list resources in apisix                                                                                                                                                                  
+  version     Print the version number of operator                                                                                                                                                      
+                                                                                                                                                                                                        
+Flags:                                                                                                                                                                                                  
+  -c, --config string   config file (default is config.yml;required)                                                                                                                                    
+  -h, --help            help for bk-apigateway-operator                                                                                                                                                 
       --viper           Use Viper for configuration (default true)
 ```
-### diff
-It mainly provides the comparison function of control plane resources and data plane gateway configuration resources
 
+### list-apigw
+Provide control plane resource function query
 ```shell
-diff between bkgateway resources and apisix storage
-
-Usage:
-  micro-gateway-operator diff [flags]
-
-Flags:
-      --all                    list all gateway resources
-  -c, --config string          config file (default is config.yml;required)
-      --gateway string         gateway name for list command
-  -h, --help                   help for diff
-      --resource_id int        resource ID for list command, default(-1) for all resources in stage (default -1)
-      --resource_name string   resource Name for list command, empty for all resources in stage
-      --stage string           stage name for list command
-      --viper                  Use Viper for configuration (default true)
-  -w, --write-out string       response write out format (simple, json, yaml) (default "simple")
+list resources in apigw                                                                                                                                                                                 
+                                                                                                                                                                                                        
+Usage:                                                                                                                                                                                                  
+  bk-apigateway-operator list-apigw [flags]                                                                                                                                                             
+                                                                                                                                                                                                        
+Flags:                                                                                                                                                                                                  
+  -c, --config string          config file (default is config.yml;required)                                                                                                                             
+      --count                  gateway resources count                                                                                                                                                  
+      --current-version        gateway stage version                                                                                                                                                    
+      --gateway_name string    gateway name for list apigw command                                                                                                                                      
+  -h, --help                   help for list-apigw                                                                                                                                                      
+      --resource_id int        resource ID for list apigw command                                                                                                                                       
+      --resource_name string   resource name for list apigw command                                                                                                                                     
+      --stage_name string      stage name for list apigw command                                                                                                                                        
+      --viper                  Use Viper for configuration (default true)                                                                                                                               
+  -w, --write-out string       response write out format (simple, json, yaml) (default "json")                                                                                                          
 ```
 
-### list
+### list-apisix
 Provide data plane gateway resource function query
 ```shell
-list resources in apisix
-
-Usage:
-  micro-gateway-operator list [flags]
-
-Flags:
-      --all                    list all gateway resources
-  -l, --config string          config file (default is config.yml;required)
-      --gateway string         gateway name for list command
-  -h, --help                   help for list
-      --resource_id int        resource ID for list command, default(-1) for all resources in stage (default -1)
-      --resource_name string   resource name for list command, empty for all resources in stage. Can not be set with resource_id simultaneously
-      --stage string           stage name for list command
-      --viper                  Use Viper for configuration (default true)
-  -w, --write-out string       response write out format (simple, json, yaml) (default "json")
-```
-### sync
-Manually synchronize control plane data to data plane gateway resource data
-```shell
-sync bkgateway resources into apisix storage
-
-Usage:
-  micro-gateway-operator sync [flags]
-
-Flags:
-      --all              sync all gateway
-  -c, --config string    config file (default is config.yml;required)
-      --gateway string   gateway for sync command
-  -h, --help             help for sync
-      --stage string     stage for sync command
-      --viper            Use Viper for configuration (default true)
+list resources in apisix                                                                                                                                                                                
+                                                                                                                                                                                                        
+Usage:                                                                                                                                                                                                  
+  bk-apigateway-operator list-apisix [flags]                                                                                                                                                            
+                                                                                                                                                                                                        
+Flags:                                                                                                                                                                                                  
+  -c, --config string          config file (default is config.yml;required)                                                                                                                             
+      --count                  gateway resources count                                                                                                                                                  
+      --current-version        gateway stage version                                                                                                                                                    
+      --gateway_name string    gateway name for list apisix command                                                                                                                                     
+  -h, --help                   help for list-apisix                                                                                                                                                     
+      --resource_id int        resource ID for list apisix command                                                                                                                                      
+      --resource_name string   resource name for list apisix command                                                                                                                                    
+      --stage_name string      stage name for list apisix command                                                                                                                                       
+      --viper                  Use Viper for configuration (default true)                                                                                                                               
+  -w, --write-out string       response write out format (simple, json, yaml) (default "json")    
 ```
