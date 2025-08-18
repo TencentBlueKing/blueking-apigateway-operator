@@ -1,9 +1,9 @@
 ## debug cli 工具
-为制面配置数据和数据面的网关配置数据提供资源查询及环境发布版本查询功能
+为控制面配置数据和数据面的网关配置数据提供资源查询及环境发布版本查询功能
 ## 功能介绍
 
 ```shell
-bk-apigateway-operator --help
+micro-gateway-operator --help
 ```
 output：
 ```shell
