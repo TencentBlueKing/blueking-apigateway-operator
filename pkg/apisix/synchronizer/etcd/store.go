@@ -64,7 +64,8 @@ type EtcdConfigStore struct {
 }
 
 // NewEtcdConfigStore ...
-func NewEtcdConfigStore(client *clientv3.Client, prefix string, putInterval time.Duration, delInterval time.Duration) (*EtcdConfigStore, error) {
+func NewEtcdConfigStore(client *clientv3.Client, prefix string,
+putInterval time.Duration, delInterval time.Duration) (*EtcdConfigStore, error) {
 	s := &EtcdConfigStore{
 		client:      client,
 		prefix:      strings.TrimRight(prefix, "/"),

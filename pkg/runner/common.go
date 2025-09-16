@@ -47,7 +47,8 @@ func initApisixConfigStore(cfg *config.Config) (store synchronizer.ApisixConfigS
 		if err != nil {
 			return nil, fmt.Errorf("init etcd client failed: %w", err)
 		}
-		store, err = etcd.NewEtcdConfigStore(client, cfg.Apisix.Etcd.KeyPrefix, cfg.Operator.EtcdPutInterval, cfg.Operator.EtcdDelInterval)
+		store, err = etcd.NewEtcdConfigStore(client, cfg.Apisix.Etcd.KeyPrefix, cfg.Operator.EtcdPutInterval,
+			cfg.Operator.EtcdDelInterval)
 		if err != nil {
 			return nil, fmt.Errorf("init etcd store failed: %w", err)
 		}

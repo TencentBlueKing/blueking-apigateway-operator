@@ -285,7 +285,7 @@ func newDefaultConfig() *Config {
 			AgentCommitTimeWindow:        5 * time.Second,
 			AgentConcurrencyLimit:        2,
 			EtcdPutInterval:              50 * time.Millisecond,
-			EtcdDelInterval:              15 * time.Millisecond,
+			EtcdDelInterval:              15 * time.Second,
 		},
 		Sentry: Sentry{
 			ReportLevel: 2,
