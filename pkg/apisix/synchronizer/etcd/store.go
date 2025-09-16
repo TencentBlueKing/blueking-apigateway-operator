@@ -58,11 +58,13 @@ type EtcdConfigStore struct {
 
 	putInterval time.Duration
 
+	delInterval time.Duration
+
 	lock *sync.RWMutex
 }
 
 // NewEtcdConfigStore ...
-func NewEtcdConfigStore(client *clientv3.Client, prefix string, putInterval time.Duration) (*EtcdConfigStore, error) {
+func NewEtcdConfigStore(client *clientv3.Client, prefix string, putInterval time.Duration, delInterval time.Duration) (*EtcdConfigStore, error) {
 	s := &EtcdConfigStore{
 		client:      client,
 		prefix:      strings.TrimRight(prefix, "/"),
@@ -70,6 +72,7 @@ func NewEtcdConfigStore(client *clientv3.Client, prefix string, putInterval time
 		differ:      newConfigDiffer(),
 		logger:      logging.GetLogger().Named("etcd-config-store"),
 		putInterval: putInterval,
+		delInterval: delInterval,
 		lock:        &sync.RWMutex{},
 	}
 	s.Init()
@@ -260,7 +263,7 @@ ctx context.Context, stageKey string, conf *apisix.ApisixConfiguration,
 		}
 		if len(deleteConf.Services) > 0 {
 			// sleep putInterVal to avoid resource data inconsistency
-			time.Sleep(s.putInterval)
+			time.Sleep(s.delInterval)
 			if err = s.batchDeleteResource(ctx, ApisixResourceTypeServices, deleteConf.Services); err != nil {
 				return fmt.Errorf("batch delete services failed: %w", err)
 			}

@@ -9,6 +9,7 @@ operator:
   defaultStage: "default"
   #write apisix etcd interval
   etcdPutInterval: "100ms"
+  etcdDelInterval: "15s"
 
 dashboard:
   etcd:
