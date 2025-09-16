@@ -263,7 +263,7 @@ ctx context.Context, stageKey string, conf *apisix.ApisixConfiguration,
 			return fmt.Errorf("batch delete routes failed: %w", err)
 		}
 		if len(deleteConf.Services) > 0 {
-			// sleep putInterVal to avoid resource data inconsistency
+			// sleep delInterval to avoid resource data inconsistency
 			time.Sleep(s.delInterval)
 			if err = s.batchDeleteResource(ctx, ApisixResourceTypeServices, deleteConf.Services); err != nil {
 				return fmt.Errorf("batch delete services failed: %w", err)
