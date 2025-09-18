@@ -33,6 +33,8 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/server/v3/embed"
 
+	apisixv1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
+
 	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
 	. "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
@@ -41,7 +43,6 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/tests/util"
-	apisixv1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
 )
 
 var _ = Describe("ApisixConfigSynchronizer", func() {
@@ -62,7 +63,7 @@ var _ = Describe("ApisixConfigSynchronizer", func() {
 		etcdClient, embedEtcd, err = util.StartEmbedEtcdClient(ctx)
 		Expect(err).NotTo(HaveOccurred())
 
-		store, err = etcd.NewEtcdConfigStore(etcdClient, "test_prefix", 1*time.Second)
+		store, err = etcd.NewEtcdConfigStore(etcdClient, "test_prefix", 1*time.Second, 1*time.Second)
 
 		Expect(err).NotTo(HaveOccurred())
 
