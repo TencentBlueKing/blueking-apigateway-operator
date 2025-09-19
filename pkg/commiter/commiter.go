@@ -66,6 +66,10 @@ type Commiter struct {
 	kubeClient client.Client
 
 	logger *zap.SugaredLogger
+
+	// Gateway stage dimension
+	gatewayStageChanMap map[string]chan struct{}
+	gatewayStageMapLock *sync.RWMutex
 }
 
 // NewCommiter 创建Commiter
@@ -77,13 +81,15 @@ func NewCommiter(
 	kubeClient client.Client,
 ) *Commiter {
 	return &Commiter{
-		resourceRegistry: resourceRegistry,
-		commitChan:       make(chan []registry.StageInfo),
-		synchronizer:     synchronizer,
-		radixTreeGetter:  radixTreeGetter,
-		stageTimer:       stageTimer,
-		kubeClient:       kubeClient,
-		logger:           logging.GetLogger().Named("commiter"),
+		resourceRegistry:    resourceRegistry,                      // Registry for resource management
+		commitChan:          make(chan []registry.StageInfo),       // Channel for committing stage information
+		synchronizer:        synchronizer,                          // Configuration synchronizer
+		radixTreeGetter:     radixTreeGetter,                       // Getter for radix tree data structure
+		stageTimer:          stageTimer,                            // Timer for stage management
+		kubeClient:          kubeClient,                            // Kubernetes client
+		logger:              logging.GetLogger().Named("commiter"), // Logger instance named "commiter"
+		gatewayStageChanMap: make(map[string]chan struct{}),        // Map for storing gateway stage channels
+		gatewayStageMapLock: &sync.RWMutex{},
 	}
 }
 
@@ -137,15 +143,33 @@ func (c *Commiter) commitGroup(ctx context.Context, stageInfoList []registry.Sta
 		wg.Add(1)
 		tempStageInfo := stageInfo
 		utils.GoroutineWithRecovery(ctx, func() {
-			c.commitStage(ctx, tempStageInfo, wg)
+			c.commitGatewayStage(ctx, tempStageInfo, wg)
 		})
 	}
 	wg.Wait()
 }
 
-func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, wg *sync.WaitGroup) {
+// 按照gateway的维度串行更新etcd
+func (c *Commiter) commitGatewayStage(ctx context.Context, si registry.StageInfo, wg *sync.WaitGroup) {
 	defer wg.Done()
+	c.gatewayStageMapLock.Lock()
+	stageChan, ok := c.gatewayStageChanMap[si.GatewayName]
+	if !ok {
+		c.gatewayStageChanMap[si.GatewayName] = make(chan struct{})
+	}
+	c.gatewayStageMapLock.Unlock()
+	utils.GoroutineWithRecovery(ctx, func() {
+		// Control stage writes for each gateway to be serial
+		stageChan <- struct{}{}
+		c.commitStage(ctx, si, stageChan)
+	})
 
+}
+
+func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, stageChan chan struct{}) {
+	defer func() {
+		<-stageChan
+	}()
 	// trace
 	_, span := trace.StartTrace(si.Ctx, "commiter.commitStage")
 	defer span.End()

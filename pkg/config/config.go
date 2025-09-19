@@ -283,9 +283,9 @@ func newDefaultConfig() *Config {
 			AgentEventsWaitingTimeWindow: 2 * time.Second,
 			AgentForceUpdateTimeWindow:   10 * time.Second,
 			AgentCommitTimeWindow:        5 * time.Second,
-			AgentConcurrencyLimit:        2,
+			AgentConcurrencyLimit:        4,
 			EtcdPutInterval:              50 * time.Millisecond,
-			EtcdDelInterval:              15 * time.Second,
+			EtcdDelInterval:              16 * time.Second,
 		},
 		Sentry: Sentry{
 			ReportLevel: 2,
