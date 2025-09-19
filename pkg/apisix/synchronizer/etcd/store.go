@@ -65,7 +65,7 @@ type EtcdConfigStore struct {
 
 // NewEtcdConfigStore ...
 func NewEtcdConfigStore(client *clientv3.Client, prefix string,
-putInterval time.Duration, delInterval time.Duration) (*EtcdConfigStore, error) {
+	putInterval time.Duration, delInterval time.Duration) (*EtcdConfigStore, error) {
 	s := &EtcdConfigStore{
 		client:      client,
 		prefix:      strings.TrimRight(prefix, "/"),
@@ -190,9 +190,9 @@ func (s *EtcdConfigStore) GetAll() map[string]*apisix.ApisixConfiguration {
 
 // Alter ...
 func (s *EtcdConfigStore) Alter(
-ctx context.Context,
-stageName string,
-config *apisix.ApisixConfiguration,
+	ctx context.Context,
+	stageName string,
+	config *apisix.ApisixConfiguration,
 ) error {
 	st := time.Now()
 	err := s.alterByStage(ctx, stageName, config)
@@ -209,7 +209,7 @@ config *apisix.ApisixConfiguration,
 }
 
 func (s *EtcdConfigStore) alterByStage(
-ctx context.Context, stageKey string, conf *apisix.ApisixConfiguration,
+	ctx context.Context, stageKey string, conf *apisix.ApisixConfiguration,
 ) (err error) {
 	// get cached config
 	oldConf := s.Get(stageKey)
@@ -240,7 +240,7 @@ ctx context.Context, stageKey string, conf *apisix.ApisixConfiguration,
 		}
 
 		if len(putConf.Routes)+len(putConf.StreamRoutes)+len(putConf.Services)+
-		len(putConf.PluginMetadatas)+len(putConf.SSLs) > 0 {
+			len(putConf.PluginMetadatas)+len(putConf.SSLs) > 0 {
 			s.logger.Infof(
 				"put gateway[key=%s] conf count:[route:%d,stream_route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
 				stageKey,
@@ -278,7 +278,7 @@ ctx context.Context, stageKey string, conf *apisix.ApisixConfiguration,
 			}
 		}
 		if len(deleteConf.Routes)+len(deleteConf.StreamRoutes)+len(deleteConf.Services)+
-		len(deleteConf.PluginMetadatas)+len(deleteConf.SSLs) > 0 {
+			len(deleteConf.PluginMetadatas)+len(deleteConf.SSLs) > 0 {
 			s.logger.Infof(
 				"del gateway[key=%s] conf count:[route:%d,stream_route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
 				stageKey,

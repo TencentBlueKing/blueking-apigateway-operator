@@ -59,7 +59,7 @@ var _ = Describe("Commiter", func() {
 		mockSynchronizer = synchronizerMock.NewMockApisixConfigSynchronizer(ctl)
 		stageTimer = timer.NewStageTimer()
 
-		commiter = NewCommiter(mockRegister, mockSynchronizer, radixtree.NewSingleRadixTreeGetter(), stageTimer, nil)
+		commiter = NewCommiter(mockRegister, mockSynchronizer, radixtree.NewSingleRadixTreeGetter(), stageTimer, nil, 1)
 
 		eventreporter.InitReporter(&config.Config{
 			EventReporter: config.EventReporter{
