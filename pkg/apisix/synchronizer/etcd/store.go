@@ -262,19 +262,20 @@ ctx context.Context, stageKey string, conf *apisix.ApisixConfiguration,
 		if err = s.batchDeleteResource(ctx, ApisixResourceTypeRoutes, deleteConf.Routes); err != nil {
 			return fmt.Errorf("batch delete routes failed: %w", err)
 		}
-		if len(deleteConf.Services) > 0 {
-			// sleep delInterval to avoid resource data inconsistency
-			time.Sleep(s.delInterval)
-			if err = s.batchDeleteResource(ctx, ApisixResourceTypeServices, deleteConf.Services); err != nil {
-				return fmt.Errorf("batch delete services failed: %w", err)
-			}
-		}
 
 		if err = s.batchDeleteResource(ctx, ApisixResourceTypePluginMetadata, deleteConf.PluginMetadatas); err != nil {
 			return fmt.Errorf("batch delete plugin metadata failed: %w", err)
 		}
 		if err = s.batchDeleteResource(ctx, ApisixResourceTypeSSL, deleteConf.SSLs); err != nil {
 			return fmt.Errorf("batch delete ssl failed: %w", err)
+		}
+
+		if len(deleteConf.Services) > 0 {
+			// sleep delInterval to avoid resource data inconsistency
+			time.Sleep(s.delInterval)
+			if err = s.batchDeleteResource(ctx, ApisixResourceTypeServices, deleteConf.Services); err != nil {
+				return fmt.Errorf("batch delete services failed: %w", err)
+			}
 		}
 		if len(deleteConf.Routes)+len(deleteConf.StreamRoutes)+len(deleteConf.Services)+
 		len(deleteConf.PluginMetadatas)+len(deleteConf.SSLs) > 0 {

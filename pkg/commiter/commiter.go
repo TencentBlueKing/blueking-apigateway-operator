@@ -66,24 +66,37 @@ type Commiter struct {
 	kubeClient client.Client
 
 	logger *zap.SugaredLogger
+
+	// 网关stage维度
+	gatewayStageChanMap map[string]chan struct{}
 }
 
 // NewCommiter 创建Commiter
+// NewCommiter creates a new Commiter instance with the provided dependencies
+// Parameters:
+//   - resourceRegistry: Registry interface for managing resources
+//   - synchronizer: ApisixConfigSynchronizer for synchronizing configurations
+//   - radixTreeGetter: RadixTreeGetter for accessing radix tree data structure
+//   - stageTimer: Timer for managing stages
+//   - kubeClient: Kubernetes client for interacting with the cluster
+// Returns:
+//   - A new instance of Commiter with all dependencies injected
 func NewCommiter(
-	resourceRegistry registry.Registry,
-	synchronizer synchronizer.ApisixConfigSynchronizer,
-	radixTreeGetter radixtree.RadixTreeGetter,
-	stageTimer *timer.StageTimer,
-	kubeClient client.Client,
+resourceRegistry registry.Registry,
+synchronizer synchronizer.ApisixConfigSynchronizer,
+radixTreeGetter radixtree.RadixTreeGetter,
+stageTimer *timer.StageTimer,
+kubeClient client.Client,
 ) *Commiter {
 	return &Commiter{
-		resourceRegistry: resourceRegistry,
-		commitChan:       make(chan []registry.StageInfo),
-		synchronizer:     synchronizer,
-		radixTreeGetter:  radixTreeGetter,
-		stageTimer:       stageTimer,
-		kubeClient:       kubeClient,
-		logger:           logging.GetLogger().Named("commiter"),
+		resourceRegistry:    resourceRegistry,                      // Registry for resource management
+		commitChan:          make(chan []registry.StageInfo),       // Channel for committing stage information
+		synchronizer:        synchronizer,                          // Configuration synchronizer
+		radixTreeGetter:     radixTreeGetter,                       // Getter for radix tree data structure
+		stageTimer:          stageTimer,                            // Timer for stage management
+		kubeClient:          kubeClient,                            // Kubernetes client
+		logger:              logging.GetLogger().Named("commiter"), // Logger instance named "commiter"
+		gatewayStageChanMap: make(map[string]chan struct{}),        // Map for storing gateway stage channels
 	}
 }
 
@@ -137,15 +150,31 @@ func (c *Commiter) commitGroup(ctx context.Context, stageInfoList []registry.Sta
 		wg.Add(1)
 		tempStageInfo := stageInfo
 		utils.GoroutineWithRecovery(ctx, func() {
-			c.commitStage(ctx, tempStageInfo, wg)
+			c.commitGatewayStage(ctx, tempStageInfo, wg)
 		})
 	}
 	wg.Wait()
 }
 
-func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, wg *sync.WaitGroup) {
+// 按照gateway的维度串行更新etcd
+func (c *Commiter) commitGatewayStage(ctx context.Context, si registry.StageInfo, wg *sync.WaitGroup) {
 	defer wg.Done()
+	stageChan, ok := c.gatewayStageChanMap[si.GatewayName]
+	if !ok {
+		c.gatewayStageChanMap[si.GatewayName] = make(chan struct{})
+	}
+	utils.GoroutineWithRecovery(ctx, func() {
+		// 控制每个网关的stage写入为串行
+		stageChan <- struct{}{}
+		c.commitStage(ctx, si, stageChan)
+	})
 
+}
+
+func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, stageChan chan struct{}) {
+	defer func() {
+		<-stageChan
+	}()
 	// trace
 	_, span := trace.StartTrace(si.Ctx, "commiter.commitStage")
 	defer span.End()
@@ -184,9 +213,9 @@ func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, wg *s
 		c.logger.Error(err, "sync stage resources to apisix failed", "stageInfo", si)
 		c.retryStage(si)
 	}
-
 	// eventrepoter.ReportApplyConfigurationSuccessEvent(ctx, stage) // 可以由事件之前的关系推断出来
 	eventreporter.ReportLoadConfigurationResultEvent(ctx, stage)
+
 }
 
 func (c *Commiter) retryStage(si registry.StageInfo) {
@@ -201,8 +230,8 @@ func (c *Commiter) retryStage(si registry.StageInfo) {
 
 // ConvertEtcdKVToApisixConfiguration ...
 func (c *Commiter) ConvertEtcdKVToApisixConfiguration(
-	ctx context.Context,
-	si registry.StageInfo,
+ctx context.Context,
+si registry.StageInfo,
 ) (*apisix.ApisixConfiguration, *v1beta1.BkGatewayStage, error) {
 	stage, err := c.getStage(ctx, si)
 	if err != nil {
@@ -257,9 +286,9 @@ func (c *Commiter) ConvertEtcdKVToApisixConfiguration(
 
 // CliConvertEtcdResourceToApisixConfiguration apigw cli 转换 etcd 资源为 apisix configuration
 func (c *Commiter) CliConvertEtcdResourceToApisixConfiguration(
-	ctx context.Context,
-	si registry.StageInfo,
-	resourceName string,
+ctx context.Context,
+si registry.StageInfo,
+resourceName string,
 ) (*apisix.ApisixConfiguration, *v1beta1.BkGatewayStage, error) {
 	stage, err := c.getStage(ctx, si)
 	if err != nil {
@@ -300,8 +329,8 @@ func (c *Commiter) CliConvertEtcdResourceToApisixConfiguration(
 
 // CliGetResourceCount apigw cli 查询资源数量
 func (c *Commiter) CliGetResourceCount(
-	ctx context.Context,
-	stageInfo registry.StageInfo,
+ctx context.Context,
+stageInfo registry.StageInfo,
 ) (int64, error) {
 	resourceList := &v1beta1.BkGatewayResourceList{}
 	count, err := c.resourceRegistry.Count(ctx, registry.ResourceKey{StageInfo: stageInfo}, resourceList)
@@ -328,9 +357,9 @@ func (c *Commiter) getStage(ctx context.Context, stageInfo registry.StageInfo) (
 }
 
 func (c *Commiter) getResource(
-	ctx context.Context,
-	stageInfo registry.StageInfo,
-	resourceName string,
+ctx context.Context,
+stageInfo registry.StageInfo,
+resourceName string,
 ) (*v1beta1.BkGatewayResource, error) {
 	resourceInfo := &v1beta1.BkGatewayResource{}
 	if err := c.resourceRegistry.Get(
@@ -344,8 +373,8 @@ func (c *Commiter) getResource(
 }
 
 func (c *Commiter) listResources(
-	ctx context.Context,
-	stageInfo registry.StageInfo,
+ctx context.Context,
+stageInfo registry.StageInfo,
 ) ([]*v1beta1.BkGatewayResource, error) {
 	resourceList := &v1beta1.BkGatewayResourceList{}
 	if err := c.resourceRegistry.List(ctx, registry.ResourceKey{StageInfo: stageInfo}, resourceList); err != nil {
@@ -359,8 +388,8 @@ func (c *Commiter) listResources(
 }
 
 func (c *Commiter) listStreamResources(
-	ctx context.Context,
-	stageInfo registry.StageInfo,
+ctx context.Context,
+stageInfo registry.StageInfo,
 ) ([]*v1beta1.BkGatewayStreamResource, error) {
 	resourceList := &v1beta1.BkGatewayStreamResourceList{}
 	if err := c.resourceRegistry.List(ctx, registry.ResourceKey{StageInfo: stageInfo}, resourceList); err != nil {
@@ -374,8 +403,8 @@ func (c *Commiter) listStreamResources(
 }
 
 func (c *Commiter) listServices(
-	ctx context.Context,
-	stageInfo registry.StageInfo,
+ctx context.Context,
+stageInfo registry.StageInfo,
 ) ([]*v1beta1.BkGatewayService, error) {
 	serviceList := &v1beta1.BkGatewayServiceList{}
 	if err := c.resourceRegistry.List(ctx, registry.ResourceKey{StageInfo: stageInfo}, serviceList); err != nil {
@@ -389,8 +418,8 @@ func (c *Commiter) listServices(
 }
 
 func (c *Commiter) listPluginMetadatas(
-	ctx context.Context,
-	stageInfo registry.StageInfo,
+ctx context.Context,
+stageInfo registry.StageInfo,
 ) ([]*v1beta1.BkGatewayPluginMetadata, error) {
 	pluginMetadataList := &v1beta1.BkGatewayPluginMetadataList{}
 	if err := c.resourceRegistry.List(ctx, registry.ResourceKey{StageInfo: stageInfo}, pluginMetadataList); err != nil {
