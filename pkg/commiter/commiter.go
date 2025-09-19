@@ -67,7 +67,7 @@ type Commiter struct {
 
 	logger *zap.SugaredLogger
 
-	// 网关stage维度
+	// Gateway stage dimension
 	gatewayStageChanMap map[string]chan struct{}
 	gatewayStageMapLock *sync.RWMutex
 }
