@@ -159,7 +159,7 @@ func (c *Commiter) commitGatewayStage(ctx context.Context, si registry.StageInfo
 	}
 	c.gatewayStageMapLock.Unlock()
 	utils.GoroutineWithRecovery(ctx, func() {
-		// 控制每个网关的stage写入为串行
+		// Control stage writes for each gateway to be serial
 		stageChan <- struct{}{}
 		c.commitStage(ctx, si, stageChan)
 	})
