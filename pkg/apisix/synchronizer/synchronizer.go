@@ -109,6 +109,11 @@ func (as *apisixConfigurationSynchronizer) RemoveNotExistStage(ctx context.Conte
 		keySet[key] = struct{}{}
 	}
 	for key := range existStageConfig {
+		// virtual stage is not in existStageKeys, it maintained by operator, so we should skip here
+		if key == cfg.VirtualStageKey {
+			continue
+		}
+
 		if _, ok := keySet[key]; !ok {
 			err := as.store.Alter(ctx, key, apisix.NewEmptyApisixConfiguration())
 			if err != nil {
