@@ -72,15 +72,6 @@ type Commiter struct {
 }
 
 // NewCommiter 创建Commiter
-// NewCommiter creates a new Commiter instance with the provided dependencies
-// Parameters:
-//   - resourceRegistry: Registry interface for managing resources
-//   - synchronizer: ApisixConfigSynchronizer for synchronizing configurations
-//   - radixTreeGetter: RadixTreeGetter for accessing radix tree data structure
-//   - stageTimer: Timer for managing stages
-//   - kubeClient: Kubernetes client for interacting with the cluster
-// Returns:
-//   - A new instance of Commiter with all dependencies injected
 func NewCommiter(
 resourceRegistry registry.Registry,
 synchronizer synchronizer.ApisixConfigSynchronizer,
@@ -213,9 +204,9 @@ func (c *Commiter) commitStage(ctx context.Context, si registry.StageInfo, stage
 		c.logger.Error(err, "sync stage resources to apisix failed", "stageInfo", si)
 		c.retryStage(si)
 	}
+
 	// eventrepoter.ReportApplyConfigurationSuccessEvent(ctx, stage) // 可以由事件之前的关系推断出来
 	eventreporter.ReportLoadConfigurationResultEvent(ctx, stage)
-
 }
 
 func (c *Commiter) retryStage(si registry.StageInfo) {
