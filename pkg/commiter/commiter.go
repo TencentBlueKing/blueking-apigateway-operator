@@ -157,7 +157,8 @@ func (c *Commiter) commitGatewayStage(ctx context.Context, si registry.StageInfo
 	c.gatewayStageMapLock.Lock()
 	stageChan, ok := c.gatewayStageChanMap[si.GatewayName]
 	if !ok {
-		c.gatewayStageChanMap[si.GatewayName] = make(chan struct{}, 1)
+		stageChan = make(chan struct{}, 1)
+		c.gatewayStageChanMap[si.GatewayName] = stageChan
 	}
 	c.gatewayStageMapLock.Unlock()
 	utils.GoroutineWithRecovery(ctx, func() {
