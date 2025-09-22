@@ -143,7 +143,9 @@ func (c *Commiter) commitGroup(ctx context.Context, stageInfoList []registry.Sta
 		wg.Add(1)
 		tempStageInfo := stageInfo
 		utils.GoroutineWithRecovery(ctx, func() {
+			c.logger.Infof("begin commit gateway channel: %s", tempStageInfo.Key())
 			c.commitGatewayStage(ctx, tempStageInfo, wg)
+			c.logger.Infof("end commit gateway channel: %s", tempStageInfo.Key())
 		})
 	}
 	wg.Wait()
@@ -155,13 +157,16 @@ func (c *Commiter) commitGatewayStage(ctx context.Context, si registry.StageInfo
 	c.gatewayStageMapLock.Lock()
 	stageChan, ok := c.gatewayStageChanMap[si.GatewayName]
 	if !ok {
-		c.gatewayStageChanMap[si.GatewayName] = make(chan struct{}, 1)
+		stageChan = make(chan struct{}, 1)
+		c.gatewayStageChanMap[si.GatewayName] = stageChan
 	}
 	c.gatewayStageMapLock.Unlock()
 	utils.GoroutineWithRecovery(ctx, func() {
 		// Control stage writes for each gateway to be serial
 		stageChan <- struct{}{}
+		c.logger.Infof("begin commit stage channel: %s", si.Key())
 		c.commitStage(ctx, si, stageChan)
+		c.logger.Infof("end commit stage channel: %s", si.Key())
 	})
 
 }
