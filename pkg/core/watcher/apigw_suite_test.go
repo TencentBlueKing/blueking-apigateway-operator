@@ -16,23 +16,16 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package metric ...
-package metric
+package watcher
 
 import (
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
+	"testing"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-// ReportResourceCountHelper ...
-func ReportResourceCountHelper(
-	gateway, stage string,
-	conf *entity.ApisixConfiguration,
-	handler func(string, string, string, int),
-) {
-	if conf != nil {
-		handler(gateway, stage, "routes", len(conf.Routes))
-		handler(gateway, stage, "services", len(conf.Services))
-		handler(gateway, stage, "ssls", len(conf.SSLs))
-		handler(gateway, stage, "plugin_metadatas", len(conf.PluginMetadatas))
-	}
+func TestRegistry(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Registry Suite")
 }

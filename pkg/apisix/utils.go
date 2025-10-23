@@ -20,10 +20,12 @@
 // Package apisix ...
 package apisix
 
+import "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
+
 // ReportResourceCount ...
 func ReportResourceCount(
 	gateway, stage, resType string,
-	conf *ApisixConfiguration,
+	conf *entity.ApisixConfiguration,
 	handler func(string, string, string, int),
 ) {
 	if conf != nil {

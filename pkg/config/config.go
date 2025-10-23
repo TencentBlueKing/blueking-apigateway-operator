@@ -98,12 +98,7 @@ type Dashboard struct {
 
 // Apisix ...
 type Apisix struct {
-	Etcd Etcd
-
-	ResourceStoreMode     string
-	ConfigPath            string
-	InternalDiscoveryType []string
-
+	Etcd         Etcd
 	VirtualStage VirtualStage
 }
 
@@ -253,9 +248,6 @@ func newDefaultConfig() *Config {
 			Etcd: Etcd{
 				KeyPrefix: "/apisix",
 			},
-			ResourceStoreMode:     "etcd",
-			ConfigPath:            "/usr/local/apisix/conf/apisix.yaml",
-			InternalDiscoveryType: []string{"dns", "consul_kv", "nacos", "eureka"},
 			VirtualStage: VirtualStage{
 				FileLoggerLogPath: "/usr/local/apisix/logs/access.log",
 
@@ -359,5 +351,5 @@ func GenStagePrimaryKey(gatewayName string, stageName string) string {
 	if len(gatewayName) == 0 && len(stageName) == 0 {
 		return DefaultStageKey
 	}
-	return fmt.Sprintf("%s/%s", gatewayName, stageName)
+	return fmt.Sprintf("bk.release.%s.%s", gatewayName, stageName)
 }

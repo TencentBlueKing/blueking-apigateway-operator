@@ -29,21 +29,21 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/commiter"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/store"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/watcher"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 )
 
 // Server ...
 type Server struct {
-	LeaderElector   leaderelection.LeaderElector
-	registry        registry.Registry
+	LeaderElector   *leaderelection.EtcdLeaderElector
+	registry        *watcher.APIGEtcdWWatcher
 	commiter        *commiter.Commiter
-	apisixConfStore synchronizer.ApisixConfigStore
+	apisixConfStore *store.ApisixEtcdConfigStore
 
 	mux *gin.Engine
 
@@ -52,9 +52,9 @@ type Server struct {
 
 // NewServer ...
 func NewServer(
-	leaderElector leaderelection.LeaderElector,
-	registry registry.Registry,
-	apisixConfStore synchronizer.ApisixConfigStore,
+	leaderElector *leaderelection.EtcdLeaderElector,
+	registry *watcher.APIGEtcdWWatcher,
+	apisixConfStore *store.ApisixEtcdConfigStore,
 	commiter *commiter.Commiter,
 ) *Server {
 	return &Server{

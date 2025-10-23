@@ -23,19 +23,19 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apis/open/handler"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/commiter"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/store"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/watcher"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 )
 
 // Register registers the API routes
 func Register(
-	r *gin.RouterGroup,
-	leaderElector leaderelection.LeaderElector,
-	registry registry.Registry,
-	committer *commiter.Commiter,
-	apiSixConfStore synchronizer.ApisixConfigStore,
+r *gin.RouterGroup,
+leaderElector *leaderelection.EtcdLeaderElector,
+registry *watcher.APIGEtcdWWatcher,
+committer *commiter.Commiter,
+apiSixConfStore *store.ApisixEtcdConfigStore,
 ) {
 	// register resource api
 	resourceApi := handler.NewResourceApi(leaderElector, registry, committer, apiSixConfStore)

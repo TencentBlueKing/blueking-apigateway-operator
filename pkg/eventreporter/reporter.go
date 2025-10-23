@@ -26,10 +26,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/api/v1beta1"
+	"github.com/spf13/cast"
+
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
@@ -41,7 +43,7 @@ var (
 
 type reportEvent struct {
 	ctx    context.Context
-	stage  *v1beta1.BkGatewayStage
+	stage  *entity.ReleaseStageInfo
 	Event  constant.EventName
 	status constant.EventStatus
 	detail map[string]interface{}
@@ -113,7 +115,7 @@ func Shutdown() {
 }
 
 // ReportParseConfigurationDoingEvent  will report the event of paring configuration
-func ReportParseConfigurationDoingEvent(ctx context.Context, stage *v1beta1.BkGatewayStage) {
+func ReportParseConfigurationDoingEvent(ctx context.Context, stage *entity.ReleaseStageInfo) {
 	event := reportEvent{
 		stage:  stage,
 		Event:  constant.EventNameParseConfiguration,
@@ -125,7 +127,7 @@ func ReportParseConfigurationDoingEvent(ctx context.Context, stage *v1beta1.BkGa
 }
 
 // ReportParseConfigurationFailureEvent will report parse configuration failure event
-func ReportParseConfigurationFailureEvent(ctx context.Context, stage *v1beta1.BkGatewayStage, err error) {
+func ReportParseConfigurationFailureEvent(ctx context.Context, stage *entity.ReleaseStageInfo, err error) {
 	event := reportEvent{
 		ctx:    ctx,
 		stage:  stage,
@@ -138,7 +140,7 @@ func ReportParseConfigurationFailureEvent(ctx context.Context, stage *v1beta1.Bk
 }
 
 // ReportParseConfigurationSuccessEvent will report the success event of parse configuration
-func ReportParseConfigurationSuccessEvent(ctx context.Context, stage *v1beta1.BkGatewayStage) {
+func ReportParseConfigurationSuccessEvent(ctx context.Context, stage *entity.ReleaseStageInfo) {
 	event := reportEvent{
 		stage:  stage,
 		Event:  constant.EventNameParseConfiguration,
@@ -149,7 +151,7 @@ func ReportParseConfigurationSuccessEvent(ctx context.Context, stage *v1beta1.Bk
 }
 
 // ReportApplyConfigurationDoingEvent will report the event of applying configuration
-func ReportApplyConfigurationDoingEvent(ctx context.Context, stage *v1beta1.BkGatewayStage) {
+func ReportApplyConfigurationDoingEvent(ctx context.Context, stage *entity.ReleaseStageInfo) {
 	event := reportEvent{
 		stage:  stage,
 		Event:  constant.EventNameApplyConfiguration,
@@ -160,7 +162,7 @@ func ReportApplyConfigurationDoingEvent(ctx context.Context, stage *v1beta1.BkGa
 }
 
 // ReportApplyConfigurationSuccessEvent will report success event when apply configuration successfully
-func ReportApplyConfigurationSuccessEvent(ctx context.Context, stage *v1beta1.BkGatewayStage) {
+func ReportApplyConfigurationSuccessEvent(ctx context.Context, stage *entity.ReleaseStageInfo) {
 	event := reportEvent{
 		stage:  stage,
 		Event:  constant.EventNameApplyConfiguration,
@@ -171,7 +173,7 @@ func ReportApplyConfigurationSuccessEvent(ctx context.Context, stage *v1beta1.Bk
 }
 
 // ReportLoadConfigurationDoingEvent will report  event when loading configuration
-func ReportLoadConfigurationDoingEvent(ctx context.Context, stage *v1beta1.BkGatewayStage) {
+func ReportLoadConfigurationDoingEvent(ctx context.Context, stage *entity.ReleaseStageInfo) {
 	event := reportEvent{
 		stage:  stage,
 		Event:  constant.EventNameLoadConfiguration,
@@ -182,12 +184,12 @@ func ReportLoadConfigurationDoingEvent(ctx context.Context, stage *v1beta1.BkGat
 }
 
 // ReportLoadConfigurationResultEvent Report the detection result of apisix loading
-func ReportLoadConfigurationResultEvent(ctx context.Context, stage *v1beta1.BkGatewayStage) {
+func ReportLoadConfigurationResultEvent(ctx context.Context, stage *entity.ReleaseStageInfo) {
 	// filter not need report event
-	if stage == nil || stage.Labels == nil {
+	if stage == nil || stage.Labels.PublishId == "" {
 		return
 	}
-	publishID := stage.Labels[config.BKAPIGatewayLabelKeyGatewayPublishID]
+	publishID := cast.ToString(stage.PublishId)
 	if publishID == constant.NoNeedReportPublishID || publishID == "" {
 		logging.GetLogger().Debugf("event[stage: %+v] is not need to report", stage.Labels)
 		return
@@ -263,11 +265,11 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *v1beta1.BkGa
 // addEvent add event to reporter event
 func addEvent(event reportEvent) {
 	// avoid gateway del that cause stage to be nil and make panic
-	if event.stage == nil || event.stage.Labels == nil {
+	if event.stage == nil || event.stage.Labels.PublishId == "" {
 		return
 	}
 	// filter not need report event
-	publishID := event.stage.Labels[config.BKAPIGatewayLabelKeyGatewayPublishID]
+	publishID := cast.ToString(event.stage.PublishId)
 	if publishID == constant.NoNeedReportPublishID || publishID == "" {
 		logging.GetLogger().Debugf("event[stage: %+v] is not need to report", event.stage.Labels)
 		return
@@ -309,10 +311,10 @@ func (r *Reporter) reportEvent(event reportEvent) {
 }
 
 // parseEventInfo parse stage info
-func parseEventInfo(stage *v1beta1.BkGatewayStage) *client.ReportEventReq {
-	gatewayName := stage.Labels[config.BKAPIGatewayLabelKeyGatewayName]
-	stageName := stage.Labels[config.BKAPIGatewayLabelKeyGatewayStage]
-	publishID := stage.Labels[config.BKAPIGatewayLabelKeyGatewayPublishID]
+func parseEventInfo(stage *entity.ReleaseStageInfo) *client.ReportEventReq {
+	gatewayName := stage.GetGatewayName()
+	stageName := stage.GetStageName()
+	publishID := cast.ToString(stage.PublishId)
 	return &client.ReportEventReq{
 		BkGatewayName: gatewayName,
 		BkStageName:   stageName,

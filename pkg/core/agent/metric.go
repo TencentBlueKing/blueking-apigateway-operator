@@ -16,23 +16,33 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package metric ...
-package metric
+// Package agent ...
+package agent
 
 import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 )
 
-// ReportResourceCountHelper ...
-func ReportResourceCountHelper(
-	gateway, stage string,
-	conf *entity.ApisixConfiguration,
-	handler func(string, string, string, int),
-) {
-	if conf != nil {
-		handler(gateway, stage, "routes", len(conf.Routes))
-		handler(gateway, stage, "services", len(conf.Services))
-		handler(gateway, stage, "ssls", len(conf.SSLs))
-		handler(gateway, stage, "plugin_metadatas", len(conf.PluginMetadatas))
+// ReportBootstrapSyncingMetric ...
+func ReportBootstrapSyncingMetric(err error) {
+	result := metric.ResultSuccess
+	if err != nil {
+		result = metric.ResultFail
 	}
+
+	if metric.BootstrapSyncingCounter == nil {
+		return
+	}
+
+	metric.BootstrapSyncingCounter.WithLabelValues(result).Inc()
+}
+
+// ReportEventTriggeredMetric ...
+func ReportEventTriggeredMetric(event *entity.ResourceMetadata) {
+	if metric.ResourceEventTriggeredCounter == nil {
+		return
+	}
+
+	metric.ResourceEventTriggeredCounter.WithLabelValues(event.GetStageName(), event.GetGatewayName(), event.Kind.String()).Inc()
 }
