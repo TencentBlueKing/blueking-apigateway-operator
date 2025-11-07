@@ -79,7 +79,7 @@ var _ = Describe("VirtualStage", func() {
 	}
 
 	Context("MakeConfiguration", func() {
-		var configuration *entity.ApisixConfiguration
+		var configuration *entity.ApisixStageResource
 
 		JustBeforeEach(func() {
 			configuration = stage.MakeConfiguration()

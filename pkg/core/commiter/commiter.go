@@ -41,7 +41,7 @@ var errStageNotFound = eris.Errorf("no bk gateway stage found")
 
 // Commiter ...
 type Commiter struct {
-	resourceRegistry *watcher.APIGEtcdWWatcher
+	resourceRegistry *watcher.APIGEtcdWatcher
 
 	commitChan chan []*entity.ReleaseStageInfo
 
@@ -58,7 +58,7 @@ type Commiter struct {
 
 // NewCommiter 创建Commiter
 func NewCommiter(
-resourceRegistry *watcher.APIGEtcdWWatcher,
+resourceRegistry *watcher.APIGEtcdWatcher,
 synchronizer *synchronizer.ApisixConfigSynchronizer,
 stageTimer *timer.StageTimer,
 ) *Commiter {
@@ -201,9 +201,10 @@ func (c *Commiter) retryStage(si *entity.ReleaseStageInfo) {
 func (c *Commiter) GetNativeApisixConfiguration(
 ctx context.Context,
 si *entity.ReleaseStageInfo,
-) (*entity.ApisixConfiguration, error) {
+) (*entity.ApisixStageResource, error) {
 	// 直接从etcd获取原生apisix配置，无需转换
 	// 这里应该直接从etcd读取apisix配置数据
 	// 暂时返回空配置，后续需要根据实际的etcd数据结构来实现
+
 	return entity.NewEmptyApisixConfiguration(), nil
 }

@@ -41,7 +41,7 @@ import (
 // Server ...
 type Server struct {
 	LeaderElector   *leaderelection.EtcdLeaderElector
-	registry        *watcher.APIGEtcdWWatcher
+	registry        *watcher.APIGEtcdWatcher
 	commiter        *commiter.Commiter
 	apisixConfStore *store.ApisixEtcdConfigStore
 
@@ -52,10 +52,10 @@ type Server struct {
 
 // NewServer ...
 func NewServer(
-	leaderElector *leaderelection.EtcdLeaderElector,
-	registry *watcher.APIGEtcdWWatcher,
-	apisixConfStore *store.ApisixEtcdConfigStore,
-	commiter *commiter.Commiter,
+leaderElector *leaderelection.EtcdLeaderElector,
+registry *watcher.APIGEtcdWatcher,
+apisixConfStore *store.ApisixEtcdConfigStore,
+commiter *commiter.Commiter,
 ) *Server {
 	return &Server{
 		LeaderElector:   leaderElector,

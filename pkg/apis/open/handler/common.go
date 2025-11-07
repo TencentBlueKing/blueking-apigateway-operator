@@ -29,7 +29,7 @@ import (
 // ResourceHandler resource api handler
 type ResourceHandler struct {
 	LeaderElector   *leaderelection.EtcdLeaderElector
-	registry        *watcher.APIGEtcdWWatcher
+	registry        *watcher.APIGEtcdWatcher
 	committer       *commiter.Commiter
 	apisixConfStore *store.ApisixEtcdConfigStore
 }
@@ -37,7 +37,7 @@ type ResourceHandler struct {
 // NewResourceApi constructor of resource handler
 func NewResourceApi(
 leaderElector *leaderelection.EtcdLeaderElector,
-registry *watcher.APIGEtcdWWatcher,
+registry *watcher.APIGEtcdWatcher,
 committer *commiter.Commiter,
 apiSixConfStore *store.ApisixEtcdConfigStore,
 ) *ResourceHandler {

@@ -33,7 +33,7 @@ import (
 func Register(
 r *gin.RouterGroup,
 leaderElector *leaderelection.EtcdLeaderElector,
-registry *watcher.APIGEtcdWWatcher,
+registry *watcher.APIGEtcdWatcher,
 committer *commiter.Commiter,
 apiSixConfStore *store.ApisixEtcdConfigStore,
 ) {

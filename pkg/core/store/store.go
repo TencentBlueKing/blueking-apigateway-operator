@@ -42,7 +42,6 @@ import (
 
 var apisixResourceTypes = []string{
 	constant.ApisixResourceTypeRoutes,
-	constant.ApisixResourceTypeStreamRoutes,
 	constant.ApisixResourceTypeServices,
 	constant.ApisixResourceTypeSSL,
 	constant.ApisixResourceTypePluginMetadata,
@@ -67,7 +66,7 @@ type ApisixEtcdConfigStore struct {
 
 // NewApiEtcdConfigStore ...
 func NewApiEtcdConfigStore(client *clientv3.Client, prefix string,
-	putInterval time.Duration, delInterval time.Duration) (*ApisixEtcdConfigStore, error) {
+putInterval time.Duration, delInterval time.Duration) (*ApisixEtcdConfigStore, error) {
 	s := &ApisixEtcdConfigStore{
 		client:      client,
 		prefix:      strings.TrimRight(prefix, "/"),
@@ -114,15 +113,11 @@ func (s *ApisixEtcdConfigStore) Init() {
 }
 
 // Get get a staged apisix configuration
-func (s *ApisixEtcdConfigStore) Get(stageName string) *entity.ApisixConfiguration {
+func (s *ApisixEtcdConfigStore) Get(stageName string) *entity.ApisixStageResource {
 	ret := entity.NewEmptyApisixConfiguration()
 	routes := s.watcher[constant.ApisixResourceTypeRoutes].GetStageResources(stageName)
 	for key, val := range routes {
 		ret.Routes[key] = val.(*entity.Route)
-	}
-	streamRoutes := s.watcher[constant.ApisixResourceTypeStreamRoutes].GetStageResources(stageName)
-	for key, val := range streamRoutes {
-		ret.StreamRoutes[key] = val.(*entity.StreamRoute)
 	}
 	services := s.watcher[constant.ApisixResourceTypeServices].GetStageResources(stageName)
 	for key, val := range services {
@@ -140,8 +135,8 @@ func (s *ApisixEtcdConfigStore) Get(stageName string) *entity.ApisixConfiguratio
 }
 
 // GetAll get staged apisix configuration map
-func (s *ApisixEtcdConfigStore) GetAll() map[string]*entity.ApisixConfiguration {
-	configMap := make(map[string]*entity.ApisixConfiguration)
+func (s *ApisixEtcdConfigStore) GetAll() map[string]*entity.ApisixStageResource {
+	configMap := make(map[string]*entity.ApisixStageResource)
 	routeMap := s.watcher[constant.ApisixResourceTypeRoutes].GetAllResources()
 	for key, route := range routeMap {
 		stageName := route.GetStageFromLabel()
@@ -149,15 +144,6 @@ func (s *ApisixEtcdConfigStore) GetAll() map[string]*entity.ApisixConfiguration 
 			configMap[stageName] = entity.NewEmptyApisixConfiguration()
 		}
 		configMap[stageName].Routes[key] = route.(*entity.Route)
-	}
-
-	streamRouteMap := s.watcher[constant.ApisixResourceTypeStreamRoutes].GetAllResources()
-	for key, route := range streamRouteMap {
-		stageName := route.GetStageFromLabel()
-		if _, ok := configMap[stageName]; !ok {
-			configMap[stageName] = entity.NewEmptyApisixConfiguration()
-		}
-		configMap[stageName].StreamRoutes[key] = route.(*entity.StreamRoute)
 	}
 
 	serviceMap := s.watcher[constant.ApisixResourceTypeServices].GetAllResources()
@@ -192,9 +178,9 @@ func (s *ApisixEtcdConfigStore) GetAll() map[string]*entity.ApisixConfiguration 
 
 // Alter ...
 func (s *ApisixEtcdConfigStore) Alter(
-	ctx context.Context,
-	stageName string,
-	config *entity.ApisixConfiguration,
+ctx context.Context,
+stageName string,
+config *entity.ApisixStageResource,
 ) error {
 	st := time.Now()
 	err := s.alterByStage(ctx, stageName, config)
@@ -211,7 +197,7 @@ func (s *ApisixEtcdConfigStore) Alter(
 }
 
 func (s *ApisixEtcdConfigStore) alterByStage(
-	ctx context.Context, stageKey string, conf *entity.ApisixConfiguration,
+ctx context.Context, stageKey string, conf *entity.ApisixStageResource,
 ) (err error) {
 	// get cached config
 	oldConf := s.Get(stageKey)
@@ -237,17 +223,12 @@ func (s *ApisixEtcdConfigStore) alterByStage(
 			return fmt.Errorf("batch put routes failed: %w", err)
 		}
 
-		if err = s.batchPutResource(ctx, constant.ApisixResourceTypeStreamRoutes, putConf.StreamRoutes); err != nil {
-			return fmt.Errorf("batch put stream routes failed: %w", err)
-		}
-
-		if len(putConf.Routes)+len(putConf.StreamRoutes)+len(putConf.Services)+
-			len(putConf.PluginMetadatas)+len(putConf.SSLs) > 0 {
+		if len(putConf.Routes)+len(putConf.Services)+
+		len(putConf.PluginMetadatas)+len(putConf.SSLs) > 0 {
 			s.logger.Infof(
-				"put gateway[key=%s] conf count:[route:%d,stream_route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
+				"put gateway[key=%s] conf count:[route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
 				stageKey,
 				len(putConf.Routes),
-				len(putConf.StreamRoutes),
 				len(putConf.Services),
 				len(putConf.PluginMetadatas),
 				len(putConf.SSLs),
@@ -257,10 +238,6 @@ func (s *ApisixEtcdConfigStore) alterByStage(
 
 	// delete resources
 	if deleteConf != nil {
-		// NOTE: 删除的顺序和创建的顺序相反, 错误的顺序会导致apisix的异常
-		if err = s.batchDeleteResource(ctx, constant.ApisixResourceTypeStreamRoutes, deleteConf.StreamRoutes); err != nil {
-			return fmt.Errorf("batch delete stream routes failed: %w", err)
-		}
 		if err = s.batchDeleteResource(ctx, constant.ApisixResourceTypeRoutes, deleteConf.Routes); err != nil {
 			return fmt.Errorf("batch delete routes failed: %w", err)
 		}
@@ -280,7 +257,7 @@ func (s *ApisixEtcdConfigStore) alterByStage(
 			}
 		}
 		if len(deleteConf.Routes)+len(deleteConf.StreamRoutes)+len(deleteConf.Services)+
-			len(deleteConf.PluginMetadatas)+len(deleteConf.SSLs) > 0 {
+		len(deleteConf.PluginMetadatas)+len(deleteConf.SSLs) > 0 {
 			s.logger.Infof(
 				"del gateway[key=%s] conf count:[route:%d,stream_route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
 				stageKey,

@@ -40,6 +40,40 @@ const (
 	Gateway        APISIXResource = "gateway" // 操作审计场景使用
 )
 
+// ResourceTypeList ...
+var ResourceTypeList = []APISIXResource{
+	Route,
+	Service,
+	Upstream,
+	PluginConfig,
+	PluginMetadata,
+	Consumer,
+	ConsumerGroup,
+	GlobalRule,
+	Proto,
+	SSL,
+	StreamRoute,
+}
+
+// PluginsMustResourceMap 必须要配置插件的资源
+var PluginsMustResourceMap = map[APISIXResource]bool{
+	PluginConfig:   true,
+	PluginMetadata: true,
+	ConsumerGroup:  true,
+	GlobalRule:     true,
+}
+
+// APISIXVersion ...
+type APISIXVersion string
+
+// APISIXVersion311 ...
+const (
+	APISIXVersion313 APISIXVersion = "3.13.X"
+	APISIXVersion311 APISIXVersion = "3.11.X"
+	APISIXVersion33  APISIXVersion = "3.3.X"
+	APISIXVersion32  APISIXVersion = "3.2.X"
+)
+
 func (a APISIXResource) String() string {
 	return string(a)
 }
@@ -58,7 +92,6 @@ const (
 	SkippedValueEtcdEmptyObject = "{}"
 
 	ApisixResourceTypeRoutes         = "routes"
-	ApisixResourceTypeStreamRoutes   = "stream_routes"
 	ApisixResourceTypeServices       = "services"
 	ApisixResourceTypeSSL            = "ssls"
 	ApisixResourceTypePluginMetadata = "plugin_metadata"

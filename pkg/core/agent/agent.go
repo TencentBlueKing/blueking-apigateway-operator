@@ -42,7 +42,7 @@ var retryDelaySeconds = time.Second * 5
 
 // EventAgent ...
 type EventAgent struct {
-	apigwWatcher *watcher.APIGEtcdWWatcher
+	apigwWatcher *watcher.APIGEtcdWatcher
 	commitChan   chan []*entity.ReleaseStageInfo
 	synchronizer *synchronizer.ApisixConfigSynchronizer
 
@@ -57,7 +57,7 @@ type EventAgent struct {
 
 // NewEventAgent ...
 func NewEventAgent(
-resourceRegistry *watcher.APIGEtcdWWatcher,
+resourceRegistry *watcher.APIGEtcdWatcher,
 commitCh chan []*entity.ReleaseStageInfo,
 synchronizer *synchronizer.ApisixConfigSynchronizer,
 stageTimer *timer.StageTimer,

@@ -45,8 +45,8 @@ func ListApisixResources(
 store *store.ApisixEtcdConfigStore,
 gatewayName string,
 stageName string,
-) map[string]*entity.ApisixConfiguration {
-	configMap := make(map[string]*entity.ApisixConfiguration)
+) map[string]*entity.ApisixStageResource {
+	configMap := make(map[string]*entity.ApisixStageResource)
 	stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
 	apiSixResources := store.Get(stageKey)
 	configMap[stageKey] = apiSixResources
@@ -60,8 +60,8 @@ gatewayName string,
 stageName string,
 resourceName string,
 resourceID int64,
-) (map[string]*entity.ApisixConfiguration, error) {
-	configMap := make(map[string]*entity.ApisixConfiguration)
+) (map[string]*entity.ApisixStageResource, error) {
+	configMap := make(map[string]*entity.ApisixStageResource)
 	stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
 	apiSixResources := store.Get(stageKey)
 

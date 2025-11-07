@@ -147,7 +147,7 @@ func (s *VirtualStage) makeExtraConfiguration() *entity.ApisixConfigurationStand
 }
 
 // MakeConfiguration return the apisix configuration of virtual stage
-func (s *VirtualStage) MakeConfiguration() *entity.ApisixConfiguration {
+func (s *VirtualStage) MakeConfiguration() *entity.ApisixStageResource {
 	ret := entity.NewEmptyApisixConfiguration()
 	extraConfiguration := s.makeExtraConfiguration()
 

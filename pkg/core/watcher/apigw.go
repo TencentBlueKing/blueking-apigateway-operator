@@ -39,8 +39,8 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/trace"
 )
 
-// APIGEtcdWWatcher implements the Register interface using etcd as the main storage.
-type APIGEtcdWWatcher struct {
+// APIGEtcdWatcher implements the Register interface using etcd as the main storage.
+type APIGEtcdWatcher struct {
 	etcdClient *clientv3.Client
 
 	logger *zap.SugaredLogger
@@ -50,9 +50,9 @@ type APIGEtcdWWatcher struct {
 	currentRevision int64
 }
 
-// NewEtcdResourceRegistry creates a APIGEtcdWWatcher object
-func NewEtcdResourceRegistry(etcdClient *clientv3.Client, keyPrefix string) *APIGEtcdWWatcher {
-	registry := &APIGEtcdWWatcher{
+// NewEtcdResourceRegistry creates a APIGEtcdWatcher object
+func NewEtcdResourceRegistry(etcdClient *clientv3.Client, keyPrefix string) *APIGEtcdWatcher {
+	registry := &APIGEtcdWatcher{
 		etcdClient: etcdClient,
 	}
 	registry.logger = logging.GetLogger().Named("registry")
@@ -62,7 +62,7 @@ func NewEtcdResourceRegistry(etcdClient *clientv3.Client, keyPrefix string) *API
 }
 
 // Watch creates and returns a channel that produces update events of resources.
-func (r *APIGEtcdWWatcher) Watch(ctx context.Context) <-chan *entity.ResourceMetadata {
+func (r *APIGEtcdWatcher) Watch(ctx context.Context) <-chan *entity.ResourceMetadata {
 	watchCtx, cancel := context.WithCancel(ctx)
 	retCh := make(chan *entity.ResourceMetadata)
 	var etcdWatchCh clientv3.WatchChan
@@ -141,7 +141,7 @@ func (r *APIGEtcdWWatcher) Watch(ctx context.Context) <-chan *entity.ResourceMet
 }
 
 // handle event
-func (r *APIGEtcdWWatcher) handleEvent(event *clientv3.Event) (*entity.ResourceMetadata, error) {
+func (r *APIGEtcdWatcher) handleEvent(event *clientv3.Event) (*entity.ResourceMetadata, error) {
 	switch event.Type {
 	case clientv3.EventTypePut:
 		r.logger.Debugw(
@@ -208,7 +208,38 @@ func (r *APIGEtcdWWatcher) handleEvent(event *clientv3.Event) (*entity.ResourceM
 	return nil, fmt.Errorf("err unknown event type: %s", event.Type)
 }
 
-func (r *APIGEtcdWWatcher) extractResourceMetadata(key string, value []byte) (entity.ResourceMetadata, error) {
+func (r *APIGEtcdWatcher) extractResourceMetadata(key string, value []byte) (entity.ResourceMetadata, error) {
+	// /{self.prefix}/{self.api_version}/gateway/{gateway_name}/{stage_name}/route/bk-default.default.-1
+	ret := entity.ResourceMetadata{}
+	err := json.Unmarshal(value, &ret)
+	if err != nil {
+		r.logger.Error(err, "unmarshal etcd value failed", "value", string(value))
+		return ret, err
+	}
+	if len(key) == 0 {
+		r.logger.Error(nil, "empty key", "key", key)
+		return ret, eris.Errorf("empty key")
+	}
+	// remove leading /
+	matches := strings.Split(key[1:], "/")
+	if matches == nil {
+		r.logger.Error(nil, "regex match failed, not found", "key", key)
+		return ret, eris.Errorf("regex match failed, not found")
+	}
+	if len(matches) < 7 {
+		r.logger.Error(nil, "Etcd key segment by slash should larger or equal to 5", "key", key)
+		return ret, eris.Errorf("Etcd key segment by slash should larger or equal to 5")
+	}
+
+	ret.APIVersion = matches[len(matches)-6]
+	ret.Kind = constant.APISIXResource(matches[len(matches)-2])
+	ret.Name = matches[len(matches)-1]
+	ret.Ctx = context.Background()
+	r.logger.Debugw("Extract resource info from etcdkey", "key", key, "resourceInfo", ret)
+	return ret, nil
+}
+
+func (r *APIGEtcdWatcher) ListResources(key string, value []byte) (entity.ResourceMetadata, error) {
 	// /{self.prefix}/{self.api_version}/gateway/{gateway_name}/{stage_name}/route/bk-default.default.-1
 	ret := entity.ResourceMetadata{}
 	err := json.Unmarshal(value, &ret)

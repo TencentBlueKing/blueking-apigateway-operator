@@ -35,7 +35,7 @@ commiter *commiter.Commiter,
 gatewayName string,
 stageName string,
 isExcludeReleaseVersion bool,
-) (*entity.ApisixConfiguration, error) {
+) (*entity.ApisixStageResource, error) {
 	//si := entity.ReleaseStageInfo{
 	//	ResourceMetadata: entity.ResourceMetadata{
 	//		Labels: entity.Label{
@@ -80,8 +80,8 @@ ctx context.Context,
 commiter *commiter.Commiter,
 gatewayName string,
 stageName string,
-) (map[string]*entity.ApisixConfiguration, error) {
-	configMap := make(map[string]*entity.ApisixConfiguration)
+) (map[string]*entity.ApisixStageResource, error) {
+	configMap := make(map[string]*entity.ApisixStageResource)
 	stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
 	apiSixResources, err := GetApigwResourcesByStage(ctx, commiter, gatewayName, stageName, true)
 	if err != nil {
@@ -99,7 +99,7 @@ gatewayName string,
 stageName string,
 resourceName string,
 resourceID int64,
-) (map[string]*entity.ApisixConfiguration, error) {
+) (map[string]*entity.ApisixStageResource, error) {
 	//configMap := make(map[string]*entity.ApisixConfiguration)
 	//stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
 	//

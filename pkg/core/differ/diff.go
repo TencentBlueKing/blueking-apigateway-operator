@@ -98,18 +98,17 @@ func (r *CmpReporter) Report(rs cmp.Result) {
 }
 
 func (d *ConfigDiffer) Diff(
-	old, new *entity.ApisixConfiguration,
-) (put *entity.ApisixConfiguration, delete *entity.ApisixConfiguration) {
+old, new *entity.ApisixStageResource,
+) (put *entity.ApisixStageResource, delete *entity.ApisixStageResource) {
 	if old == nil {
 		return new, nil
 	}
 	if new == nil {
 		return nil, old
 	}
-	put = &entity.ApisixConfiguration{}
-	delete = &entity.ApisixConfiguration{}
+	put = &entity.ApisixStageResource{}
+	delete = &entity.ApisixStageResource{}
 	put.Routes, delete.Routes = d.DiffRoutes(old.Routes, new.Routes)
-	put.StreamRoutes, delete.StreamRoutes = d.DiffStreamRoutes(old.StreamRoutes, new.StreamRoutes)
 	put.Services, delete.Services = d.DiffServices(old.Services, new.Services)
 	put.PluginMetadatas, delete.PluginMetadatas = d.DiffPluginMetadatas(old.PluginMetadatas, new.PluginMetadatas)
 	put.SSLs, delete.SSLs = d.DiffSSLs(old.SSLs, new.SSLs)
@@ -117,8 +116,8 @@ func (d *ConfigDiffer) Diff(
 }
 
 func (d *ConfigDiffer) DiffRoutes(
-	old map[string]*entity.Route,
-	new map[string]*entity.Route,
+old map[string]*entity.Route,
+new map[string]*entity.Route,
 ) (putList map[string]*entity.Route, deleteList map[string]*entity.Route) {
 	oldResMap := make(map[string]*entity.Route)
 	putList = make(map[string]*entity.Route)
@@ -155,48 +154,9 @@ func (d *ConfigDiffer) DiffRoutes(
 	return putList, deleteList
 }
 
-func (d *ConfigDiffer) DiffStreamRoutes(
-	old map[string]*entity.StreamRoute,
-	new map[string]*entity.StreamRoute,
-) (putList map[string]*entity.StreamRoute, deleteList map[string]*entity.StreamRoute) {
-	oldResMap := make(map[string]*entity.StreamRoute)
-	putList = make(map[string]*entity.StreamRoute)
-	deleteList = make(map[string]*entity.StreamRoute)
-	for key, oldRes := range old {
-		oldResMap[key] = oldRes
-	}
-	for key, newRes := range new {
-		oldRes, ok := oldResMap[key]
-		if !ok {
-			putList[key] = newRes
-			continue
-		}
-
-		if !cmp.Equal(
-			oldRes,
-			newRes,
-			cmp.Transformer("transformerMap", transformMap),
-			ignoreApisixMetadataCmpOpt,
-			ignoreCreateTimeAndUpdateTimeCmpOptFunc(entity.StreamRoute{}),
-			cmp.Reporter(&CmpReporter{
-				Gateway:      newRes.Labels[config.BKAPIGatewayLabelKeyGatewayName],
-				Stage:        newRes.Labels[config.BKAPIGatewayLabelKeyGatewayStage],
-				ResourceType: constant.ApisixResourceTypeStreamRoutes,
-			}),
-		) {
-			putList[key] = newRes
-		}
-		delete(oldResMap, key)
-	}
-	for key, oldRes := range oldResMap {
-		deleteList[key] = oldRes
-	}
-	return putList, deleteList
-}
-
 func (d *ConfigDiffer) DiffServices(
-	old map[string]*entity.Service,
-	new map[string]*entity.Service,
+old map[string]*entity.Service,
+new map[string]*entity.Service,
 ) (putList map[string]*entity.Service, deleteList map[string]*entity.Service) {
 	oldResMap := make(map[string]*entity.Service)
 	putList = make(map[string]*entity.Service)
@@ -233,8 +193,8 @@ func (d *ConfigDiffer) DiffServices(
 }
 
 func (d *ConfigDiffer) DiffPluginMetadatas(
-	old map[string]*entity.PluginMetadata,
-	new map[string]*entity.PluginMetadata,
+old map[string]*entity.PluginMetadata,
+new map[string]*entity.PluginMetadata,
 ) (putList map[string]*entity.PluginMetadata, deleteList map[string]*entity.PluginMetadata) {
 	oldResMap := make(map[string]*entity.PluginMetadata)
 	putList = make(map[string]*entity.PluginMetadata)
@@ -264,8 +224,8 @@ func (d *ConfigDiffer) DiffPluginMetadatas(
 }
 
 func (d *ConfigDiffer) DiffSSLs(
-	old map[string]*entity.SSL,
-	new map[string]*entity.SSL,
+old map[string]*entity.SSL,
+new map[string]*entity.SSL,
 ) (putList map[string]*entity.SSL, deleteList map[string]*entity.SSL) {
 	oldResMap := make(map[string]*entity.SSL)
 	putList = make(map[string]*entity.SSL)

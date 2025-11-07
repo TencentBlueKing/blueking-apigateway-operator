@@ -416,12 +416,12 @@ var _ = Describe("configDiffer", func() {
 
 	Describe("diff", func() {
 		var (
-			newConf *entity.ApisixConfiguration
-			oldConf *entity.ApisixConfiguration
+			newConf *entity.ApisixStageResource
+			oldConf *entity.ApisixStageResource
 		)
 		BeforeEach(func() {
 			differ = NewConfigDiffer()
-			newConf = &entity.ApisixConfiguration{
+			newConf = &entity.ApisixStageResource{
 				Routes: map[string]*entity.Route{
 					"test-route1": {
 						Route: v1.Route{
@@ -501,7 +501,7 @@ var _ = Describe("configDiffer", func() {
 				},
 			}
 
-			oldConf = &entity.ApisixConfiguration{
+			oldConf = &entity.ApisixStageResource{
 				Routes: map[string]*entity.Route{
 					"test-route1": {
 						Route: v1.Route{

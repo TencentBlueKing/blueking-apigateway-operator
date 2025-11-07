@@ -24,9 +24,9 @@ import "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
 
 // ReportResourceCount ...
 func ReportResourceCount(
-	gateway, stage, resType string,
-	conf *entity.ApisixConfiguration,
-	handler func(string, string, string, int),
+gateway, stage, resType string,
+conf *entity.ApisixStageResource,
+handler func(string, string, string, int),
 ) {
 	if conf != nil {
 		handler(gateway, stage, "routes", len(conf.Routes))

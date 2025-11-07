@@ -42,6 +42,7 @@ type ApisixWatcher struct {
 	Prefix string // example: /apisix/routes
 
 	mux       sync.RWMutex
+	// key -> resource  stage_id: resources
 	resources map[string]entity.ApisixResource // resource id -> resource
 
 	currentRevision int64
@@ -87,10 +88,10 @@ func (e *ApisixWatcher) fullSync(ctx context.Context) error {
 	e.mux.Lock()
 	defer e.mux.Unlock()
 
-	e.resources = make(map[string]entity.ApisixResource)
+	e.resources = make(map[string]entity.ApisixStageResource)
 
 	for i := range ret.Kvs {
-		resource, err := e.parseResource(ret.Kvs[i].Key, ret.Kvs[i].Value)
+		resource, err := e.addResource(ret.Kvs[i].Key, ret.Kvs[i].Value)
 		if err != nil {
 			e.logger.Error(err, "Parse resource from etcd failed")
 			continue
@@ -108,27 +109,31 @@ func (e *ApisixWatcher) fullSync(ctx context.Context) error {
 	return nil
 }
 
-func (e *ApisixWatcher) parseResource(key, value []byte) (resource entity.ApisixResource, err error) {
+func (e *ApisixWatcher) addResource(key, value []byte) error {
 	if len(e.Prefix) == len(key) {
-		return nil, nil
+		return nil
 	}
 	if string(value) == constant.SkippedValueEtcdInitDir ||
-		string(value) == constant.SkippedValueEtcdEmptyObject {
-		return nil, nil
+	string(value) == constant.SkippedValueEtcdEmptyObject {
+		return nil
 	}
 
 	parts := strings.Split(strings.Trim(e.Prefix, "/"), "/")
 	if len(parts) == 0 {
 		e.logger.Error("Invalid Prefix key", e.Prefix)
-		return nil, fmt.Errorf("invalid Prefix key: %s", e.Prefix)
+		return fmt.Errorf("invalid Prefix key: %s", e.Prefix)
 	}
 	resourceType := parts[len(parts)-1]
 
 	switch resourceType {
 	case constant.ApisixResourceTypeRoutes:
-		resource = &entity.Route{}
-	case constant.ApisixResourceTypeStreamRoutes:
-		resource = &entity.StreamRoute{}
+		resource := &entity.Route{}
+		err := json.Unmarshal(value, resource)
+		if err != nil {
+			e.logger.Error("Unmarshal route from etcd failed")
+			return fmt.Errorf("unmarshal route from etcd failed: %w", err)
+		}
+		e.resources[resource.GetStageID())] = resource
 	case constant.ApisixResourceTypeServices:
 		resource = &entity.Service{}
 	case constant.ApisixResourceTypeSSL:
@@ -206,7 +211,7 @@ func (e *ApisixWatcher) incrSync() {
 func (e *ApisixWatcher) handlerEvent(event *clientv3.Event) error {
 	switch event.Type {
 	case clientv3.EventTypePut:
-		resource, err := e.parseResource(event.Kv.Key, event.Kv.Value)
+		resource, err := e.addResource(event.Kv.Key, event.Kv.Value)
 		if err != nil {
 			e.logger.Error(err, "Parse resource from etcd failed")
 			return err
@@ -227,7 +232,7 @@ func (e *ApisixWatcher) handlerEvent(event *clientv3.Event) error {
 		e.resources[resource.GetID()] = resource
 		e.mux.Unlock()
 	case clientv3.EventTypeDelete:
-		resource, err := e.parseResource(event.PrevKv.Key, event.PrevKv.Value)
+		resource, err := e.addResource(event.PrevKv.Key, event.PrevKv.Value)
 		if err != nil {
 			e.logger.Error(err, "Parse resource from etcd failed")
 			return err

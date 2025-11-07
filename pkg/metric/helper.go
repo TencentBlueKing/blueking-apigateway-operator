@@ -25,9 +25,9 @@ import (
 
 // ReportResourceCountHelper ...
 func ReportResourceCountHelper(
-	gateway, stage string,
-	conf *entity.ApisixConfiguration,
-	handler func(string, string, string, int),
+gateway, stage string,
+conf *entity.ApisixStageResource,
+handler func(string, string, string, int),
 ) {
 	if conf != nil {
 		handler(gateway, stage, "routes", len(conf.Routes))

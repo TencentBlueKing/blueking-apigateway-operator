@@ -44,7 +44,7 @@ import (
 // EtcdAgentRunner ...
 type EtcdAgentRunner struct {
 	client       *clientv3.Client
-	apigwWatcher *watcher.APIGEtcdWWatcher
+	apigwWatcher *watcher.APIGEtcdWatcher
 	leader       *leaderelection.EtcdLeaderElector
 	synchronizer *synchronizer.ApisixConfigSynchronizer
 	store        *store.ApisixEtcdConfigStore
