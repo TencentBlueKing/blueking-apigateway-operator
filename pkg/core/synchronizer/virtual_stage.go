@@ -23,14 +23,11 @@ package synchronizer
 import (
 	"os"
 
-	apisixv1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
 	"go.uber.org/zap"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 // HealthZRouteIDInner ...
@@ -41,7 +38,7 @@ const (
 
 // VirtualStage combine some builtin routes
 type VirtualStage struct {
-	labels           map[string]string
+	entity.ResourceMetadata
 	apisixHealthzURI string
 
 	logger *zap.SugaredLogger
@@ -49,52 +46,57 @@ type VirtualStage struct {
 
 // NewVirtualStage creates a new virtual stage
 func NewVirtualStage(apisixHealthzURI string) *VirtualStage {
-	labels := make(map[string]string)
-	labels[config.BKAPIGatewayLabelKeyGatewayName] = virtualGatewayName
-	labels[config.BKAPIGatewayLabelKeyGatewayStage] = virtualStageName
+	metadata := entity.ResourceMetadata{
+		Labels: entity.LabelInfo{
+			Gateway: virtualGatewayName,
+			Stage:   virtualStageName,
+		},
+	}
 
 	return &VirtualStage{
-		labels:           labels,
+		ResourceMetadata: metadata,
 		apisixHealthzURI: apisixHealthzURI,
 		logger:           logging.GetLogger().Named("virtual-stage"),
 	}
 }
 
-func (s *VirtualStage) injectVirtualStageLabels(labels map[string]string) map[string]string {
-	if labels == nil {
-		labels = make(map[string]string, len(s.labels))
-	}
-
-	for k, v := range s.labels {
-		labels[k] = v
-	}
-
-	return labels
-}
-
-func (s *VirtualStage) makeRouteMetadata(id string) apisixv1.Metadata {
-	return apisixv1.Metadata{
+func (s *VirtualStage) makeRouteMetadata(id string) entity.ResourceMetadata {
+	return entity.ResourceMetadata{
 		ID:     id,
 		Name:   id,
-		Labels: s.labels,
+		Labels: s.ResourceMetadata.Labels,
 	}
 }
 
 func (s *VirtualStage) make404DefaultRoute() *entity.Route {
 	return &entity.Route{
-		Route: apisixv1.Route{
-			Metadata: s.makeRouteMetadata(NotFoundHandling),
-			Uri:      "/*",
-			Priority: -100,
-			Plugins: map[string]interface{}{
-				"bk-error-wrapper":     map[string]interface{}{},
-				"bk-not-found-handler": map[string]interface{}{},
-				"file-logger": map[string]interface{}{
-					"path": fileLoggerLogPath,
-				},
-			},
-		},
-		Status: utils.IntPtr(1),
+		ResourceMetadata: s.makeRouteMetadata(NotFoundHandling),
+		URI:              "/*",
+		Uris:             nil,
+		Desc:             "",
+		Priority:         -100,
+		Methods:          nil,
+		Host:             "",
+		Hosts:            nil,
+		RemoteAddr:       "",
+		RemoteAddrs:      nil,
+		Vars:             nil,
+		FilterFunc:       "",
+		Script:           nil,
+		ScriptID:         nil,
+		Plugins: map[string]interface{}{
+			"bk-error-wrapper":     map[string]interface{}{},
+			"bk-not-found-handler": map[string]interface{}{},
+			"file-logger": map[string]interface{}{
+				"path": fileLoggerLogPath,
+			}},
+		PluginConfigID:  nil,
+		Upstream:        nil,
+		ServiceID:       nil,
+		UpstreamID:      nil,
+		ServiceProtocol: "",
+		EnableWebsocket: false,
+		Status:          1,
 	}
 }
 
@@ -112,19 +114,17 @@ func (s *VirtualStage) makeOuterHealthzRoute() *entity.Route {
 	}
 
 	return &entity.Route{
-		Route: apisixv1.Route{
-			Metadata: s.makeRouteMetadata(HealthZRouteIDOuter),
-			Uri:      s.apisixHealthzURI,
-			Priority: -100,
-			Methods:  []string{"GET"},
-			Plugins:  plugins,
-		},
-		Status: utils.IntPtr(1),
+		ResourceMetadata: s.makeRouteMetadata(HealthZRouteIDOuter),
+		URI:              s.apisixHealthzURI,
+		Priority:         -100,
+		Methods:          []string{"GET"},
+		Plugins:          plugins,
+		Status:           1,
 	}
 }
 
-func (s *VirtualStage) makeExtraConfiguration() *entity.ApisixConfigurationStandalone {
-	var configuration entity.ApisixConfigurationStandalone
+func (s *VirtualStage) makeExtraConfiguration() *entity.ApisixStageResource {
+	var configuration entity.ApisixStageResource
 
 	if extraApisixResourcesPath == "" {
 		return &configuration
@@ -153,21 +153,21 @@ func (s *VirtualStage) MakeConfiguration() *entity.ApisixStageResource {
 
 	for _, service := range extraConfiguration.Services {
 		if service != nil && service.ID != "" {
-			service.Labels = s.injectVirtualStageLabels(service.Labels)
+			service.Labels = s.Labels
 			ret.Services[service.ID] = service
 		}
 	}
 
 	for _, ssl := range extraConfiguration.SSLs {
 		if ssl != nil && ssl.ID != "" {
-			ssl.Labels = s.injectVirtualStageLabels(ssl.Labels)
+			ssl.Labels = s.Labels
 			ret.SSLs[ssl.ID] = ssl
 		}
 	}
 
 	for _, route := range extraConfiguration.Routes {
 		if route != nil && route.ID != "" {
-			route.Labels = s.injectVirtualStageLabels(route.Labels)
+			route.Labels = s.Labels
 			ret.Routes[route.ID] = route
 		}
 	}

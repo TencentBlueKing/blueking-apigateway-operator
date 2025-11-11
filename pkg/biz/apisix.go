@@ -31,9 +31,9 @@ import (
 
 // GetApisixResourceCount 获取 apisix 指定环境的资源数量
 func GetApisixResourceCount(
-store *store.ApisixEtcdConfigStore,
-gatewayName string,
-stageName string,
+	store *store.ApisixEtcdConfigStore,
+	gatewayName string,
+	stageName string,
 ) (int64, error) {
 	stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
 	apiSixResources := store.Get(stageKey)
@@ -42,9 +42,9 @@ stageName string,
 
 // ListApisixResources 获取 apisix 指定环境的资源列表
 func ListApisixResources(
-store *store.ApisixEtcdConfigStore,
-gatewayName string,
-stageName string,
+	store *store.ApisixEtcdConfigStore,
+	gatewayName string,
+	stageName string,
 ) map[string]*entity.ApisixStageResource {
 	configMap := make(map[string]*entity.ApisixStageResource)
 	stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
@@ -55,11 +55,11 @@ stageName string,
 
 // GetApisixResource 获取 apisix 指定环境下的资源信息
 func GetApisixResource(
-store *store.ApisixEtcdConfigStore,
-gatewayName string,
-stageName string,
-resourceName string,
-resourceID int64,
+	store *store.ApisixEtcdConfigStore,
+	gatewayName string,
+	stageName string,
+	resourceName string,
+	resourceID int64,
 ) (map[string]*entity.ApisixStageResource, error) {
 	configMap := make(map[string]*entity.ApisixStageResource)
 	stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
@@ -95,9 +95,9 @@ resourceID int64,
 
 // GetApisixStageCurrentVersionInfo 获取 apisix 指定环境的发布版本信息
 func GetApisixStageCurrentVersionInfo(
-store *store.ApisixEtcdConfigStore,
-gatewayName string,
-stageName string,
+	store *store.ApisixEtcdConfigStore,
+	gatewayName string,
+	stageName string,
 ) (map[string]interface{}, error) {
 	stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
 	apiSixResources := store.Get(stageKey)

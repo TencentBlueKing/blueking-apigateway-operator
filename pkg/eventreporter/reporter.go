@@ -43,7 +43,7 @@ var (
 
 type reportEvent struct {
 	ctx    context.Context
-	stage  *entity.ReleaseStageInfo
+	stage  *entity.ReleaseInfo
 	Event  constant.EventName
 	status constant.EventStatus
 	detail map[string]interface{}
@@ -115,7 +115,7 @@ func Shutdown() {
 }
 
 // ReportParseConfigurationDoingEvent  will report the event of paring configuration
-func ReportParseConfigurationDoingEvent(ctx context.Context, stage *entity.ReleaseStageInfo) {
+func ReportParseConfigurationDoingEvent(ctx context.Context, stage *entity.ReleaseInfo) {
 	event := reportEvent{
 		stage:  stage,
 		Event:  constant.EventNameParseConfiguration,
@@ -127,7 +127,7 @@ func ReportParseConfigurationDoingEvent(ctx context.Context, stage *entity.Relea
 }
 
 // ReportParseConfigurationFailureEvent will report parse configuration failure event
-func ReportParseConfigurationFailureEvent(ctx context.Context, stage *entity.ReleaseStageInfo, err error) {
+func ReportParseConfigurationFailureEvent(ctx context.Context, stage *entity.ReleaseInfo, err error) {
 	event := reportEvent{
 		ctx:    ctx,
 		stage:  stage,
@@ -140,7 +140,7 @@ func ReportParseConfigurationFailureEvent(ctx context.Context, stage *entity.Rel
 }
 
 // ReportParseConfigurationSuccessEvent will report the success event of parse configuration
-func ReportParseConfigurationSuccessEvent(ctx context.Context, stage *entity.ReleaseStageInfo) {
+func ReportParseConfigurationSuccessEvent(ctx context.Context, stage *entity.ReleaseInfo) {
 	event := reportEvent{
 		stage:  stage,
 		Event:  constant.EventNameParseConfiguration,
@@ -151,7 +151,7 @@ func ReportParseConfigurationSuccessEvent(ctx context.Context, stage *entity.Rel
 }
 
 // ReportApplyConfigurationDoingEvent will report the event of applying configuration
-func ReportApplyConfigurationDoingEvent(ctx context.Context, stage *entity.ReleaseStageInfo) {
+func ReportApplyConfigurationDoingEvent(ctx context.Context, stage *entity.ReleaseInfo) {
 	event := reportEvent{
 		stage:  stage,
 		Event:  constant.EventNameApplyConfiguration,
@@ -162,7 +162,7 @@ func ReportApplyConfigurationDoingEvent(ctx context.Context, stage *entity.Relea
 }
 
 // ReportApplyConfigurationSuccessEvent will report success event when apply configuration successfully
-func ReportApplyConfigurationSuccessEvent(ctx context.Context, stage *entity.ReleaseStageInfo) {
+func ReportApplyConfigurationSuccessEvent(ctx context.Context, stage *entity.ReleaseInfo) {
 	event := reportEvent{
 		stage:  stage,
 		Event:  constant.EventNameApplyConfiguration,
@@ -173,7 +173,7 @@ func ReportApplyConfigurationSuccessEvent(ctx context.Context, stage *entity.Rel
 }
 
 // ReportLoadConfigurationDoingEvent will report  event when loading configuration
-func ReportLoadConfigurationDoingEvent(ctx context.Context, stage *entity.ReleaseStageInfo) {
+func ReportLoadConfigurationDoingEvent(ctx context.Context, stage *entity.ReleaseInfo) {
 	event := reportEvent{
 		stage:  stage,
 		Event:  constant.EventNameLoadConfiguration,
@@ -184,7 +184,7 @@ func ReportLoadConfigurationDoingEvent(ctx context.Context, stage *entity.Releas
 }
 
 // ReportLoadConfigurationResultEvent Report the detection result of apisix loading
-func ReportLoadConfigurationResultEvent(ctx context.Context, stage *entity.ReleaseStageInfo) {
+func ReportLoadConfigurationResultEvent(ctx context.Context, stage *entity.ReleaseInfo) {
 	// filter not need report event
 	if stage == nil || stage.Labels.PublishId == "" {
 		return
@@ -311,7 +311,7 @@ func (r *Reporter) reportEvent(event reportEvent) {
 }
 
 // parseEventInfo parse stage info
-func parseEventInfo(stage *entity.ReleaseStageInfo) *client.ReportEventReq {
+func parseEventInfo(stage *entity.ReleaseInfo) *client.ReportEventReq {
 	gatewayName := stage.GetGatewayName()
 	stageName := stage.GetStageName()
 	publishID := cast.ToString(stage.PublishId)

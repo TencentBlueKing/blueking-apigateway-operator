@@ -66,7 +66,7 @@ type ApisixEtcdConfigStore struct {
 
 // NewApiEtcdConfigStore ...
 func NewApiEtcdConfigStore(client *clientv3.Client, prefix string,
-putInterval time.Duration, delInterval time.Duration) (*ApisixEtcdConfigStore, error) {
+	putInterval time.Duration, delInterval time.Duration) (*ApisixEtcdConfigStore, error) {
 	s := &ApisixEtcdConfigStore{
 		client:      client,
 		prefix:      strings.TrimRight(prefix, "/"),
@@ -139,7 +139,7 @@ func (s *ApisixEtcdConfigStore) GetAll() map[string]*entity.ApisixStageResource 
 	configMap := make(map[string]*entity.ApisixStageResource)
 	routeMap := s.watcher[constant.ApisixResourceTypeRoutes].GetAllResources()
 	for key, route := range routeMap {
-		stageName := route.GetStageFromLabel()
+		stageName := route.GetStageName()
 		if _, ok := configMap[stageName]; !ok {
 			configMap[stageName] = entity.NewEmptyApisixConfiguration()
 		}
@@ -148,7 +148,7 @@ func (s *ApisixEtcdConfigStore) GetAll() map[string]*entity.ApisixStageResource 
 
 	serviceMap := s.watcher[constant.ApisixResourceTypeServices].GetAllResources()
 	for key, service := range serviceMap {
-		stageName := service.GetStageFromLabel()
+		stageName := service.GetStageName()
 		if _, ok := configMap[stageName]; !ok {
 			configMap[stageName] = entity.NewEmptyApisixConfiguration()
 		}
@@ -157,7 +157,7 @@ func (s *ApisixEtcdConfigStore) GetAll() map[string]*entity.ApisixStageResource 
 
 	sslMap := s.watcher[constant.ApisixResourceTypeSSL].GetAllResources()
 	for key, ssl := range sslMap {
-		stageName := ssl.GetStageFromLabel()
+		stageName := ssl.GetStageName()
 		if _, ok := configMap[stageName]; !ok {
 			configMap[stageName] = entity.NewEmptyApisixConfiguration()
 		}
@@ -166,7 +166,7 @@ func (s *ApisixEtcdConfigStore) GetAll() map[string]*entity.ApisixStageResource 
 
 	pmMap := s.watcher[constant.ApisixResourceTypePluginMetadata].GetAllResources()
 	for key, pm := range pmMap {
-		stageName := pm.GetStageFromLabel()
+		stageName := pm.GetStageName()
 		if _, ok := configMap[stageName]; !ok {
 			configMap[stageName] = entity.NewEmptyApisixConfiguration()
 		}
@@ -178,9 +178,9 @@ func (s *ApisixEtcdConfigStore) GetAll() map[string]*entity.ApisixStageResource 
 
 // Alter ...
 func (s *ApisixEtcdConfigStore) Alter(
-ctx context.Context,
-stageName string,
-config *entity.ApisixStageResource,
+	ctx context.Context,
+	stageName string,
+	config *entity.ApisixStageResource,
 ) error {
 	st := time.Now()
 	err := s.alterByStage(ctx, stageName, config)
@@ -197,7 +197,7 @@ config *entity.ApisixStageResource,
 }
 
 func (s *ApisixEtcdConfigStore) alterByStage(
-ctx context.Context, stageKey string, conf *entity.ApisixStageResource,
+	ctx context.Context, stageKey string, conf *entity.ApisixStageResource,
 ) (err error) {
 	// get cached config
 	oldConf := s.Get(stageKey)
@@ -224,7 +224,7 @@ ctx context.Context, stageKey string, conf *entity.ApisixStageResource,
 		}
 
 		if len(putConf.Routes)+len(putConf.Services)+
-		len(putConf.PluginMetadatas)+len(putConf.SSLs) > 0 {
+			len(putConf.PluginMetadatas)+len(putConf.SSLs) > 0 {
 			s.logger.Infof(
 				"put gateway[key=%s] conf count:[route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
 				stageKey,
@@ -256,18 +256,6 @@ ctx context.Context, stageKey string, conf *entity.ApisixStageResource,
 				return fmt.Errorf("batch delete services failed: %w", err)
 			}
 		}
-		if len(deleteConf.Routes)+len(deleteConf.StreamRoutes)+len(deleteConf.Services)+
-		len(deleteConf.PluginMetadatas)+len(deleteConf.SSLs) > 0 {
-			s.logger.Infof(
-				"del gateway[key=%s] conf count:[route:%d,stream_route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
-				stageKey,
-				len(deleteConf.Routes),
-				len(deleteConf.StreamRoutes),
-				len(deleteConf.Services),
-				len(deleteConf.PluginMetadatas),
-				len(deleteConf.SSLs),
-			)
-		}
 	}
 
 	if deleteConf == nil && putConf == nil {
@@ -284,18 +272,8 @@ func (s *ApisixEtcdConfigStore) batchPutResource(ctx context.Context, resourceTy
 	for resourceIter.Next() {
 		// set create time from cache resource
 		st := time.Now()
-
 		key := resourceIter.Key().Interface().(string)
 		resource := resourceIter.Value().Interface().(entity.ApisixResource)
-		oldSt := resourceStore.GetResourceCreateTime(resource.GetID())
-		if oldSt != 0 {
-			resource.SetCreateTime(oldSt)
-		} else {
-			resource.SetCreateTime(st.Unix())
-		}
-
-		resource.SetUpdateTime(st.Unix())
-
 		bytes, err := json.Marshal(resource)
 		if err != nil {
 			s.logger.Error(

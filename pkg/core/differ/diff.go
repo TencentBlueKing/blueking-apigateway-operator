@@ -25,7 +25,6 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	json "github.com/json-iterator/go"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
@@ -98,7 +97,7 @@ func (r *CmpReporter) Report(rs cmp.Result) {
 }
 
 func (d *ConfigDiffer) Diff(
-old, new *entity.ApisixStageResource,
+	old, new *entity.ApisixStageResource,
 ) (put *entity.ApisixStageResource, delete *entity.ApisixStageResource) {
 	if old == nil {
 		return new, nil
@@ -110,14 +109,13 @@ old, new *entity.ApisixStageResource,
 	delete = &entity.ApisixStageResource{}
 	put.Routes, delete.Routes = d.DiffRoutes(old.Routes, new.Routes)
 	put.Services, delete.Services = d.DiffServices(old.Services, new.Services)
-	put.PluginMetadatas, delete.PluginMetadatas = d.DiffPluginMetadatas(old.PluginMetadatas, new.PluginMetadatas)
 	put.SSLs, delete.SSLs = d.DiffSSLs(old.SSLs, new.SSLs)
 	return put, delete
 }
 
 func (d *ConfigDiffer) DiffRoutes(
-old map[string]*entity.Route,
-new map[string]*entity.Route,
+	old map[string]*entity.Route,
+	new map[string]*entity.Route,
 ) (putList map[string]*entity.Route, deleteList map[string]*entity.Route) {
 	oldResMap := make(map[string]*entity.Route)
 	putList = make(map[string]*entity.Route)
@@ -139,8 +137,8 @@ new map[string]*entity.Route,
 			ignoreApisixMetadataCmpOpt,
 			ignoreCreateTimeAndUpdateTimeCmpOptFunc(entity.Route{}),
 			cmp.Reporter(&CmpReporter{
-				Gateway:      newRes.Labels[config.BKAPIGatewayLabelKeyGatewayName],
-				Stage:        newRes.Labels[config.BKAPIGatewayLabelKeyGatewayStage],
+				Gateway:      newRes.GetReleaseInfo().GetGatewayName(),
+				Stage:        newRes.GetReleaseInfo().GetStageName(),
 				ResourceType: constant.ApisixResourceTypeRoutes,
 			}),
 		) {
@@ -155,8 +153,8 @@ new map[string]*entity.Route,
 }
 
 func (d *ConfigDiffer) DiffServices(
-old map[string]*entity.Service,
-new map[string]*entity.Service,
+	old map[string]*entity.Service,
+	new map[string]*entity.Service,
 ) (putList map[string]*entity.Service, deleteList map[string]*entity.Service) {
 	oldResMap := make(map[string]*entity.Service)
 	putList = make(map[string]*entity.Service)
@@ -177,8 +175,8 @@ new map[string]*entity.Service,
 			ignoreApisixMetadataCmpOpt,
 			ignoreCreateTimeAndUpdateTimeCmpOptFunc(entity.Service{}),
 			cmp.Reporter(&CmpReporter{
-				Gateway:      newRes.Labels[config.BKAPIGatewayLabelKeyGatewayName],
-				Stage:        newRes.Labels[config.BKAPIGatewayLabelKeyGatewayStage],
+				Gateway:      newRes.GetReleaseInfo().GetGatewayName(),
+				Stage:        newRes.GetReleaseInfo().GetStageName(),
 				ResourceType: constant.ApisixResourceTypeServices,
 			}),
 		) {
@@ -193,8 +191,8 @@ new map[string]*entity.Service,
 }
 
 func (d *ConfigDiffer) DiffPluginMetadatas(
-old map[string]*entity.PluginMetadata,
-new map[string]*entity.PluginMetadata,
+	old map[string]*entity.PluginMetadata,
+	new map[string]*entity.PluginMetadata,
 ) (putList map[string]*entity.PluginMetadata, deleteList map[string]*entity.PluginMetadata) {
 	oldResMap := make(map[string]*entity.PluginMetadata)
 	putList = make(map[string]*entity.PluginMetadata)
@@ -224,8 +222,8 @@ new map[string]*entity.PluginMetadata,
 }
 
 func (d *ConfigDiffer) DiffSSLs(
-old map[string]*entity.SSL,
-new map[string]*entity.SSL,
+	old map[string]*entity.SSL,
+	new map[string]*entity.SSL,
 ) (putList map[string]*entity.SSL, deleteList map[string]*entity.SSL) {
 	oldResMap := make(map[string]*entity.SSL)
 	putList = make(map[string]*entity.SSL)
@@ -243,8 +241,8 @@ new map[string]*entity.SSL,
 			cmp.Transformer("transformerMap", transformMap),
 			ignoreCreateTimeAndUpdateTimeCmpOptFunc(entity.SSL{}),
 			cmp.Reporter(&CmpReporter{
-				Gateway:      newRes.Labels[config.BKAPIGatewayLabelKeyGatewayName],
-				Stage:        newRes.Labels[config.BKAPIGatewayLabelKeyGatewayStage],
+				Gateway:      newRes.GetReleaseInfo().GetGatewayName(),
+				Stage:        newRes.GetReleaseInfo().GetStageName(),
 				ResourceType: constant.ApisixResourceTypeSSL,
 			}),
 		) {

@@ -30,20 +30,39 @@ import (
 
 // ApisixResource defines common function for apisix resources
 type ApisixResource interface {
-	GetResourceID() string
-	GetReleaseStageInfo() *ReleaseStageInfo
+	GetID() string
+	GetReleaseInfo() *ReleaseInfo
+	GetStageName() string
 }
 
 // 网关环境资源配置
 type ApisixStageResource struct {
-	Routes   map[string]*Route   `json:"routes,omitempty"`
-	Services map[string]*Service `json:"services,omitempty"`
-	SSL      map[string]*SSL     `json:"ssl,omitempty"`
+	Routes          map[string]*Route          `json:"routes,omitempty"`
+	Services        map[string]*Service        `json:"services,omitempty"`
+	SSLs            map[string]*SSL            `json:"ssls,omitempty"`
+	PluginMetadatas map[string]*PluginMetadata `json:"plugin_metadatas,omitempty"`
+}
+
+// NewEmptyApisixConfiguration will build a new apisix configuration object
+func NewEmptyApisixConfiguration() *ApisixStageResource {
+	return &ApisixStageResource{
+		Routes:          make(map[string]*Route),
+		Services:        make(map[string]*Service),
+		PluginMetadatas: make(map[string]*PluginMetadata),
+		SSLs:            make(map[string]*SSL),
+	}
+}
+
+// NewEmptyApisixGlobalResource ...
+func NewEmptyApisixGlobalResource() *ApisixGlobalResource {
+	return &ApisixGlobalResource{
+		PluginMetadata: make(map[string]*PluginMetadata),
+	}
 }
 
 // 全局资源配置
 type ApisixGlobalResource struct {
-	PluginMetadata map[string]*PluginMetadataConf `json:"plugin_metadata,omitempty"`
+	PluginMetadata map[string]*PluginMetadata `json:"plugin_metadata,omitempty"`
 }
 
 // Status ...
@@ -219,8 +238,9 @@ type GlobalRule struct {
 // PluginMetadataConf ...
 type PluginMetadataConf map[string]interface{}
 
-// PluginMetaData ...
-type PluginMetaData struct {
+// PluginMetadata ...
+type PluginMetadata struct {
+	ResourceMetadata
 	PluginMetadataConf
 }
 
@@ -267,20 +287,19 @@ type SSLClient struct {
 // SSL ...
 type SSL struct {
 	ResourceMetadata
-	Cert          string            `json:"cert,omitempty"`
-	Key           string            `json:"key,omitempty"`
-	Sni           string            `json:"sni,omitempty"`
-	Snis          []string          `json:"snis,omitempty"`
-	Certs         []string          `json:"certs,omitempty"`
-	Type          string            `json:"type,omitempty"`
-	Keys          []string          `json:"keys,omitempty"`
-	ExpTime       int64             `json:"exptime,omitempty"`
-	Status        int               `json:"status"`
-	ValidityStart int64             `json:"validity_start,omitempty"`
-	ValidityEnd   int64             `json:"validity_end,omitempty"`
-	Labels        map[string]string `json:"labels,omitempty"`
-	Client        *SSLClient        `json:"client,omitempty"`
-	SSLProtocols  []string          `json:"ssl_protocols,omitempty"`
+	Cert          string     `json:"cert,omitempty"`
+	Key           string     `json:"key,omitempty"`
+	Sni           string     `json:"sni,omitempty"`
+	Snis          []string   `json:"snis,omitempty"`
+	Certs         []string   `json:"certs,omitempty"`
+	Type          string     `json:"type,omitempty"`
+	Keys          []string   `json:"keys,omitempty"`
+	ExpTime       int64      `json:"exptime,omitempty"`
+	Status        int        `json:"status"`
+	ValidityStart int64      `json:"validity_start,omitempty"`
+	ValidityEnd   int64      `json:"validity_end,omitempty"`
+	Client        *SSLClient `json:"client,omitempty"`
+	SSLProtocols  []string   `json:"ssl_protocols,omitempty"`
 }
 
 // Proto ...
@@ -309,7 +328,6 @@ type StreamRoute struct {
 	ServiceID  interface{}            `json:"service_id,omitempty"`
 	Plugins    map[string]interface{} `json:"plugins,omitempty"`
 	Protocol   *StreamRouteProtocol   `json:"protocol,omitempty"`
-	Labels     map[string]string      `json:"labels,omitempty"`
 }
 
 // ResourceMetadata describes the metadata of a resource object, which includes the
@@ -324,8 +342,8 @@ type ResourceMetadata struct {
 	Ctx        context.Context
 }
 
-func (rm *ResourceMetadata) GetReleaseStageInfo() *ReleaseStageInfo {
-	return &ReleaseStageInfo{
+func (rm *ResourceMetadata) GetReleaseInfo() *ReleaseInfo {
+	return &ReleaseInfo{
 		ResourceMetadata: *rm,
 		PublishId:        cast.ToInt(rm.Labels.PublishId),
 		ApisixVersion:    rm.Labels.ApisixVersion,
@@ -333,7 +351,7 @@ func (rm *ResourceMetadata) GetReleaseStageInfo() *ReleaseStageInfo {
 	}
 }
 
-func (rm *ResourceMetadata) GetResourceID() string {
+func (rm *ResourceMetadata) GetID() string {
 	return rm.ID
 }
 
@@ -353,11 +371,15 @@ func (rm *ResourceMetadata) IsEmpty() bool {
 	return rm.Labels.Gateway == "" && rm.Labels.Stage == ""
 }
 
-func (rm *ResourceMetadata) GetStageID() string {
-	return config.GenStagePrimaryKey(rm.Labels.Gateway, rm.Labels.Stage)
+func (rm *ResourceMetadata) GetReleaseID() string {
+	// stage相关资源都是按照stage维度来管理的
+	if rm.Kind != constant.PluginMetadata {
+		return config.GenStagePrimaryKey(rm.Labels.Gateway, rm.Labels.Stage)
+	}
+	return rm.ID
 }
 
-type ReleaseStageInfo struct {
+type ReleaseInfo struct {
 	ResourceMetadata
 	PublishId       int    `json:"publish_id"`
 	PublishTime     string `json:"publish_time"`
@@ -373,18 +395,5 @@ type LabelInfo struct {
 	ApisixVersion string `json:"gateway.bk.tencent.com/apisix-version"`
 }
 
-// ResourceKey ...
-type ResourceKey struct {
-	StageInfo
-	ResourceName string
-}
-
-// StageInfo ...
-type StageInfo struct {
-	GatewayName string
-	StageName   string
-	PublishID   string
-	Ctx         context.Context
-
-	RetryCount int64
+type GlobalResourceInfo struct {
 }

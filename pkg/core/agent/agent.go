@@ -25,7 +25,6 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/agent/timer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/watcher"
@@ -43,10 +42,11 @@ var retryDelaySeconds = time.Second * 5
 // EventAgent ...
 type EventAgent struct {
 	apigwWatcher *watcher.APIGEtcdWatcher
-	commitChan   chan []*entity.ReleaseStageInfo
+	commitChan   chan []*entity.ReleaseInfo
+
 	synchronizer *synchronizer.ApisixConfigSynchronizer
 
-	stageTimer *timer.StageTimer
+	resourceTimer *timer.ResourceTimer
 
 	retryChan chan *entity.ResourceMetadata
 
@@ -57,18 +57,18 @@ type EventAgent struct {
 
 // NewEventAgent ...
 func NewEventAgent(
-resourceRegistry *watcher.APIGEtcdWatcher,
-commitCh chan []*entity.ReleaseStageInfo,
-synchronizer *synchronizer.ApisixConfigSynchronizer,
-stageTimer *timer.StageTimer,
+	resourceRegistry *watcher.APIGEtcdWatcher,
+	commitCh chan []*entity.ReleaseInfo,
+	synchronizer *synchronizer.ApisixConfigSynchronizer,
+	stageTimer *timer.ResourceTimer,
 ) *EventAgent {
 	return &EventAgent{
-		apigwWatcher: resourceRegistry,
-		commitChan:   commitCh,
-		synchronizer: synchronizer,
-		stageTimer:   stageTimer,
-		retryChan:    make(chan *entity.ResourceMetadata, 100),
-		logger:       logging.GetLogger().Named("event-agent"),
+		apigwWatcher:  resourceRegistry,
+		commitChan:    commitCh,
+		synchronizer:  synchronizer,
+		resourceTimer: stageTimer,
+		retryChan:     make(chan *entity.ResourceMetadata, 100),
+		logger:        logging.GetLogger().Named("event-agent"),
 	}
 }
 
@@ -141,41 +141,22 @@ func (w *EventAgent) handleEvent(event *entity.ResourceMetadata) {
 	ctx, span := trace.StartTrace(event.Ctx, "agent.handleEvent")
 	event.Ctx = ctx
 	defer span.End()
-
 	if event.IsEmpty() {
 		w.logger.Debugw("skip empty event")
-
 		span.AddEvent("skip empty event")
 		return
 	}
-
-	switch event.Kind {
-	// 全局配置单独处理
-	case constant.GlobalRule, constant.PluginMetadata:
-		w.logger.Debugw("skip BkInstance event")
-
-		span.AddEvent("skip BkInstance event")
-		return
-	default:
-		w.logger.Debugw("Receive event", "gatewayName",
-			event.Labels.Gateway, "stageName", event.Labels.Stage)
-		// 更新时间窗口
-		w.stageTimer.Update(event.GetReleaseStageInfo())
-
-	}
-
+	w.logger.Debugw("Receive event", "gatewayName",
+		event.Labels.Gateway, "stageName", event.Labels.Stage)
+	// 更新时间窗口
+	w.resourceTimer.Update(event.GetReleaseInfo())
 }
 
 func (w *EventAgent) handleTicker(ctx context.Context) {
-	stageList := w.stageTimer.ListStagesForCommit()
-	var includeAllStage bool
-	for _, stage := range stageList {
-		if stage.IsEmpty() {
-			includeAllStage = true
-		}
-	}
-	w.logger.Debugw("stages to be committed", "stageList", stageList, "includeAllStage", includeAllStage)
-	if len(stageList) != 0 {
-		w.commitChan <- stageList
+	resourceList := w.resourceTimer.ListResourcesForCommit()
+	w.logger.Debugw("resources to be committed", "resourceList",
+		resourceList)
+	if len(resourceList) != 0 {
+		w.commitChan <- resourceList
 	}
 }

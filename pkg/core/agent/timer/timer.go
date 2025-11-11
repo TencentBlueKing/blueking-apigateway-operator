@@ -29,7 +29,7 @@ import (
 
 // CacheTimer ...
 type CacheTimer struct {
-	StageInfo *entity.ReleaseStageInfo
+	ResourceInfo *entity.ReleaseInfo
 
 	CachedTime       time.Time
 	ShouldCommitTime time.Time
@@ -46,53 +46,51 @@ func (t *CacheTimer) Update(offset time.Duration) {
 	t.ShouldCommitTime = time.Now().Add(offset)
 }
 
-// StageTimer ...
-type StageTimer struct {
-	stageTimer sync.Map
+// ResourceTimer ...
+type ResourceTimer struct {
+	resourceTimer sync.Map
 }
 
-// NewStageTimer ...
-func NewStageTimer() *StageTimer {
-	return &StageTimer{}
+// NewResourceTimer ...
+func NewResourceTimer() *ResourceTimer {
+	return &ResourceTimer{}
 }
 
 // Update ...
-func (t *StageTimer) Update(stage *entity.ReleaseStageInfo) {
+func (t *ResourceTimer) Update(resource *entity.ReleaseInfo) {
 	// trace
-	ctx, span := trace.StartTrace(stage.Ctx, "timer.Update")
-	stage.Ctx = ctx
+	ctx, span := trace.StartTrace(resource.Ctx, "timer.Update")
+	resource.Ctx = ctx
 	defer span.End()
 
 	var timer *CacheTimer
-	timerInterface, ok := t.stageTimer.Load(stage.Id)
+	timerInterface, ok := t.resourceTimer.Load(resource.GetReleaseID())
 	if !ok {
-		timer = &CacheTimer{StageInfo: stage}
+		timer = &CacheTimer{ResourceInfo: resource}
 		timer.Reset(eventsWaitingTimeWindow)
 	} else {
 		timer = timerInterface.(*CacheTimer)
-
-		// end old stage trace
-		_, span := trace.StartTrace(timer.StageInfo.Ctx, "timer.Replace")
+		// end old resource trace
+		_, span := trace.StartTrace(timer.ResourceInfo.Ctx, "timer.Replace")
 		span.End()
 
-		timer.StageInfo = stage
+		timer.ResourceInfo = resource
 		timer.Update(eventsWaitingTimeWindow)
 	}
-	t.stageTimer.Store(stage.Id, timer)
+	t.resourceTimer.Store(resource.GetReleaseID(), timer)
 }
 
-// ListStagesForCommit ...
-func (t *StageTimer) ListStagesForCommit() []*entity.ReleaseStageInfo {
-	stageList := make([]*entity.ReleaseStageInfo, 0)
-
-	t.stageTimer.Range(func(key, timerInterface interface{}) bool {
+// ListResourcesForCommit ...
+func (t *ResourceTimer) ListResourcesForCommit() []*entity.ReleaseInfo {
+	resourceList := make([]*entity.ReleaseInfo, 0)
+	t.resourceTimer.Range(func(key, timerInterface interface{}) bool {
 		timer := timerInterface.(*CacheTimer)
 		if time.Since(timer.ShouldCommitTime) > 0 || time.Since(timer.CachedTime) > forceUpdateTimeWindow {
-			stageList = append(stageList, timer.StageInfo)
-			t.stageTimer.Delete(key)
+			resourceList = append(resourceList, timer.ResourceInfo)
+			t.resourceTimer.Delete(key)
 		}
 		return true
 	})
 
-	return stageList
+	return resourceList
 }

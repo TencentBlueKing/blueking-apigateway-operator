@@ -95,7 +95,7 @@ func (r *EtcdAgentRunner) init() {
 	r.store = apisixStore
 	r.synchronizer = synchronizer.NewSynchronizer(apisixStore, "/healthz")
 
-	stageTimer := timer.NewStageTimer()
+	stageTimer := timer.NewResourceTimer()
 
 	r.commiter = commiter.NewCommiter(
 		r.apigwWatcher,

@@ -42,7 +42,6 @@ type ApisixWatcher struct {
 	Prefix string // example: /apisix/routes
 
 	mux       sync.RWMutex
-	// key -> resource  stage_id: resources
 	resources map[string]entity.ApisixResource // resource id -> resource
 
 	currentRevision int64
@@ -88,7 +87,7 @@ func (e *ApisixWatcher) fullSync(ctx context.Context) error {
 	e.mux.Lock()
 	defer e.mux.Unlock()
 
-	e.resources = make(map[string]entity.ApisixStageResource)
+	e.resources = make(map[string]entity.ApisixResource)
 
 	for i := range ret.Kvs {
 		resource, err := e.addResource(ret.Kvs[i].Key, ret.Kvs[i].Value)
@@ -101,7 +100,8 @@ func (e *ApisixWatcher) fullSync(ctx context.Context) error {
 			continue
 		}
 
-		e.logger.Debugw("store resource", "key", string(ret.Kvs[i].Key), "resourceID", resource.GetID())
+		e.logger.Debugw("store resource", "key", string(ret.Kvs[i].Key), "resourceID",
+			resource.GetID())
 		e.resources[resource.GetID()] = resource
 	}
 
@@ -109,31 +109,24 @@ func (e *ApisixWatcher) fullSync(ctx context.Context) error {
 	return nil
 }
 
-func (e *ApisixWatcher) addResource(key, value []byte) error {
+func (e *ApisixWatcher) addResource(key, value []byte) (resource entity.ApisixResource, err error) {
 	if len(e.Prefix) == len(key) {
-		return nil
+		return nil, nil
 	}
 	if string(value) == constant.SkippedValueEtcdInitDir ||
-	string(value) == constant.SkippedValueEtcdEmptyObject {
-		return nil
+		string(value) == constant.SkippedValueEtcdEmptyObject {
+		return nil, nil
 	}
 
 	parts := strings.Split(strings.Trim(e.Prefix, "/"), "/")
 	if len(parts) == 0 {
 		e.logger.Error("Invalid Prefix key", e.Prefix)
-		return fmt.Errorf("invalid Prefix key: %s", e.Prefix)
+		return nil, fmt.Errorf("invalid Prefix key: %s", e.Prefix)
 	}
 	resourceType := parts[len(parts)-1]
-
 	switch resourceType {
 	case constant.ApisixResourceTypeRoutes:
-		resource := &entity.Route{}
-		err := json.Unmarshal(value, resource)
-		if err != nil {
-			e.logger.Error("Unmarshal route from etcd failed")
-			return fmt.Errorf("unmarshal route from etcd failed: %w", err)
-		}
-		e.resources[resource.GetStageID())] = resource
+		resource = &entity.Route{}
 	case constant.ApisixResourceTypeServices:
 		resource = &entity.Service{}
 	case constant.ApisixResourceTypeSSL:
@@ -150,9 +143,6 @@ func (e *ApisixWatcher) addResource(key, value []byte) error {
 		e.logger.Error("Unmarshal resource from etcd failed")
 		return nil, fmt.Errorf("unmarshal resource from etcd failed: %w", err)
 	}
-
-	// remove resource desc
-	resource.ClearUnusedFields()
 	return resource, nil
 }
 
@@ -256,25 +246,15 @@ func (e *ApisixWatcher) handlerEvent(event *clientv3.Event) error {
 	return nil
 }
 
-func (e *ApisixWatcher) GetResourceCreateTime(resourceID string) int64 {
-	e.mux.RLock()
-	defer e.mux.RUnlock()
-
-	resource, ok := e.resources[resourceID]
-	if !ok {
-		return 0
-	}
-
-	return resource.GetCreateTime()
-}
-
 func (e *ApisixWatcher) GetStageResources(stageName string) map[string]entity.ApisixResource {
 	e.mux.RLock()
 	defer e.mux.RUnlock()
-
 	resources := make(map[string]entity.ApisixResource)
 	for key, resource := range e.resources {
-		if resource.GetStageFromLabel() == stageName {
+		if resource.GetReleaseInfo() == nil {
+			continue
+		}
+		if resource.GetReleaseInfo().GetStageName() == stageName {
 			resources[key] = resource
 		}
 	}

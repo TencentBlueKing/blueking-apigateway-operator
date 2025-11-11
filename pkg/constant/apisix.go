@@ -20,6 +20,14 @@ package constant
 
 import "time"
 
+// ApigwAPISIXStageResourcePrefixFormat ...
+// example: /{prefix}/{self.api_version}/gateway/{gateway_name}/{stage_name}/route/bk-default.default.-1
+const ApigwAPISIXStageResourcePrefixFormat = "/%s/%s/%s/gateway/%s/"
+
+// ApigwAPISIXGlobalResourcePrefixFormat ...
+// example: /{prefix}/{self.api_version}/global/plugin_metadata/bk-concurrency-limit
+const ApigwAPISIXGlobalResourcePrefixFormat = "/%s/%s/global/"
+
 // APISIXResource ...
 type APISIXResource string
 
@@ -36,9 +44,22 @@ const (
 	Proto          APISIXResource = "proto"
 	SSL            APISIXResource = "ssl"
 	StreamRoute    APISIXResource = "stream_route"
-	Schema         APISIXResource = "schema"  // 操作审计场景使用
-	Gateway        APISIXResource = "gateway" // 操作审计场景使用
+	BkRelease      APISIXResource = "_bk_release"
 )
+
+var SupportResourceTypeMap = map[APISIXResource]bool{
+	Route:          true,
+	Service:        true,
+	SSL:            true,
+	PluginMetadata: true,
+	Upstream:       false,
+	PluginConfig:   false,
+	Consumer:       false,
+	ConsumerGroup:  false,
+	GlobalRule:     false,
+	Proto:          false,
+	StreamRoute:    false,
+}
 
 // ResourceTypeList ...
 var ResourceTypeList = []APISIXResource{

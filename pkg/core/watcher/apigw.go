@@ -34,6 +34,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/validator"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/trace"
@@ -208,6 +209,7 @@ func (r *APIGEtcdWatcher) handleEvent(event *clientv3.Event) (*entity.ResourceMe
 	return nil, fmt.Errorf("err unknown event type: %s", event.Type)
 }
 
+// extractResourceMetadata ...
 func (r *APIGEtcdWatcher) extractResourceMetadata(key string, value []byte) (entity.ResourceMetadata, error) {
 	// /{self.prefix}/{self.api_version}/gateway/{gateway_name}/{stage_name}/route/bk-default.default.-1
 	ret := entity.ResourceMetadata{}
@@ -226,46 +228,178 @@ func (r *APIGEtcdWatcher) extractResourceMetadata(key string, value []byte) (ent
 		r.logger.Error(nil, "regex match failed, not found", "key", key)
 		return ret, eris.Errorf("regex match failed, not found")
 	}
-	if len(matches) < 7 {
-		r.logger.Error(nil, "Etcd key segment by slash should larger or equal to 5", "key", key)
-		return ret, eris.Errorf("Etcd key segment by slash should larger or equal to 5")
-	}
-
-	ret.APIVersion = matches[len(matches)-6]
-	ret.Kind = constant.APISIXResource(matches[len(matches)-2])
-	ret.Name = matches[len(matches)-1]
 	ret.Ctx = context.Background()
+	resourceKind := constant.APISIXResource(matches[len(matches)-2])
+	if resourceKind == constant.PluginMetadata && len(matches) == 5 {
+		ret.ID = matches[len(matches)-1]
+		ret.Kind = resourceKind
+		ret.Name = matches[len(matches)-1]
+		ret.APIVersion = matches[len(matches)-4]
+		return ret, nil
+	}
+	if len(matches) < 7 {
+		r.logger.Error(nil, "Etcd key segment by slash should larger or equal to 7", "key", key)
+		return ret, eris.Errorf("Etcd key segment by slash should larger or equal to 7")
+	}
+	ret.APIVersion = matches[len(matches)-6]
+	ret.Kind = resourceKind
+	ret.Name = matches[len(matches)-1]
 	r.logger.Debugw("Extract resource info from etcdkey", "key", key, "resourceInfo", ret)
 	return ret, nil
 }
 
-func (r *APIGEtcdWatcher) ListResources(key string, value []byte) (entity.ResourceMetadata, error) {
+// ListStageResources ...
+func (r *APIGEtcdWatcher) ListStageResources(stageRelease *entity.ReleaseInfo) (*entity.ApisixStageResource, error) {
 	// /{self.prefix}/{self.api_version}/gateway/{gateway_name}/{stage_name}/route/bk-default.default.-1
-	ret := entity.ResourceMetadata{}
-	err := json.Unmarshal(value, &ret)
+	etcdKey := fmt.Sprintf(
+		constant.ApigwAPISIXStageResourcePrefixFormat,
+		r.keyPrefix, stageRelease.APIVersion, stageRelease.Labels.Gateway, stageRelease.Labels.Stage)
+	resp, err := r.etcdClient.Get(stageRelease.Ctx, etcdKey)
 	if err != nil {
-		r.logger.Error(err, "unmarshal etcd value failed", "value", string(value))
-		return ret, err
+		r.logger.Error(err, "get etcd value failed", "key", stageRelease.GetID())
+		return nil, err
 	}
-	if len(key) == 0 {
-		r.logger.Error(nil, "empty key", "key", key)
-		return ret, eris.Errorf("empty key")
+	if len(resp.Kvs) == 0 {
+		r.logger.Error(nil, "empty etcd value", "key", etcdKey)
+		return nil, eris.Errorf("empty etcd value")
 	}
-	// remove leading /
-	matches := strings.Split(key[1:], "/")
-	if matches == nil {
-		r.logger.Error(nil, "regex match failed, not found", "key", key)
-		return ret, eris.Errorf("regex match failed, not found")
+	ret, err := r.ValueToStageResource(resp)
+	if err != nil {
+		r.logger.Error(err, "value to resource failed", "key", etcdKey)
+		return nil, err
 	}
-	if len(matches) < 7 {
-		r.logger.Error(nil, "Etcd key segment by slash should larger or equal to 5", "key", key)
-		return ret, eris.Errorf("Etcd key segment by slash should larger or equal to 5")
-	}
+	return ret, nil
+}
 
-	ret.APIVersion = matches[len(matches)-6]
-	ret.Kind = constant.APISIXResource(matches[len(matches)-2])
-	ret.Name = matches[len(matches)-1]
-	ret.Ctx = context.Background()
-	r.logger.Debugw("Extract resource info from etcdkey", "key", key, "resourceInfo", ret)
+// ValueToStageResource ...
+func (r *APIGEtcdWatcher) ValueToStageResource(resp *clientv3.GetResponse) (*entity.ApisixStageResource, error) {
+	// /{self.prefix}/{self.api_version}/gateway/{gateway_name}/{stage_name}/route/bk-default.default.-1
+	ret := entity.NewEmptyApisixConfiguration()
+	for _, kv := range resp.Kvs {
+		// remove leading /
+		matches := strings.Split(string(kv.Key[1:]), "/")
+		if matches == nil {
+			r.logger.Error(nil, "regex match failed, not found", "key", string(kv.Key))
+			return nil, eris.Errorf("regex match failed, not found")
+		}
+		if len(matches) < 7 {
+			r.logger.Error(nil, "Etcd key segment by slash should larger or equal to 7", "key", string(kv.Key))
+			return nil, eris.Errorf("Etcd key segment by slash should larger or equal to 7")
+		}
+		resourceKind := constant.APISIXResource(matches[len(matches)-2])
+		if !constant.SupportResourceTypeMap[resourceKind] {
+			r.logger.Error(nil, "resource kind not support", "key", string(kv.Key))
+			return nil, eris.Errorf("resource kind not support")
+		}
+		resourceMetadata, err := r.extractResourceMetadata(string(kv.Key), kv.Value)
+		if err != nil {
+			r.logger.Error(err, "extract resource metadata failed", "key", string(kv.Key))
+			return nil, err
+		}
+		// 校验配置schema
+		err = validator.ValidateAPISIXJsonSchema(resourceMetadata.APIVersion, resourceKind, kv.Value)
+		if err != nil {
+			r.logger.Error(err, "validate apisix json schema failed", "key", string(kv.Key))
+			return nil, err
+		}
+		switch resourceKind {
+		case constant.Route:
+			var route entity.Route
+			err := json.Unmarshal(kv.Value, &route)
+			if err != nil {
+				r.logger.Error(err, "unmarshal etcd value failed", "value", string(kv.Value))
+				return nil, err
+			}
+			route.ResourceMetadata = resourceMetadata
+			ret.Routes[route.GetID()] = &route
+		case constant.Service:
+			var service entity.Service
+			err := json.Unmarshal(kv.Value, &service)
+			if err != nil {
+				r.logger.Error(err, "unmarshal etcd value failed", "value", string(kv.Value))
+				return nil, err
+			}
+			service.ResourceMetadata = resourceMetadata
+			ret.Services[service.GetID()] = &service
+		case constant.SSL:
+			var ssl entity.SSL
+			err := json.Unmarshal(kv.Value, &ssl)
+			if err != nil {
+				r.logger.Error(err, "unmarshal etcd value failed", "value", string(kv.Value))
+				return nil, err
+			}
+			ssl.ResourceMetadata = resourceMetadata
+			ret.SSLs[ssl.GetID()] = &ssl
+		}
+	}
+	return ret, nil
+}
+
+// ListGlobalResources ...
+func (r *APIGEtcdWatcher) ListGlobalResources(releaseInfo *entity.ReleaseInfo) (*entity.ApisixGlobalResource, error) {
+	// /{self.prefix}/{self.api_version}/global/plugin_metadata/bk-concurrency-limit
+	etcdKey := fmt.Sprintf(
+		constant.ApigwAPISIXGlobalResourcePrefixFormat,
+		r.keyPrefix, releaseInfo.APIVersion)
+	resp, err := r.etcdClient.Get(releaseInfo.Ctx, etcdKey)
+	if err != nil {
+		r.logger.Error(err, "get etcd value failed", "key", etcdKey)
+		return nil, err
+	}
+	if len(resp.Kvs) == 0 {
+		r.logger.Error(nil, "empty etcd value", "key", etcdKey)
+		return nil, eris.Errorf("empty etcd value")
+	}
+	ret, err := r.ValueToGlobalResource(resp)
+	if err != nil {
+		r.logger.Error(err, "value to resource failed", "key", etcdKey)
+		return nil, err
+	}
+	return ret, nil
+}
+
+// ValueToGlobalResource ...
+func (r *APIGEtcdWatcher) ValueToGlobalResource(resp *clientv3.GetResponse) (*entity.ApisixGlobalResource, error) {
+	// /bk-gateway-apigw/v2/global/plugin_metadata/bk-concurrency-limit
+	ret := entity.NewEmptyApisixGlobalResource()
+	for _, kv := range resp.Kvs {
+		// remove leading /
+		matches := strings.Split(string(kv.Key[1:]), "/")
+		if matches == nil {
+			r.logger.Error(nil, "regex match failed, not found", "key", string(kv.Key))
+			return nil, eris.Errorf("regex match failed, not found")
+		}
+		if len(matches) != 5 {
+			r.logger.Error(nil, "Etcd key segment by slash should be 5", "key", string(kv.Key))
+			return nil, eris.Errorf("Etcd key segment by slash should be 5")
+		}
+		resourceKind := constant.APISIXResource(matches[len(matches)-2])
+		if !constant.SupportResourceTypeMap[resourceKind] {
+			r.logger.Error(nil, "resource kind not support", "key", string(kv.Key))
+			return nil, eris.Errorf("resource kind not support")
+		}
+		resourceMetadata, err := r.extractResourceMetadata(string(kv.Key), kv.Value)
+		if err != nil {
+			r.logger.Error(err, "extract resource metadata failed", "key", string(kv.Key))
+			return nil, err
+		}
+		// 校验配置schema
+		err = validator.ValidateAPISIXJsonSchema(resourceMetadata.APIVersion, resourceKind, kv.Value)
+		if err != nil {
+			r.logger.Error(err, "validate apisix json schema failed", "key", string(kv.Key))
+			return nil, err
+		}
+		switch resourceKind {
+		case constant.PluginMetadata:
+			var route entity.PluginMetadata
+			err := json.Unmarshal(kv.Value, &route)
+			if err != nil {
+				r.logger.Error(err, "unmarshal etcd value failed", "value", string(kv.Value))
+				return nil, err
+			}
+			route.ResourceMetadata = resourceMetadata
+			ret.PluginMetadata[route.GetID()] = &route
+		}
+	}
 	return ret, nil
 }

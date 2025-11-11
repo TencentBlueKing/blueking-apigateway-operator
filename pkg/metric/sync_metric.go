@@ -46,10 +46,10 @@ func ReportStageConfigSyncMetric(gateway, stage string) {
 
 // ReportStageConfigAlterMetric ...
 func ReportStageConfigAlterMetric(
-stageKey string,
-config *entity.ApisixStageResource,
-started time.Time,
-err error,
+	stageKey string,
+	config *entity.ApisixStageResource,
+	started time.Time,
+	err error,
 ) {
 	parts := strings.Split(strings.Trim(stageKey, "/"), "/")
 	var (

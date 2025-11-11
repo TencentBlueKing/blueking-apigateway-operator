@@ -30,11 +30,11 @@ import (
 
 // GetApigwResourcesByStage 根据网关查询资源
 func GetApigwResourcesByStage(
-ctx context.Context,
-commiter *commiter.Commiter,
-gatewayName string,
-stageName string,
-isExcludeReleaseVersion bool,
+	ctx context.Context,
+	commiter *commiter.Commiter,
+	gatewayName string,
+	stageName string,
+	isExcludeReleaseVersion bool,
 ) (*entity.ApisixStageResource, error) {
 	//si := entity.ReleaseStageInfo{
 	//	ResourceMetadata: entity.ResourceMetadata{
@@ -58,12 +58,12 @@ isExcludeReleaseVersion bool,
 
 // GetApigwResourceCount 获取 apigw 指定环境的资源数量
 func GetApigwResourceCount(
-ctx context.Context,
-commiter *commiter.Commiter,
-gatewayName string,
-stageName string,
+	ctx context.Context,
+	commiter *commiter.Commiter,
+	gatewayName string,
+	stageName string,
 ) (int64, error) {
-	//si := watcher.StageInfo{
+	//si := watcher.ResourceInfo{
 	//	GatewayName: gatewayName,
 	//	StageName:   stageName,
 	//}
@@ -76,10 +76,10 @@ stageName string,
 
 // ListApigwResources 获取 apigw 指定环境的资源列表
 func ListApigwResources(
-ctx context.Context,
-commiter *commiter.Commiter,
-gatewayName string,
-stageName string,
+	ctx context.Context,
+	commiter *commiter.Commiter,
+	gatewayName string,
+	stageName string,
 ) (map[string]*entity.ApisixStageResource, error) {
 	configMap := make(map[string]*entity.ApisixStageResource)
 	stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
@@ -93,19 +93,19 @@ stageName string,
 
 // GetApigwResource 获取 apigw 指定环境下的资源信息
 func GetApigwResource(
-ctx context.Context,
-commiter *commiter.Commiter,
-gatewayName string,
-stageName string,
-resourceName string,
-resourceID int64,
+	ctx context.Context,
+	commiter *commiter.Commiter,
+	gatewayName string,
+	stageName string,
+	resourceName string,
+	resourceID int64,
 ) (map[string]*entity.ApisixStageResource, error) {
 	//configMap := make(map[string]*entity.ApisixConfiguration)
 	//stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
 	//
 	//// by resourceName
 	//if resourceName != "" {
-	//	si := watcher.StageInfo{
+	//	si := watcher.ResourceInfo{
 	//		GatewayName: gatewayName,
 	//		StageName:   stageName,
 	//	}
@@ -136,12 +136,12 @@ resourceID int64,
 
 // GetApigwStageCurrentVersionInfo 获取 apigw 指定环境的发布版本信息
 func GetApigwStageCurrentVersionInfo(
-ctx context.Context,
-commiter *commiter.Commiter,
-gatewayName string,
-stageName string,
+	ctx context.Context,
+	commiter *commiter.Commiter,
+	gatewayName string,
+	stageName string,
 ) (map[string]interface{}, error) {
-	//si := watcher.StageInfo{
+	//si := watcher.ResourceInfo{
 	//	GatewayName: gatewayName,
 	//	StageName:   stageName,
 	//}

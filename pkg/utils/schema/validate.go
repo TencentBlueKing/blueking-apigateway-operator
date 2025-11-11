@@ -72,9 +72,9 @@ type APISIXJsonSchemaValidator struct {
 
 // NewResourceSchema 获取资源 schema
 func NewResourceSchema(
-version constant.APISIXVersion,
-resourceType constant.APISIXResource,
-jsonPath string,
+	version constant.APISIXVersion,
+	resourceType constant.APISIXResource,
+	jsonPath string,
 ) (string, *gojsonschema.Schema, error) {
 	schemaDef := schemaVersionMap[version].Get(jsonPath).String()
 	if schemaDef == "" {
@@ -82,6 +82,15 @@ jsonPath string,
 		return "", nil, fmt.Errorf("schema 验证失败: 未找到 schema, 路径: %s", jsonPath)
 	}
 
+	if resourceType == constant.PluginMetadata {
+		// 允许有附加属性
+		schema, err := gojsonschema.NewSchema(gojsonschema.NewStringLoader(schemaDef))
+		if err != nil {
+			log.Warnf("new schema failed: %v", err)
+			return "", nil, fmt.Errorf("实例化 schema 失败: %w", err)
+		}
+		return schemaDef, schema, nil
+	}
 	// 不允许有额外字段，需动态设置 additionalProperties=false
 	jsonLoader := gojsonschema.NewStringLoader(schemaDef)
 	schemaObj, err := jsonLoader.LoadJSON()
@@ -104,18 +113,17 @@ jsonPath string,
 
 // NewAPISIXJsonSchemaValidator 创建 APISIXJsonSchemaValidator
 func NewAPISIXJsonSchemaValidator(version constant.APISIXVersion,
-resourceType constant.APISIXResource, jsonPath string, customizePluginSchemaMap map[string]interface{},
+	resourceType constant.APISIXResource, jsonPath string,
 ) (Validator, error) {
 	schemaDef, schema, err := NewResourceSchema(version, resourceType, jsonPath)
 	if err != nil {
 		return nil, err
 	}
 	return &APISIXJsonSchemaValidator{
-		schema:                   schema,
-		schemaDef:                schemaDef,
-		version:                  version,
-		resourceType:             resourceType,
-		customizePluginSchemaMap: customizePluginSchemaMap,
+		schema:       schema,
+		schemaDef:    schemaDef,
+		version:      version,
+		resourceType: resourceType,
 	}, nil
 }
 
@@ -127,9 +135,24 @@ func getPlugins(reqBody interface{}) (map[string]interface{}, string) {
 	case *entity.Service:
 		log.Infof("type of reqBody: %#v", bodyType)
 		return bodyType.Plugins, "schema"
-	case *entity.PluginMetaData:
+	case *entity.Consumer:
 		log.Infof("type of reqBody: %#v", bodyType)
-		name := cast.ToString(bodyType.PluginMetadataConf["id"])
+		return bodyType.Plugins, "consumer_schema"
+	case *entity.ConsumerGroup:
+		log.Infof("type of reqBody: %#v", bodyType)
+		return bodyType.Plugins, "consumer_schema"
+	case *entity.PluginConfig:
+		log.Infof("type of reqBody: %#v", bodyType)
+		return bodyType.Plugins, "schema"
+	case *entity.GlobalRule:
+		log.Infof("type of reqBody: %#v", bodyType)
+		return bodyType.Plugins, "schema"
+	case *entity.StreamRoute:
+		log.Infof("type of reqBody: %#v", bodyType)
+		return bodyType.Plugins, "stream_schema"
+	case *entity.PluginMetadata:
+		log.Infof("type of reqBody: %#v", bodyType)
+		name := cast.ToString(bodyType.PluginMetadataConf["name"])
 		return map[string]interface{}{name: map[string]interface{}(bodyType.PluginMetadataConf)}, "metadata_schema"
 	}
 	return nil, ""
@@ -140,8 +163,8 @@ func (v *APISIXJsonSchemaValidator) cHashKeySchemaCheck(upstream *entity.Upstrea
 		return nil
 	}
 	if upstream.HashOn != "vars" &&
-	upstream.HashOn != "header" &&
-	upstream.HashOn != "cookie" {
+		upstream.HashOn != "header" &&
+		upstream.HashOn != "cookie" {
 		return fmt.Errorf("无效的哈希类型: %s", upstream.HashOn)
 	}
 
@@ -329,11 +352,6 @@ func (v *APISIXJsonSchemaValidator) checkConf(reqBody interface{}) error {
 				return err
 			}
 		}
-	// case *entity.Consumer:
-	//	consumer := reqBody.(*entity.Consumer)
-	//	//if consumer.GroupID == "" && len(consumer.Plugins) == 0 {
-	//	//	return fmt.Errorf("schema 验证失败: 插件为空")
-	//	//}
 	case *entity.SSL:
 		_, err := sslx.ParseCert(bodyType.Cert, bodyType.Key)
 		if err != nil {
@@ -387,7 +405,7 @@ func (v *APISIXJsonSchemaValidator) Validate(rawConfig json.RawMessage) error { 
 		obj = &entity.GlobalRule{}
 		_ = json.Unmarshal(rawConfig, obj)
 	case constant.PluginMetadata:
-		obj = &entity.PluginMetaData{}
+		obj = &entity.PluginMetadata{}
 		_ = json.Unmarshal(rawConfig, obj)
 	case constant.SSL:
 		obj = &entity.SSL{}

@@ -36,10 +36,10 @@ type ResourceHandler struct {
 
 // NewResourceApi constructor of resource handler
 func NewResourceApi(
-leaderElector *leaderelection.EtcdLeaderElector,
-registry *watcher.APIGEtcdWatcher,
-committer *commiter.Commiter,
-apiSixConfStore *store.ApisixEtcdConfigStore,
+	leaderElector *leaderelection.EtcdLeaderElector,
+	registry *watcher.APIGEtcdWatcher,
+	committer *commiter.Commiter,
+	apiSixConfStore *store.ApisixEtcdConfigStore,
 ) *ResourceHandler {
 	return &ResourceHandler{
 		LeaderElector:   leaderElector,

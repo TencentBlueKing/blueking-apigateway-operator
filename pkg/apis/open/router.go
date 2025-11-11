@@ -31,11 +31,11 @@ import (
 
 // Register registers the API routes
 func Register(
-r *gin.RouterGroup,
-leaderElector *leaderelection.EtcdLeaderElector,
-registry *watcher.APIGEtcdWatcher,
-committer *commiter.Commiter,
-apiSixConfStore *store.ApisixEtcdConfigStore,
+	r *gin.RouterGroup,
+	leaderElector *leaderelection.EtcdLeaderElector,
+	registry *watcher.APIGEtcdWatcher,
+	committer *commiter.Commiter,
+	apiSixConfStore *store.ApisixEtcdConfigStore,
 ) {
 	// register resource api
 	resourceApi := handler.NewResourceApi(leaderElector, registry, committer, apiSixConfStore)

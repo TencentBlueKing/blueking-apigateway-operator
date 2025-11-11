@@ -30,14 +30,13 @@ import (
 
 var _ = Describe("Timer", func() {
 	var (
-		stageTimer *StageTimer
-		stageInfo  entity.ReleaseStageInfo
+		stageTimer *ResourceTimer
+		stageInfo  entity.ReleaseInfo
 	)
 
 	BeforeEach(func() {
-		stageTimer = NewStageTimer()
-		stageInfo = entity.ReleaseStageInfo{
-			Id: "gateway-stage",
+		stageTimer = NewResourceTimer()
+		stageInfo = entity.ReleaseInfo{
 			ResourceMetadata: entity.ResourceMetadata{
 				Labels: entity.LabelInfo{
 					Gateway:       "gateway",
@@ -45,6 +44,7 @@ var _ = Describe("Timer", func() {
 					PublishId:     "1",
 					ApisixVersion: "2.13.1",
 				},
+				ID: "gateway-stage",
 			},
 
 			PublishId:       1,
@@ -63,7 +63,7 @@ var _ = Describe("Timer", func() {
 	It("should update the stage timer correctly", func() {
 		stageTimer.Update(&stageInfo)
 		stageTimer.Update(&stageInfo)
-		stageList := stageTimer.ListStagesForCommit()
+		stageList := stageTimer.ListResourcesForCommit()
 		// no sleep for exceeding 100ms (eventsWaitingTimeWindow)
 		gomega.Expect(stageList).To(gomega.HaveLen(0))
 	})
@@ -74,8 +74,8 @@ var _ = Describe("Timer", func() {
 
 		time.Sleep(200 * time.Millisecond)
 
-		stageList := stageTimer.ListStagesForCommit()
+		stageList := stageTimer.ListResourcesForCommit()
 		gomega.Expect(stageList).To(gomega.HaveLen(1))
-		gomega.Expect(stageList[0].Id).To(gomega.Equal(stageInfo.Id))
+		gomega.Expect(stageList[0].ID).To(gomega.Equal(stageInfo.ID))
 	})
 })

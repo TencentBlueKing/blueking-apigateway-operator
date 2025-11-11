@@ -56,9 +56,9 @@ func NewSynchronizer(store *store.ApisixEtcdConfigStore, apisixHealthzURI string
 
 // Sync will sync new staged apisix configuration
 func (as *ApisixConfigSynchronizer) Sync(
-ctx context.Context,
-gatewayName, stageName string,
-config *entity.ApisixStageResource,
+	ctx context.Context,
+	gatewayName, stageName string,
+	config *entity.ApisixStageResource,
 ) error {
 	key := cfg.GenStagePrimaryKey(gatewayName, stageName)
 
