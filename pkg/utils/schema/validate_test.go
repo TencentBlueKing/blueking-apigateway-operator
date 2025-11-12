@@ -36,13 +36,12 @@ var APISIXVersionList = []constant.APISIXVersion{
 
 func TestNewResourceSchema(t *testing.T) {
 	tests := []struct {
-		name                 string
-		version              constant.APISIXVersion
-		resourceType         constant.APISIXResource
-		jsonPath             string
-		config               string
-		shouldFail           bool
-		expectAdditionalProp bool
+		name         string
+		version      constant.APISIXVersion
+		resourceType constant.APISIXResource
+		jsonPath     string
+		config       string
+		shouldFail   bool
 	}{
 		{
 			name:         "normal case ",
