@@ -73,7 +73,6 @@ func (s *VirtualStage) make404DefaultRoute() *entity.Route {
 		ResourceMetadata: s.makeRouteMetadata(NotFoundHandling),
 		URI:              "/*",
 		Uris:             nil,
-		Desc:             "",
 		Priority:         -100,
 		Methods:          nil,
 		Host:             "",

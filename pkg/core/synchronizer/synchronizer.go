@@ -34,7 +34,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 )
 
-// ApisixConfigSynchronizer	synchronizes the API Gateway configuration.
+// ApisixConfigSynchronizer synchronizes the API Gateway configuration.
 type ApisixConfigSynchronizer struct {
 	store    *store.ApisixEtcdConfigStore
 	flushMux sync.Mutex
@@ -72,18 +72,6 @@ func (as *ApisixConfigSynchronizer) Sync(
 		return err
 	}
 
-	as.logger.Debug("flush virtual stage")
-	virtualStage := NewVirtualStage(as.apisixHealthzURI)
-	err = as.store.Alter(ctx, cfg.VirtualStageKey, virtualStage.MakeConfiguration())
-	if err != nil {
-		as.logger.Errorw(
-			"Failed to sync virtual stage",
-			"err", err, "key", cfg.VirtualStageKey,
-			"content", virtualStage.MakeConfiguration(),
-		)
-		return err
-	}
-
 	metric.ReportStageConfigSyncMetric(gatewayName, stageName)
 
 	return nil
@@ -115,5 +103,34 @@ func (as *ApisixConfigSynchronizer) RemoveNotExistStage(ctx context.Context, exi
 		}
 	}
 
+	return nil
+}
+
+// SyncGlobal 同步全局资源配置到 apisix etcd
+func (as *ApisixConfigSynchronizer) SyncGlobal(
+	ctx context.Context,
+	config *entity.ApisixGlobalResource,
+) error {
+	as.flushMux.Lock()
+	defer as.flushMux.Unlock()
+	as.logger.Debug("flush global changes")
+	err := as.store.AlterGlobal(ctx, config)
+	if err != nil {
+		as.logger.Errorw("Failed to sync global resource", "err", err, "content", config)
+		return err
+	}
+	metric.ReportStageConfigSyncMetric("global", "global")
+
+	as.logger.Debug("flush virtual stage")
+	virtualStage := NewVirtualStage(as.apisixHealthzURI)
+	err = as.store.Alter(ctx, cfg.VirtualStageKey, virtualStage.MakeConfiguration())
+	if err != nil {
+		as.logger.Errorw(
+			"Failed to sync virtual stage",
+			"err", err, "key", cfg.VirtualStageKey,
+			"content", virtualStage.MakeConfiguration(),
+		)
+		return err
+	}
 	return nil
 }

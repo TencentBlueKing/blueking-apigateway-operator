@@ -389,8 +389,7 @@ func (r *APIGEtcdWatcher) ValueToGlobalResource(resp *clientv3.GetResponse) (*en
 			r.logger.Error(err, "validate apisix json schema failed", "key", string(kv.Key))
 			return nil, err
 		}
-		switch resourceKind {
-		case constant.PluginMetadata:
+		if resourceKind == constant.PluginMetadata {
 			var route entity.PluginMetadata
 			err := json.Unmarshal(kv.Value, &route)
 			if err != nil {

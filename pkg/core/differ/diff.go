@@ -20,7 +20,6 @@
 package differ
 
 import (
-	apisixv1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	json "github.com/json-iterator/go"
@@ -49,12 +48,9 @@ func transformMap(mapType map[string]interface{}) map[string]interface{} {
 }
 
 // ignoreApisixMetadata: 忽略apisixeMetadata的部分成员
-var ignoreApisixMetadataCmpOpt = cmpopts.IgnoreFields(apisixv1.Metadata{}, "Desc", "Labels")
-
-// ignoreCreateTimeAndUpdateTimeCmpOpt: 忽略typ 创建、更新时间
-var ignoreCreateTimeAndUpdateTimeCmpOptFunc = func(typ interface{}) cmp.Option {
-	return cmpopts.IgnoreFields(typ, "CreateTime", "UpdateTime")
-}
+var ignoreApisixMetadataCmpOpt = cmpopts.IgnoreFields(entity.ResourceMetadata{},
+	"Labels", "Ctx", "RetryCount",
+)
 
 // CmpReporter ...
 type CmpReporter struct {
@@ -96,6 +92,7 @@ func (r *CmpReporter) Report(rs cmp.Result) {
 	}
 }
 
+// Diff 对比两个 ApisixStageResource，返回需要 put 和 delete 的资源
 func (d *ConfigDiffer) Diff(
 	old, new *entity.ApisixStageResource,
 ) (put *entity.ApisixStageResource, delete *entity.ApisixStageResource) {
@@ -110,9 +107,27 @@ func (d *ConfigDiffer) Diff(
 	put.Routes, delete.Routes = d.DiffRoutes(old.Routes, new.Routes)
 	put.Services, delete.Services = d.DiffServices(old.Services, new.Services)
 	put.SSLs, delete.SSLs = d.DiffSSLs(old.SSLs, new.SSLs)
+	put.PluginMetadatas, delete.PluginMetadatas = d.DiffPluginMetadatas(old.PluginMetadatas, new.PluginMetadatas)
 	return put, delete
 }
 
+// DiffGlobal 对比全局资源配置
+func (d *ConfigDiffer) DiffGlobal(
+	old, new *entity.ApisixGlobalResource,
+) (put *entity.ApisixGlobalResource, delete *entity.ApisixGlobalResource) {
+	if old == nil {
+		return new, nil
+	}
+	if new == nil {
+		return nil, old
+	}
+	put = &entity.ApisixGlobalResource{}
+	delete = &entity.ApisixGlobalResource{}
+	put.PluginMetadata, delete.PluginMetadata = d.DiffPluginMetadatas(old.PluginMetadata, new.PluginMetadata)
+	return put, delete
+}
+
+// DiffRoutes 对比两个 Route map，返回需要 put 和 delete 的 Route
 func (d *ConfigDiffer) DiffRoutes(
 	old map[string]*entity.Route,
 	new map[string]*entity.Route,
@@ -135,7 +150,6 @@ func (d *ConfigDiffer) DiffRoutes(
 			newRes,
 			cmp.Transformer("transformerMap", transformMap),
 			ignoreApisixMetadataCmpOpt,
-			ignoreCreateTimeAndUpdateTimeCmpOptFunc(entity.Route{}),
 			cmp.Reporter(&CmpReporter{
 				Gateway:      newRes.GetReleaseInfo().GetGatewayName(),
 				Stage:        newRes.GetReleaseInfo().GetStageName(),
@@ -152,6 +166,7 @@ func (d *ConfigDiffer) DiffRoutes(
 	return putList, deleteList
 }
 
+// DiffServices 对比两个 Service map，返回需要 put 和 delete 的 Service
 func (d *ConfigDiffer) DiffServices(
 	old map[string]*entity.Service,
 	new map[string]*entity.Service,
@@ -173,7 +188,6 @@ func (d *ConfigDiffer) DiffServices(
 			newRes,
 			cmp.Transformer("transformerMap", transformMap),
 			ignoreApisixMetadataCmpOpt,
-			ignoreCreateTimeAndUpdateTimeCmpOptFunc(entity.Service{}),
 			cmp.Reporter(&CmpReporter{
 				Gateway:      newRes.GetReleaseInfo().GetGatewayName(),
 				Stage:        newRes.GetReleaseInfo().GetStageName(),
@@ -190,6 +204,7 @@ func (d *ConfigDiffer) DiffServices(
 	return putList, deleteList
 }
 
+// DiffPluginMetadatas 对比两个 PluginMetadata map，返回需要 put 和 delete 的 PluginMetadata
 func (d *ConfigDiffer) DiffPluginMetadatas(
 	old map[string]*entity.PluginMetadata,
 	new map[string]*entity.PluginMetadata,
@@ -221,6 +236,7 @@ func (d *ConfigDiffer) DiffPluginMetadatas(
 	return putList, deleteList
 }
 
+// DiffSSLs 对比两个 SSL map，返回需要 put 和 delete 的 SSL
 func (d *ConfigDiffer) DiffSSLs(
 	old map[string]*entity.SSL,
 	new map[string]*entity.SSL,
@@ -239,7 +255,6 @@ func (d *ConfigDiffer) DiffSSLs(
 		}
 		if !cmp.Equal(oldRes, newRes,
 			cmp.Transformer("transformerMap", transformMap),
-			ignoreCreateTimeAndUpdateTimeCmpOptFunc(entity.SSL{}),
 			cmp.Reporter(&CmpReporter{
 				Gateway:      newRes.GetReleaseInfo().GetGatewayName(),
 				Stage:        newRes.GetReleaseInfo().GetStageName(),

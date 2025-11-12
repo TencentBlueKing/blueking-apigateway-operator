@@ -20,35 +20,60 @@ package leaderelection_test
 
 import (
 	"context"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/prometheus/client_golang/prometheus"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"go.etcd.io/etcd/server/v3/embed"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/tests/util"
 )
 
+var (
+	etcdClient *clientv3.Client
+	etcdServer *embed.Etcd
+)
+
+var _ = BeforeSuite(func() {
+	// 初始化 metric
+	metric.InitMetric(prometheus.DefaultRegisterer)
+
+	ctx := context.Background()
+	// 使用 etcd mock 客户端
+	var err error
+	etcdClient, etcdServer, err = util.StartEmbedEtcdClient(ctx)
+	Expect(err).To(BeNil())
+	Expect(etcdClient).NotTo(BeNil())
+})
+
+var _ = AfterSuite(func() {
+	if etcdClient != nil {
+		etcdClient.Close()
+	}
+	if etcdServer != nil {
+		etcdServer.Close()
+	}
+})
+
 var _ = Describe("EtcdLeaderElector", func() {
 	var (
-		elector1 leaderelection.EtcdLeaderElector
-		elector2 leaderelection.EtcdLeaderElector
-
-		etcdClient *clientv3.Client
-		err        error
-		ctx        = context.Background()
+		elector1 *leaderelection.EtcdLeaderElector
+		elector2 *leaderelection.EtcdLeaderElector
+		err      error
 	)
-
-	// 使用 etcd mock 客户端
-	etcdClient, _, err = util.StartEmbedEtcdClient(ctx)
-	Expect(err).To(BeNil())
 
 	BeforeEach(func() {
 		config.InstanceName = "test-instance1"
+		config.InstanceIP = "127.0.0.1"
 		elector1, err = leaderelection.NewEtcdLeaderElector(etcdClient, "test-prefix")
 		Expect(err).To(BeNil())
 		config.InstanceName = "test-instance2"
+		config.InstanceIP = "127.0.0.2"
 		elector2, err = leaderelection.NewEtcdLeaderElector(etcdClient, "test-prefix")
 		Expect(err).To(BeNil())
 	})
@@ -62,10 +87,25 @@ var _ = Describe("EtcdLeaderElector", func() {
 
 	Describe("Run", func() {
 		It("should run the election process", func() {
-			go elector1.Run(context.Background())
-			go elector2.Run(context.Background())
+			ctx1, cancel1 := context.WithCancel(context.Background())
+			ctx2, cancel2 := context.WithCancel(context.Background())
+			defer cancel1()
+			defer cancel2()
 
-			Expect(elector1.Leader()).To(Equal(elector2.Leader()))
+			go elector1.Run(ctx1)
+			go elector2.Run(ctx2)
+
+			// 等待选举完成
+			Eventually(func() string {
+				return elector1.Leader()
+			}, 10*time.Second, 100*time.Millisecond).ShouldNot(BeEmpty())
+
+			// 两个选举器应该看到同一个 leader
+			leader1 := elector1.Leader()
+			leader2 := elector2.Leader()
+			Expect(leader1).NotTo(BeEmpty())
+			Expect(leader2).NotTo(BeEmpty())
+			Expect(leader1).To(Equal(leader2))
 		})
 	})
 })

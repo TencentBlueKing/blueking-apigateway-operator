@@ -32,9 +32,6 @@ import (
 
 var APISIXVersionList = []constant.APISIXVersion{
 	constant.APISIXVersion313,
-	constant.APISIXVersion311,
-	constant.APISIXVersion33,
-	constant.APISIXVersion32,
 }
 
 func TestNewResourceSchema(t *testing.T) {
@@ -48,8 +45,8 @@ func TestNewResourceSchema(t *testing.T) {
 		expectAdditionalProp bool
 	}{
 		{
-			name:         "normal case with dataType=DATABASE",
-			version:      constant.APISIXVersion311,
+			name:         "normal case ",
+			version:      constant.APISIXVersion313,
 			resourceType: constant.Route,
 			jsonPath:     "main.route",
 			config: `{
@@ -87,7 +84,7 @@ func TestNewResourceSchema(t *testing.T) {
 		},
 		{
 			name:         "normal case with dataType=ETCD",
-			version:      constant.APISIXVersion311,
+			version:      constant.APISIXVersion313,
 			resourceType: constant.Route,
 			jsonPath:     "main.route",
 			config: `{
@@ -125,7 +122,7 @@ func TestNewResourceSchema(t *testing.T) {
 		},
 		{
 			name:         "invalid schema path",
-			version:      constant.APISIXVersion311,
+			version:      constant.APISIXVersion313,
 			resourceType: constant.Route,
 			jsonPath:     "invalid.path",
 			shouldFail:   true,
@@ -1105,7 +1102,7 @@ func TestAPISIXJsonSchemaValidatorCHashKeySchemaCheck(t *testing.T) {
 			upstream: &entity.UpstreamDef{
 				HashOn: "consumer",
 			},
-			version:    constant.APISIXVersion311,
+			version:    constant.APISIXVersion313,
 			shouldFail: false,
 		},
 		{
@@ -1114,7 +1111,7 @@ func TestAPISIXJsonSchemaValidatorCHashKeySchemaCheck(t *testing.T) {
 				HashOn: "vars",
 				Key:    "arg_id",
 			},
-			version:    constant.APISIXVersion311,
+			version:    constant.APISIXVersion313,
 			shouldFail: false,
 		},
 		{
@@ -1123,7 +1120,7 @@ func TestAPISIXJsonSchemaValidatorCHashKeySchemaCheck(t *testing.T) {
 				HashOn: "header",
 				Key:    "X-User-Id",
 			},
-			version:    constant.APISIXVersion311,
+			version:    constant.APISIXVersion313,
 			shouldFail: false,
 		},
 		{
@@ -1132,7 +1129,7 @@ func TestAPISIXJsonSchemaValidatorCHashKeySchemaCheck(t *testing.T) {
 				HashOn: "cookie",
 				Key:    "session_id",
 			},
-			version:    constant.APISIXVersion311,
+			version:    constant.APISIXVersion313,
 			shouldFail: false,
 		},
 		{
@@ -1140,7 +1137,7 @@ func TestAPISIXJsonSchemaValidatorCHashKeySchemaCheck(t *testing.T) {
 			upstream: &entity.UpstreamDef{
 				HashOn: "invalid",
 			},
-			version:    constant.APISIXVersion311,
+			version:    constant.APISIXVersion313,
 			shouldFail: true,
 		},
 		{
@@ -1158,7 +1155,7 @@ func TestAPISIXJsonSchemaValidatorCHashKeySchemaCheck(t *testing.T) {
 				HashOn: "vars",
 				Key:    "",
 			},
-			version:    constant.APISIXVersion311,
+			version:    constant.APISIXVersion313,
 			shouldFail: true,
 		},
 	}

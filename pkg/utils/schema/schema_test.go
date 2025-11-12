@@ -33,21 +33,6 @@ func TestGetResourceSchema(t *testing.T) {
 		shouldFail bool
 	}{
 		{
-			name:       "APISIX 3.2 - Existing Resource",
-			version:    constant.APISIXVersion32,
-			shouldFail: false,
-		},
-		{
-			name:       "APISIX 3.3 - Existing Resource",
-			version:    constant.APISIXVersion33,
-			shouldFail: false,
-		},
-		{
-			name:       "APISIX 3.11 - Existing Resource",
-			version:    constant.APISIXVersion311,
-			shouldFail: false,
-		},
-		{
 			name:       "APISIX 3.13 - Existing Resource",
 			version:    constant.APISIXVersion313,
 			shouldFail: false,

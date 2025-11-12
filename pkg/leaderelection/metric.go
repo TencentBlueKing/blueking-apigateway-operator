@@ -21,34 +21,8 @@
 package leaderelection
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
-	"k8s.io/client-go/tools/leaderelection"
-
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 )
-
-type prometheusMetricsProvider struct{}
-
-// NewLeaderMetric  ...
-func (p *prometheusMetricsProvider) NewLeaderMetric() leaderelection.SwitchMetric {
-	return &prometheusSwitchMetric{
-		gauge: metric.LeaderElectionGauge,
-	}
-}
-
-type prometheusSwitchMetric struct {
-	gauge *prometheus.GaugeVec
-}
-
-// On ...
-func (m *prometheusSwitchMetric) On(name string) {
-	m.gauge.WithLabelValues(name).Set(1)
-}
-
-// Off ...
-func (m *prometheusSwitchMetric) Off(name string) {
-	m.gauge.WithLabelValues(name).Set(0)
-}
 
 // ReportLeaderElectionMetric ...
 func ReportLeaderElectionMetric(hostname string) {

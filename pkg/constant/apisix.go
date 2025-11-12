@@ -87,12 +87,9 @@ var PluginsMustResourceMap = map[APISIXResource]bool{
 // APISIXVersion ...
 type APISIXVersion string
 
-// APISIXVersion311 ...
+// APISIXVersion313 ...
 const (
 	APISIXVersion313 APISIXVersion = "3.13.X"
-	APISIXVersion311 APISIXVersion = "3.11.X"
-	APISIXVersion33  APISIXVersion = "3.3.X"
-	APISIXVersion32  APISIXVersion = "3.2.X"
 )
 
 func (a APISIXResource) String() string {

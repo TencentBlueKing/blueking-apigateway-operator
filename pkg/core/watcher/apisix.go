@@ -49,6 +49,7 @@ type ApisixWatcher struct {
 	logger *zap.SugaredLogger
 }
 
+// NewApisixResourceWatcher creates a new ApisixWatcher instance
 func NewApisixResourceWatcher(client *clientv3.Client, prefix string) (*ApisixWatcher, error) {
 	if !strings.HasSuffix(prefix, "/") {
 		prefix += "/"
@@ -246,6 +247,7 @@ func (e *ApisixWatcher) handlerEvent(event *clientv3.Event) error {
 	return nil
 }
 
+// GetStageResources returns all resources for a specific stage
 func (e *ApisixWatcher) GetStageResources(stageName string) map[string]entity.ApisixResource {
 	e.mux.RLock()
 	defer e.mux.RUnlock()
@@ -261,6 +263,7 @@ func (e *ApisixWatcher) GetStageResources(stageName string) map[string]entity.Ap
 	return resources
 }
 
+// GetAllResources returns all resources from the watcher
 func (e *ApisixWatcher) GetAllResources() map[string]entity.ApisixResource {
 	e.mux.RLock()
 	defer e.mux.RUnlock()

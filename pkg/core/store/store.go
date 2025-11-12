@@ -242,7 +242,9 @@ func (s *ApisixEtcdConfigStore) alterByStage(
 			return fmt.Errorf("batch delete routes failed: %w", err)
 		}
 
-		if err = s.batchDeleteResource(ctx, constant.ApisixResourceTypePluginMetadata, deleteConf.PluginMetadatas); err != nil {
+		if err = s.batchDeleteResource(
+			ctx, constant.ApisixResourceTypePluginMetadata, deleteConf.PluginMetadatas,
+		); err != nil {
 			return fmt.Errorf("batch delete plugin metadata failed: %w", err)
 		}
 		if err = s.batchDeleteResource(ctx, constant.ApisixResourceTypeSSL, deleteConf.SSLs); err != nil {
@@ -265,7 +267,82 @@ func (s *ApisixEtcdConfigStore) alterByStage(
 	return nil
 }
 
-func (s *ApisixEtcdConfigStore) batchPutResource(ctx context.Context, resourceType string, resources interface{}) error {
+// GetGlobal 获取全局资源配置（从 apisix etcd 中获取所有没有 stage 标签的 plugin metadata）
+func (s *ApisixEtcdConfigStore) GetGlobal() *entity.ApisixGlobalResource {
+	ret := entity.NewEmptyApisixGlobalResource()
+	// 获取所有 plugin metadata，过滤出没有 stage 标签的（即 global 资源）
+	pmMap := s.watcher[constant.ApisixResourceTypePluginMetadata].GetAllResources()
+	for key, pm := range pmMap {
+		// Global 资源没有 stage 标签，stage 为空字符串
+		if pm.GetStageName() == "" {
+			ret.PluginMetadata[key] = pm.(*entity.PluginMetadata)
+		}
+	}
+	return ret
+}
+
+// AlterGlobal 同步全局资源配置到 apisix etcd
+func (s *ApisixEtcdConfigStore) AlterGlobal(
+	ctx context.Context,
+	config *entity.ApisixGlobalResource,
+) error {
+	st := time.Now()
+	err := s.alterGlobal(ctx, config)
+
+	// metric
+	metric.ReportStageConfigAlterMetric("global", nil, st, err)
+
+	if err != nil {
+		s.logger.Errorw("Alter global resource failed", "err", err)
+		return err
+	}
+
+	return nil
+}
+
+func (s *ApisixEtcdConfigStore) alterGlobal(
+	ctx context.Context, conf *entity.ApisixGlobalResource,
+) (err error) {
+	// get cached global config
+	oldConf := s.GetGlobal()
+
+	// diff config
+	putConf, deleteConf := s.differ.DiffGlobal(oldConf, conf)
+
+	// put resources
+	if putConf != nil && len(putConf.PluginMetadata) > 0 {
+		if err = s.batchPutResource(ctx, constant.ApisixResourceTypePluginMetadata, putConf.PluginMetadata); err != nil {
+			return fmt.Errorf("batch put global plugin metadata failed: %w", err)
+		}
+		s.logger.Infof(
+			"put global plugin_metadata count:%d",
+			len(putConf.PluginMetadata),
+		)
+	}
+
+	// delete resources
+	if deleteConf != nil && len(deleteConf.PluginMetadata) > 0 {
+		if err = s.batchDeleteResource(
+			ctx, constant.ApisixResourceTypePluginMetadata, deleteConf.PluginMetadata,
+		); err != nil {
+			return fmt.Errorf("batch delete global plugin metadata failed: %w", err)
+		}
+		s.logger.Infof(
+			"delete global plugin_metadata count:%d",
+			len(deleteConf.PluginMetadata),
+		)
+	}
+
+	if deleteConf == nil && putConf == nil {
+		s.logger.Infof("global resource has no change")
+	}
+
+	return nil
+}
+
+func (s *ApisixEtcdConfigStore) batchPutResource(
+	ctx context.Context, resourceType string, resources interface{},
+) error {
 	resourceStore := s.watcher[resourceType]
 
 	resourceIter := reflect.ValueOf(resources).MapRange()
@@ -310,7 +387,9 @@ func (s *ApisixEtcdConfigStore) batchPutResource(ctx context.Context, resourceTy
 	return nil
 }
 
-func (s *ApisixEtcdConfigStore) batchDeleteResource(ctx context.Context, resourceType string, resources interface{}) error {
+func (s *ApisixEtcdConfigStore) batchDeleteResource(
+	ctx context.Context, resourceType string, resources interface{},
+) error {
 	resourceStore := s.watcher[resourceType]
 	resourceMap := reflect.ValueOf(resources).MapRange()
 	for resourceMap.Next() {

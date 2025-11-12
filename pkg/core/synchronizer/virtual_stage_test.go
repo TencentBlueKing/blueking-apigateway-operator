@@ -21,17 +21,16 @@ package synchronizer_test
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
-	apisixv1 "github.com/apache/apisix-ingress-controller/pkg/types/apisix/v1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/spf13/viper"
 	yaml "gopkg.in/yaml.v2"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	. "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
 )
@@ -68,13 +67,14 @@ var _ = Describe("VirtualStage", func() {
 		stage = NewVirtualStage(apisixHealthzURI)
 	})
 
-	checkLabels := func(labels map[string]string) {
-		Expect(labels).To(HaveKeyWithValue(config.BKAPIGatewayLabelKeyGatewayName, gatewayName))
-		Expect(labels).To(HaveKeyWithValue(config.BKAPIGatewayLabelKeyGatewayStage, stageName))
+	checkLabels := func(labels entity.LabelInfo) {
+		Expect(labels.Gateway).To(Equal(gatewayName))
+		Expect(labels.Stage).To(Equal(stageName))
 	}
 
-	checkMetadata := func(metadata apisixv1.Metadata) {
-		Expect(metadata.Name).To(Equal(metadata.ID))
+	checkMetadata := func(metadata entity.ResourceMetadata) {
+		// Name 可能为空，只检查 ID 和 Labels
+		Expect(metadata.ID).NotTo(BeEmpty())
 		checkLabels(metadata.Labels)
 	}
 
@@ -88,11 +88,11 @@ var _ = Describe("VirtualStage", func() {
 		Context("Standard Configuration", func() {
 			It("should create 404 default route", func() {
 				route := configuration.Routes[NotFoundHandling]
-				checkMetadata(route.Metadata)
+				checkMetadata(route.ResourceMetadata)
 
-				Expect(route.Uri).To(Equal("/*"))
+				Expect(route.URI).To(Equal("/*"))
 				Expect(route.Priority).To(Equal(-100))
-				Expect(*route.Status).To(Equal(1))
+				Expect(route.Status).To(Equal(entity.Status(1)))
 
 				plugins := route.Plugins
 				Expect(plugins).To(HaveKey("bk-error-wrapper"))
@@ -102,12 +102,12 @@ var _ = Describe("VirtualStage", func() {
 
 			It("should create outter healthz route", func() {
 				route := configuration.Routes[HealthZRouteIDOuter]
-				checkMetadata(route.Metadata)
+				checkMetadata(route.ResourceMetadata)
 
-				Expect(route.Uri).To(Equal(apisixHealthzURI))
+				Expect(route.URI).To(Equal(apisixHealthzURI))
 				Expect(route.Priority).To(Equal(-100))
 				Expect(route.Methods).To(ContainElement("GET"))
-				Expect(*route.Status).To(Equal(1))
+				Expect(route.Status).To(Equal(entity.Status(1)))
 
 				plugins := route.Plugins
 				Expect(plugins["limit-req"]).To(HaveKeyWithValue("key", "server_addr"))
@@ -118,7 +118,7 @@ var _ = Describe("VirtualStage", func() {
 		Context("Extra Configuration", func() {
 			var (
 				extraPath          string
-				extraConfiguration *entity.ApisixConfigurationStandalone
+				extraConfiguration *entity.ApisixStageResource
 			)
 
 			BeforeEach(func() {
@@ -134,7 +134,11 @@ var _ = Describe("VirtualStage", func() {
 					},
 				})
 
-				extraConfiguration = &entity.ApisixConfigurationStandalone{}
+				extraConfiguration = entity.NewEmptyApisixConfiguration()
+				// 重新创建 stage 以使用新的配置
+				stage = NewVirtualStage(apisixHealthzURI)
+				// 初始化 configuration 用于比较
+				configuration = stage.MakeConfiguration()
 			})
 
 			AfterEach(func() {
@@ -145,9 +149,9 @@ var _ = Describe("VirtualStage", func() {
 				buf := &bytes.Buffer{}
 
 				encoder := yaml.NewEncoder(buf)
-				Expect(encoder.Encode(&extraConfiguration)).To(BeNil())
+				Expect(encoder.Encode(extraConfiguration)).To(BeNil())
 
-				Expect(ioutil.WriteFile(extraPath, buf.Bytes(), 0o644)).To(BeNil())
+				Expect(os.WriteFile(extraPath, buf.Bytes(), 0o644)).To(BeNil())
 			}
 
 			It("should skip a not exists file", func() {
@@ -156,20 +160,19 @@ var _ = Describe("VirtualStage", func() {
 			})
 
 			It("should skip a valid yaml", func() {
-				Expect(ioutil.WriteFile(extraPath, []byte("not:a:yaml"), 0o644)).To(BeNil())
+				Expect(os.WriteFile(extraPath, []byte("not:a:yaml"), 0o644)).To(BeNil())
 
 				config := stage.MakeConfiguration()
 				Expect(len(config.Routes)).To(Equal(len(configuration.Routes)))
 			})
 
 			It("should not include invalid extra route", func() {
-				extraConfiguration.Routes = []*entity.Route{{
-					Route: apisixv1.Route{
-						Metadata: apisixv1.Metadata{
-							ID: "",
-						},
+				extraConfiguration.Routes[""] = &entity.Route{
+					ResourceMetadata: entity.ResourceMetadata{
+						ID:   "",
+						Kind: constant.Route,
 					},
-				}}
+				}
 				writeExtraConfiguration()
 
 				config := stage.MakeConfiguration()
@@ -177,29 +180,29 @@ var _ = Describe("VirtualStage", func() {
 			})
 
 			It("should include valid extra route", func() {
-				extraConfiguration.Routes = []*entity.Route{{
-					Route: apisixv1.Route{
-						Metadata: apisixv1.Metadata{
-							ID: "not-empty",
-						},
+				extraConfiguration.Routes["not-empty"] = &entity.Route{
+					ResourceMetadata: entity.ResourceMetadata{
+						ID:   "not-empty",
+						Kind: constant.Route,
 					},
-				}}
+				}
 				writeExtraConfiguration()
 
 				config := stage.MakeConfiguration()
 				Expect(len(config.Routes)).To(Equal(len(configuration.Routes) + 1))
 
-				for _, route := range configuration.Routes {
-					checkMetadata(route.Metadata)
+				for _, route := range config.Routes {
+					checkMetadata(route.ResourceMetadata)
 				}
 			})
 
 			It("should not include invalid extra service", func() {
-				extraConfiguration.Services = []*entity.Service{{
-					Metadata: apisixv1.Metadata{
-						ID: "",
+				extraConfiguration.Services[""] = &entity.Service{
+					ResourceMetadata: entity.ResourceMetadata{
+						ID:   "",
+						Kind: constant.Service,
 					},
-				}}
+				}
 				writeExtraConfiguration()
 
 				config := stage.MakeConfiguration()
@@ -207,27 +210,29 @@ var _ = Describe("VirtualStage", func() {
 			})
 
 			It("should include valid extra service", func() {
-				extraConfiguration.Services = []*entity.Service{{
-					Metadata: apisixv1.Metadata{
-						ID: "not-empty",
+				extraConfiguration.Services["not-empty"] = &entity.Service{
+					ResourceMetadata: entity.ResourceMetadata{
+						ID:   "not-empty",
+						Kind: constant.Service,
 					},
-				}}
+				}
 				writeExtraConfiguration()
 
 				config := stage.MakeConfiguration()
 				Expect(len(config.Services)).To(Equal(len(configuration.Services) + 1))
 
-				for _, service := range configuration.Services {
-					checkMetadata(service.Metadata)
+				for _, service := range config.Services {
+					checkMetadata(service.ResourceMetadata)
 				}
 			})
 
 			It("should not include invalid extra ssl", func() {
-				extraConfiguration.SSLs = []*entity.SSL{{
-					Ssl: apisixv1.Ssl{
-						ID: "",
+				extraConfiguration.SSLs[""] = &entity.SSL{
+					ResourceMetadata: entity.ResourceMetadata{
+						ID:   "",
+						Kind: constant.SSL,
 					},
-				}}
+				}
 				writeExtraConfiguration()
 
 				config := stage.MakeConfiguration()
@@ -235,17 +240,18 @@ var _ = Describe("VirtualStage", func() {
 			})
 
 			It("should include valid extra ssl", func() {
-				extraConfiguration.SSLs = []*entity.SSL{{
-					Ssl: apisixv1.Ssl{
-						ID: "not-empty",
+				extraConfiguration.SSLs["not-empty"] = &entity.SSL{
+					ResourceMetadata: entity.ResourceMetadata{
+						ID:   "not-empty",
+						Kind: constant.SSL,
 					},
-				}}
+				}
 				writeExtraConfiguration()
 
 				config := stage.MakeConfiguration()
 				Expect(len(config.SSLs)).To(Equal(len(configuration.SSLs) + 1))
 
-				for _, ssl := range configuration.SSLs {
+				for _, ssl := range config.SSLs {
 					checkLabels(ssl.Labels)
 				}
 			})

@@ -35,7 +35,7 @@ type ApisixResource interface {
 	GetStageName() string
 }
 
-// 网关环境资源配置
+// ApisixStageResource 网关环境资源配置
 type ApisixStageResource struct {
 	Routes          map[string]*Route          `json:"routes,omitempty"`
 	Services        map[string]*Service        `json:"services,omitempty"`
@@ -60,7 +60,7 @@ func NewEmptyApisixGlobalResource() *ApisixGlobalResource {
 	}
 }
 
-// 全局资源配置
+// ApisixGlobalResource 全局资源配置
 type ApisixGlobalResource struct {
 	PluginMetadata map[string]*PluginMetadata `json:"plugin_metadata,omitempty"`
 }
@@ -73,7 +73,6 @@ type Route struct {
 	ResourceMetadata
 	URI             string                 `json:"uri,omitempty"`
 	Uris            []string               `json:"uris,omitempty"`
-	Desc            string                 `json:"desc,omitempty"`
 	Priority        int                    `json:"priority,omitempty"`
 	Methods         []string               `json:"methods,omitempty"`
 	Host            string                 `json:"host,omitempty"`
@@ -185,7 +184,6 @@ type UpstreamDef struct {
 	DiscoveryArgs map[string]interface{} `json:"discovery_args,omitempty"`
 	PassHost      string                 `json:"pass_host,omitempty"`
 	UpstreamHost  string                 `json:"upstream_host,omitempty"`
-	Desc          string                 `json:"desc,omitempty"`
 	ServiceName   string                 `json:"service_name,omitempty"`
 	TLS           *UpstreamTLS           `json:"tls,omitempty"`
 	KeepalivePool *UpstreamKeepalivePool `json:"keepalive_pool,omitempty"`
@@ -199,13 +197,11 @@ type Upstream struct {
 
 // Consumer ...
 type Consumer struct {
-	Username   string                 `json:"username"`
-	Desc       string                 `json:"desc,omitempty"`
-	Plugins    map[string]interface{} `json:"plugins,omitempty"`
-	Labels     map[string]string      `json:"labels,omitempty"`
-	CreateTime int64                  `json:"create_time,omitempty"`
-	UpdateTime int64                  `json:"update_time,omitempty"`
-	GroupID    string                 `json:"group_id,omitempty"`
+	Username string                 `json:"username"`
+	Desc     string                 `json:"desc,omitempty"`
+	Plugins  map[string]interface{} `json:"plugins,omitempty"`
+	Labels   map[string]string      `json:"labels,omitempty"`
+	GroupID  string                 `json:"group_id,omitempty"`
 }
 
 // ConsumerGroup ...
@@ -220,7 +216,6 @@ type ConsumerGroup struct {
 // Service ...
 type Service struct {
 	ResourceMetadata
-	Desc            string                 `json:"desc,omitempty"`
 	Upstream        *UpstreamDef           `json:"upstream,omitempty"`
 	UpstreamID      interface{}            `json:"upstream_id,omitempty"`
 	Plugins         map[string]interface{} `json:"plugins,omitempty"`
@@ -318,7 +313,6 @@ type StreamRouteProtocol struct {
 // StreamRoute ...
 type StreamRoute struct {
 	ResourceMetadata
-	Desc       string                 `json:"desc,omitempty"`
 	RemoteAddr string                 `json:"remote_addr,omitempty"`
 	ServerAddr string                 `json:"server_addr,omitempty"`
 	ServerPort int                    `json:"server_port,omitempty"`
@@ -342,6 +336,7 @@ type ResourceMetadata struct {
 	Ctx        context.Context
 }
 
+// GetReleaseInfo returns the ReleaseInfo for the resource
 func (rm *ResourceMetadata) GetReleaseInfo() *ReleaseInfo {
 	return &ReleaseInfo{
 		ResourceMetadata: *rm,
@@ -351,14 +346,17 @@ func (rm *ResourceMetadata) GetReleaseInfo() *ReleaseInfo {
 	}
 }
 
+// GetID returns the resource ID
 func (rm *ResourceMetadata) GetID() string {
 	return rm.ID
 }
 
+// GetStageName returns the stage name from labels
 func (rm *ResourceMetadata) GetStageName() string {
 	return rm.Labels.Stage
 }
 
+// GetGatewayName returns the gateway name from labels
 func (rm *ResourceMetadata) GetGatewayName() string {
 	return rm.Labels.Gateway
 }
@@ -371,6 +369,7 @@ func (rm *ResourceMetadata) IsEmpty() bool {
 	return rm.Labels.Gateway == "" && rm.Labels.Stage == ""
 }
 
+// GetReleaseID returns the release ID for the resource
 func (rm *ResourceMetadata) GetReleaseID() string {
 	// stage相关资源都是按照stage维度来管理的
 	if rm.Kind != constant.PluginMetadata {

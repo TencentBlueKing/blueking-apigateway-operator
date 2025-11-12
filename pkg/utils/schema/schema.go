@@ -28,20 +28,7 @@ import (
 
 //go:embed 3.13/schema.json
 var rawSchemaV313 []byte
-
-//go:embed 3.11/schema.json
-var rawSchemaV311 []byte
-
-//go:embed 3.3/schema.json
-var rawSchemaV33 []byte
-
-//go:embed 3.2/schema.json
-var rawSchemaV32 []byte
-
 var schemaVersionMap = map[constant.APISIXVersion]gjson.Result{
-	constant.APISIXVersion32:  gjson.ParseBytes(rawSchemaV32),
-	constant.APISIXVersion33:  gjson.ParseBytes(rawSchemaV33),
-	constant.APISIXVersion311: gjson.ParseBytes(rawSchemaV311),
 	constant.APISIXVersion313: gjson.ParseBytes(rawSchemaV313),
 }
 

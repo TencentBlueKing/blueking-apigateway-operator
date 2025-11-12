@@ -33,12 +33,6 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/trace"
 )
 
-const (
-	retryLimit = 5
-)
-
-var retryDelaySeconds = time.Second * 5
-
 // EventAgent ...
 type EventAgent struct {
 	apigwWatcher *watcher.APIGEtcdWatcher

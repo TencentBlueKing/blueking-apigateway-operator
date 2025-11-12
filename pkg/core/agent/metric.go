@@ -44,5 +44,9 @@ func ReportEventTriggeredMetric(event *entity.ResourceMetadata) {
 		return
 	}
 
-	metric.ResourceEventTriggeredCounter.WithLabelValues(event.GetStageName(), event.GetGatewayName(), event.Kind.String()).Inc()
+	metric.ResourceEventTriggeredCounter.WithLabelValues(
+		event.GetStageName(),
+		event.GetGatewayName(),
+		event.Kind.String(),
+	).Inc()
 }

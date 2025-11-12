@@ -16,6 +16,7 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
+// Package validator provides validation functionality for API Gateway resources.
 package validator
 
 import (
