@@ -37,6 +37,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/validator"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/trace"
 )
 
@@ -338,16 +339,20 @@ func (r *APIGEtcdWatcher) ValueToStageResource(resp *clientv3.GetResponse) (*ent
 // ListGlobalResources ...
 func (r *APIGEtcdWatcher) ListGlobalResources(releaseInfo *entity.ReleaseInfo) (*entity.ApisixGlobalResource, error) {
 	// /{self.prefix}/{self.api_version}/global/plugin_metadata/bk-concurrency-limit
+	startedTime := time.Now()
 	etcdKey := fmt.Sprintf(
 		constant.ApigwAPISIXGlobalResourcePrefixFormat,
 		r.keyPrefix, releaseInfo.APIVersion)
+	metric.ReportRegistryAction(releaseInfo.Kind.String(), metric.ActionGet, metric.ResultFail, startedTime)
 	resp, err := r.etcdClient.Get(releaseInfo.Ctx, etcdKey)
 	if err != nil {
+		metric.ReportRegistryAction(releaseInfo.Kind.String(), metric.ActionGet, metric.ResultFail, startedTime)
 		r.logger.Error(err, "get etcd value failed", "key", etcdKey)
 		return nil, err
 	}
 	if len(resp.Kvs) == 0 {
 		r.logger.Error(nil, "empty etcd value", "key", etcdKey)
+		metric.ReportRegistryAction(releaseInfo.Kind.String(), metric.ActionGet, metric.ResultFail, startedTime)
 		return nil, eris.Errorf("empty etcd value")
 	}
 	ret, err := r.ValueToGlobalResource(resp)
@@ -355,6 +360,7 @@ func (r *APIGEtcdWatcher) ListGlobalResources(releaseInfo *entity.ReleaseInfo) (
 		r.logger.Error(err, "value to resource failed", "key", etcdKey)
 		return nil, err
 	}
+	metric.ReportRegistryAction(releaseInfo.Kind.String(), metric.ActionGet, metric.ResultSuccess, startedTime)
 	return ret, nil
 }
 

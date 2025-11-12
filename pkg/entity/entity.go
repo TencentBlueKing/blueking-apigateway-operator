@@ -393,6 +393,3 @@ type LabelInfo struct {
 	PublishId     string `json:"gateway.bk.tencent.com/publish-id"`
 	ApisixVersion string `json:"gateway.bk.tencent.com/apisix-version"`
 }
-
-type GlobalResourceInfo struct {
-}

@@ -72,9 +72,9 @@ type APISIXJsonSchemaValidator struct {
 
 // NewResourceSchema 获取资源 schema
 func NewResourceSchema(
-version constant.APISIXVersion,
-resourceType constant.APISIXResource,
-jsonPath string,
+	version constant.APISIXVersion,
+	resourceType constant.APISIXResource,
+	jsonPath string,
 ) (string, *gojsonschema.Schema, error) {
 	schemaDef := schemaVersionMap[version].Get(jsonPath).String()
 	if schemaDef == "" {
@@ -113,7 +113,7 @@ jsonPath string,
 
 // NewAPISIXJsonSchemaValidator 创建 APISIXJsonSchemaValidator
 func NewAPISIXJsonSchemaValidator(version constant.APISIXVersion,
-resourceType constant.APISIXResource, jsonPath string,
+	resourceType constant.APISIXResource, jsonPath string,
 ) (Validator, error) {
 	schemaDef, schema, err := NewResourceSchema(version, resourceType, jsonPath)
 	if err != nil {
@@ -163,8 +163,8 @@ func (v *APISIXJsonSchemaValidator) cHashKeySchemaCheck(upstream *entity.Upstrea
 		return nil
 	}
 	if upstream.HashOn != "vars" &&
-	upstream.HashOn != "header" &&
-	upstream.HashOn != "cookie" {
+		upstream.HashOn != "header" &&
+		upstream.HashOn != "cookie" {
 		return fmt.Errorf("无效的哈希类型: %s", upstream.HashOn)
 	}
 
