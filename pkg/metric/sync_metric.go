@@ -51,18 +51,15 @@ func ReportStageConfigAlterMetric(
 	started time.Time,
 	err error,
 ) {
-	parts := strings.Split(strings.Trim(stageKey, "/"), "/")
-	var (
-		gateway string
-		stage   string
-	)
-	if len(parts) == 2 {
-		gateway = parts[0]
-		stage = parts[1]
-	} else {
-		logging.GetLogger().Infow("Invalid stage key", "stageKey", stageKey)
+	parts := strings.Split(stageKey, ".")
+	// 格式必须满足 "bk.release.{gateway}.{stage}"
+	if len(parts) < 4 || parts[0] != "bk" || parts[1] != "release" {
+		logging.GetLogger().Infow("Invalid stage key format", "stageKey", stageKey)
 		return
 	}
+	// 动态提取 gateway 和 stage
+	gateway := strings.Join(parts[2:len(parts)-1], ".")
+	stage := parts[len(parts)-1]
 
 	result := ResultSuccess
 	if err != nil {

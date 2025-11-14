@@ -49,7 +49,7 @@ func transformMap(mapType map[string]interface{}) map[string]interface{} {
 
 // ignoreApisixMetadata: 忽略apisixeMetadata的部分成员
 var ignoreApisixMetadataCmpOpt = cmpopts.IgnoreFields(entity.ResourceMetadata{},
-	"Labels", "Ctx", "RetryCount",
+	"Labels", "Ctx", "RetryCount", "APIVersion", "Kind", "ApisixVersion",
 )
 
 // CmpReporter ...
@@ -144,7 +144,6 @@ func (d *ConfigDiffer) DiffRoutes(
 			putList[key] = newRes
 			continue
 		}
-
 		if !cmp.Equal(
 			oldRes,
 			newRes,

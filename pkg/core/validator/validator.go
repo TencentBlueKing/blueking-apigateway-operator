@@ -38,16 +38,6 @@ func ValidateAPISIXJsonSchema(version string, resourceType constant.APISIXResour
 	if err != nil {
 		return err
 	}
-	// 校验基础schema
-	err = validator.Validate(config)
-	if err != nil {
-		return fmt.Errorf("validate apisix json schema failed, err: %v", err)
-	}
-	// 校验配置schema
-	validator, err = schema.NewAPISIXJsonSchemaValidator(apisixVersion, resourceType, "main."+resourceType.String())
-	if err != nil {
-		return fmt.Errorf("new apisix json schema validator failed, err: %v", err)
-	}
 	err = validator.Validate(config)
 	if err != nil {
 		return fmt.Errorf("validate apisix json schema failed, err: %v", err)

@@ -123,8 +123,8 @@ func GetApigwResource(
 	// if err != nil {
 	//	return nil, err
 	//}
-	//resourceIDKey := genResourceIDKey(gatewayName, stageName, resourceID)
-	//for _, route := range apiSixResources.Routes {
+	// resourceIDKey := genResourceIDKey(gatewayName, stageName, resourceID)
+	// for _, route := range apiSixResources.Routes {
 	//	if resourceID != 0 && route.ID == resourceIDKey {
 	//		apiSixResources.Routes = map[string]*entity.Route{route.ID: route}
 	//		configMap[stageKey] = apiSixResources
@@ -156,10 +156,10 @@ func GetApigwStageCurrentVersionInfo(
 	//	return nil, errors.New("current-version not found")
 	//}
 	//
-	//resourceIDKey := genResourceIDKey(gatewayName, stageName, config.ReleaseVersionResourceID)
-	//plugins := apiSixResources.Routes[resourceIDKey].Plugins
+	// resourceIDKey := genResourceIDKey(gatewayName, stageName, config.ReleaseVersionResourceID)
+	// plugins := apiSixResources.Routes[resourceIDKey].Plugins
 	//
-	//for _, plugin := range plugins {
+	// for _, plugin := range plugins {
 	//	pluginData := plugin.(map[string]interface{})
 	//	responseExample := pluginData["response_example"].(string)
 	//	if responseExample == "" {

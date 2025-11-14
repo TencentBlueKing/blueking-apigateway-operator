@@ -213,6 +213,7 @@ func (r *APIGEtcdWatcher) handleEvent(event *clientv3.Event) (*entity.ResourceMe
 // extractResourceMetadata ...
 func (r *APIGEtcdWatcher) extractResourceMetadata(key string, value []byte) (entity.ResourceMetadata, error) {
 	// /{self.prefix}/{self.api_version}/gateway/{gateway_name}/{stage_name}/route/bk-default.default.-1
+
 	ret := entity.ResourceMetadata{}
 	err := json.Unmarshal(value, &ret)
 	if err != nil {
@@ -231,13 +232,28 @@ func (r *APIGEtcdWatcher) extractResourceMetadata(key string, value []byte) (ent
 	}
 	ret.Ctx = context.Background()
 	resourceKind := constant.APISIXResource(matches[len(matches)-2])
+	defer func() {
+		r.logger.Debugw("Extract resource info from etcdkey", "key", key, "resourceInfo", ret)
+	}()
+
+	// /bk-gateway-apigw/v2/global/plugin_metadata/bk-concurrency-limit
 	if resourceKind == constant.PluginMetadata && len(matches) == 5 {
 		ret.ID = matches[len(matches)-1]
 		ret.Kind = resourceKind
 		ret.Name = matches[len(matches)-1]
 		ret.APIVersion = matches[len(matches)-4]
+		ret.ApisixVersion = ret.Labels.ApisixVersion
 		return ret, nil
 	}
+	// /bk-gateway-apigw/v2/gateway/bk-default/default/_bk_release/bk.release.bk-default.default
+	if resourceKind == constant.BkRelease && len(matches) == 7 {
+		ret.ID = matches[len(matches)-1]
+		ret.Kind = resourceKind
+		ret.Name = matches[len(matches)-1]
+		ret.APIVersion = matches[len(matches)-6]
+		return ret, nil
+	}
+
 	if len(matches) < 7 {
 		r.logger.Error(nil, "Etcd key segment by slash should larger or equal to 7", "key", key)
 		return ret, eris.Errorf("Etcd key segment by slash should larger or equal to 7")
@@ -245,23 +261,35 @@ func (r *APIGEtcdWatcher) extractResourceMetadata(key string, value []byte) (ent
 	ret.APIVersion = matches[len(matches)-6]
 	ret.Kind = resourceKind
 	ret.Name = matches[len(matches)-1]
-	r.logger.Debugw("Extract resource info from etcdkey", "key", key, "resourceInfo", ret)
 	return ret, nil
 }
 
 // ListStageResources ...
+// ListStageResources retrieves the stage resources for a given release
+// It queries etcd using the provided release information and returns the corresponding APISIX stage resources
+//
+// Parameters:
+//
+//	stageRelease: A pointer to entity.ReleaseInfo containing the release information including API version, gateway name, and stage name
+//
+// Returns:
+//
+//	*entity.ApisixStageResource: A pointer to the APISIX stage resource structure containing the retrieved resources
+//	error: An error object that will be non-nil if any operation fails
 func (r *APIGEtcdWatcher) ListStageResources(stageRelease *entity.ReleaseInfo) (*entity.ApisixStageResource, error) {
 	// /{self.prefix}/{self.api_version}/gateway/{gateway_name}/{stage_name}/route/bk-default.default.-1
+
 	etcdKey := fmt.Sprintf(
 		constant.ApigwAPISIXStageResourcePrefixFormat,
 		r.keyPrefix, stageRelease.APIVersion, stageRelease.Labels.Gateway, stageRelease.Labels.Stage)
-	resp, err := r.etcdClient.Get(stageRelease.Ctx, etcdKey)
+	resp, err := r.etcdClient.Get(stageRelease.Ctx, etcdKey, clientv3.WithPrefix())
 	if err != nil {
 		r.logger.Error(err, "get etcd value failed", "key", stageRelease.GetID())
 		return nil, err
 	}
+
 	if len(resp.Kvs) == 0 {
-		r.logger.Error(nil, "empty etcd value", "key", etcdKey)
+		r.logger.Error(nil, "empty etcd value key: ", etcdKey)
 		return nil, eris.Errorf("empty etcd value")
 	}
 	ret, err := r.ValueToStageResource(resp)
@@ -290,7 +318,7 @@ func (r *APIGEtcdWatcher) ValueToStageResource(resp *clientv3.GetResponse) (*ent
 		resourceKind := constant.APISIXResource(matches[len(matches)-2])
 		if !constant.SupportResourceTypeMap[resourceKind] {
 			r.logger.Error(nil, "resource kind not support", "key", string(kv.Key))
-			return nil, eris.Errorf("resource kind not support")
+			continue
 		}
 		resourceMetadata, err := r.extractResourceMetadata(string(kv.Key), kv.Value)
 		if err != nil {
@@ -298,7 +326,7 @@ func (r *APIGEtcdWatcher) ValueToStageResource(resp *clientv3.GetResponse) (*ent
 			return nil, err
 		}
 		// 校验配置schema
-		err = validator.ValidateAPISIXJsonSchema(resourceMetadata.APIVersion, resourceKind, kv.Value)
+		err = validator.ValidateAPISIXJsonSchema(resourceMetadata.Labels.ApisixVersion, resourceKind, kv.Value)
 		if err != nil {
 			r.logger.Error(err, "validate apisix json schema failed", "key", string(kv.Key))
 			return nil, err
@@ -344,7 +372,7 @@ func (r *APIGEtcdWatcher) ListGlobalResources(releaseInfo *entity.ReleaseInfo) (
 		constant.ApigwAPISIXGlobalResourcePrefixFormat,
 		r.keyPrefix, releaseInfo.APIVersion)
 	metric.ReportRegistryAction(releaseInfo.Kind.String(), metric.ActionGet, metric.ResultFail, startedTime)
-	resp, err := r.etcdClient.Get(releaseInfo.Ctx, etcdKey)
+	resp, err := r.etcdClient.Get(releaseInfo.Ctx, etcdKey, clientv3.WithPrefix())
 	if err != nil {
 		metric.ReportRegistryAction(releaseInfo.Kind.String(), metric.ActionGet, metric.ResultFail, startedTime)
 		r.logger.Error(err, "get etcd value failed", "key", etcdKey)
@@ -390,9 +418,9 @@ func (r *APIGEtcdWatcher) ValueToGlobalResource(resp *clientv3.GetResponse) (*en
 			return nil, err
 		}
 		// 校验配置schema
-		err = validator.ValidateAPISIXJsonSchema(resourceMetadata.APIVersion, resourceKind, kv.Value)
+		err = validator.ValidateAPISIXJsonSchema(resourceMetadata.ApisixVersion, resourceKind, kv.Value)
 		if err != nil {
-			r.logger.Error(err, "validate apisix json schema failed", "key", string(kv.Key))
+			r.logger.Error(err, "  validate apisix json schema failed", "key", string(kv.Key))
 			return nil, err
 		}
 		if resourceKind == constant.PluginMetadata {

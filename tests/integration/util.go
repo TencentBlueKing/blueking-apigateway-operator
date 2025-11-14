@@ -16,7 +16,7 @@
  *   to the current version of the project delivered to anyone in the future.
  */
 
-// Package util ...
+// Package integration provides utilities for integration testing.
 package integration
 
 import (
@@ -50,8 +50,9 @@ type MetricsAdapter struct {
 	Metrics map[string]*dto.MetricFamily
 }
 
-// GetBkDefaultResource retrieves the default API gateway stage resources from a JSON file
-// It reads the configuration from "bk_apigw_gateway_default_stage_resources.json" and unmarshals it into an ApisixStageResource struct
+// GetBkDefaultResource retrieves the default API gateway stage resources from a JSON file.
+// It reads the configuration from "bk_apigw_gateway_default_stage_resources.json"
+// and unmarshals it into an ApisixStageResource struct.
 // Returns: entity.ApisixStageResource - the default resources configuration
 func GetBkDefaultResource() entity.ApisixStageResource {
 	var resources entity.ApisixStageResource
@@ -67,8 +68,9 @@ func GetBkDefaultResource() entity.ApisixStageResource {
 	return resources // Return the unmarshaled resources
 }
 
-// GetBkDefaultGlobalResource retrieves the default API gateway global resources from a JSON file
-// It reads the configuration from "bk_apigw_gateway_default_global_resources.json" and unmarshals it into an ApisixGlobalResource struct
+// GetBkDefaultGlobalResource retrieves the default API gateway global resources from a JSON file.
+// It reads the configuration from "bk_apigw_gateway_default_global_resources.json"
+// and unmarshals it into an ApisixGlobalResource struct.
 // Returns: entity.ApisixGlobalResource - the default global resources configuration
 func GetBkDefaultGlobalResource() entity.ApisixGlobalResource {
 	var resources entity.ApisixGlobalResource
@@ -84,8 +86,9 @@ func GetBkDefaultGlobalResource() entity.ApisixGlobalResource {
 	return resources // Return the unmarshaled resources
 }
 
-// GetBkDefaultStageRelease retrieves the default API gateway stage release from a JSON file
-// It reads the configuration from "bk_apigw_gateway_default_stage_release.json" and unmarshals it into a map[string]entity.ReleaseInfo struct
+// GetBkDefaultStageRelease retrieves the default API gateway stage release from a JSON file.
+// It reads the configuration from "bk_apigw_gateway_default_stage_release.json"
+// and unmarshals it into a map[string]entity.ReleaseInfo struct.
 // Returns: map[string]entity.ReleaseInfo - the default stage release configuration
 func GetBkDefaultStageRelease() map[string]entity.ReleaseInfo {
 	var resources map[string]entity.ReleaseInfo

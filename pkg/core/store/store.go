@@ -31,6 +31,7 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.uber.org/zap"
 
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/differ"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/watcher"
@@ -113,21 +114,21 @@ func (s *ApisixEtcdConfigStore) Init() {
 }
 
 // Get get a staged apisix configuration
-func (s *ApisixEtcdConfigStore) Get(stageName string) *entity.ApisixStageResource {
+func (s *ApisixEtcdConfigStore) Get(stageKey string) *entity.ApisixStageResource {
 	ret := entity.NewEmptyApisixConfiguration()
-	routes := s.watcher[constant.ApisixResourceTypeRoutes].GetStageResources(stageName)
+	routes := s.watcher[constant.ApisixResourceTypeRoutes].GetStageResources(stageKey)
 	for key, val := range routes {
 		ret.Routes[key] = val.(*entity.Route)
 	}
-	services := s.watcher[constant.ApisixResourceTypeServices].GetStageResources(stageName)
+	services := s.watcher[constant.ApisixResourceTypeServices].GetStageResources(stageKey)
 	for key, val := range services {
 		ret.Services[key] = val.(*entity.Service)
 	}
-	ssls := s.watcher[constant.ApisixResourceTypeSSL].GetStageResources(stageName)
+	ssls := s.watcher[constant.ApisixResourceTypeSSL].GetStageResources(stageKey)
 	for key, val := range ssls {
 		ret.SSLs[key] = val.(*entity.SSL)
 	}
-	pms := s.watcher[constant.ApisixResourceTypePluginMetadata].GetStageResources(stageName)
+	pms := s.watcher[constant.ApisixResourceTypePluginMetadata].GetStageResources(stageKey)
 	for key, val := range pms {
 		ret.PluginMetadatas[key] = val.(*entity.PluginMetadata)
 	}
@@ -179,17 +180,17 @@ func (s *ApisixEtcdConfigStore) GetAll() map[string]*entity.ApisixStageResource 
 // Alter ...
 func (s *ApisixEtcdConfigStore) Alter(
 	ctx context.Context,
-	stageName string,
+	stageKey string,
 	config *entity.ApisixStageResource,
 ) error {
 	st := time.Now()
-	err := s.alterByStage(ctx, stageName, config)
+	err := s.alterByStage(ctx, stageKey, config)
 
 	// metric
-	metric.ReportStageConfigAlterMetric(stageName, config, st, err)
+	metric.ReportStageConfigAlterMetric(stageKey, config, st, err)
 
 	if err != nil {
-		s.logger.Errorw("Alter by stage failed", "err", err, "stage", stageName)
+		s.logger.Errorw("Alter by stage failed", "err", err, "stage", stageKey)
 		return err
 	}
 
@@ -204,6 +205,8 @@ func (s *ApisixEtcdConfigStore) alterByStage(
 
 	// diff config
 	putConf, deleteConf := s.differ.Diff(oldConf, conf)
+
+	var putFlag, delFlag bool
 	// put resources
 	if putConf != nil {
 		if err = s.batchPutResource(ctx, constant.ApisixResourceTypeSSL, putConf.SSLs); err != nil {
@@ -233,6 +236,7 @@ func (s *ApisixEtcdConfigStore) alterByStage(
 				len(putConf.PluginMetadatas),
 				len(putConf.SSLs),
 			)
+			putFlag = true
 		}
 	}
 
@@ -258,9 +262,21 @@ func (s *ApisixEtcdConfigStore) alterByStage(
 				return fmt.Errorf("batch delete services failed: %w", err)
 			}
 		}
+		if len(deleteConf.Routes)+len(deleteConf.Services)+
+			len(deleteConf.PluginMetadatas)+len(deleteConf.SSLs) > 0 {
+			s.logger.Infof(
+				"delete gateway[key=%s] conf count:[route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
+				stageKey,
+				len(deleteConf.Routes),
+				len(deleteConf.Services),
+				len(deleteConf.PluginMetadatas),
+				len(deleteConf.SSLs),
+			)
+			delFlag = true
+		}
 	}
 
-	if deleteConf == nil && putConf == nil {
+	if !putFlag && !delFlag {
 		s.logger.Infof("%s has no change", stageKey)
 	}
 
@@ -284,13 +300,13 @@ func (s *ApisixEtcdConfigStore) GetGlobal() *entity.ApisixGlobalResource {
 // AlterGlobal 同步全局资源配置到 apisix etcd
 func (s *ApisixEtcdConfigStore) AlterGlobal(
 	ctx context.Context,
-	config *entity.ApisixGlobalResource,
+	conf *entity.ApisixGlobalResource,
 ) error {
 	st := time.Now()
-	err := s.alterGlobal(ctx, config)
+	err := s.alterGlobal(ctx, conf)
 
 	// metric
-	metric.ReportStageConfigAlterMetric("global", nil, st, err)
+	metric.ReportStageConfigAlterMetric(config.GenStagePrimaryKey("apigw", "global_resource"), nil, st, err)
 
 	if err != nil {
 		s.logger.Errorw("Alter global resource failed", "err", err)

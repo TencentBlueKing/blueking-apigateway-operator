@@ -327,13 +327,14 @@ type StreamRoute struct {
 // ResourceMetadata describes the metadata of a resource object, which includes the
 // resource kind and name. It is used by the watch process of the APIGEtcdWWatcher type.
 type ResourceMetadata struct {
-	Labels     LabelInfo `json:"labels"`
-	APIVersion string
-	ID         string `json:"id"`
-	Kind       constant.APISIXResource
-	Name       string
-	RetryCount int64 `json:"-" yaml:"-"`
-	Ctx        context.Context
+	Labels        LabelInfo               `json:"labels,omitempty"`
+	APIVersion    string                  `json:"-"`
+	ID            string                  `json:"id,omitempty"`
+	Kind          constant.APISIXResource `json:"-"`
+	Name          string                  `json:"name,omitempty"`
+	RetryCount    int64                   `json:"-"`
+	Ctx           context.Context         `json:"-"`
+	ApisixVersion string                  `json:"apisix_version,omitempty"`
 }
 
 // GetReleaseInfo returns the ReleaseInfo for the resource
@@ -356,6 +357,10 @@ func (rm *ResourceMetadata) GetStageName() string {
 	return rm.Labels.Stage
 }
 
+func (rm *ResourceMetadata) GetStageKey() string {
+	return config.GenStagePrimaryKey(rm.GetGatewayName(), rm.GetStageName())
+}
+
 // GetGatewayName returns the gateway name from labels
 func (rm *ResourceMetadata) GetGatewayName() string {
 	return rm.Labels.Gateway
@@ -365,6 +370,10 @@ func (rm *ResourceMetadata) GetGatewayName() string {
 func (rm *ResourceMetadata) IsEmpty() bool {
 	if rm == nil {
 		return true
+	}
+	// PluginMetadata 是全局资源，不依赖于 gateway 和 stage
+	if rm.Kind == constant.PluginMetadata {
+		return false
 	}
 	return rm.Labels.Gateway == "" && rm.Labels.Stage == ""
 }
@@ -388,8 +397,8 @@ type ReleaseInfo struct {
 }
 
 type LabelInfo struct {
-	Gateway       string `json:"gateway.bk.tencent.com/gateway"`
-	Stage         string `json:"gateway.bk.tencent.com/stage"`
-	PublishId     string `json:"gateway.bk.tencent.com/publish-id"`
-	ApisixVersion string `json:"gateway.bk.tencent.com/apisix-version"`
+	Gateway       string `json:"gateway.bk.tencent.com/gateway,omitempty"`
+	Stage         string `json:"gateway.bk.tencent.com/stage,omitempty"`
+	PublishId     string `json:"gateway.bk.tencent.com/publish-id,omitempty"`
+	ApisixVersion string `json:"gateway.bk.tencent.com/apisix-version,omitempty"`
 }

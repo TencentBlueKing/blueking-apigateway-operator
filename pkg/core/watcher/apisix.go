@@ -133,16 +133,28 @@ func (e *ApisixWatcher) addResource(key, value []byte) (resource entity.ApisixRe
 	case constant.ApisixResourceTypeSSL:
 		resource = &entity.SSL{}
 	case constant.ApisixResourceTypePluginMetadata:
-		resource = &entity.PluginMetadata{}
+		var metadata entity.ResourceMetadata
+		err = json.Unmarshal(value, &metadata)
+		if err != nil {
+			e.logger.Error("Unmarshal resource from etcd failed")
+			return nil, fmt.Errorf("unmarshal resource from etcd failed: %w", err)
+		}
+		resource = &entity.PluginMetadata{
+			ResourceMetadata: metadata,
+			PluginMetadataConf: entity.PluginMetadataConf{
+				metadata.GetID(): value,
+			},
+		}
 	default:
 		e.logger.Errorw("Unknown resource type", "resourceType", resourceType)
 		return nil, fmt.Errorf("unknown resource type: %s", resourceType)
 	}
-
-	err = json.Unmarshal(value, resource)
-	if err != nil {
-		e.logger.Error("Unmarshal resource from etcd failed")
-		return nil, fmt.Errorf("unmarshal resource from etcd failed: %w", err)
+	if resourceType != constant.ApisixResourceTypePluginMetadata {
+		err = json.Unmarshal(value, resource)
+		if err != nil {
+			e.logger.Error("Unmarshal resource from etcd failed")
+			return nil, fmt.Errorf("unmarshal resource from etcd failed: %w", err)
+		}
 	}
 	return resource, nil
 }
@@ -256,7 +268,8 @@ func (e *ApisixWatcher) GetStageResources(stageName string) map[string]entity.Ap
 		if resource.GetReleaseInfo() == nil {
 			continue
 		}
-		if resource.GetReleaseInfo().GetStageName() == stageName {
+		stageKey := resource.GetReleaseInfo().GetStageKey()
+		if stageKey == stageName {
 			resources[key] = resource
 		}
 	}

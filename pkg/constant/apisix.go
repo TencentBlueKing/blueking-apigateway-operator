@@ -22,11 +22,15 @@ import "time"
 
 // ApigwAPISIXStageResourcePrefixFormat ...
 // example: /{prefix}/{self.api_version}/gateway/{gateway_name}/{stage_name}/route/bk-default.default.-1
-const ApigwAPISIXStageResourcePrefixFormat = "/%s/%s/%s/gateway/%s/"
+const ApigwAPISIXStageResourcePrefixFormat = "%s/%s/gateway/%s/%s/"
 
 // ApigwAPISIXGlobalResourcePrefixFormat ...
 // example: /{prefix}/{self.api_version}/global/plugin_metadata/bk-concurrency-limit
-const ApigwAPISIXGlobalResourcePrefixFormat = "/%s/%s/global/"
+const ApigwAPISIXGlobalResourcePrefixFormat = "%s/%s/global/"
+
+// GlobalResourceKey
+// GlobalResourceKey ...
+const GlobalResourceKey = "global_resource"
 
 // APISIXResource ...
 type APISIXResource string

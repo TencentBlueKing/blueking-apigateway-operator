@@ -23,6 +23,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/trace"
 )
@@ -64,7 +65,12 @@ func (t *ResourceTimer) Update(resource *entity.ReleaseInfo) {
 	defer span.End()
 
 	var timer *CacheTimer
-	timerInterface, ok := t.resourceTimer.Load(resource.GetReleaseID())
+	cacheKey := resource.GetReleaseID()
+	// 全局资源
+	if resource.Kind == constant.PluginMetadata {
+		cacheKey = constant.GlobalResourceKey
+	}
+	timerInterface, ok := t.resourceTimer.Load(cacheKey)
 	if !ok {
 		timer = &CacheTimer{ResourceInfo: resource}
 		timer.Reset(eventsWaitingTimeWindow)
@@ -77,7 +83,7 @@ func (t *ResourceTimer) Update(resource *entity.ReleaseInfo) {
 		timer.ResourceInfo = resource
 		timer.Update(eventsWaitingTimeWindow)
 	}
-	t.resourceTimer.Store(resource.GetReleaseID(), timer)
+	t.resourceTimer.Store(cacheKey, timer)
 }
 
 // ListResourcesForCommit ...

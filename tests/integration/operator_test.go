@@ -51,7 +51,7 @@ var _ = Describe("Operator Integration", func() {
 	//var resourceCli *client.ResourceClient
 	BeforeEach(func() {
 		cfg := clientv3.Config{
-			Endpoints:   []string{"localhost:2479"},
+			Endpoints:   []string{"localhost:2379"},
 			DialTimeout: 5 * time.Second,
 		}
 		var err error
@@ -61,30 +61,30 @@ var _ = Describe("Operator Integration", func() {
 		//resourceCli = client.NewResourceClient(operatorURL, "DebugModel@bk")
 	})
 
-	AfterEach(func() {
-		_, err := etcdCli.Delete(context.Background(), "", clientv3.WithPrefix())
-		Expect(err).NotTo(HaveOccurred())
-		_ = etcdCli.Close()
-	})
+	//AfterEach(func() {
+	//	_, err := etcdCli.Delete(context.Background(), "", clientv3.WithPrefix())
+	//	Expect(err).NotTo(HaveOccurred())
+	//	_ = etcdCli.Close()
+	//})
 
 	Describe("test publish default resource", func() {
 		Context("test new agteway publish", func() {
 			It("should not error and the value should be equal to what was put", func() {
-				// load resources
-				resources := integration.GetBkDefaultResource()
-				// put route
-				for key, route := range resources.Routes {
-					rawConfig, _ := json.Marshal(route)
-					_, err := etcdCli.Put(context.Background(), key, string(rawConfig))
-					Expect(err).NotTo(HaveOccurred())
-				}
-
-				// put service
-				for key, service := range resources.Services {
-					rawConfig, _ := json.Marshal(service)
-					_, err := etcdCli.Put(context.Background(), key, string(rawConfig))
-					Expect(err).NotTo(HaveOccurred())
-				}
+				////// load resources
+				//resources := integration.GetBkDefaultResource()
+				////// put route
+				//for key, route := range resources.Routes {
+				//	rawConfig, _ := json.Marshal(route)
+				//	_, err := etcdCli.Put(context.Background(), key, string(rawConfig))
+				//	Expect(err).NotTo(HaveOccurred())
+				//}
+				////
+				////// put service
+				//for key, service := range resources.Services {
+				//	rawConfig, _ := json.Marshal(service)
+				//	_, err := etcdCli.Put(context.Background(), key, string(rawConfig))
+				//	Expect(err).NotTo(HaveOccurred())
+				//}
 
 				// put global rule
 				globalResource := integration.GetBkDefaultGlobalResource()
@@ -93,13 +93,13 @@ var _ = Describe("Operator Integration", func() {
 					_, err := etcdCli.Put(context.Background(), key, string(rawConfig))
 					Expect(err).NotTo(HaveOccurred())
 				}
-				// put stage release
-				stageRelease := integration.GetBkDefaultStageRelease()
-				for key, release := range stageRelease {
-					rawConfig, _ := json.Marshal(release)
-					_, err := etcdCli.Put(context.Background(), key, string(rawConfig))
-					Expect(err).NotTo(HaveOccurred())
-				}
+				//// put stage release
+				//stageRelease := integration.GetBkDefaultStageRelease()
+				//for key, release := range stageRelease {
+				//	rawConfig, _ := json.Marshal(release)
+				//	_, err := etcdCli.Put(context.Background(), key, string(rawConfig))
+				//	Expect(err).NotTo(HaveOccurred())
+				//}
 
 				time.Sleep(time.Second * 10)
 

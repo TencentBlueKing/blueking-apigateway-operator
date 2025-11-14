@@ -26,6 +26,32 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 )
 
+// 内置的插件映射，这些插件无需进行schema校验
+var innerPluginsMap = map[string]bool{
+	"bk-jwt":                  true,
+	"bk-debug":                true,
+	"bk-real-ip":              true,
+	"prometheus":              true,
+	"file-logger":             true,
+	"bk-permission":           true,
+	"bk-request-id":           true,
+	"bk-auth-verify":          true,
+	"bk-log-context":          true,
+	"bk-auth-validate":        true,
+	"bk-delete-cookie":        true,
+	"bk-error-wrapper":        true,
+	"bk-stage-context":        true,
+	"bk-default-tenant":       true,
+	"bk-response-check":       true,
+	"bk-backend-context":      true,
+	"bk-delete-sensitive":     true,
+	"bk-break-recursive-call": true,
+	"bk-proxy-rewrite":        true,
+	"bk-resource-context":     true,
+	"bk-concurrency-limit":    true,
+	"bk-opentelemetry":        true,
+}
+
 //go:embed 3.13/schema.json
 var rawSchemaV313 []byte
 var schemaVersionMap = map[constant.APISIXVersion]gjson.Result{

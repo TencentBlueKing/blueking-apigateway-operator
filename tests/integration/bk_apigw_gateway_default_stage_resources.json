@@ -1,5 +1,5 @@
 {
-  "route": {
+  "routes": {
     "/bk-gateway-apigw/v2/gateway/bk-default/default/route/bk-default.default.-1": {
       "id": "bk-default.default.-1",
       "desc": "route for detect release version",
@@ -43,7 +43,8 @@
         "/api/bk-default/default/ping/"
       ],
       "methods": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "plugins": {
         "bk-resource-context": {
@@ -64,7 +65,7 @@
       "service_id": "bk-default.default.2-1"
     }
   },
-  "service": {
+  "services": {
     "/bk-gateway-apigw/v2/gateway/bk-default/default/service/bk-default.default.2-1": {
       "id": "bk-default.default.2-1",
       "desc": "default/2 (backend=default)",

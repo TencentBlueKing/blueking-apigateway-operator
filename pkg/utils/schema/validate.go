@@ -152,7 +152,7 @@ func getPlugins(reqBody interface{}) (map[string]interface{}, string) {
 		return bodyType.Plugins, "stream_schema"
 	case *entity.PluginMetadata:
 		log.Infof("type of reqBody: %#v", bodyType)
-		name := cast.ToString(bodyType.PluginMetadataConf["name"])
+		name := cast.ToString(bodyType.PluginMetadataConf["id"])
 		return map[string]interface{}{name: map[string]interface{}(bodyType.PluginMetadataConf)}, "metadata_schema"
 	}
 	return nil, ""
@@ -376,7 +376,7 @@ func (v *APISIXJsonSchemaValidator) Validate(rawConfig json.RawMessage) error { 
 
 	if !ret.Valid() {
 		errString := GetSchemaValidateFailed(ret)
-		log.Errorf("schema validate failed:s: %v, obj: %s", v.schemaDef, rawConfig)
+		log.Errorf("schema validate failed:s: %v, obj: %s，err: %s", v.schemaDef, rawConfig, errString)
 		return fmt.Errorf("资源: %s schema 验证失败: %s", resourceIdentification, errString)
 	}
 
@@ -426,6 +426,10 @@ func (v *APISIXJsonSchemaValidator) Validate(rawConfig json.RawMessage) error { 
 	}
 
 	for pluginName, pluginConf := range plugins {
+		// 如果是内置插件，直接跳过校验
+		if innerPluginsMap[pluginName] {
+			continue
+		}
 		var schemaMap map[string]interface{}
 		schemaValue := GetPluginSchema(v.version, pluginName, schemaType)
 		// 查询自定义插件
