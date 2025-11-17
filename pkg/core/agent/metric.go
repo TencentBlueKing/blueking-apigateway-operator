@@ -24,20 +24,6 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 )
 
-// ReportBootstrapSyncingMetric ...
-func ReportBootstrapSyncingMetric(err error) {
-	result := metric.ResultSuccess
-	if err != nil {
-		result = metric.ResultFail
-	}
-
-	if metric.BootstrapSyncingCounter == nil {
-		return
-	}
-
-	metric.BootstrapSyncingCounter.WithLabelValues(result).Inc()
-}
-
 // ReportEventTriggeredMetric ...
 func ReportEventTriggeredMetric(event *entity.ResourceMetadata) {
 	if metric.ResourceEventTriggeredCounter == nil {
@@ -45,8 +31,8 @@ func ReportEventTriggeredMetric(event *entity.ResourceMetadata) {
 	}
 
 	metric.ResourceEventTriggeredCounter.WithLabelValues(
-		event.GetStageName(),
 		event.GetGatewayName(),
+		event.GetStageName(),
 		event.Kind.String(),
 	).Inc()
 }

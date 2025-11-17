@@ -1,6 +1,6 @@
 /*
  * TencentBlueKing is pleased to support the open source community by making
- * 蓝鲸智云 - 微网关(BlueKing - Micro APIGateway) available.
+ * 蓝鲸智云 - API 网关(BlueKing - APIGateway) available.
  * Copyright (C) 2025 Tencent. All rights reserved.
  * Licensed under the MIT License (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -21,8 +21,11 @@ package entity
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 
 	"github.com/spf13/cast"
+	"github.com/tidwall/gjson"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
@@ -37,19 +40,17 @@ type ApisixResource interface {
 
 // ApisixStageResource 网关环境资源配置
 type ApisixStageResource struct {
-	Routes          map[string]*Route          `json:"routes,omitempty"`
-	Services        map[string]*Service        `json:"services,omitempty"`
-	SSLs            map[string]*SSL            `json:"ssls,omitempty"`
-	PluginMetadatas map[string]*PluginMetadata `json:"plugin_metadatas,omitempty"`
+	Routes   map[string]*Route   `json:"routes,omitempty"`
+	Services map[string]*Service `json:"services,omitempty"`
+	SSLs     map[string]*SSL     `json:"ssls,omitempty"`
 }
 
 // NewEmptyApisixConfiguration will build a new apisix configuration object
 func NewEmptyApisixConfiguration() *ApisixStageResource {
 	return &ApisixStageResource{
-		Routes:          make(map[string]*Route),
-		Services:        make(map[string]*Service),
-		PluginMetadatas: make(map[string]*PluginMetadata),
-		SSLs:            make(map[string]*SSL),
+		Routes:   make(map[string]*Route),
+		Services: make(map[string]*Service),
+		SSLs:     make(map[string]*SSL),
 	}
 }
 
@@ -231,7 +232,7 @@ type GlobalRule struct {
 }
 
 // PluginMetadataConf ...
-type PluginMetadataConf map[string]interface{}
+type PluginMetadataConf map[string]json.RawMessage
 
 // PluginMetadata ...
 type PluginMetadata struct {
@@ -240,18 +241,23 @@ type PluginMetadata struct {
 }
 
 // UnmarshalJSON 解析PluginMetadataConf
-func (c *PluginMetadataConf) UnmarshalJSON(dAtA []byte) error {
-	temp := make(map[string]interface{})
-	if err := json.Unmarshal(dAtA, &temp); err != nil {
-		return err
+func (p *PluginMetadataConf) UnmarshalJSON(conf []byte) error {
+	pluginName := gjson.GetBytes(conf, "id").String()
+	if pluginName == "" {
+		return fmt.Errorf("plugin id is empty")
 	}
-	*c = temp
+	*p = PluginMetadataConf{pluginName: conf}
 	return nil
 }
 
 // MarshalJSON 将PluginMetadataConf转换为json
-func (c *PluginMetadataConf) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}(*c))
+func (p *PluginMetadataConf) MarshalJSON() ([]byte, error) {
+	for key, conf := range *p {
+		if key != "" {
+			return conf, nil
+		}
+	}
+	return nil, errors.New("invalid plugin conf")
 }
 
 // ServerInfo ...
@@ -357,6 +363,7 @@ func (rm *ResourceMetadata) GetStageName() string {
 	return rm.Labels.Stage
 }
 
+// GetStageKey returns the stage key from labels
 func (rm *ResourceMetadata) GetStageKey() string {
 	return config.GenStagePrimaryKey(rm.GetGatewayName(), rm.GetStageName())
 }

@@ -16,8 +16,8 @@
  *   to the current version of the project delivered to anyone in the future.
  */
 
-// Package watcher ...
-package watcher
+// Package registry ...
+package registry
 
 import (
 	"context"
@@ -37,33 +37,35 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 )
 
-type ApisixWatcher struct {
+type ApisixRegistry struct {
 	client *clientv3.Client
 	Prefix string // example: /apisix/routes
 
-	mux       sync.RWMutex
-	resources map[string]entity.ApisixResource // resource id -> resource
-
+	mux             sync.RWMutex
+	resources       map[string]entity.ApisixResource // resource id -> resource
+	syncTimeout     time.Duration
 	currentRevision int64
 
 	logger *zap.SugaredLogger
 }
 
-// NewApisixResourceWatcher creates a new ApisixWatcher instance
-func NewApisixResourceWatcher(client *clientv3.Client, prefix string) (*ApisixWatcher, error) {
+// NewApisixResourceRegistry creates a new ApisixRegistry instance
+func NewApisixResourceRegistry(client *clientv3.Client, prefix string,
+	syncTimeout time.Duration) (*ApisixRegistry, error) {
 	if !strings.HasSuffix(prefix, "/") {
 		prefix += "/"
 	}
 
-	apisixWatcher := &ApisixWatcher{
-		client: client,
-		Prefix: prefix,
-		logger: logging.GetLogger().Named("etcd-resource-store"),
+	apisixWatcher := &ApisixRegistry{
+		client:      client,
+		Prefix:      prefix,
+		logger:      logging.GetLogger().Named("etcd-resource-store"),
+		syncTimeout: syncTimeout,
 	}
 
 	apisixWatcher.logger.Infow("Create etcd resource store", "Prefix", prefix)
 
-	err := apisixWatcher.fullSync(context.Background())
+	err := apisixWatcher.fullSync(context.Background(), syncTimeout)
 	if err != nil {
 		apisixWatcher.logger.Error(err, "full sync failed")
 		return nil, fmt.Errorf("init local resource store Prefix: %s error: %w", apisixWatcher.Prefix, err)
@@ -73,10 +75,10 @@ func NewApisixResourceWatcher(client *clientv3.Client, prefix string) (*ApisixWa
 	return apisixWatcher, nil
 }
 
-func (e *ApisixWatcher) fullSync(ctx context.Context) error {
+func (e *ApisixRegistry) fullSync(ctx context.Context, syncTimeout time.Duration) error {
 	e.logger.Infow("etcdLocalResourceStore start full sync", "Prefix", e.Prefix)
 
-	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, syncTimeout)
 	defer cancel()
 
 	ret, err := e.client.Get(ctx, e.Prefix, clientv3.WithPrefix())
@@ -91,7 +93,7 @@ func (e *ApisixWatcher) fullSync(ctx context.Context) error {
 	e.resources = make(map[string]entity.ApisixResource)
 
 	for i := range ret.Kvs {
-		resource, err := e.addResource(ret.Kvs[i].Key, ret.Kvs[i].Value)
+		resource, err := e.parseResource(ret.Kvs[i].Key, ret.Kvs[i].Value)
 		if err != nil {
 			e.logger.Error(err, "Parse resource from etcd failed")
 			continue
@@ -110,7 +112,7 @@ func (e *ApisixWatcher) fullSync(ctx context.Context) error {
 	return nil
 }
 
-func (e *ApisixWatcher) addResource(key, value []byte) (resource entity.ApisixResource, err error) {
+func (e *ApisixRegistry) parseResource(key, value []byte) (resource entity.ApisixResource, err error) {
 	if len(e.Prefix) == len(key) {
 		return nil, nil
 	}
@@ -132,6 +134,8 @@ func (e *ApisixWatcher) addResource(key, value []byte) (resource entity.ApisixRe
 		resource = &entity.Service{}
 	case constant.ApisixResourceTypeSSL:
 		resource = &entity.SSL{}
+	case constant.ApisixResourceTypeProtos:
+		resource = &entity.Proto{}
 	case constant.ApisixResourceTypePluginMetadata:
 		var metadata entity.ResourceMetadata
 		err = json.Unmarshal(value, &metadata)
@@ -160,7 +164,7 @@ func (e *ApisixWatcher) addResource(key, value []byte) (resource entity.ApisixRe
 }
 
 // nolint: staticcheck
-func (e *ApisixWatcher) incrSync() {
+func (e *ApisixRegistry) incrSync() {
 	c, cancel := context.WithCancel(context.TODO())
 	defer cancel()
 	var ch clientv3.WatchChan
@@ -186,7 +190,7 @@ func (e *ApisixWatcher) incrSync() {
 
 				switch err := event.Err(); {
 				case errors.Is(err, v3rpc.ErrCompacted), errors.Is(err, v3rpc.ErrFutureRev):
-					err := e.fullSync(c)
+					err := e.fullSync(c, e.syncTimeout)
 					if err != nil {
 						time.Sleep(constant.SyncSleepSeconds)
 						continue
@@ -211,15 +215,15 @@ func (e *ApisixWatcher) incrSync() {
 	}
 }
 
-func (e *ApisixWatcher) handlerEvent(event *clientv3.Event) error {
+func (e *ApisixRegistry) handlerEvent(event *clientv3.Event) error {
 	switch event.Type {
 	case clientv3.EventTypePut:
-		resource, err := e.addResource(event.Kv.Key, event.Kv.Value)
+		resource, err := e.parseResource(event.Kv.Key, event.Kv.Value)
 		if err != nil {
-			e.logger.Error(err, "Parse resource from etcd failed")
+			e.logger.Errorf("parse resource[key=%s,value=%s] from etcd failed:%v",
+				event.Kv.Key, event.Kv.Value, err)
 			return err
 		}
-
 		if resource == nil {
 			return errors.New("resource is nil")
 		}
@@ -235,9 +239,10 @@ func (e *ApisixWatcher) handlerEvent(event *clientv3.Event) error {
 		e.resources[resource.GetID()] = resource
 		e.mux.Unlock()
 	case clientv3.EventTypeDelete:
-		resource, err := e.addResource(event.PrevKv.Key, event.PrevKv.Value)
+		resource, err := e.parseResource(event.PrevKv.Key, event.PrevKv.Value)
 		if err != nil {
-			e.logger.Error(err, "Parse resource from etcd failed")
+			e.logger.Errorf("parse resource[key=%s,value=%s] from etcd failed:%v",
+				event.PrevKv.Key, event.PrevKv.Value, err)
 			return err
 		}
 
@@ -260,7 +265,7 @@ func (e *ApisixWatcher) handlerEvent(event *clientv3.Event) error {
 }
 
 // GetStageResources returns all resources for a specific stage
-func (e *ApisixWatcher) GetStageResources(stageName string) map[string]entity.ApisixResource {
+func (e *ApisixRegistry) GetStageResources(stageName string) map[string]entity.ApisixResource {
 	e.mux.RLock()
 	defer e.mux.RUnlock()
 	resources := make(map[string]entity.ApisixResource)
@@ -276,8 +281,8 @@ func (e *ApisixWatcher) GetStageResources(stageName string) map[string]entity.Ap
 	return resources
 }
 
-// GetAllResources returns all resources from the watcher
-func (e *ApisixWatcher) GetAllResources() map[string]entity.ApisixResource {
+// GetAllResources returns all resources from the registry
+func (e *ApisixRegistry) GetAllResources() map[string]entity.ApisixResource {
 	e.mux.RLock()
 	defer e.mux.RUnlock()
 

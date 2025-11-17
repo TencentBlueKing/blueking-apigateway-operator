@@ -31,10 +31,10 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/agent"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/agent/timer"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/commiter"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/committer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/store"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/synchronizer"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/watcher"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
@@ -43,14 +43,14 @@ import (
 
 // EtcdAgentRunner ...
 type EtcdAgentRunner struct {
-	client       *clientv3.Client
-	apigwWatcher *watcher.APIGEtcdWatcher
-	leader       *leaderelection.EtcdLeaderElector
-	synchronizer *synchronizer.ApisixConfigSynchronizer
-	store        *store.ApisixEtcdConfigStore
+	client        *clientv3.Client
+	apigwRegistry *registry.APIGWEtcdRegistry
+	leader        *leaderelection.EtcdLeaderElector
+	synchronizer  *synchronizer.ApisixConfigSynchronizer
+	store         *store.ApisixEtcdStore
 
-	commiter *commiter.Commiter
-	agent    *agent.EventAgent
+	committer *committer.Committer
+	agent     *agent.EventAgent
 
 	cfg *config.Config
 
@@ -61,7 +61,7 @@ type EtcdAgentRunner struct {
 func NewEtcdAgentRunner(cfg *config.Config) *EtcdAgentRunner {
 	client, err := initOperatorEtcdClient(cfg)
 	if err != nil {
-		fmt.Println(err, "Error creating apigwWatcher etcd client")
+		fmt.Println(err, "Error creating apigwRegistry etcd client")
 		os.Exit(1)
 	}
 
@@ -78,8 +78,8 @@ func (r *EtcdAgentRunner) init() {
 	// 1. init metrics
 	metric.InitMetric(prometheus.DefaultRegisterer)
 
-	// 2. init apigwWatcher
-	r.apigwWatcher = watcher.NewEtcdResourceRegistry(r.client, r.cfg.Dashboard.Etcd.KeyPrefix)
+	// 2. init apigwRegistry
+	r.apigwRegistry = registry.NewEtcdResourceRegistry(r.client, r.cfg.Dashboard.Etcd.KeyPrefix)
 
 	// 3. init leader elector
 	if r.cfg.Operator.WithLeader {
@@ -95,18 +95,18 @@ func (r *EtcdAgentRunner) init() {
 	r.store = apisixStore
 	r.synchronizer = synchronizer.NewSynchronizer(apisixStore, "/healthz")
 
-	stageTimer := timer.NewResourceTimer()
-
-	r.commiter = commiter.NewCommiter(
-		r.apigwWatcher,
+	stageTimer := timer.NewReleaseTimer()
+	// 5. init committer
+	r.committer = committer.NewCommitter(
+		r.apigwRegistry,
 		r.synchronizer,
 		stageTimer,
 	)
-	commitChan := r.commiter.GetCommitChan()
+	commitChan := r.committer.GetCommitChan()
 
 	// 6. init agent
 	r.agent = agent.NewEventAgent(
-		r.apigwWatcher,
+		r.apigwRegistry,
 		commitChan,
 		r.synchronizer,
 		stageTimer,
@@ -118,9 +118,9 @@ func (r *EtcdAgentRunner) Run(ctx context.Context) {
 	// 1. run http server
 	httpServer := server.NewServer(
 		r.leader,
-		r.apigwWatcher,
+		r.apigwRegistry,
 		r.store,
-		r.commiter,
+		r.committer,
 	)
 	httpServer.RegisterMetric(prometheus.DefaultGatherer)
 	httpServer.Run(ctx, r.cfg)
@@ -133,9 +133,9 @@ func (r *EtcdAgentRunner) Run(ctx context.Context) {
 		keepAliveChan = r.leader.WaitForLeading()
 	}
 
-	// 3. run commiter
-	r.logger.Info("starting commiter")
-	go r.commiter.Run(ctx)
+	// 3. run committer
+	r.logger.Info("starting committer")
+	go r.committer.Run(ctx)
 
 	// 4. run agent
 	r.agent.SetKeepAliveChan(keepAliveChan)

@@ -28,7 +28,6 @@ const ApigwAPISIXStageResourcePrefixFormat = "%s/%s/gateway/%s/%s/"
 // example: /{prefix}/{self.api_version}/global/plugin_metadata/bk-concurrency-limit
 const ApigwAPISIXGlobalResourcePrefixFormat = "%s/%s/global/"
 
-// GlobalResourceKey
 // GlobalResourceKey ...
 const GlobalResourceKey = "global_resource"
 
@@ -116,6 +115,7 @@ const (
 	ApisixResourceTypeRoutes         = "routes"
 	ApisixResourceTypeServices       = "services"
 	ApisixResourceTypeSSL            = "ssls"
+	ApisixResourceTypeProtos         = "protos"
 	ApisixResourceTypePluginMetadata = "plugin_metadata"
 
 	SyncSleepSeconds = 5 * time.Second

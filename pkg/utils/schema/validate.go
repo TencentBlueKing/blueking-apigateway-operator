@@ -1,6 +1,6 @@
 /*
  * TencentBlueKing is pleased to support the open source community by making
- * 蓝鲸智云 - 微网关(BlueKing - Micro APIGateway) available.
+ * 蓝鲸智云 - API 网关(BlueKing - APIGateway) available.
  * Copyright (C) 2025 Tencent. All rights reserved.
  * Licensed under the MIT License (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -26,7 +26,6 @@ import (
 	"fmt"
 
 	"github.com/apache/apisix-ingress-controller/pkg/log"
-	"github.com/spf13/cast"
 	"github.com/tidwall/gjson"
 	"github.com/xeipuuv/gojsonschema"
 	"go.uber.org/zap/buffer"
@@ -127,41 +126,53 @@ func NewAPISIXJsonSchemaValidator(version constant.APISIXVersion,
 	}, nil
 }
 
-func getPlugins(reqBody interface{}) (map[string]interface{}, string) {
-	switch bodyType := reqBody.(type) {
+func getPlugins(conf interface{}) (map[string]interface{}, string) {
+	switch confType := conf.(type) {
 	case *entity.Route:
-		log.Infof("type of reqBody: %#v", bodyType)
-		return bodyType.Plugins, "schema"
+		log.Infof("type of conf: %#v", confType)
+		return confType.Plugins, "schema"
 	case *entity.Service:
-		log.Infof("type of reqBody: %#v", bodyType)
-		return bodyType.Plugins, "schema"
+		log.Infof("type of conf: %#v", confType)
+		return confType.Plugins, "schema"
 	case *entity.Consumer:
-		log.Infof("type of reqBody: %#v", bodyType)
-		return bodyType.Plugins, "consumer_schema"
+		log.Infof("type of conf: %#v", confType)
+		return confType.Plugins, "consumer_schema"
 	case *entity.ConsumerGroup:
-		log.Infof("type of reqBody: %#v", bodyType)
-		return bodyType.Plugins, "consumer_schema"
+		log.Infof("type of conf: %#v", confType)
+		return confType.Plugins, "consumer_schema"
 	case *entity.PluginConfig:
-		log.Infof("type of reqBody: %#v", bodyType)
-		return bodyType.Plugins, "schema"
+		log.Infof("type of conf: %#v", confType)
+		return confType.Plugins, "schema"
 	case *entity.GlobalRule:
-		log.Infof("type of reqBody: %#v", bodyType)
-		return bodyType.Plugins, "schema"
+		log.Infof("type of conf: %#v", confType)
+		return confType.Plugins, "schema"
 	case *entity.StreamRoute:
-		log.Infof("type of reqBody: %#v", bodyType)
-		return bodyType.Plugins, "stream_schema"
+		log.Infof("type of conf: %#v", confType)
+		return confType.Plugins, "stream_schema"
 	case *entity.PluginMetadata:
-		log.Infof("type of reqBody: %#v", bodyType)
-		name := cast.ToString(bodyType.PluginMetadataConf["id"])
-		return map[string]interface{}{name: map[string]interface{}(bodyType.PluginMetadataConf)}, "metadata_schema"
+		log.Infof("type of conf: %#v", confType)
+		var pluginName string
+		for name := range confType.PluginMetadataConf {
+			pluginName = name
+		}
+		return map[string]interface{}{pluginName: confType.PluginMetadataConf}, "metadata_schema"
 	}
 	return nil, ""
 }
 
+// cHashKeySchemaCheck validates the hash key configuration for an upstream based on the hash type
+// It checks if the hash type is valid and verifies the key against the appropriate schema
+// Parameters:
+//   - upstream: The upstream configuration to validate
+//
+// Returns:
+//   - error: If validation fails, returns an error with details about the failure
 func (v *APISIXJsonSchemaValidator) cHashKeySchemaCheck(upstream *entity.UpstreamDef) error {
+	// If hash type is "consumer", no validation is needed
 	if upstream.HashOn == "consumer" {
 		return nil
 	}
+	// Validate that hash type is one of the supported values
 	if upstream.HashOn != "vars" &&
 		upstream.HashOn != "header" &&
 		upstream.HashOn != "cookie" {
@@ -169,6 +180,7 @@ func (v *APISIXJsonSchemaValidator) cHashKeySchemaCheck(upstream *entity.Upstrea
 	}
 
 	var schemaDef string
+	// For "vars" hash type, get the appropriate schema definition
 	if upstream.HashOn == "vars" {
 		schemaDef = schemaVersionMap[v.version].Get("main.upstream_hash_vars_schema").String()
 		if schemaDef == "" {
@@ -176,6 +188,7 @@ func (v *APISIXJsonSchemaValidator) cHashKeySchemaCheck(upstream *entity.Upstrea
 		}
 	}
 
+	// For "header" or "cookie" hash types, get the appropriate schema definition
 	if upstream.HashOn == "header" || upstream.HashOn == "cookie" {
 		schemaDef = schemaVersionMap[v.version].Get("main.upstream_hash_header_schema").String()
 		if schemaDef == "" {
@@ -183,21 +196,25 @@ func (v *APISIXJsonSchemaValidator) cHashKeySchemaCheck(upstream *entity.Upstrea
 		}
 	}
 
+	// Create a new schema validator from the schema definition
 	s, err := gojsonschema.NewSchema(gojsonschema.NewStringLoader(schemaDef))
 	if err != nil {
 		return fmt.Errorf("schema 验证失败: %s", err)
 	}
 
+	// Validate the upstream key against the schema
 	ret, err := s.Validate(gojsonschema.NewGoLoader(upstream.Key))
 	if err != nil {
 		return fmt.Errorf("schema 验证失败: %s", err)
 	}
 
+	// If validation fails, return detailed error information
 	if !ret.Valid() {
 		errString := GetSchemaValidateFailed(ret)
 		return fmt.Errorf("schema 验证失败: %s", errString)
 	}
 
+	// Validation successful
 	return nil
 }
 
@@ -500,8 +517,8 @@ type APISIXSchemaValidator struct {
 	version constant.APISIXVersion
 }
 
-// NewAPISIXSchemaValidator 创建 APISIXSchemaValidator
-func NewAPISIXSchemaValidator(version constant.APISIXVersion, jsonPath string) (Validator, error) {
+// NewApisixSchemaValidator 创建 APISIXSchemaValidator
+func NewApisixSchemaValidator(version constant.APISIXVersion, jsonPath string) (Validator, error) {
 	schemaDef := schemaVersionMap[version].Get(jsonPath).String()
 	if schemaDef == "" {
 		log.Warnf("schema validate failed: schema not found, path: %s", jsonPath)

@@ -20,6 +20,7 @@
 package differ
 
 import (
+	"encoding/json"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -135,9 +136,7 @@ var _ = Describe("configDiffer", func() {
 						Kind: constant.PluginMetadata,
 					},
 					PluginMetadataConf: entity.PluginMetadataConf{
-						"log-format": map[string]interface{}{
-							"remote_addr": "$remote_addr",
-						},
+						"log-format": json.RawMessage(`{"remote_addr":"$remote_addr"}`),
 					},
 				},
 				"test-plugin2": {
@@ -146,9 +145,7 @@ var _ = Describe("configDiffer", func() {
 						Kind: constant.PluginMetadata,
 					},
 					PluginMetadataConf: entity.PluginMetadataConf{
-						"log-format": map[string]interface{}{
-							"remote_addr": "$remote_addr",
-						},
+						"log-format": json.RawMessage(`{"remote_addr":"$remote_addr"}`),
 					},
 				},
 				"test-plugin4": {
@@ -157,9 +154,7 @@ var _ = Describe("configDiffer", func() {
 						Kind: constant.PluginMetadata,
 					},
 					PluginMetadataConf: entity.PluginMetadataConf{
-						"log-format": map[string]interface{}{
-							"remote_addr": "$remote_addrxx",
-						},
+						"log-format": json.RawMessage(`{"remote_addr":"$remote_addrxx"}`),
 					},
 				},
 			}
@@ -171,9 +166,7 @@ var _ = Describe("configDiffer", func() {
 						Kind: constant.PluginMetadata,
 					},
 					PluginMetadataConf: entity.PluginMetadataConf{
-						"log-format": map[string]interface{}{
-							"remote_addr": "$remote_addr",
-						},
+						"log-format": json.RawMessage(`{"remote_addr":"$remote_addr"}`),
 					},
 				},
 				"test-plugin3": {
@@ -182,9 +175,7 @@ var _ = Describe("configDiffer", func() {
 						Kind: constant.PluginMetadata,
 					},
 					PluginMetadataConf: entity.PluginMetadataConf{
-						"log-format": map[string]interface{}{
-							"remote_addr": "$remote_addr",
-						},
+						"log-format": json.RawMessage(`{"remote_addr":"$remote_addr"}`),
 					},
 				},
 				"test-plugin4": {
@@ -193,9 +184,7 @@ var _ = Describe("configDiffer", func() {
 						Kind: constant.PluginMetadata,
 					},
 					PluginMetadataConf: entity.PluginMetadataConf{
-						"log-format": map[string]interface{}{
-							"remote_addr": "$remote_addr",
-						},
+						"log-format": json.RawMessage(`{"remote_addr":"$remote_addr"}`),
 					},
 				},
 			}
@@ -525,19 +514,6 @@ var _ = Describe("configDiffer", func() {
 						},
 					},
 				},
-				PluginMetadatas: map[string]*entity.PluginMetadata{
-					"test-plugin1": {
-						ResourceMetadata: entity.ResourceMetadata{
-							ID:   "test-plugin1",
-							Kind: constant.PluginMetadata,
-						},
-						PluginMetadataConf: entity.PluginMetadataConf{
-							"log-format": map[string]interface{}{
-								"remote_addr": "$remote_addr",
-							},
-						},
-					},
-				},
 			}
 
 			oldConf = &entity.ApisixStageResource{
@@ -611,30 +587,6 @@ var _ = Describe("configDiffer", func() {
 						},
 					},
 				},
-				PluginMetadatas: map[string]*entity.PluginMetadata{
-					"test-plugin1": {
-						ResourceMetadata: entity.ResourceMetadata{
-							ID:   "test-plugin1",
-							Kind: constant.PluginMetadata,
-						},
-						PluginMetadataConf: entity.PluginMetadataConf{
-							"log-format": map[string]interface{}{
-								"remote_addr": "$remote_addr",
-							},
-						},
-					},
-					"test-plugin2": {
-						ResourceMetadata: entity.ResourceMetadata{
-							ID:   "test-plugin2",
-							Kind: constant.PluginMetadata,
-						},
-						PluginMetadataConf: entity.PluginMetadataConf{
-							"log-format": map[string]interface{}{
-								"remote_addr": "$remote_addr",
-							},
-						},
-					},
-				},
 			}
 		})
 
@@ -648,15 +600,11 @@ var _ = Describe("configDiffer", func() {
 
 				Expect(len(put.SSLs)).To(Equal(1))
 
-				Expect(len(put.PluginMetadatas)).To(Equal(0))
-
 				Expect(len(del.Routes)).To(Equal(1))
 
 				Expect(len(del.Services)).To(Equal(1))
 
 				Expect(len(del.SSLs)).To(Equal(1))
-
-				Expect(len(del.PluginMetadatas)).To(Equal(1))
 			})
 		})
 	})

@@ -21,6 +21,7 @@
 package synchronizer
 
 import (
+	"net/http"
 	"os"
 
 	"go.uber.org/zap"
@@ -72,30 +73,14 @@ func (s *VirtualStage) make404DefaultRoute() *entity.Route {
 	return &entity.Route{
 		ResourceMetadata: s.makeRouteMetadata(NotFoundHandling),
 		URI:              "/*",
-		Uris:             nil,
 		Priority:         -100,
-		Methods:          nil,
-		Host:             "",
-		Hosts:            nil,
-		RemoteAddr:       "",
-		RemoteAddrs:      nil,
-		Vars:             nil,
-		FilterFunc:       "",
-		Script:           nil,
-		ScriptID:         nil,
 		Plugins: map[string]interface{}{
 			"bk-error-wrapper":     map[string]interface{}{},
 			"bk-not-found-handler": map[string]interface{}{},
 			"file-logger": map[string]interface{}{
 				"path": fileLoggerLogPath,
 			}},
-		PluginConfigID:  nil,
-		Upstream:        nil,
-		ServiceID:       nil,
-		UpstreamID:      nil,
-		ServiceProtocol: "",
-		EnableWebsocket: false,
-		Status:          1,
+		Status: 1,
 	}
 }
 
@@ -114,9 +99,9 @@ func (s *VirtualStage) makeOuterHealthzRoute() *entity.Route {
 
 	return &entity.Route{
 		ResourceMetadata: s.makeRouteMetadata(HealthZRouteIDOuter),
-		URI:              s.apisixHealthzURI,
+		Uris:             []string{s.apisixHealthzURI},
 		Priority:         -100,
-		Methods:          []string{"GET"},
+		Methods:          []string{http.MethodGet, http.MethodHead},
 		Plugins:          plugins,
 		Status:           1,
 	}

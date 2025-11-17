@@ -5,7 +5,7 @@
       "labels": {
         "gateway.bk.tencent.com/apisix-version": "3.13"
       },
-      "conn": 2000,
+      "conn": 2001,
       "burst": 1000,
       "default_conn_delay": 1,
       "key_type": "var",

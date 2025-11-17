@@ -24,14 +24,14 @@ import (
 	"errors"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/commiter"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/committer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
 )
 
 // GetApigwResourcesByStage 根据网关查询资源
 func GetApigwResourcesByStage(
 	ctx context.Context,
-	commiter *commiter.Commiter,
+	commiter *committer.Committer,
 	gatewayName string,
 	stageName string,
 	isExcludeReleaseVersion bool,
@@ -59,11 +59,11 @@ func GetApigwResourcesByStage(
 // GetApigwResourceCount 获取 apigw 指定环境的资源数量
 func GetApigwResourceCount(
 	ctx context.Context,
-	commiter *commiter.Commiter,
+	commiter *committer.Committer,
 	gatewayName string,
 	stageName string,
 ) (int64, error) {
-	// si := watcher.ResourceInfo{
+	// si := watcher.ReleaseInfo{
 	//	GatewayName: gatewayName,
 	//	StageName:   stageName,
 	//}
@@ -77,7 +77,7 @@ func GetApigwResourceCount(
 // ListApigwResources 获取 apigw 指定环境的资源列表
 func ListApigwResources(
 	ctx context.Context,
-	commiter *commiter.Commiter,
+	commiter *committer.Committer,
 	gatewayName string,
 	stageName string,
 ) (map[string]*entity.ApisixStageResource, error) {
@@ -94,7 +94,7 @@ func ListApigwResources(
 // GetApigwResource 获取 apigw 指定环境下的资源信息
 func GetApigwResource(
 	ctx context.Context,
-	commiter *commiter.Commiter,
+	commiter *committer.Committer,
 	gatewayName string,
 	stageName string,
 	resourceName string,
@@ -105,7 +105,7 @@ func GetApigwResource(
 	//
 	//// by resourceName
 	// if resourceName != "" {
-	//	si := watcher.ResourceInfo{
+	//	si := watcher.ReleaseInfo{
 	//		GatewayName: gatewayName,
 	//		StageName:   stageName,
 	//	}
@@ -137,11 +137,11 @@ func GetApigwResource(
 // GetApigwStageCurrentVersionInfo 获取 apigw 指定环境的发布版本信息
 func GetApigwStageCurrentVersionInfo(
 	ctx context.Context,
-	commiter *commiter.Commiter,
+	commiter *committer.Committer,
 	gatewayName string,
 	stageName string,
 ) (map[string]interface{}, error) {
-	// si := watcher.ResourceInfo{
+	// si := watcher.ReleaseInfo{
 	//	GatewayName: gatewayName,
 	//	StageName:   stageName,
 	//}

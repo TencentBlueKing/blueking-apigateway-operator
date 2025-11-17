@@ -31,7 +31,7 @@ import (
 
 // GetApisixResourceCount 获取 apisix 指定环境的资源数量
 func GetApisixResourceCount(
-	store *store.ApisixEtcdConfigStore,
+	store *store.ApisixEtcdStore,
 	gatewayName string,
 	stageName string,
 ) (int64, error) {
@@ -42,7 +42,7 @@ func GetApisixResourceCount(
 
 // ListApisixResources 获取 apisix 指定环境的资源列表
 func ListApisixResources(
-	store *store.ApisixEtcdConfigStore,
+	store *store.ApisixEtcdStore,
 	gatewayName string,
 	stageName string,
 ) map[string]*entity.ApisixStageResource {
@@ -55,7 +55,7 @@ func ListApisixResources(
 
 // GetApisixResource 获取 apisix 指定环境下的资源信息
 func GetApisixResource(
-	store *store.ApisixEtcdConfigStore,
+	store *store.ApisixEtcdStore,
 	gatewayName string,
 	stageName string,
 	resourceName string,
@@ -95,7 +95,7 @@ func GetApisixResource(
 
 // GetApisixStageCurrentVersionInfo 获取 apisix 指定环境的发布版本信息
 func GetApisixStageCurrentVersionInfo(
-	store *store.ApisixEtcdConfigStore,
+	store *store.ApisixEtcdStore,
 	gatewayName string,
 	stageName string,
 ) (map[string]interface{}, error) {

@@ -16,8 +16,8 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package commiter provides the functionality to commit changes
-package commiter
+// Package committer provides the functionality to commit changes
+package committer
 
 import (
 	"context"
@@ -27,8 +27,8 @@ import (
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/agent/timer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/synchronizer"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/watcher"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/eventreporter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
@@ -39,14 +39,14 @@ import (
 
 const maxStageRetryCount = 3
 
-// Commiter ...
-type Commiter struct {
-	resourceRegistry   *watcher.APIGEtcdWatcher
+// Committer ...
+type Committer struct {
+	resourceRegistry   *registry.APIGWEtcdRegistry
 	commitResourceChan chan []*entity.ReleaseInfo
 
 	synchronizer *synchronizer.ApisixConfigSynchronizer
 
-	resourceTimer *timer.ResourceTimer
+	resourceTimer *timer.ReleaseTimer
 
 	logger *zap.SugaredLogger
 
@@ -55,13 +55,13 @@ type Commiter struct {
 	gatewayStageMapLock *sync.RWMutex
 }
 
-// NewCommiter 创建Commiter
-func NewCommiter(
-	resourceRegistry *watcher.APIGEtcdWatcher,
+// NewCommitter 创建Committer
+func NewCommitter(
+	resourceRegistry *registry.APIGWEtcdRegistry,
 	synchronizer *synchronizer.ApisixConfigSynchronizer,
-	stageTimer *timer.ResourceTimer,
-) *Commiter {
-	return &Commiter{
+	stageTimer *timer.ReleaseTimer,
+) *Committer {
+	return &Committer{
 		resourceRegistry:    resourceRegistry,                      // Registry for resource management
 		commitResourceChan:  make(chan []*entity.ReleaseInfo),      // Channel for committing resource information
 		synchronizer:        synchronizer,                          // Configuration synchronizer
@@ -73,7 +73,7 @@ func NewCommiter(
 }
 
 // Run ...
-func (c *Commiter) Run(ctx context.Context) {
+func (c *Committer) Run(ctx context.Context) {
 	// 分批次处理需要同步的resource
 	for {
 		c.logger.Debugw("commiter waiting for commit command")
@@ -102,17 +102,17 @@ func (c *Commiter) Run(ctx context.Context) {
 }
 
 // GetCommitChan 获取提交channel
-func (c *Commiter) GetCommitChan() chan []*entity.ReleaseInfo {
+func (c *Committer) GetCommitChan() chan []*entity.ReleaseInfo {
 	return c.commitResourceChan
 }
 
 // ForceCommit ...
-func (c *Commiter) ForceCommit(ctx context.Context, stageList []*entity.ReleaseInfo) {
+func (c *Committer) ForceCommit(ctx context.Context, stageList []*entity.ReleaseInfo) {
 	c.logger.Infow("force commit stage changes", "stageList", stageList)
 	c.commitResourceChan <- stageList
 }
 
-func (c *Commiter) commitGroup(ctx context.Context, releaseInfoList []*entity.ReleaseInfo) {
+func (c *Committer) commitGroup(ctx context.Context, releaseInfoList []*entity.ReleaseInfo) {
 	c.logger.Debugw("Commit resource group", "resourceList", releaseInfoList)
 	// batch write apisix conf to buffer
 	wg := &sync.WaitGroup{}
@@ -141,7 +141,7 @@ func (c *Commiter) commitGroup(ctx context.Context, releaseInfoList []*entity.Re
 }
 
 // 按照gateway的维度串行更新etcd
-func (c *Commiter) commitGatewayStage(ctx context.Context, si *entity.ReleaseInfo, wg *sync.WaitGroup) {
+func (c *Committer) commitGatewayStage(ctx context.Context, si *entity.ReleaseInfo, wg *sync.WaitGroup) {
 	defer wg.Done()
 	c.gatewayStageMapLock.Lock()
 	stageChan, ok := c.gatewayStageChanMap[si.GetGatewayName()]
@@ -159,7 +159,7 @@ func (c *Commiter) commitGatewayStage(ctx context.Context, si *entity.ReleaseInf
 	})
 }
 
-func (c *Commiter) commitStage(ctx context.Context, si *entity.ReleaseInfo, stageChan chan struct{}) {
+func (c *Committer) commitStage(ctx context.Context, si *entity.ReleaseInfo, stageChan chan struct{}) {
 	defer func() {
 		<-stageChan
 	}()
@@ -202,7 +202,7 @@ func (c *Commiter) commitStage(ctx context.Context, si *entity.ReleaseInfo, stag
 	c.logger.Infow("commit stage success", "stageInfo", si)
 }
 
-func (c *Commiter) retryStage(si *entity.ReleaseInfo) {
+func (c *Committer) retryStage(si *entity.ReleaseInfo) {
 	if si.RetryCount >= maxStageRetryCount {
 		c.logger.Error("too many retries", "stageInfo", si)
 		return
@@ -212,7 +212,7 @@ func (c *Commiter) retryStage(si *entity.ReleaseInfo) {
 }
 
 // GetStageReleaseNativeApisixConfiguration 直接从etcd获取原生apisix配置
-func (c *Commiter) GetStageReleaseNativeApisixConfiguration(
+func (c *Committer) GetStageReleaseNativeApisixConfiguration(
 	ctx context.Context,
 	si *entity.ReleaseInfo,
 ) (*entity.ApisixStageResource, error) {
@@ -227,7 +227,7 @@ func (c *Commiter) GetStageReleaseNativeApisixConfiguration(
 }
 
 // GetGlobalApisixConfiguration 直接从etcd获取原生全局apisix配置
-func (c *Commiter) GetGlobalApisixConfiguration(
+func (c *Committer) GetGlobalApisixConfiguration(
 	ctx context.Context,
 	si *entity.ReleaseInfo,
 ) (*entity.ApisixGlobalResource, error) {
@@ -240,7 +240,7 @@ func (c *Commiter) GetGlobalApisixConfiguration(
 	return resources, nil
 }
 
-func (c *Commiter) commitGlobalResource(ctx context.Context, si *entity.ReleaseInfo) {
+func (c *Committer) commitGlobalResource(ctx context.Context, si *entity.ReleaseInfo) {
 	// trace
 	_, span := trace.StartTrace(si.Ctx, "commiter.commitGlobalResource")
 	defer span.End()

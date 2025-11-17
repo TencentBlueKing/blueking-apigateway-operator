@@ -19,8 +19,6 @@ SETUP_ENVTEST = $(LOCALBIN)/setup-envtest
 
 ## Tool Versions
 GOLANGCI_LINT_VERSION ?= v2.1.5
-ENVTEST_K8S_VERSION = 1.22  # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
-CONTROLLER_TOOLS_VERSION ?= v0.18.0
 MOCKGEN_VERSION ?= v1.6.0
 GINKGO_VERSION ?= v2.27.2
 
@@ -55,9 +53,9 @@ $(BUILD_PATH):
 	mkdir -p $(BUILD_PATH)
 
 
-.PHONY: fmt
+.PHONY:
 fmt: ## Run go fmt against code.
-	go fmt ./...
+	$(GOLANGCI_LINT) fmt  ./...
 
 .PHONY: gofumpt
 gofumpt: ## Run go fmt against code.

@@ -23,9 +23,9 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apis/open/handler"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/commiter"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/committer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/store"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/watcher"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
 )
 
@@ -33,12 +33,12 @@ import (
 func Register(
 	r *gin.RouterGroup,
 	leaderElector *leaderelection.EtcdLeaderElector,
-	registry *watcher.APIGEtcdWatcher,
-	committer *commiter.Commiter,
-	apiSixConfStore *store.ApisixEtcdConfigStore,
+	registry *registry.APIGWEtcdRegistry,
+	committer *committer.Committer,
+	apisixConfStore *store.ApisixEtcdStore,
 ) {
 	// register resource api
-	resourceApi := handler.NewResourceApi(leaderElector, registry, committer, apiSixConfStore)
+	resourceApi := handler.NewResourceApi(leaderElector, registry, committer, apisixConfStore)
 	r.GET("/leader/", resourceApi.GetLeader)
 	r.POST("/apigw/resources/", resourceApi.ApigwList)
 	r.POST("/apigw/resources/count/", resourceApi.ApigwStageResourceCount)

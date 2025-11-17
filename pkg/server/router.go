@@ -25,9 +25,9 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apis/open"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/commiter"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/committer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/store"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/watcher"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
@@ -35,9 +35,9 @@ import (
 // NewRouter do the router initialization
 func NewRouter(
 	leaderElector *leaderelection.EtcdLeaderElector,
-	registry *watcher.APIGEtcdWatcher,
-	committer *commiter.Commiter,
-	apiSixConfStore *store.ApisixEtcdConfigStore,
+	registry *registry.APIGWEtcdRegistry,
+	committer *committer.Committer,
+	apiSixConfStore *store.ApisixEtcdStore,
 	router *gin.Engine,
 	conf *config.Config,
 ) *gin.Engine {

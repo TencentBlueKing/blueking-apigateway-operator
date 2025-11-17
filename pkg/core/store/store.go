@@ -34,7 +34,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/differ"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/watcher"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
@@ -48,13 +48,13 @@ var apisixResourceTypes = []string{
 	constant.ApisixResourceTypePluginMetadata,
 }
 
-// ApisixEtcdConfigStore ...
-type ApisixEtcdConfigStore struct {
+// ApisixEtcdStore ...
+type ApisixEtcdStore struct {
 	client *clientv3.Client
 	prefix string
 
-	watcher map[string]*watcher.ApisixWatcher
-	differ  *differ.ConfigDiffer
+	registry map[string]*registry.ApisixRegistry
+	differ   *differ.ConfigDiffer
 
 	logger *zap.SugaredLogger
 
@@ -62,27 +62,30 @@ type ApisixEtcdConfigStore struct {
 
 	delInterval time.Duration
 
+	syncTimeout time.Duration
+
 	lock *sync.RWMutex
 }
 
-// NewApiEtcdConfigStore ...
-func NewApiEtcdConfigStore(client *clientv3.Client, prefix string,
-	putInterval time.Duration, delInterval time.Duration) (*ApisixEtcdConfigStore, error) {
-	s := &ApisixEtcdConfigStore{
+// NewApisixEtcdStore ...
+func NewApisixEtcdStore(client *clientv3.Client, prefix string,
+	putInterval time.Duration, delInterval time.Duration, syncTimeout time.Duration) (*ApisixEtcdStore, error) {
+	s := &ApisixEtcdStore{
 		client:      client,
 		prefix:      strings.TrimRight(prefix, "/"),
-		watcher:     make(map[string]*watcher.ApisixWatcher, 4),
+		registry:    make(map[string]*registry.ApisixRegistry, 4),
 		differ:      differ.NewConfigDiffer(),
 		logger:      logging.GetLogger().Named("etcd-config-store"),
 		putInterval: putInterval,
 		delInterval: delInterval,
+		syncTimeout: syncTimeout,
 		lock:        &sync.RWMutex{},
 	}
 	s.Init()
 
 	s.logger.Infow("Create etcd config store", "prefix", prefix)
 
-	if len(s.watcher) != len(apisixResourceTypes) {
+	if len(s.registry) != len(apisixResourceTypes) {
 		s.logger.Error("Create etcd config store failed")
 		return nil, fmt.Errorf("create etcd config store failed")
 	}
@@ -91,7 +94,7 @@ func NewApiEtcdConfigStore(client *clientv3.Client, prefix string,
 }
 
 // Init initializes the etcd config store
-func (s *ApisixEtcdConfigStore) Init() {
+func (s *ApisixEtcdStore) Init() {
 	wg := &sync.WaitGroup{}
 	for _, resourceType := range apisixResourceTypes {
 		wg.Add(1)
@@ -100,45 +103,42 @@ func (s *ApisixEtcdConfigStore) Init() {
 		tempResourceType := resourceType
 		utils.GoroutineWithRecovery(context.Background(), func() {
 			defer wg.Done()
-			resourceStore, err := watcher.NewApisixResourceWatcher(s.client, s.prefix+"/"+tempResourceType+"/")
+			resourceRegistry, err := registry.NewApisixResourceRegistry(
+				s.client, s.prefix+"/"+tempResourceType+"/", s.syncTimeout)
 			if err != nil {
 				s.logger.Errorw("Create resource store failed", "resourceType", tempResourceType)
 				return
 			}
 			s.lock.Lock()
 			defer s.lock.Unlock()
-			s.watcher[tempResourceType] = resourceStore
+			s.registry[tempResourceType] = resourceRegistry
 		})
 	}
 	wg.Wait()
 }
 
 // Get get a staged apisix configuration
-func (s *ApisixEtcdConfigStore) Get(stageKey string) *entity.ApisixStageResource {
+func (s *ApisixEtcdStore) Get(stageKey string) *entity.ApisixStageResource {
 	ret := entity.NewEmptyApisixConfiguration()
-	routes := s.watcher[constant.ApisixResourceTypeRoutes].GetStageResources(stageKey)
+	routes := s.registry[constant.ApisixResourceTypeRoutes].GetStageResources(stageKey)
 	for key, val := range routes {
 		ret.Routes[key] = val.(*entity.Route)
 	}
-	services := s.watcher[constant.ApisixResourceTypeServices].GetStageResources(stageKey)
+	services := s.registry[constant.ApisixResourceTypeServices].GetStageResources(stageKey)
 	for key, val := range services {
 		ret.Services[key] = val.(*entity.Service)
 	}
-	ssls := s.watcher[constant.ApisixResourceTypeSSL].GetStageResources(stageKey)
+	ssls := s.registry[constant.ApisixResourceTypeSSL].GetStageResources(stageKey)
 	for key, val := range ssls {
 		ret.SSLs[key] = val.(*entity.SSL)
-	}
-	pms := s.watcher[constant.ApisixResourceTypePluginMetadata].GetStageResources(stageKey)
-	for key, val := range pms {
-		ret.PluginMetadatas[key] = val.(*entity.PluginMetadata)
 	}
 	return ret
 }
 
 // GetAll get staged apisix configuration map
-func (s *ApisixEtcdConfigStore) GetAll() map[string]*entity.ApisixStageResource {
+func (s *ApisixEtcdStore) GetAll() map[string]*entity.ApisixStageResource {
 	configMap := make(map[string]*entity.ApisixStageResource)
-	routeMap := s.watcher[constant.ApisixResourceTypeRoutes].GetAllResources()
+	routeMap := s.registry[constant.ApisixResourceTypeRoutes].GetAllResources()
 	for key, route := range routeMap {
 		stageName := route.GetStageName()
 		if _, ok := configMap[stageName]; !ok {
@@ -147,7 +147,7 @@ func (s *ApisixEtcdConfigStore) GetAll() map[string]*entity.ApisixStageResource 
 		configMap[stageName].Routes[key] = route.(*entity.Route)
 	}
 
-	serviceMap := s.watcher[constant.ApisixResourceTypeServices].GetAllResources()
+	serviceMap := s.registry[constant.ApisixResourceTypeServices].GetAllResources()
 	for key, service := range serviceMap {
 		stageName := service.GetStageName()
 		if _, ok := configMap[stageName]; !ok {
@@ -156,7 +156,7 @@ func (s *ApisixEtcdConfigStore) GetAll() map[string]*entity.ApisixStageResource 
 		configMap[stageName].Services[key] = service.(*entity.Service)
 	}
 
-	sslMap := s.watcher[constant.ApisixResourceTypeSSL].GetAllResources()
+	sslMap := s.registry[constant.ApisixResourceTypeSSL].GetAllResources()
 	for key, ssl := range sslMap {
 		stageName := ssl.GetStageName()
 		if _, ok := configMap[stageName]; !ok {
@@ -164,21 +164,11 @@ func (s *ApisixEtcdConfigStore) GetAll() map[string]*entity.ApisixStageResource 
 		}
 		configMap[stageName].SSLs[key] = ssl.(*entity.SSL)
 	}
-
-	pmMap := s.watcher[constant.ApisixResourceTypePluginMetadata].GetAllResources()
-	for key, pm := range pmMap {
-		stageName := pm.GetStageName()
-		if _, ok := configMap[stageName]; !ok {
-			configMap[stageName] = entity.NewEmptyApisixConfiguration()
-		}
-		configMap[stageName].PluginMetadatas[key] = pm.(*entity.PluginMetadata)
-	}
-
 	return configMap
 }
 
 // Alter ...
-func (s *ApisixEtcdConfigStore) Alter(
+func (s *ApisixEtcdStore) Alter(
 	ctx context.Context,
 	stageKey string,
 	config *entity.ApisixStageResource,
@@ -197,7 +187,7 @@ func (s *ApisixEtcdConfigStore) Alter(
 	return nil
 }
 
-func (s *ApisixEtcdConfigStore) alterByStage(
+func (s *ApisixEtcdStore) alterByStage(
 	ctx context.Context, stageKey string, conf *entity.ApisixStageResource,
 ) (err error) {
 	// get cached config
@@ -212,9 +202,6 @@ func (s *ApisixEtcdConfigStore) alterByStage(
 		if err = s.batchPutResource(ctx, constant.ApisixResourceTypeSSL, putConf.SSLs); err != nil {
 			return fmt.Errorf("batch put ssl failed: %w", err)
 		}
-		if err = s.batchPutResource(ctx, constant.ApisixResourceTypePluginMetadata, putConf.PluginMetadatas); err != nil {
-			return fmt.Errorf("batch put plugin metadata failed: %w", err)
-		}
 		if err = s.batchPutResource(ctx, constant.ApisixResourceTypeServices, putConf.Services); err != nil {
 			return fmt.Errorf("batch put services failed: %w", err)
 		}
@@ -226,14 +213,12 @@ func (s *ApisixEtcdConfigStore) alterByStage(
 			return fmt.Errorf("batch put routes failed: %w", err)
 		}
 
-		if len(putConf.Routes)+len(putConf.Services)+
-			len(putConf.PluginMetadatas)+len(putConf.SSLs) > 0 {
+		if len(putConf.Routes)+len(putConf.Services)+len(putConf.SSLs) > 0 {
 			s.logger.Infof(
-				"put gateway[key=%s] conf count:[route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
+				"put gateway[key=%s] conf count:[route:%d,serivce:%d,ssl:%d]",
 				stageKey,
 				len(putConf.Routes),
 				len(putConf.Services),
-				len(putConf.PluginMetadatas),
 				len(putConf.SSLs),
 			)
 			putFlag = true
@@ -245,12 +230,6 @@ func (s *ApisixEtcdConfigStore) alterByStage(
 		if err = s.batchDeleteResource(ctx, constant.ApisixResourceTypeRoutes, deleteConf.Routes); err != nil {
 			return fmt.Errorf("batch delete routes failed: %w", err)
 		}
-
-		if err = s.batchDeleteResource(
-			ctx, constant.ApisixResourceTypePluginMetadata, deleteConf.PluginMetadatas,
-		); err != nil {
-			return fmt.Errorf("batch delete plugin metadata failed: %w", err)
-		}
 		if err = s.batchDeleteResource(ctx, constant.ApisixResourceTypeSSL, deleteConf.SSLs); err != nil {
 			return fmt.Errorf("batch delete ssl failed: %w", err)
 		}
@@ -259,17 +238,15 @@ func (s *ApisixEtcdConfigStore) alterByStage(
 			// sleep delInterval to avoid resource data inconsistency
 			time.Sleep(s.delInterval)
 			if err = s.batchDeleteResource(ctx, constant.ApisixResourceTypeServices, deleteConf.Services); err != nil {
-				return fmt.Errorf("batch delete services failed: %w", err)
+				return fmt.Errorf("batch delete service failed: %w", err)
 			}
 		}
-		if len(deleteConf.Routes)+len(deleteConf.Services)+
-			len(deleteConf.PluginMetadatas)+len(deleteConf.SSLs) > 0 {
+		if len(deleteConf.Routes)+len(deleteConf.Services)+len(deleteConf.SSLs) > 0 {
 			s.logger.Infof(
-				"delete gateway[key=%s] conf count:[route:%d,serivce:%d,plugin_metadata:%d,ssl:%d]",
+				"delete gateway[key=%s] conf count:[route:%d,service:%d,ssl:%d]",
 				stageKey,
 				len(deleteConf.Routes),
 				len(deleteConf.Services),
-				len(deleteConf.PluginMetadatas),
 				len(deleteConf.SSLs),
 			)
 			delFlag = true
@@ -284,10 +261,10 @@ func (s *ApisixEtcdConfigStore) alterByStage(
 }
 
 // GetGlobal 获取全局资源配置（从 apisix etcd 中获取所有没有 stage 标签的 plugin metadata）
-func (s *ApisixEtcdConfigStore) GetGlobal() *entity.ApisixGlobalResource {
+func (s *ApisixEtcdStore) GetGlobal() *entity.ApisixGlobalResource {
 	ret := entity.NewEmptyApisixGlobalResource()
 	// 获取所有 plugin metadata，过滤出没有 stage 标签的（即 global 资源）
-	pmMap := s.watcher[constant.ApisixResourceTypePluginMetadata].GetAllResources()
+	pmMap := s.registry[constant.ApisixResourceTypePluginMetadata].GetAllResources()
 	for key, pm := range pmMap {
 		// Global 资源没有 stage 标签，stage 为空字符串
 		if pm.GetStageName() == "" {
@@ -298,7 +275,7 @@ func (s *ApisixEtcdConfigStore) GetGlobal() *entity.ApisixGlobalResource {
 }
 
 // AlterGlobal 同步全局资源配置到 apisix etcd
-func (s *ApisixEtcdConfigStore) AlterGlobal(
+func (s *ApisixEtcdStore) AlterGlobal(
 	ctx context.Context,
 	conf *entity.ApisixGlobalResource,
 ) error {
@@ -316,7 +293,7 @@ func (s *ApisixEtcdConfigStore) AlterGlobal(
 	return nil
 }
 
-func (s *ApisixEtcdConfigStore) alterGlobal(
+func (s *ApisixEtcdStore) alterGlobal(
 	ctx context.Context, conf *entity.ApisixGlobalResource,
 ) (err error) {
 	// get cached global config
@@ -325,11 +302,13 @@ func (s *ApisixEtcdConfigStore) alterGlobal(
 	// diff config
 	putConf, deleteConf := s.differ.DiffGlobal(oldConf, conf)
 
+	var putFlag, delFlag bool
 	// put resources
 	if putConf != nil && len(putConf.PluginMetadata) > 0 {
 		if err = s.batchPutResource(ctx, constant.ApisixResourceTypePluginMetadata, putConf.PluginMetadata); err != nil {
 			return fmt.Errorf("batch put global plugin metadata failed: %w", err)
 		}
+		putFlag = true
 		s.logger.Infof(
 			"put global plugin_metadata count:%d",
 			len(putConf.PluginMetadata),
@@ -343,23 +322,24 @@ func (s *ApisixEtcdConfigStore) alterGlobal(
 		); err != nil {
 			return fmt.Errorf("batch delete global plugin metadata failed: %w", err)
 		}
+		delFlag = true
 		s.logger.Infof(
 			"delete global plugin_metadata count:%d",
 			len(deleteConf.PluginMetadata),
 		)
 	}
 
-	if deleteConf == nil && putConf == nil {
+	if !putFlag && !delFlag {
 		s.logger.Infof("global resource has no change")
 	}
 
 	return nil
 }
 
-func (s *ApisixEtcdConfigStore) batchPutResource(
+func (s *ApisixEtcdStore) batchPutResource(
 	ctx context.Context, resourceType string, resources interface{},
 ) error {
-	resourceStore := s.watcher[resourceType]
+	resourceStore := s.registry[resourceType]
 
 	resourceIter := reflect.ValueOf(resources).MapRange()
 	for resourceIter.Next() {
@@ -403,10 +383,10 @@ func (s *ApisixEtcdConfigStore) batchPutResource(
 	return nil
 }
 
-func (s *ApisixEtcdConfigStore) batchDeleteResource(
+func (s *ApisixEtcdStore) batchDeleteResource(
 	ctx context.Context, resourceType string, resources interface{},
 ) error {
-	resourceStore := s.watcher[resourceType]
+	resourceStore := s.registry[resourceType]
 	resourceMap := reflect.ValueOf(resources).MapRange()
 	for resourceMap.Next() {
 		st := time.Now()

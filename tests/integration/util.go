@@ -31,7 +31,6 @@ import (
 )
 
 const (
-	BootstrapSyncingCountMetric       = "bootstrap_syncing_count"
 	ResourceEventTriggeredCountMetric = "resource_event_triggered_count"
 	ResourceConvertedCountMetric      = "resource_converted_count"
 	ResourceSyncCmpCount              = "sync_cmp_count"
@@ -171,9 +170,4 @@ func (m *MetricsAdapter) GetResourceSyncCmpDiffCountMetric(gateway string, stage
 // GetApisixOperationCountMetric ApisixOperationCountMetric returns the resource event triggered count metric
 func (m *MetricsAdapter) GetApisixOperationCountMetric(action string, result string, resourceType string) int {
 	return m.GetResourceMetrics(ApisixOperationCountMetric, []string{action, result, resourceType})
-}
-
-// GetBootstrapSyncingSuccessCountMetric BootstrapSyncingCountMetric returns the resource event triggered count metric
-func (m *MetricsAdapter) GetBootstrapSyncingSuccessCountMetric(result string) int {
-	return m.GetResourceMetrics(BootstrapSyncingCountMetric, []string{result})
 }

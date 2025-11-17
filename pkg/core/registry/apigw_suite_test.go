@@ -1,4 +1,3 @@
-// Package apisix ...
 /*
  * TencentBlueKing is pleased to support the open source community by making
  * 蓝鲸智云 - API 网关(BlueKing - APIGateway) available.
@@ -17,30 +16,16 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package apisix ...
-package apisix
+package registry
 
-import "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
+import (
+	"testing"
 
-// ReportResourceCount ...
-func ReportResourceCount(
-	gateway, stage, resType string,
-	conf *entity.ApisixStageResource,
-	handler func(string, string, string, int),
-) {
-	if conf != nil {
-		handler(gateway, stage, "routes", len(conf.Routes))
-		handler(gateway, stage, "services", len(conf.Services))
-		handler(gateway, stage, "ssls", len(conf.SSLs))
-		handler(gateway, stage, "plugin_metadatas", len(conf.PluginMetadatas))
-	}
-}
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+)
 
-// MapStringToMapInterface ...
-func MapStringToMapInterface(in map[string]string) map[string]interface{} {
-	out := make(map[string]interface{})
-	for key, val := range in {
-		out[key] = val
-	}
-	return out
+func TestRegistry(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Registry Suite")
 }

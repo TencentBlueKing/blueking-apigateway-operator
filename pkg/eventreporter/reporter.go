@@ -42,11 +42,11 @@ var (
 )
 
 type reportEvent struct {
-	ctx    context.Context
-	stage  *entity.ReleaseInfo
-	Event  constant.EventName
-	status constant.EventStatus
-	detail map[string]interface{}
+	ctx     context.Context
+	release *entity.ReleaseInfo
+	Event   constant.EventName
+	status  constant.EventStatus
+	detail  map[string]interface{}
 	// event timestamp
 	ts int64
 }
@@ -115,83 +115,88 @@ func Shutdown() {
 }
 
 // ReportParseConfigurationDoingEvent  will report the event of paring configuration
-func ReportParseConfigurationDoingEvent(ctx context.Context, stage *entity.ReleaseInfo) {
+func ReportParseConfigurationDoingEvent(ctx context.Context, release *entity.ReleaseInfo) {
 	event := reportEvent{
-		stage:  stage,
-		Event:  constant.EventNameParseConfiguration,
-		status: constant.EventStatusDoing,
-		detail: nil,
-		ts:     time.Now().Unix(),
+		ctx:     ctx,
+		release: release,
+		Event:   constant.EventNameParseConfiguration,
+		status:  constant.EventStatusDoing,
+		detail:  nil,
+		ts:      time.Now().Unix(),
 	}
 	addEvent(event)
 }
 
 // ReportParseConfigurationFailureEvent will report parse configuration failure event
-func ReportParseConfigurationFailureEvent(ctx context.Context, stage *entity.ReleaseInfo, err error) {
+func ReportParseConfigurationFailureEvent(ctx context.Context, release *entity.ReleaseInfo, err error) {
 	event := reportEvent{
-		ctx:    ctx,
-		stage:  stage,
-		Event:  constant.EventNameParseConfiguration,
-		status: constant.EventStatusFailure,
-		detail: map[string]interface{}{"err_msg": err.Error()},
-		ts:     time.Now().Unix(),
+		ctx:     ctx,
+		release: release,
+		Event:   constant.EventNameParseConfiguration,
+		status:  constant.EventStatusFailure,
+		detail:  map[string]interface{}{"err_msg": err.Error()},
+		ts:      time.Now().Unix(),
 	}
 	addEvent(event)
 }
 
 // ReportParseConfigurationSuccessEvent will report the success event of parse configuration
-func ReportParseConfigurationSuccessEvent(ctx context.Context, stage *entity.ReleaseInfo) {
+func ReportParseConfigurationSuccessEvent(ctx context.Context, release *entity.ReleaseInfo) {
 	event := reportEvent{
-		stage:  stage,
-		Event:  constant.EventNameParseConfiguration,
-		status: constant.EventStatusSuccess,
-		ts:     time.Now().Unix(),
+		ctx:     ctx,
+		release: release,
+		Event:   constant.EventNameParseConfiguration,
+		status:  constant.EventStatusSuccess,
+		ts:      time.Now().Unix(),
 	}
 	addEvent(event)
 }
 
 // ReportApplyConfigurationDoingEvent will report the event of applying configuration
-func ReportApplyConfigurationDoingEvent(ctx context.Context, stage *entity.ReleaseInfo) {
+func ReportApplyConfigurationDoingEvent(ctx context.Context, release *entity.ReleaseInfo) {
 	event := reportEvent{
-		stage:  stage,
-		Event:  constant.EventNameApplyConfiguration,
-		status: constant.EventStatusDoing,
-		ts:     time.Now().Unix(),
+		ctx:     ctx,
+		release: release,
+		Event:   constant.EventNameApplyConfiguration,
+		status:  constant.EventStatusDoing,
+		ts:      time.Now().Unix(),
 	}
 	addEvent(event)
 }
 
 // ReportApplyConfigurationSuccessEvent will report success event when apply configuration successfully
-func ReportApplyConfigurationSuccessEvent(ctx context.Context, stage *entity.ReleaseInfo) {
+func ReportApplyConfigurationSuccessEvent(ctx context.Context, release *entity.ReleaseInfo) {
 	event := reportEvent{
-		stage:  stage,
-		Event:  constant.EventNameApplyConfiguration,
-		status: constant.EventStatusSuccess,
-		ts:     time.Now().Unix(),
+		ctx:     ctx,
+		release: release,
+		Event:   constant.EventNameApplyConfiguration,
+		status:  constant.EventStatusSuccess,
+		ts:      time.Now().Unix(),
 	}
 	addEvent(event)
 }
 
 // ReportLoadConfigurationDoingEvent will report  event when loading configuration
-func ReportLoadConfigurationDoingEvent(ctx context.Context, stage *entity.ReleaseInfo) {
+func ReportLoadConfigurationDoingEvent(ctx context.Context, release *entity.ReleaseInfo) {
 	event := reportEvent{
-		stage:  stage,
-		Event:  constant.EventNameLoadConfiguration,
-		status: constant.EventStatusDoing,
-		ts:     time.Now().Unix(),
+		ctx:     ctx,
+		release: release,
+		Event:   constant.EventNameLoadConfiguration,
+		status:  constant.EventStatusDoing,
+		ts:      time.Now().Unix(),
 	}
 	addEvent(event)
 }
 
 // ReportLoadConfigurationResultEvent Report the detection result of apisix loading
-func ReportLoadConfigurationResultEvent(ctx context.Context, stage *entity.ReleaseInfo) {
+func ReportLoadConfigurationResultEvent(ctx context.Context, release *entity.ReleaseInfo) {
 	// filter not need report event
-	if stage == nil || stage.Labels.PublishId == "" {
+	if release == nil || release.Labels.PublishId == "" {
 		return
 	}
-	publishID := cast.ToString(stage.PublishId)
+	publishID := cast.ToString(release.PublishId)
 	if publishID == constant.NoNeedReportPublishID || publishID == "" {
-		logging.GetLogger().Debugf("event[stage: %+v] is not need to report", stage.Labels)
+		logging.GetLogger().Debugf("event[release: %+v] is not need to report", release.Labels)
 		return
 	}
 
@@ -203,7 +208,7 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *entity.Relea
 
 		// wait apisix rebuild finished then begin version probe
 		time.Sleep(reporter.versionProbe.waitTime)
-		eventReq := parseEventInfo(stage)
+		eventReq := parseEventInfo(release)
 		reportCtx, cancelFunc := context.WithTimeout(ctx, reporter.versionProbe.timeout)
 		errChan := make(chan error, 1)
 		defer func() {
@@ -219,14 +224,15 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *entity.Relea
 			errChan <- err
 			if err != nil {
 				logging.GetLogger().Errorf(
-					"get release[gateway:%s,stage:%s,publish_id:%s] version from apisix err:%v",
+					"get release[gateway:%s,release:%s,publish_id:%s] version from apisix err:%v",
 					eventReq.BkGatewayName, eventReq.BkStageName, eventReq.PublishID, err)
 				return
 			}
 			event := reportEvent{
-				stage:  stage,
-				Event:  constant.EventNameLoadConfiguration,
-				status: constant.EventStatusSuccess,
+				ctx:     ctx,
+				release: release,
+				Event:   constant.EventNameLoadConfiguration,
+				status:  constant.EventStatusSuccess,
 				detail: map[string]interface{}{
 					"publish_id": versionInfo.PublishID,
 					"start_time": versionInfo.StartTime,
@@ -239,11 +245,12 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *entity.Relea
 		case err := <-errChan:
 			if err != nil {
 				event := reportEvent{
-					stage:  stage,
-					Event:  constant.EventNameLoadConfiguration,
-					status: constant.EventStatusFailure,
-					detail: map[string]interface{}{"err_msg": err.Error()},
-					ts:     time.Now().Unix(),
+					ctx:     ctx,
+					release: release,
+					Event:   constant.EventNameLoadConfiguration,
+					status:  constant.EventStatusFailure,
+					detail:  map[string]interface{}{"err_msg": err.Error()},
+					ts:      time.Now().Unix(),
 				}
 				reporter.eventChain <- event
 			}
@@ -251,11 +258,12 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *entity.Relea
 		case <-reportCtx.Done():
 			// version publish probe timeout
 			event := reportEvent{
-				stage:  stage,
-				Event:  constant.EventNameLoadConfiguration,
-				status: constant.EventStatusFailure,
-				detail: map[string]interface{}{"err_msg": "version publish probe timeout"},
-				ts:     time.Now().Unix(),
+				ctx:     ctx,
+				release: release,
+				Event:   constant.EventNameLoadConfiguration,
+				status:  constant.EventStatusFailure,
+				detail:  map[string]interface{}{"err_msg": "version publish probe timeout"},
+				ts:      time.Now().Unix(),
 			}
 			reporter.eventChain <- event
 		}
@@ -264,14 +272,14 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, stage *entity.Relea
 
 // addEvent add event to reporter event
 func addEvent(event reportEvent) {
-	// avoid gateway del that cause stage to be nil and make panic
-	if event.stage == nil || event.stage.Labels.PublishId == "" {
+	// avoid gateway del that cause release to be nil and make panic
+	if event.release == nil || event.release.Labels.PublishId == "" {
 		return
 	}
 	// filter not need report event
-	publishID := cast.ToString(event.stage.PublishId)
+	publishID := cast.ToString(event.release.PublishId)
 	if publishID == constant.NoNeedReportPublishID || publishID == "" {
-		logging.GetLogger().Debugf("event[stage: %+v] is not need to report", event.stage.Labels)
+		logging.GetLogger().Debugf("event[release: %+v] is not need to report", event.release.Labels)
 		return
 	}
 	reporter.eventChain <- event
@@ -282,13 +290,13 @@ func (r *Reporter) reportEvent(event reportEvent) {
 	defer func() {
 		<-r.reportChain
 	}()
-	if event.stage == nil {
-		logging.GetLogger().Errorf("event[%+v]stage is empty", event)
+	if event.release == nil {
+		logging.GetLogger().Errorf("event[%+v]release is empty", event)
 		return
 	}
 
 	// parse event info
-	eventReq := parseEventInfo(event.stage)
+	eventReq := parseEventInfo(event.release)
 	eventReq.Name = event.Event
 	eventReq.Status = event.status
 	eventReq.Ts = event.ts
@@ -300,21 +308,21 @@ func (r *Reporter) reportEvent(event reportEvent) {
 	err := client.GetCoreAPIClient().ReportPublishEvent(context.TODO(), eventReq)
 	if err != nil && !strings.Contains(err.Error(), constant.EventDuplicatedErrMsg) {
 		logging.GetLogger().Errorf(
-			"report event  [name:%s,gateway:%s,stage:%s,publish_id:%s,status:%s] fail:%v",
+			"report event  [name:%s,gateway:%s,release:%s,publish_id:%s,status:%s] fail:%v",
 			event.Event, eventReq.BkGatewayName, eventReq.BkStageName, eventReq.PublishID, event.status, err)
 		return
 	}
 
 	// log event
-	logging.GetLogger().Infof("report event [name:%s,gateway:%s,stage:%s,publish_id:%s,status:%s] success",
+	logging.GetLogger().Infof("report event [name:%s,gateway:%s,release:%s,publish_id:%s,status:%s] success",
 		event.Event, eventReq.BkGatewayName, eventReq.BkStageName, eventReq.PublishID, event.status)
 }
 
-// parseEventInfo parse stage info
-func parseEventInfo(stage *entity.ReleaseInfo) *client.ReportEventReq {
-	gatewayName := stage.GetGatewayName()
-	stageName := stage.GetStageName()
-	publishID := cast.ToString(stage.PublishId)
+// parseEventInfo parse release info
+func parseEventInfo(release *entity.ReleaseInfo) *client.ReportEventReq {
+	gatewayName := release.GetGatewayName()
+	stageName := release.GetStageName()
+	publishID := cast.ToString(release.PublishId)
 	return &client.ReportEventReq{
 		BkGatewayName: gatewayName,
 		BkStageName:   stageName,

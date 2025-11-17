@@ -36,7 +36,7 @@ import (
 
 // ApisixConfigSynchronizer synchronizes the API Gateway configuration.
 type ApisixConfigSynchronizer struct {
-	store    *store.ApisixEtcdConfigStore
+	store    *store.ApisixEtcdStore
 	flushMux sync.Mutex
 
 	apisixHealthzURI string
@@ -45,7 +45,7 @@ type ApisixConfigSynchronizer struct {
 }
 
 // NewSynchronizer create new Synchronizer
-func NewSynchronizer(store *store.ApisixEtcdConfigStore, apisixHealthzURI string) *ApisixConfigSynchronizer {
+func NewSynchronizer(store *store.ApisixEtcdStore, apisixHealthzURI string) *ApisixConfigSynchronizer {
 	syncer := &ApisixConfigSynchronizer{
 		store:            store,
 		apisixHealthzURI: apisixHealthzURI,

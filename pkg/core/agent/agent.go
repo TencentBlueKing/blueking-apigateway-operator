@@ -26,8 +26,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/agent/timer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/synchronizer"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/watcher"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/trace"
@@ -35,12 +35,12 @@ import (
 
 // EventAgent ...
 type EventAgent struct {
-	apigwWatcher *watcher.APIGEtcdWatcher
-	commitChan   chan []*entity.ReleaseInfo
+	apigwRegistry *registry.APIGWEtcdRegistry
+	commitChan    chan []*entity.ReleaseInfo
 
 	synchronizer *synchronizer.ApisixConfigSynchronizer
 
-	resourceTimer *timer.ResourceTimer
+	resourceTimer *timer.ReleaseTimer
 
 	retryChan chan *entity.ResourceMetadata
 
@@ -51,13 +51,13 @@ type EventAgent struct {
 
 // NewEventAgent ...
 func NewEventAgent(
-	resourceRegistry *watcher.APIGEtcdWatcher,
+	resourceRegistry *registry.APIGWEtcdRegistry,
 	commitCh chan []*entity.ReleaseInfo,
 	synchronizer *synchronizer.ApisixConfigSynchronizer,
-	stageTimer *timer.ResourceTimer,
+	stageTimer *timer.ReleaseTimer,
 ) *EventAgent {
 	return &EventAgent{
-		apigwWatcher:  resourceRegistry,
+		apigwRegistry: resourceRegistry,
 		commitChan:    commitCh,
 		synchronizer:  synchronizer,
 		resourceTimer: stageTimer,
@@ -125,7 +125,7 @@ func (w *EventAgent) Run(ctx context.Context) {
 func (w *EventAgent) createWatchChannel(ctx context.Context) (<-chan *entity.ResourceMetadata, context.CancelFunc) {
 	ctx, cancel := context.WithCancel(ctx)
 
-	watchCh := w.apigwWatcher.Watch(ctx)
+	watchCh := w.apigwRegistry.Watch(ctx)
 
 	return watchCh, cancel
 }
@@ -147,7 +147,7 @@ func (w *EventAgent) handleEvent(event *entity.ResourceMetadata) {
 }
 
 func (w *EventAgent) handleTicker(ctx context.Context) {
-	resourceList := w.resourceTimer.ListResourcesForCommit()
+	resourceList := w.resourceTimer.ListReleaseForCommit()
 	w.logger.Debugw("resources to be committed", "resourceList",
 		resourceList)
 	if len(resourceList) != 0 {

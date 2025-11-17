@@ -37,7 +37,7 @@ const (
 	testStage               = "default"
 	testDataStageAmount     = 1
 	testDataServiceAmount   = 1
-	testDataRoutesAmount    = 75
+	testDataRoutesAmount    = 2
 	testDataResourcesAmount = 74
 	versionRouteKey         = "integration-test-prod-apigw-builtin-mock-release-version"
 	operatorURL             = "http://127.0.0.1:6004"
@@ -70,21 +70,21 @@ var _ = Describe("Operator Integration", func() {
 	Describe("test publish default resource", func() {
 		Context("test new agteway publish", func() {
 			It("should not error and the value should be equal to what was put", func() {
-				////// load resources
-				//resources := integration.GetBkDefaultResource()
-				////// put route
-				//for key, route := range resources.Routes {
-				//	rawConfig, _ := json.Marshal(route)
-				//	_, err := etcdCli.Put(context.Background(), key, string(rawConfig))
-				//	Expect(err).NotTo(HaveOccurred())
-				//}
-				////
-				////// put service
-				//for key, service := range resources.Services {
-				//	rawConfig, _ := json.Marshal(service)
-				//	_, err := etcdCli.Put(context.Background(), key, string(rawConfig))
-				//	Expect(err).NotTo(HaveOccurred())
-				//}
+				// load resources
+				resources := integration.GetBkDefaultResource()
+				//put route
+				for key, route := range resources.Routes {
+					rawConfig, _ := json.Marshal(route)
+					_, err := etcdCli.Put(context.Background(), key, string(rawConfig))
+					Expect(err).NotTo(HaveOccurred())
+				}
+
+				// put service
+				for key, service := range resources.Services {
+					rawConfig, _ := json.Marshal(service)
+					_, err := etcdCli.Put(context.Background(), key, string(rawConfig))
+					Expect(err).NotTo(HaveOccurred())
+				}
 
 				// put global rule
 				globalResource := integration.GetBkDefaultGlobalResource()
@@ -93,22 +93,19 @@ var _ = Describe("Operator Integration", func() {
 					_, err := etcdCli.Put(context.Background(), key, string(rawConfig))
 					Expect(err).NotTo(HaveOccurred())
 				}
-				//// put stage release
-				//stageRelease := integration.GetBkDefaultStageRelease()
-				//for key, release := range stageRelease {
-				//	rawConfig, _ := json.Marshal(release)
-				//	_, err := etcdCli.Put(context.Background(), key, string(rawConfig))
-				//	Expect(err).NotTo(HaveOccurred())
-				//}
+				// put stage release
+				stageRelease := integration.GetBkDefaultStageRelease()
+				for key, release := range stageRelease {
+					rawConfig, _ := json.Marshal(release)
+					_, err := etcdCli.Put(context.Background(), key, string(rawConfig))
+					Expect(err).NotTo(HaveOccurred())
+				}
 
 				time.Sleep(time.Second * 10)
 
 				metricsAdapter, err := integration.NewMetricsAdapter(operatorURL)
 
 				Expect(err).NotTo(HaveOccurred())
-
-				// assert bootstrap syncing count
-				Expect(metricsAdapter.GetBootstrapSyncingSuccessCountMetric(metric.ResultSuccess)).To(Equal(1))
 
 				// assert resource_event_triggered_count
 				Expect(metricsAdapter.GetResourceEventTriggeredCountMetric(
@@ -121,21 +118,21 @@ var _ = Describe("Operator Integration", func() {
 
 				// assert resource convert
 				Expect(metricsAdapter.GetResourceConvertedCountMetric(
-					testGateway, testStage, constant.Route.String()),
+					testGateway, testStage, constant.ApisixResourceTypeRoutes),
 				).To(Equal(testDataRoutesAmount))
 
 				Expect(metricsAdapter.GetResourceConvertedCountMetric(
-					testGateway, testStage, constant.Service.String()),
+					testGateway, testStage, constant.ApisixResourceTypeServices),
 				).To(Equal(testDataServiceAmount))
 
 				// assert apisix operation count
 				Expect(metricsAdapter.GetApisixOperationCountMetric(
-					metric.ActionPut, metric.ResultSuccess, constant.Route.String()),
+					metric.ActionPut, metric.ResultSuccess, constant.ApisixResourceTypeRoutes),
 				// 2 micro-gateway-not-found-handling and healthz-outer
 				).To(Equal(testDataRoutesAmount + 2))
 
 				Expect(metricsAdapter.GetApisixOperationCountMetric(
-					metric.ActionPut, metric.ResultSuccess, constant.Service.String()),
+					metric.ActionPut, metric.ResultSuccess, constant.ApisixResourceTypeServices),
 				).To(Equal(testDataServiceAmount))
 
 				// assert apigw resource

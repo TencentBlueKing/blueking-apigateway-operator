@@ -26,12 +26,12 @@ import (
 // ReportResourceCountHelper ...
 func ReportResourceCountHelper(
 	gateway, stage string,
-	conf *entity.ApisixStageResource,
+	apisixStageResource *entity.ApisixStageResource,
 	handler func(string, string, string, int),
 ) {
-	if conf != nil {
-		handler(gateway, stage, "routes", len(conf.Routes))
-		handler(gateway, stage, "services", len(conf.Services))
-		handler(gateway, stage, "ssls", len(conf.SSLs))
+	if apisixStageResource != nil {
+		handler(gateway, stage, "routes", len(apisixStageResource.Routes))
+		handler(gateway, stage, "services", len(apisixStageResource.Services))
+		handler(gateway, stage, "ssls", len(apisixStageResource.SSLs))
 	}
 }

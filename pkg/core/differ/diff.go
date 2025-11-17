@@ -107,7 +107,6 @@ func (d *ConfigDiffer) Diff(
 	put.Routes, delete.Routes = d.DiffRoutes(old.Routes, new.Routes)
 	put.Services, delete.Services = d.DiffServices(old.Services, new.Services)
 	put.SSLs, delete.SSLs = d.DiffSSLs(old.SSLs, new.SSLs)
-	put.PluginMetadatas, delete.PluginMetadatas = d.DiffPluginMetadatas(old.PluginMetadatas, new.PluginMetadatas)
 	return put, delete
 }
 
@@ -221,9 +220,8 @@ func (d *ConfigDiffer) DiffPluginMetadatas(
 			continue
 		}
 		if !cmp.Equal(
-			oldRes,
-			newRes,
-			cmp.Transformer("transformerMap", transformMap),
+			oldRes.PluginMetadataConf,
+			newRes.PluginMetadataConf,
 		) {
 			putList[key] = newRes
 		}

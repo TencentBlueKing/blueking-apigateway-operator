@@ -1,3 +1,4 @@
+// Package commiter ...
 /*
  * TencentBlueKing is pleased to support the open source community by making
  * 蓝鲸智云 - API 网关(BlueKing - APIGateway) available.
@@ -16,16 +17,16 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-package apisix
+// Package committer ...
+package committer
 
-import (
-	"testing"
+import "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/metric"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-)
+// ReportResourceConvertedMetric ...
+func ReportResourceConvertedMetric(gateway, stage, resType string, numbers int) {
+	if metric.ResourceConvertedCounter == nil {
+		return
+	}
 
-func TestApisix(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Apisix Suite")
+	metric.ResourceConvertedCounter.WithLabelValues(gateway, stage, resType).Add(float64(numbers))
 }

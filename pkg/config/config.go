@@ -120,6 +120,8 @@ type Operator struct {
 	EtcdPutInterval time.Duration
 	// etcd delete interval
 	EtcdDelInterval time.Duration
+	// etcd sync timeout
+	EtcdSyncTimeout time.Duration
 }
 
 // VersionProbe ...
@@ -278,6 +280,7 @@ func newDefaultConfig() *Config {
 			AgentConcurrencyLimit:        4,
 			EtcdPutInterval:              50 * time.Millisecond,
 			EtcdDelInterval:              16 * time.Second,
+			EtcdSyncTimeout:              60 * time.Second,
 		},
 		Sentry: Sentry{
 			ReportLevel: 2,

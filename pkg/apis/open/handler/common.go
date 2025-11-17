@@ -20,30 +20,30 @@
 package handler
 
 import (
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/commiter"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/committer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/store"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/watcher"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
 )
 
 // ResourceHandler resource api handler
 type ResourceHandler struct {
 	LeaderElector   *leaderelection.EtcdLeaderElector
-	registry        *watcher.APIGEtcdWatcher
-	committer       *commiter.Commiter
-	apisixConfStore *store.ApisixEtcdConfigStore
+	etcdWatcher     *registry.APIGWEtcdRegistry
+	committer       *committer.Committer
+	apisixConfStore *store.ApisixEtcdStore
 }
 
 // NewResourceApi constructor of resource handler
 func NewResourceApi(
 	leaderElector *leaderelection.EtcdLeaderElector,
-	registry *watcher.APIGEtcdWatcher,
-	committer *commiter.Commiter,
-	apiSixConfStore *store.ApisixEtcdConfigStore,
+	registry *registry.APIGWEtcdRegistry,
+	committer *committer.Committer,
+	apiSixConfStore *store.ApisixEtcdStore,
 ) *ResourceHandler {
 	return &ResourceHandler{
 		LeaderElector:   leaderElector,
-		registry:        registry,
+		etcdWatcher:     registry,
 		committer:       committer,
 		apisixConfStore: apiSixConfStore,
 	}

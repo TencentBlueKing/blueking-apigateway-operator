@@ -31,9 +31,9 @@ import (
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/commiter"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/committer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/store"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/watcher"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 )
@@ -41,9 +41,9 @@ import (
 // Server ...
 type Server struct {
 	LeaderElector   *leaderelection.EtcdLeaderElector
-	registry        *watcher.APIGEtcdWatcher
-	commiter        *commiter.Commiter
-	apisixConfStore *store.ApisixEtcdConfigStore
+	registry        *registry.APIGWEtcdRegistry
+	commiter        *committer.Committer
+	apisixConfStore *store.ApisixEtcdStore
 
 	mux *gin.Engine
 
@@ -53,9 +53,9 @@ type Server struct {
 // NewServer ...
 func NewServer(
 	leaderElector *leaderelection.EtcdLeaderElector,
-	registry *watcher.APIGEtcdWatcher,
-	apisixConfStore *store.ApisixEtcdConfigStore,
-	commiter *commiter.Commiter,
+	registry *registry.APIGWEtcdRegistry,
+	apisixConfStore *store.ApisixEtcdStore,
+	commiter *committer.Committer,
 ) *Server {
 	return &Server{
 		LeaderElector:   leaderElector,
