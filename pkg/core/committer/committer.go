@@ -66,7 +66,7 @@ func NewCommitter(
 		commitResourceChan:  make(chan []*entity.ReleaseInfo),      // Channel for committing resource information
 		synchronizer:        synchronizer,                          // Configuration synchronizer
 		resourceTimer:       stageTimer,                            // Timer for stage management
-		logger:              logging.GetLogger().Named("commiter"), // Logger instance named "commiter"
+		logger:              logging.GetLogger().Named("committer"), // Logger instance named "committer"
 		gatewayStageChanMap: make(map[string]chan struct{}),        // Map for storing gateway stage channels
 		gatewayStageMapLock: &sync.RWMutex{},
 	}
