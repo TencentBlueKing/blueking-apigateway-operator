@@ -42,7 +42,7 @@ import (
 type Server struct {
 	LeaderElector   *leaderelection.EtcdLeaderElector
 	registry        *registry.APIGWEtcdRegistry
-	commiter        *committer.Committer
+	committer       *committer.Committer
 	apisixConfStore *store.ApisixEtcdStore
 
 	mux *gin.Engine
@@ -55,13 +55,13 @@ func NewServer(
 	leaderElector *leaderelection.EtcdLeaderElector,
 	registry *registry.APIGWEtcdRegistry,
 	apisixConfStore *store.ApisixEtcdStore,
-	commiter *committer.Committer,
+	committer *committer.Committer,
 ) *Server {
 	return &Server{
 		LeaderElector:   leaderElector,
 		registry:        registry,
 		apisixConfStore: apisixConfStore,
-		commiter:        commiter,
+		committer:       committer,
 		logger:          logging.GetLogger().Named("server"),
 		mux:             gin.Default(),
 	}
@@ -78,7 +78,7 @@ func (s *Server) RegisterMetric(gatherer prometheus.Gatherer) {
 
 // Run ...
 func (s *Server) Run(ctx context.Context, config *config.Config) error {
-	router := NewRouter(s.LeaderElector, s.registry, s.commiter, s.apisixConfStore, s.mux, config)
+	router := NewRouter(s.LeaderElector, s.registry, s.committer, s.apisixConfStore, s.mux, config)
 	// run http server
 	var addr, addrv6 string
 	if config.HttpServer.BindAddressV6 != "" {

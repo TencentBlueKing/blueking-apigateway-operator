@@ -148,7 +148,7 @@ func (r *APIGWEtcdRegistry) handleEvent(event *clientv3.Event) (*entity.Resource
 	switch event.Type {
 	case clientv3.EventTypePut:
 		r.logger.Debugw(
-			"Etcd Put events triggeres",
+			"Etcd Put events triggers",
 			"action",
 			event.Type,
 			"key",
@@ -174,7 +174,7 @@ func (r *APIGWEtcdRegistry) handleEvent(event *clientv3.Event) (*entity.Resource
 		return &metadata, nil
 	case clientv3.EventTypeDelete:
 		r.logger.Debugw(
-			"Etcd Delete events triggeres",
+			"Etcd Delete events triggers",
 			"action",
 			event.Type,
 			"key",

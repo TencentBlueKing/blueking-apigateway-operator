@@ -31,7 +31,7 @@ import (
 // GetApigwResourcesByStage 根据网关查询资源
 func GetApigwResourcesByStage(
 	ctx context.Context,
-	commiter *committer.Committer,
+	committer *committer.Committer,
 	gatewayName string,
 	stageName string,
 	isExcludeReleaseVersion bool,
@@ -44,7 +44,7 @@ func GetApigwResourcesByStage(
 	//		},
 	//	},
 	//}
-	// apiSixResources, _, err := commiter.ConvertEtcdKVToApisixConfiguration(ctx, si)
+	// apiSixResources, _, err := committer.ConvertEtcdKVToApisixConfiguration(ctx, si)
 	// if err != nil {
 	//	return nil, err
 	//}
@@ -59,7 +59,7 @@ func GetApigwResourcesByStage(
 // GetApigwResourceCount 获取 apigw 指定环境的资源数量
 func GetApigwResourceCount(
 	ctx context.Context,
-	commiter *committer.Committer,
+	committer *committer.Committer,
 	gatewayName string,
 	stageName string,
 ) (int64, error) {
@@ -67,7 +67,7 @@ func GetApigwResourceCount(
 	//	GatewayName: gatewayName,
 	//	StageName:   stageName,
 	//}
-	// count, err := commiter.CliGetResourceCount(ctx, si)
+	// count, err := committer.CliGetResourceCount(ctx, si)
 	// if err != nil {
 	//	return 0, err
 	//}
@@ -77,13 +77,13 @@ func GetApigwResourceCount(
 // ListApigwResources 获取 apigw 指定环境的资源列表
 func ListApigwResources(
 	ctx context.Context,
-	commiter *committer.Committer,
+	committer *committer.Committer,
 	gatewayName string,
 	stageName string,
 ) (map[string]*entity.ApisixStageResource, error) {
 	configMap := make(map[string]*entity.ApisixStageResource)
 	stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
-	apiSixResources, err := GetApigwResourcesByStage(ctx, commiter, gatewayName, stageName, true)
+	apiSixResources, err := GetApigwResourcesByStage(ctx, committer, gatewayName, stageName, true)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func ListApigwResources(
 // GetApigwResource 获取 apigw 指定环境下的资源信息
 func GetApigwResource(
 	ctx context.Context,
-	commiter *committer.Committer,
+	committer *committer.Committer,
 	gatewayName string,
 	stageName string,
 	resourceName string,
@@ -110,7 +110,7 @@ func GetApigwResource(
 	//		StageName:   stageName,
 	//	}
 	//	resourceNameKey := genResourceNameKey(gatewayName, stageName, resourceName)
-	//	apiSixResources, _, err := commiter.CliConvertEtcdResourceToApisixConfiguration(ctx, si, resourceNameKey)
+	//	apiSixResources, _, err := committer.CliConvertEtcdResourceToApisixConfiguration(ctx, si, resourceNameKey)
 	//	if err != nil {
 	//		return nil, err
 	//	}
@@ -119,7 +119,7 @@ func GetApigwResource(
 	//}
 	//
 	//// by resourceID
-	// apiSixResources, err := GetApigwResourcesByStage(ctx, commiter, gatewayName, stageName, true)
+	// apiSixResources, err := GetApigwResourcesByStage(ctx, committer, gatewayName, stageName, true)
 	// if err != nil {
 	//	return nil, err
 	//}
@@ -137,7 +137,7 @@ func GetApigwResource(
 // GetApigwStageCurrentVersionInfo 获取 apigw 指定环境的发布版本信息
 func GetApigwStageCurrentVersionInfo(
 	ctx context.Context,
-	commiter *committer.Committer,
+	committer *committer.Committer,
 	gatewayName string,
 	stageName string,
 ) (map[string]interface{}, error) {
@@ -147,7 +147,7 @@ func GetApigwStageCurrentVersionInfo(
 	//}
 	//
 	// resourceNameKey := genResourceNameKey(gatewayName, stageName, "apigw-builtin-mock-release-version")
-	// apiSixResources, _, err := commiter.CliConvertEtcdResourceToApisixConfiguration(ctx, si, resourceNameKey)
+	// apiSixResources, _, err := committer.CliConvertEtcdResourceToApisixConfiguration(ctx, si, resourceNameKey)
 	// if err != nil {
 	//	return nil, err
 	//}

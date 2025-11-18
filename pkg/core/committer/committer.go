@@ -62,12 +62,12 @@ func NewCommitter(
 	stageTimer *timer.ReleaseTimer,
 ) *Committer {
 	return &Committer{
-		resourceRegistry:    resourceRegistry,                      // Registry for resource management
-		commitResourceChan:  make(chan []*entity.ReleaseInfo),      // Channel for committing resource information
-		synchronizer:        synchronizer,                          // Configuration synchronizer
-		resourceTimer:       stageTimer,                            // Timer for stage management
+		resourceRegistry:    resourceRegistry,                       // Registry for resource management
+		commitResourceChan:  make(chan []*entity.ReleaseInfo),       // Channel for committing resource information
+		synchronizer:        synchronizer,                           // Configuration synchronizer
+		resourceTimer:       stageTimer,                             // Timer for stage management
 		logger:              logging.GetLogger().Named("committer"), // Logger instance named "committer"
-		gatewayStageChanMap: make(map[string]chan struct{}),        // Map for storing gateway stage channels
+		gatewayStageChanMap: make(map[string]chan struct{}),         // Map for storing gateway stage channels
 		gatewayStageMapLock: &sync.RWMutex{},
 	}
 }
@@ -76,7 +76,7 @@ func NewCommitter(
 func (c *Committer) Run(ctx context.Context) {
 	// 分批次处理需要同步的resource
 	for {
-		c.logger.Debugw("commiter waiting for commit command")
+		c.logger.Debugw("committer waiting for commit command")
 		select {
 		case resourceList := <-c.commitResourceChan:
 			c.logger.Infow("received commit command", "resourceList", resourceList)
@@ -164,10 +164,10 @@ func (c *Committer) commitStage(ctx context.Context, si *entity.ReleaseInfo, sta
 		<-stageChan
 	}()
 	// trace
-	_, span := trace.StartTrace(si.Ctx, "commiter.commitStage")
+	_, span := trace.StartTrace(si.Ctx, "committer.commitStage")
 	defer span.End()
 
-	span.AddEvent("commiter.GetNativeApisixConfiguration")
+	span.AddEvent("committer.GetNativeApisixConfiguration")
 	eventreporter.ReportParseConfigurationDoingEvent(ctx, si)
 	// 直接从etcd获取原生apisix配置，无需转换
 	apisixConf, err := c.GetStageReleaseNativeApisixConfiguration(ctx, si)
@@ -183,7 +183,7 @@ func (c *Committer) commitStage(ctx context.Context, si *entity.ReleaseInfo, sta
 	}
 	eventreporter.ReportApplyConfigurationDoingEvent(ctx, si)
 
-	span.AddEvent("commiter.Sync")
+	span.AddEvent("committer.Sync")
 	err = c.synchronizer.Sync(
 		ctx,
 		si.GetGatewayName(),
@@ -242,10 +242,10 @@ func (c *Committer) GetGlobalApisixConfiguration(
 
 func (c *Committer) commitGlobalResource(ctx context.Context, si *entity.ReleaseInfo) {
 	// trace
-	_, span := trace.StartTrace(si.Ctx, "commiter.commitGlobalResource")
+	_, span := trace.StartTrace(si.Ctx, "committer.commitGlobalResource")
 	defer span.End()
 
-	span.AddEvent("commiter.GetGlobalApisixConfiguration")
+	span.AddEvent("committer.GetGlobalApisixConfiguration")
 	// 直接从etcd获取原生全局apisix配置，无需转换
 	apisixGlobalConf, err := c.GetGlobalApisixConfiguration(ctx, si)
 	if err != nil {
@@ -255,7 +255,7 @@ func (c *Committer) commitGlobalResource(ctx context.Context, si *entity.Release
 		span.RecordError(err)
 		return
 	}
-	span.AddEvent("commiter.SyncGlobal")
+	span.AddEvent("committer.SyncGlobal")
 	err = c.synchronizer.SyncGlobal(
 		ctx,
 		apisixGlobalConf,
