@@ -249,7 +249,7 @@ func (c *Committer) commitGlobalResource(ctx context.Context, si *entity.Release
 	// 直接从etcd获取原生全局apisix配置，无需转换
 	apisixGlobalConf, err := c.GetGlobalApisixConfiguration(ctx, si)
 	if err != nil {
-		c.logger.Error(err, "  get native global apisix configuration failed", "globalInfo", si)
+		c.logger.Error(err, "get native global apisix configuration failed", "globalInfo", si)
 		// retry
 		c.retryStage(si)
 		span.RecordError(err)
