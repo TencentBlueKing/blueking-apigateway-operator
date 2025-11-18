@@ -418,7 +418,7 @@ func (r *APIGWEtcdRegistry) ValueToGlobalResource(resp *clientv3.GetResponse) (*
 		// 校验配置schema
 		err = validator.ValidateAPISIXJsonSchema(resourceMetadata.ApisixVersion, resourceKind, kv.Value)
 		if err != nil {
-			r.logger.Error(err, "  validate apisix json schema failed", "key", string(kv.Key))
+			r.logger.Error(err, "validate apisix json schema failed", "key", string(kv.Key))
 			return nil, err
 		}
 		if resourceKind == constant.PluginMetadata {
