@@ -23,21 +23,21 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apis/open"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/committer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/registry"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/store"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
 // NewRouter do the router initialization
 func NewRouter(
-	leaderElector leaderelection.LeaderElector,
-	registry registry.Registry,
-	committer *commiter.Commiter,
-	apiSixConfStore synchronizer.ApisixConfigStore,
+	leaderElector *leaderelection.EtcdLeaderElector,
+	registry *registry.APIGWEtcdRegistry,
+	committer *committer.Committer,
+	apiSixConfStore *store.ApisixEtcdStore,
 	router *gin.Engine,
 	conf *config.Config,
 ) *gin.Engine {

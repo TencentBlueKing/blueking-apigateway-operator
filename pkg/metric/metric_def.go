@@ -40,7 +40,6 @@ const (
 // BootstrapSyncingCounter ...
 var (
 	LeaderElectionGauge           *prometheus.GaugeVec
-	BootstrapSyncingCounter       *prometheus.CounterVec
 	ResourceEventTriggeredCounter *prometheus.CounterVec
 	ResourceConvertedCounter      *prometheus.CounterVec
 	SyncCmpCounter                *prometheus.CounterVec
@@ -63,13 +62,6 @@ func InitMetric(register prometheus.Registerer) {
 			Help: "leader_election describe whether agent is leader",
 		},
 		[]string{"hostname"},
-	)
-	BootstrapSyncingCounter = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "bootstrap_syncing_count",
-			Help: "bootstrap_syncing_count describe count running bootstrap syncing in agent",
-		},
-		[]string{"result"},
 	)
 	ResourceEventTriggeredCounter = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
@@ -163,7 +155,6 @@ func InitMetric(register prometheus.Registerer) {
 	)
 
 	register.MustRegister(LeaderElectionGauge)
-	register.MustRegister(BootstrapSyncingCounter)
 	register.MustRegister(ResourceEventTriggeredCounter)
 	register.MustRegister(ResourceConvertedCounter)
 	register.MustRegister(SynchronizerEventCounter)

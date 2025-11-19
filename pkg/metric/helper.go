@@ -19,18 +19,19 @@
 // Package metric ...
 package metric
 
-import "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix"
+import (
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
+)
 
 // ReportResourceCountHelper ...
 func ReportResourceCountHelper(
 	gateway, stage string,
-	conf *apisix.ApisixConfiguration,
+	apisixStageResource *entity.ApisixStageResource,
 	handler func(string, string, string, int),
 ) {
-	if conf != nil {
-		handler(gateway, stage, "routes", len(conf.Routes))
-		handler(gateway, stage, "services", len(conf.Services))
-		handler(gateway, stage, "ssls", len(conf.SSLs))
-		handler(gateway, stage, "plugin_metadatas", len(conf.PluginMetadatas))
+	if apisixStageResource != nil {
+		handler(gateway, stage, "routes", len(apisixStageResource.Routes))
+		handler(gateway, stage, "services", len(apisixStageResource.Services))
+		handler(gateway, stage, "ssls", len(apisixStageResource.SSLs))
 	}
 }

@@ -1,36 +1,36 @@
-// Package integration ...
 /*
- * TencentBlueKing is pleased to support the open source community by making
- * 蓝鲸智云 - API 网关(BlueKing - APIGateway) available.
- * Copyright (C) 2025 Tencent. All rights reserved.
- * Licensed under the MIT License (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ *  TencentBlueKing is pleased to support the open source community by making
+ *  蓝鲸智云 - API 网关(BlueKing - APIGateway) available.
+ *  Copyright (C) 2017 THL A29 Limited, a Tencent company. All rights reserved.
+ *  Licensed under the MIT License (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at
  *
- *     http://opensource.org/licenses/MIT
+ *      http://opensource.org/licenses/MIT
  *
- * Unless required by applicable law or agreed to in writing, software distributed under
- * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software distributed under
+ *  the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ *  either express or implied. See the License for the specific language governing permissions and
+ *   limitations under the License.
  *
- * We undertake not to change the open source license (MIT license) applicable
- * to the current version of the project delivered to anyone in the future.
+ *   We undertake not to change the open source license (MIT license) applicable
+ *   to the current version of the project delivered to anyone in the future.
  */
 
-// Package integration ...
+// Package integration provides utilities for integration testing.
 package integration
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
 
 	dto "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
-	"gopkg.in/yaml.v2"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
 )
 
 const (
-	BootstrapSyncingCountMetric       = "bootstrap_syncing_count"
 	ResourceEventTriggeredCountMetric = "resource_event_triggered_count"
 	ResourceConvertedCountMetric      = "resource_converted_count"
 	ResourceSyncCmpCount              = "sync_cmp_count"
@@ -49,18 +49,58 @@ type MetricsAdapter struct {
 	Metrics map[string]*dto.MetricFamily
 }
 
-// GetHTTPBinGatewayResource returns the httpbin gateway resource
-func GetHTTPBinGatewayResource() []EtcdConfig {
-	var resources []EtcdConfig
-	data, err := os.ReadFile("bk_apigw_httpbin_resources.yaml")
+// GetBkDefaultResource retrieves the default API gateway stage resources from a JSON file.
+// It reads the configuration from "bk_apigw_gateway_default_stage_resources.json"
+// and unmarshals it into an ApisixStageResource struct.
+// Returns: entity.ApisixStageResource - the default resources configuration
+func GetBkDefaultResource() entity.ApisixStageResource {
+	var resources entity.ApisixStageResource
+	// Read the JSON file containing default stage resources
+	data, err := os.ReadFile("bk_apigw_gateway_default_stage_resources.json")
 	if err != nil {
-		panic(err)
+		panic(err) // Panic if file reading fails
 	}
-	err = yaml.Unmarshal(data, &resources)
+	err = json.Unmarshal(data, &resources)
 	if err != nil {
-		panic(err)
+		panic(err) // Panic if YAML unmarshaling fails
 	}
-	return resources
+	return resources // Return the unmarshaled resources
+}
+
+// GetBkDefaultGlobalResource retrieves the default API gateway global resources from a JSON file.
+// It reads the configuration from "bk_apigw_gateway_default_global_resources.json"
+// and unmarshals it into an ApisixGlobalResource struct.
+// Returns: entity.ApisixGlobalResource - the default global resources configuration
+func GetBkDefaultGlobalResource() entity.ApisixGlobalResource {
+	var resources entity.ApisixGlobalResource
+	// Read the JSON file containing default stage resources
+	data, err := os.ReadFile("bk_apigw_global_resources.json")
+	if err != nil {
+		panic(err) // Panic if file reading fails
+	}
+	err = json.Unmarshal(data, &resources)
+	if err != nil {
+		panic(err) // Panic if YAML unmarshaling fails
+	}
+	return resources // Return the unmarshaled resources
+}
+
+// GetBkDefaultStageRelease retrieves the default API gateway stage release from a JSON file.
+// It reads the configuration from "bk_apigw_gateway_default_stage_release.json"
+// and unmarshals it into a map[string]entity.ReleaseInfo struct.
+// Returns: map[string]entity.ReleaseInfo - the default stage release configuration
+func GetBkDefaultStageRelease() map[string]entity.ReleaseInfo {
+	var resources map[string]entity.ReleaseInfo
+	// Read the JSON file containing default stage resources
+	data, err := os.ReadFile("bk_apigw_gateway_default_stage_release.json")
+	if err != nil {
+		panic(err) // Panic if file reading fails
+	}
+	err = json.Unmarshal(data, &resources)
+	if err != nil {
+		panic(err) // Panic if YAML unmarshaling fails
+	}
+	return resources // Return the unmarshaled resources
 }
 
 // NewMetricsAdapter creates a new MetricsAdapter
@@ -130,9 +170,4 @@ func (m *MetricsAdapter) GetResourceSyncCmpDiffCountMetric(gateway string, stage
 // GetApisixOperationCountMetric ApisixOperationCountMetric returns the resource event triggered count metric
 func (m *MetricsAdapter) GetApisixOperationCountMetric(action string, result string, resourceType string) int {
 	return m.GetResourceMetrics(ApisixOperationCountMetric, []string{action, result, resourceType})
-}
-
-// GetBootstrapSyncingSuccessCountMetric BootstrapSyncingCountMetric returns the resource event triggered count metric
-func (m *MetricsAdapter) GetBootstrapSyncingSuccessCountMetric(result string) int {
-	return m.GetResourceMetrics(BootstrapSyncingCountMetric, []string{result})
 }

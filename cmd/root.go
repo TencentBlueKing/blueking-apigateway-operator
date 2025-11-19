@@ -27,8 +27,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/runner"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/eventreporter"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/runner"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -72,12 +72,7 @@ func rootRun(cmd *cobra.Command, args []string) {
 	// start event reporter
 	eventreporter.Start(rootCtx)
 
-	var agentRunner runner.AgentRunner
-	if globalConfig.Operator.WithKube {
-		agentRunner = runner.NewKubeAgentRunner(globalConfig)
-	} else {
-		agentRunner = runner.NewEtcdAgentRunner(globalConfig)
-	}
-
+	// 只支持etcd模式，直接使用etcd运行器
+	agentRunner := runner.NewEtcdAgentRunner(globalConfig)
 	agentRunner.Run(rootCtx)
 }

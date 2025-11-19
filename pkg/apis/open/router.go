@@ -23,22 +23,22 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apis/open/handler"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/committer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/registry"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/store"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 )
 
 // Register registers the API routes
 func Register(
 	r *gin.RouterGroup,
-	leaderElector leaderelection.LeaderElector,
-	registry registry.Registry,
-	committer *commiter.Commiter,
-	apiSixConfStore synchronizer.ApisixConfigStore,
+	leaderElector *leaderelection.EtcdLeaderElector,
+	registry *registry.APIGWEtcdRegistry,
+	committer *committer.Committer,
+	apisixConfStore *store.ApisixEtcdStore,
 ) {
 	// register resource api
-	resourceApi := handler.NewResourceApi(leaderElector, registry, committer, apiSixConfStore)
+	resourceApi := handler.NewResourceApi(leaderElector, registry, committer, apisixConfStore)
 	r.GET("/leader/", resourceApi.GetLeader)
 	r.POST("/apigw/resources/", resourceApi.ApigwList)
 	r.POST("/apigw/resources/count/", resourceApi.ApigwStageResourceCount)

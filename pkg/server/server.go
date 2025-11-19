@@ -29,21 +29,21 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/committer"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/registry"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/store"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/leaderelection"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/registry"
 )
 
 // Server ...
 type Server struct {
-	LeaderElector   leaderelection.LeaderElector
-	registry        registry.Registry
-	commiter        *commiter.Commiter
-	apisixConfStore synchronizer.ApisixConfigStore
+	LeaderElector     *leaderelection.EtcdLeaderElector
+	apigwEtcdregistry *registry.APIGWEtcdRegistry
+	committer         *committer.Committer
+	apisixEtcdStore   *store.ApisixEtcdStore
 
 	mux *gin.Engine
 
@@ -52,18 +52,18 @@ type Server struct {
 
 // NewServer ...
 func NewServer(
-	leaderElector leaderelection.LeaderElector,
-	registry registry.Registry,
-	apisixConfStore synchronizer.ApisixConfigStore,
-	commiter *commiter.Commiter,
+	leaderElector *leaderelection.EtcdLeaderElector,
+	apigwEtcdRegistry *registry.APIGWEtcdRegistry,
+	apisixEtcdStore *store.ApisixEtcdStore,
+	committer *committer.Committer,
 ) *Server {
 	return &Server{
-		LeaderElector:   leaderElector,
-		registry:        registry,
-		apisixConfStore: apisixConfStore,
-		commiter:        commiter,
-		logger:          logging.GetLogger().Named("server"),
-		mux:             gin.Default(),
+		LeaderElector:     leaderElector,
+		apigwEtcdregistry: apigwEtcdRegistry,
+		apisixEtcdStore:   apisixEtcdStore,
+		committer:         committer,
+		logger:            logging.GetLogger().Named("server"),
+		mux:               gin.Default(),
 	}
 }
 
@@ -78,7 +78,7 @@ func (s *Server) RegisterMetric(gatherer prometheus.Gatherer) {
 
 // Run ...
 func (s *Server) Run(ctx context.Context, config *config.Config) error {
-	router := NewRouter(s.LeaderElector, s.registry, s.commiter, s.apisixConfStore, s.mux, config)
+	router := NewRouter(s.LeaderElector, s.apigwEtcdregistry, s.committer, s.apisixEtcdStore, s.mux, config)
 	// run http server
 	var addr, addrv6 string
 	if config.HttpServer.BindAddressV6 != "" {

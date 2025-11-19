@@ -35,8 +35,8 @@ func StartEmbedEtcdClient(_ context.Context) (*clientv3.Client, *embed.Etcd, err
 	cfg := embed.NewConfig()
 	cfg.Dir, _ = os.MkdirTemp("", "etcd")
 	cfg.LogLevel = "error"
-	cfg.LPUrls = []url.URL{{Scheme: "http", Host: "localhost:1234"}}
-	cfg.LCUrls = []url.URL{{Scheme: "grpc", Host: "localhost:2345"}}
+	cfg.ListenClientUrls = []url.URL{{Scheme: "http", Host: "localhost:1234"}}
+	cfg.ListenPeerUrls = []url.URL{{Scheme: "http", Host: "localhost:2345"}}
 
 	etcd, err := embed.StartEtcd(cfg)
 	if err != nil {

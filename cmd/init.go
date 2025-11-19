@@ -32,11 +32,10 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/agent"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/apisix/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/client"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/commiter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/agent"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/synchronizer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/eventreporter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/trace"
@@ -139,6 +138,5 @@ func initClient() {
 
 func initOperator() {
 	synchronizer.Init(globalConfig)
-	commiter.Init(globalConfig)
 	agent.Init(globalConfig)
 }
