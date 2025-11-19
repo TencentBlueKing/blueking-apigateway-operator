@@ -25,7 +25,6 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/agent/timer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/synchronizer"
@@ -41,34 +40,34 @@ const maxStageRetryCount = 3
 
 // Committer ...
 type Committer struct {
-	resourceRegistry   *registry.APIGWEtcdRegistry
+	apigwEtcdRegistry  *registry.APIGWEtcdRegistry
 	commitResourceChan chan []*entity.ReleaseInfo
 
 	synchronizer *synchronizer.ApisixConfigSynchronizer
 
-	resourceTimer *timer.ReleaseTimer
+	releaseTimer *timer.ReleaseTimer
 
 	logger *zap.SugaredLogger
 
 	// Gateway stage dimension
-	gatewayStageChanMap map[string]chan struct{}
-	gatewayStageMapLock *sync.RWMutex
+	gatewayStageChanMap     map[string]chan struct{}
+	gatewayStageChanMapLock *sync.RWMutex
 }
 
 // NewCommitter 创建Committer
 func NewCommitter(
-	resourceRegistry *registry.APIGWEtcdRegistry,
+	apigwEtcdRegistry *registry.APIGWEtcdRegistry,
 	synchronizer *synchronizer.ApisixConfigSynchronizer,
-	stageTimer *timer.ReleaseTimer,
+	releaseTimer *timer.ReleaseTimer,
 ) *Committer {
 	return &Committer{
-		resourceRegistry:    resourceRegistry,                       // Registry for resource management
-		commitResourceChan:  make(chan []*entity.ReleaseInfo),       // Channel for committing resource information
-		synchronizer:        synchronizer,                           // Configuration synchronizer
-		resourceTimer:       stageTimer,                             // Timer for stage management
-		logger:              logging.GetLogger().Named("committer"), // Logger instance named "committer"
-		gatewayStageChanMap: make(map[string]chan struct{}),         // Map for storing gateway stage channels
-		gatewayStageMapLock: &sync.RWMutex{},
+		apigwEtcdRegistry:       apigwEtcdRegistry,                      // Registry for resource management
+		commitResourceChan:      make(chan []*entity.ReleaseInfo),       // Channel for committing resource information
+		synchronizer:            synchronizer,                           // Configuration synchronizer
+		releaseTimer:            releaseTimer,                           // Timer for stage management
+		logger:                  logging.GetLogger().Named("committer"), // Logger instance named "committer"
+		gatewayStageChanMap:     make(map[string]chan struct{}),         // Map for storing gateway stage channels
+		gatewayStageChanMapLock: &sync.RWMutex{},
 	}
 }
 
@@ -120,7 +119,7 @@ func (c *Committer) commitGroup(ctx context.Context, releaseInfoList []*entity.R
 		wg.Add(1)
 		tempResourceInfo := resourceInfo
 		// 判断是否是 global 资源：PluginMetadata 且 Stage 为空
-		if tempResourceInfo.Kind == constant.PluginMetadata && tempResourceInfo.GetStageName() == "" {
+		if tempResourceInfo.IsGlobalResource() {
 			// Global 资源需要单独处理
 			utils.GoroutineWithRecovery(ctx, func() {
 				c.logger.Infof("begin commit global resource: %s", tempResourceInfo.GetID())
@@ -143,13 +142,13 @@ func (c *Committer) commitGroup(ctx context.Context, releaseInfoList []*entity.R
 // 按照gateway的维度串行更新etcd
 func (c *Committer) commitGatewayStage(ctx context.Context, si *entity.ReleaseInfo, wg *sync.WaitGroup) {
 	defer wg.Done()
-	c.gatewayStageMapLock.Lock()
+	c.gatewayStageChanMapLock.Lock()
 	stageChan, ok := c.gatewayStageChanMap[si.GetGatewayName()]
 	if !ok {
 		stageChan = make(chan struct{}, 1)
 		c.gatewayStageChanMap[si.GetGatewayName()] = stageChan
 	}
-	c.gatewayStageMapLock.Unlock()
+	c.gatewayStageChanMapLock.Unlock()
 	utils.GoroutineWithRecovery(ctx, func() {
 		// Control stage writes for each gateway to be serial
 		stageChan <- struct{}{}
@@ -208,7 +207,7 @@ func (c *Committer) retryStage(si *entity.ReleaseInfo) {
 		return
 	}
 	si.RetryCount++
-	c.resourceTimer.Update(si)
+	c.releaseTimer.Update(si)
 }
 
 // GetStageReleaseNativeApisixConfiguration 直接从etcd获取原生apisix配置
@@ -217,7 +216,7 @@ func (c *Committer) GetStageReleaseNativeApisixConfiguration(
 	si *entity.ReleaseInfo,
 ) (*entity.ApisixStageResource, error) {
 	// 直接从etcd获取原生apisix配置
-	resources, err := c.resourceRegistry.ListStageResources(si)
+	resources, err := c.apigwEtcdRegistry.ListStageResources(si)
 	if err != nil {
 		c.logger.Error(err, "list resources failed", "stageInfo", si)
 		return nil, err
@@ -232,7 +231,7 @@ func (c *Committer) GetGlobalApisixConfiguration(
 	si *entity.ReleaseInfo,
 ) (*entity.ApisixGlobalResource, error) {
 	// 直接从etcd获取原生apisix配置
-	resources, err := c.resourceRegistry.ListGlobalResources(si)
+	resources, err := c.apigwEtcdRegistry.ListGlobalResources(si)
 	if err != nil {
 		c.logger.Error(err, "list resources failed", "stageInfo", si)
 		return nil, err

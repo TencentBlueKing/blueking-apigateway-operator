@@ -53,13 +53,22 @@ type APIGWEtcdRegistry struct {
 	currentRevision int64
 }
 
-// NewEtcdResourceRegistry creates a APIGWEtcdRegistry object
-func NewEtcdResourceRegistry(etcdClient *clientv3.Client, keyPrefix string) *APIGWEtcdRegistry {
+// NewAPIGWEtcdRegistry creates a APIGWEtcdRegistry object
+// NewAPIGWEtcdRegistry creates a new APIGWEtcdRegistry instance with the given etcd client and key prefix
+// Parameters:
+//   - etcdClient: A pointer to an etcd client instance
+//   - keyPrefix: A string representing the prefix for etcd keys
+//
+// Returns:
+//   - A pointer to the newly created APIGWEtcdRegistry instance
+func NewAPIGWEtcdRegistry(etcdClient *clientv3.Client, keyPrefix string) *APIGWEtcdRegistry {
 	registry := &APIGWEtcdRegistry{
 		etcdClient: etcdClient,
 	}
+	// Initialize logger for the registry with a specific name
 	registry.logger = logging.GetLogger().Named("registry")
 
+	// Set the key prefix for etcd operations
 	registry.keyPrefix = keyPrefix
 	return registry
 }
@@ -227,7 +236,7 @@ func (r *APIGWEtcdRegistry) extractResourceMetadata(key string, value []byte) (e
 	}
 	// remove leading /
 	matches := strings.Split(key[1:], "/")
-	if matches == nil {
+	if len(matches) == 0 {
 		r.logger.Error(nil, "regex match failed, not found", "key", key)
 		return ret, eris.Errorf("regex match failed, not found")
 	}
@@ -270,7 +279,7 @@ func (r *APIGWEtcdRegistry) ListStageResources(stageRelease *entity.ReleaseInfo)
 	// /{self.prefix}/{self.api_version}/gateway/{gateway_name}/{stage_name}/route/bk-default.default.-1
 
 	etcdKey := fmt.Sprintf(
-		constant.ApigwAPISIXStageResourcePrefixFormat,
+		constant.ApigwStageResourcePrefixFormat,
 		r.keyPrefix, stageRelease.APIVersion, stageRelease.Labels.Gateway, stageRelease.Labels.Stage)
 	resp, err := r.etcdClient.Get(stageRelease.Ctx, etcdKey, clientv3.WithPrefix())
 	if err != nil {
@@ -297,7 +306,7 @@ func (r *APIGWEtcdRegistry) ValueToStageResource(resp *clientv3.GetResponse) (*e
 	for _, kv := range resp.Kvs {
 		// remove leading /
 		matches := strings.Split(string(kv.Key[1:]), "/")
-		if matches == nil {
+		if len(matches) == 0 {
 			r.logger.Errorf("regex match failed, not found, key: %s", kv.Key)
 			return nil, eris.Errorf("regex match failed, not found")
 		}
@@ -368,7 +377,7 @@ func (r *APIGWEtcdRegistry) ListGlobalResources(releaseInfo *entity.ReleaseInfo)
 	// /{self.prefix}/{self.api_version}/global/plugin_metadata/bk-concurrency-limit
 	startedTime := time.Now()
 	etcdKey := fmt.Sprintf(
-		constant.ApigwAPISIXGlobalResourcePrefixFormat,
+		constant.ApigwGlobalResourcePrefixFormat,
 		r.keyPrefix, releaseInfo.APIVersion)
 	resp, err := r.etcdClient.Get(releaseInfo.Ctx, etcdKey, clientv3.WithPrefix())
 	if err != nil {

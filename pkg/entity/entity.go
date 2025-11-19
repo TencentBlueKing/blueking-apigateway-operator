@@ -385,6 +385,11 @@ func (rm *ResourceMetadata) IsEmpty() bool {
 	return rm.Labels.Gateway == "" && rm.Labels.Stage == ""
 }
 
+// IsGlobalResource check if the metadata object is global
+func (rm *ResourceMetadata) IsGlobalResource() bool {
+	return rm.Kind == constant.PluginMetadata && rm.GetStageName() == ""
+}
+
 // GetReleaseID returns the release ID for the resource
 func (rm *ResourceMetadata) GetReleaseID() string {
 	// stage相关资源都是按照stage维度来管理的

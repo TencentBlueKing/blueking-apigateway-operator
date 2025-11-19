@@ -41,7 +41,7 @@ func (r *ResourceHandler) ApisixList(c *gin.Context) {
 	resp := make(serializer.ApisixListInfo)
 	if req.Resource.ID != 0 || req.Resource.Name != "" {
 		apisixResource, err := biz.GetApisixResource(
-			r.apisixConfStore,
+			r.apisixEtcdStore,
 			req.GatewayName,
 			req.StageName,
 			req.Resource.Name,
@@ -60,7 +60,7 @@ func (r *ResourceHandler) ApisixList(c *gin.Context) {
 		utils.SuccessJSONResponse(c, resp)
 		return
 	}
-	apisixList := biz.ListApisixResources(r.apisixConfStore, req.GatewayName, req.StageName)
+	apisixList := biz.ListApisixResources(r.apisixEtcdStore, req.GatewayName, req.StageName)
 	by, err := json.Marshal(apisixList)
 	if err != nil {
 		utils.BaseErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("apisix list err:%+v", err.Error()), http.StatusOK)
@@ -77,7 +77,7 @@ func (r *ResourceHandler) ApisixStageResourceCount(c *gin.Context) {
 		utils.BadRequestErrorJSONResponse(c, utils.ValidationErrorMessage(err))
 		return
 	}
-	count, err := biz.GetApisixResourceCount(r.apisixConfStore, req.GatewayName, req.StageName)
+	count, err := biz.GetApisixResourceCount(r.apisixEtcdStore, req.GatewayName, req.StageName)
 	if err != nil {
 		utils.BaseErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("apisix count:%+v", err.Error()), http.StatusOK)
 		return
@@ -93,7 +93,7 @@ func (r *ResourceHandler) ApisixStageCurrentVersion(c *gin.Context) {
 		utils.BadRequestErrorJSONResponse(c, utils.ValidationErrorMessage(err))
 		return
 	}
-	versionInfo, err := biz.GetApisixStageCurrentVersionInfo(r.apisixConfStore, req.GatewayName, req.StageName)
+	versionInfo, err := biz.GetApisixStageCurrentVersionInfo(r.apisixEtcdStore, req.GatewayName, req.StageName)
 	if err != nil {
 		utils.BaseErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("apisix version:%+v", err.Error()), http.StatusOK)
 		return

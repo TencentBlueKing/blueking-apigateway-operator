@@ -34,7 +34,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
-func initApisixConfigStore(cfg *config.Config) (apisixStore *store.ApisixEtcdStore, err error) {
+func initApisixEtcdStore(cfg *config.Config) (apisixStore *store.ApisixEtcdStore, err error) {
 	client, err := initApisixEtcdClient(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("init etcd client failed: %w", err)
@@ -42,7 +42,7 @@ func initApisixConfigStore(cfg *config.Config) (apisixStore *store.ApisixEtcdSto
 	apisixStore, err = store.NewApisixEtcdStore(client, cfg.Apisix.Etcd.KeyPrefix, cfg.Operator.EtcdPutInterval,
 		cfg.Operator.EtcdDelInterval, cfg.Operator.EtcdSyncTimeout)
 	if err != nil {
-		return nil, fmt.Errorf("init etcd store failed: %w", err)
+		return nil, fmt.Errorf("init etcd apisixEtcdstore failed: %w", err)
 	}
 	return apisixStore, nil
 }

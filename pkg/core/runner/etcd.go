@@ -43,11 +43,11 @@ import (
 
 // EtcdAgentRunner ...
 type EtcdAgentRunner struct {
-	client        *clientv3.Client
-	apigwRegistry *registry.APIGWEtcdRegistry
-	leader        *leaderelection.EtcdLeaderElector
-	synchronizer  *synchronizer.ApisixConfigSynchronizer
-	store         *store.ApisixEtcdStore
+	client            *clientv3.Client
+	apigwEtcdRegistry *registry.APIGWEtcdRegistry
+	leader            *leaderelection.EtcdLeaderElector
+	synchronizer      *synchronizer.ApisixConfigSynchronizer
+	apisixEtcdstore   *store.ApisixEtcdStore
 
 	committer *committer.Committer
 	agent     *agent.EventAgent
@@ -61,7 +61,7 @@ type EtcdAgentRunner struct {
 func NewEtcdAgentRunner(cfg *config.Config) *EtcdAgentRunner {
 	client, err := initOperatorEtcdClient(cfg)
 	if err != nil {
-		fmt.Println(err, "Error creating apigwRegistry etcd client")
+		fmt.Println(err, "Error creating apigwEtcdRegistry etcd client")
 		os.Exit(1)
 	}
 
@@ -78,8 +78,8 @@ func (r *EtcdAgentRunner) init() {
 	// 1. init metrics
 	metric.InitMetric(prometheus.DefaultRegisterer)
 
-	// 2. init apigwRegistry
-	r.apigwRegistry = registry.NewEtcdResourceRegistry(r.client, r.cfg.Dashboard.Etcd.KeyPrefix)
+	// 2. init apigwEtcdRegistry
+	r.apigwEtcdRegistry = registry.NewAPIGWEtcdRegistry(r.client, r.cfg.Dashboard.Etcd.KeyPrefix)
 
 	// 3. init leader elector
 	if r.cfg.Operator.WithLeader {
@@ -87,18 +87,18 @@ func (r *EtcdAgentRunner) init() {
 	}
 
 	// 4. init output
-	apisixStore, err := initApisixConfigStore(r.cfg)
+	apisixEtcdStore, err := initApisixEtcdStore(r.cfg)
 	if err != nil {
-		fmt.Println(err, "Error creating etcd store")
+		fmt.Println(err, "Error creating etcd apisixEtcdstore")
 		os.Exit(1)
 	}
-	r.store = apisixStore
-	r.synchronizer = synchronizer.NewSynchronizer(apisixStore, "/healthz")
+	r.apisixEtcdstore = apisixEtcdStore
+	r.synchronizer = synchronizer.NewSynchronizer(apisixEtcdStore, "/healthz")
 
 	stageTimer := timer.NewReleaseTimer()
 	// 5. init committer
 	r.committer = committer.NewCommitter(
-		r.apigwRegistry,
+		r.apigwEtcdRegistry,
 		r.synchronizer,
 		stageTimer,
 	)
@@ -106,7 +106,7 @@ func (r *EtcdAgentRunner) init() {
 
 	// 6. init agent
 	r.agent = agent.NewEventAgent(
-		r.apigwRegistry,
+		r.apigwEtcdRegistry,
 		commitChan,
 		r.synchronizer,
 		stageTimer,
@@ -118,8 +118,8 @@ func (r *EtcdAgentRunner) Run(ctx context.Context) {
 	// 1. run http server
 	httpServer := server.NewServer(
 		r.leader,
-		r.apigwRegistry,
-		r.store,
+		r.apigwEtcdRegistry,
+		r.apisixEtcdstore,
 		r.committer,
 	)
 	httpServer.RegisterMetric(prometheus.DefaultGatherer)

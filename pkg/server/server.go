@@ -40,10 +40,10 @@ import (
 
 // Server ...
 type Server struct {
-	LeaderElector   *leaderelection.EtcdLeaderElector
-	registry        *registry.APIGWEtcdRegistry
-	committer       *committer.Committer
-	apisixConfStore *store.ApisixEtcdStore
+	LeaderElector     *leaderelection.EtcdLeaderElector
+	apigwEtcdregistry *registry.APIGWEtcdRegistry
+	committer         *committer.Committer
+	apisixEtcdStore   *store.ApisixEtcdStore
 
 	mux *gin.Engine
 
@@ -53,17 +53,17 @@ type Server struct {
 // NewServer ...
 func NewServer(
 	leaderElector *leaderelection.EtcdLeaderElector,
-	registry *registry.APIGWEtcdRegistry,
-	apisixConfStore *store.ApisixEtcdStore,
+	apigwEtcdRegistry *registry.APIGWEtcdRegistry,
+	apisixEtcdStore *store.ApisixEtcdStore,
 	committer *committer.Committer,
 ) *Server {
 	return &Server{
-		LeaderElector:   leaderElector,
-		registry:        registry,
-		apisixConfStore: apisixConfStore,
-		committer:       committer,
-		logger:          logging.GetLogger().Named("server"),
-		mux:             gin.Default(),
+		LeaderElector:     leaderElector,
+		apigwEtcdregistry: apigwEtcdRegistry,
+		apisixEtcdStore:   apisixEtcdStore,
+		committer:         committer,
+		logger:            logging.GetLogger().Named("server"),
+		mux:               gin.Default(),
 	}
 }
 
@@ -78,7 +78,7 @@ func (s *Server) RegisterMetric(gatherer prometheus.Gatherer) {
 
 // Run ...
 func (s *Server) Run(ctx context.Context, config *config.Config) error {
-	router := NewRouter(s.LeaderElector, s.registry, s.committer, s.apisixConfStore, s.mux, config)
+	router := NewRouter(s.LeaderElector, s.apigwEtcdregistry, s.committer, s.apisixEtcdStore, s.mux, config)
 	// run http server
 	var addr, addrv6 string
 	if config.HttpServer.BindAddressV6 != "" {

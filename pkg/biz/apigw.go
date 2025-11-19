@@ -44,14 +44,14 @@ func GetApigwResourcesByStage(
 	//		},
 	//	},
 	//}
-	// apiSixResources, _, err := committer.ConvertEtcdKVToApisixConfiguration(ctx, si)
+	// apisixResources, _, err := committer.ConvertEtcdKVToApisixConfiguration(ctx, si)
 	// if err != nil {
 	//	return nil, err
 	//}
 	// if isExcludeReleaseVersion {
 	//	// 资源列表中排除 apigw-builtin-mock-release-version
 	//	resourceIDKey := genResourceIDKey(gatewayName, stageName, config.ReleaseVersionResourceID)
-	//	delete(apiSixResources.Routes, resourceIDKey)
+	//	delete(apisixResources.Routes, resourceIDKey)
 	//}
 	return nil, nil
 }
@@ -83,11 +83,11 @@ func ListApigwResources(
 ) (map[string]*entity.ApisixStageResource, error) {
 	configMap := make(map[string]*entity.ApisixStageResource)
 	stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
-	apiSixResources, err := GetApigwResourcesByStage(ctx, committer, gatewayName, stageName, true)
+	apisixResources, err := GetApigwResourcesByStage(ctx, committer, gatewayName, stageName, true)
 	if err != nil {
 		return nil, err
 	}
-	configMap[stageKey] = apiSixResources
+	configMap[stageKey] = apisixResources
 	return configMap, nil
 }
 
@@ -110,24 +110,24 @@ func GetApigwResource(
 	//		StageName:   stageName,
 	//	}
 	//	resourceNameKey := genResourceNameKey(gatewayName, stageName, resourceName)
-	//	apiSixResources, _, err := committer.CliConvertEtcdResourceToApisixConfiguration(ctx, si, resourceNameKey)
+	//	apisixResources, _, err := committer.CliConvertEtcdResourceToApisixConfiguration(ctx, si, resourceNameKey)
 	//	if err != nil {
 	//		return nil, err
 	//	}
-	//	configMap[stageKey] = apiSixResources
+	//	configMap[stageKey] = apisixResources
 	//	return configMap, nil
 	//}
 	//
 	//// by resourceID
-	// apiSixResources, err := GetApigwResourcesByStage(ctx, committer, gatewayName, stageName, true)
+	// apisixResources, err := GetApigwResourcesByStage(ctx, committer, gatewayName, stageName, true)
 	// if err != nil {
 	//	return nil, err
 	//}
 	// resourceIDKey := genResourceIDKey(gatewayName, stageName, resourceID)
-	// for _, route := range apiSixResources.Routes {
+	// for _, route := range apisixResources.Routes {
 	//	if resourceID != 0 && route.ID == resourceIDKey {
-	//		apiSixResources.Routes = map[string]*entity.Route{route.ID: route}
-	//		configMap[stageKey] = apiSixResources
+	//		apisixResources.Routes = map[string]*entity.Route{route.ID: route}
+	//		configMap[stageKey] = apisixResources
 	//		return configMap, nil
 	//	}
 	//}
@@ -147,17 +147,17 @@ func GetApigwStageCurrentVersionInfo(
 	//}
 	//
 	// resourceNameKey := genResourceNameKey(gatewayName, stageName, "apigw-builtin-mock-release-version")
-	// apiSixResources, _, err := committer.CliConvertEtcdResourceToApisixConfiguration(ctx, si, resourceNameKey)
+	// apisixResources, _, err := committer.CliConvertEtcdResourceToApisixConfiguration(ctx, si, resourceNameKey)
 	// if err != nil {
 	//	return nil, err
 	//}
 	//
-	// if len(apiSixResources.Routes) == 0 {
+	// if len(apisixResources.Routes) == 0 {
 	//	return nil, errors.New("current-version not found")
 	//}
 	//
 	// resourceIDKey := genResourceIDKey(gatewayName, stageName, config.ReleaseVersionResourceID)
-	// plugins := apiSixResources.Routes[resourceIDKey].Plugins
+	// plugins := apisixResources.Routes[resourceIDKey].Plugins
 	//
 	// for _, plugin := range plugins {
 	//	pluginData := plugin.(map[string]interface{})

@@ -53,7 +53,7 @@ type ApisixEtcdStore struct {
 	client *clientv3.Client
 	prefix string
 
-	registry map[string]*registry.ApisixRegistry
+	registry map[string]*registry.ApisixEtcdRegistry
 	differ   *differ.ConfigDiffer
 
 	logger *zap.SugaredLogger
@@ -73,7 +73,7 @@ func NewApisixEtcdStore(client *clientv3.Client, prefix string,
 	s := &ApisixEtcdStore{
 		client:      client,
 		prefix:      strings.TrimRight(prefix, "/"),
-		registry:    make(map[string]*registry.ApisixRegistry, 4),
+		registry:    make(map[string]*registry.ApisixEtcdRegistry, 4),
 		differ:      differ.NewConfigDiffer(),
 		logger:      logging.GetLogger().Named("etcd-config-store"),
 		putInterval: putInterval,
@@ -103,7 +103,7 @@ func (s *ApisixEtcdStore) Init() {
 		tempResourceType := resourceType
 		utils.GoroutineWithRecovery(context.Background(), func() {
 			defer wg.Done()
-			resourceRegistry, err := registry.NewApisixResourceRegistry(
+			apisixEtcdRegistry, err := registry.NewApisixEtcdRegistry(
 				s.client, s.prefix+"/"+tempResourceType+"/", s.syncTimeout)
 			if err != nil {
 				s.logger.Errorw("Create resource store failed", "resourceType", tempResourceType)
@@ -111,7 +111,7 @@ func (s *ApisixEtcdStore) Init() {
 			}
 			s.lock.Lock()
 			defer s.lock.Unlock()
-			s.registry[tempResourceType] = resourceRegistry
+			s.registry[tempResourceType] = apisixEtcdRegistry
 		})
 	}
 	wg.Wait()

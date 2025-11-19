@@ -20,13 +20,13 @@ package constant
 
 import "time"
 
-// ApigwAPISIXStageResourcePrefixFormat ...
+// ApigwStageResourcePrefixFormat ...
 // example: /{prefix}/{self.api_version}/gateway/{gateway_name}/{stage_name}/route/bk-default.default.-1
-const ApigwAPISIXStageResourcePrefixFormat = "%s/%s/gateway/%s/%s/"
+const ApigwStageResourcePrefixFormat = "%s/%s/gateway/%s/%s/"
 
-// ApigwAPISIXGlobalResourcePrefixFormat ...
+// ApigwGlobalResourcePrefixFormat ...
 // example: /{prefix}/{self.api_version}/global/plugin_metadata/bk-concurrency-limit
-const ApigwAPISIXGlobalResourcePrefixFormat = "%s/%s/global/"
+const ApigwGlobalResourcePrefixFormat = "%s/%s/global/"
 
 // GlobalResourceKey ...
 const GlobalResourceKey = "global_resource"

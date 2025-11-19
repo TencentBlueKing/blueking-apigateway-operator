@@ -36,8 +36,8 @@ func GetApisixResourceCount(
 	stageName string,
 ) (int64, error) {
 	stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
-	apiSixResources := store.Get(stageKey)
-	return int64(len(apiSixResources.Routes)), nil
+	apisixResources := store.Get(stageKey)
+	return int64(len(apisixResources.Routes)), nil
 }
 
 // ListApisixResources 获取 apisix 指定环境的资源列表
@@ -48,8 +48,8 @@ func ListApisixResources(
 ) map[string]*entity.ApisixStageResource {
 	configMap := make(map[string]*entity.ApisixStageResource)
 	stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
-	apiSixResources := store.Get(stageKey)
-	configMap[stageKey] = apiSixResources
+	apisixResources := store.Get(stageKey)
+	configMap[stageKey] = apisixResources
 	return configMap
 }
 
@@ -63,17 +63,17 @@ func GetApisixResource(
 ) (map[string]*entity.ApisixStageResource, error) {
 	configMap := make(map[string]*entity.ApisixStageResource)
 	stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
-	apiSixResources := store.Get(stageKey)
+	apisixResources := store.Get(stageKey)
 
 	// by resourceName
 	if resourceName != "" {
 		resourceNameKey := genResourceNameKey(gatewayName, stageName, resourceName)
-		for _, route := range apiSixResources.Routes {
+		for _, route := range apisixResources.Routes {
 			if route.Name == resourceNameKey {
-				apiSixResources.Routes = map[string]*entity.Route{
+				apisixResources.Routes = map[string]*entity.Route{
 					route.ID: route,
 				}
-				configMap[stageKey] = apiSixResources
+				configMap[stageKey] = apisixResources
 				return configMap, nil
 			}
 		}
@@ -82,14 +82,14 @@ func GetApisixResource(
 
 	// by resourceID
 	resourceIDKey := genResourceIDKey(gatewayName, stageName, resourceID)
-	route := apiSixResources.Routes[resourceIDKey]
+	route := apisixResources.Routes[resourceIDKey]
 	if route == nil {
 		return nil, fmt.Errorf("get apisix resource_id failed: %s not found", resourceIDKey)
 	}
-	apiSixResources.Routes = map[string]*entity.Route{
+	apisixResources.Routes = map[string]*entity.Route{
 		resourceIDKey: route,
 	}
-	configMap[stageKey] = apiSixResources
+	configMap[stageKey] = apisixResources
 	return configMap, nil
 }
 
@@ -100,10 +100,10 @@ func GetApisixStageCurrentVersionInfo(
 	stageName string,
 ) (map[string]interface{}, error) {
 	stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
-	apiSixResources := store.Get(stageKey)
+	apisixResources := store.Get(stageKey)
 
 	resourceIDKey := genResourceIDKey(gatewayName, stageName, config.ReleaseVersionResourceID)
-	route := apiSixResources.Routes[resourceIDKey]
+	route := apisixResources.Routes[resourceIDKey]
 	if route == nil {
 		return nil, errors.New("current-version not found")
 	}

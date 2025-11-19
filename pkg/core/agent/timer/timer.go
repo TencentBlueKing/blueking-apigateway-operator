@@ -49,7 +49,7 @@ func (t *CacheTimer) Update(offset time.Duration) {
 
 // ReleaseTimer ...
 type ReleaseTimer struct {
-	resourceTimer sync.Map
+	releaseTimer sync.Map
 }
 
 // NewReleaseTimer ...
@@ -70,7 +70,7 @@ func (t *ReleaseTimer) Update(releaseInfo *entity.ReleaseInfo) {
 	if releaseInfo.Kind == constant.PluginMetadata {
 		cacheKey = constant.GlobalResourceKey
 	}
-	timerInterface, ok := t.resourceTimer.Load(cacheKey)
+	timerInterface, ok := t.releaseTimer.Load(cacheKey)
 	if !ok {
 		timer = &CacheTimer{ReleaseInfo: releaseInfo}
 		timer.Reset(eventsWaitingTimeWindow)
@@ -83,20 +83,20 @@ func (t *ReleaseTimer) Update(releaseInfo *entity.ReleaseInfo) {
 		timer.ReleaseInfo = releaseInfo
 		timer.Update(eventsWaitingTimeWindow)
 	}
-	t.resourceTimer.Store(cacheKey, timer)
+	t.releaseTimer.Store(cacheKey, timer)
 }
 
 // ListReleaseForCommit ...
 func (t *ReleaseTimer) ListReleaseForCommit() []*entity.ReleaseInfo {
-	resourceList := make([]*entity.ReleaseInfo, 0)
-	t.resourceTimer.Range(func(key, timerInterface interface{}) bool {
+	releaseInfos := make([]*entity.ReleaseInfo, 0)
+	t.releaseTimer.Range(func(key, timerInterface interface{}) bool {
 		timer := timerInterface.(*CacheTimer)
 		if time.Since(timer.ShouldCommitTime) > 0 || time.Since(timer.CachedTime) > forceUpdateTimeWindow {
-			resourceList = append(resourceList, timer.ReleaseInfo)
-			t.resourceTimer.Delete(key)
+			releaseInfos = append(releaseInfos, timer.ReleaseInfo)
+			t.releaseTimer.Delete(key)
 		}
 		return true
 	})
 
-	return resourceList
+	return releaseInfos
 }
