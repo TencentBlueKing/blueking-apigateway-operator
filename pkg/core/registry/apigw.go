@@ -53,7 +53,6 @@ type APIGWEtcdRegistry struct {
 	currentRevision int64
 }
 
-// NewAPIGWEtcdRegistry creates a APIGWEtcdRegistry object
 // NewAPIGWEtcdRegistry creates a new APIGWEtcdRegistry instance with the given etcd client and key prefix
 // Parameters:
 //   - etcdClient: A pointer to an etcd client instance
