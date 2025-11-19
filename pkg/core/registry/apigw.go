@@ -423,7 +423,7 @@ func (r *APIGWEtcdRegistry) ValueToGlobalResource(resp *clientv3.GetResponse) (*
 			r.logger.Error(err, "extract resource metadata failed", "key", string(kv.Key))
 			return nil, err
 		}
-		// 校验配置schema
+		// Validate configuration schema
 		err = validator.ValidateAPISIXJsonSchema(resourceMetadata.ApisixVersion, resourceKind, kv.Value)
 		if err != nil {
 			r.logger.Error(err, "validate apisix json schema failed", "key", string(kv.Key))
