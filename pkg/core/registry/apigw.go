@@ -430,7 +430,7 @@ func (r *APIGWEtcdRegistry) ValueToGlobalResource(resp *clientv3.GetResponse) (*
 			return nil, err
 		}
 		if resourceKind == constant.PluginMetadata {
-			// 删除 labels 字段
+			// Delete labels field
 			rawConfig, _ := sjson.DeleteBytes(kv.Value, "labels")
 			metadata := &entity.PluginMetadata{
 				ResourceMetadata: resourceMetadata,
