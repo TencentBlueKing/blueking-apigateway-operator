@@ -38,8 +38,8 @@ func NewConfigDiffer() *ConfigDiffer {
 	return &ConfigDiffer{}
 }
 
-// transformMap: 需要单独针对于map类型添加一个对比转换器，由于value是一个interface类型,对于不同的序列化方式会存在类型不一致
-// eg： value存在map[any]any和map[string]any和map[interface]any的问题
+// transformMap: A separate comparison transformer is needed for map types, as the value is an interface type and there are type inconsistencies with different serialization methods.
+// e.g.: value may exist as map[any]any, map[string]any, or map[interface]any.
 func transformMap(mapType map[string]interface{}) map[string]interface{} {
 	mapTypeJson, _ := json.Marshal(mapType)
 	var newMap map[string]interface{}
