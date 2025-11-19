@@ -47,7 +47,7 @@ func transformMap(mapType map[string]interface{}) map[string]interface{} {
 	return newMap
 }
 
-// ignoreApisixMetadata: 忽略apisixeMetadata的部分成员
+// ignoreApisixMetadata: ignore some members of apisixMetadata
 var ignoreApisixMetadataCmpOpt = cmpopts.IgnoreFields(entity.ResourceMetadata{},
 	"Labels", "Ctx", "RetryCount", "APIVersion", "Kind", "ApisixVersion",
 )
