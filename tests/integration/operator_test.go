@@ -61,11 +61,11 @@ var _ = Describe("Operator Integration", func() {
 		//resourceCli = client.NewResourceClient(operatorURL, "DebugModel@bk")
 	})
 
-	//AfterEach(func() {
-	//	_, err := etcdCli.Delete(context.Background(), "", clientv3.WithPrefix())
-	//	Expect(err).NotTo(HaveOccurred())
-	//	_ = etcdCli.Close()
-	//})
+	AfterEach(func() {
+		_, err := etcdCli.Delete(context.Background(), "", clientv3.WithPrefix())
+		Expect(err).NotTo(HaveOccurred())
+		_ = etcdCli.Close()
+	})
 
 	Describe("test publish default resource", func() {
 		Context("test new agteway publish", func() {

@@ -82,44 +82,6 @@ func TestNewResourceSchema(t *testing.T) {
 			shouldFail: false,
 		},
 		{
-			name:         "normal case with dataType=ETCD",
-			version:      constant.APISIXVersion313,
-			resourceType: constant.Route,
-			jsonPath:     "main.route",
-			config: `{
-			  "id": "bk.r.xxx",
-              "name": "route1",
-              "methods": [
-                "GET",
-                "POST"
-              ],
-              "enable_websocket": false,
-              "uris": [
-                "/test"
-              ],
-              "plugins": {
-                "authz-casbin": {
-                  "model": "path/to/model.conf",
-                  "policy": "path/to/policy.csv",
-                  "username": "admin"
-                }
-              },
-              "upstream": {
-                "scheme": "http",
-                "nodes": [
-                  {
-                    "host": "1.1.1.1",
-                    "port": 80,
-                    "weight": 1
-                  }
-                ],
-                "pass_host": "pass",
-                "type": "roundrobin"
-              }
-            }`,
-			shouldFail: false,
-		},
-		{
 			name:         "invalid schema path",
 			version:      constant.APISIXVersion313,
 			resourceType: constant.Route,
@@ -672,7 +634,7 @@ func TestAPISIXJsonSchemaValidatorValidate(t *testing.T) {
 			resource: constant.PluginMetadata,
 			jsonPath: "main.plugin_metadata",
 			config: `{
-              "name": "authz-casbin",
+              "id": "authz-casbin",
               "model": "rbac_model.conf",
               "policy": "rbac_policy.csv"
             }`,

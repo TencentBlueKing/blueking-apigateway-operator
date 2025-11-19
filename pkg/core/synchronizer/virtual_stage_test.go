@@ -104,7 +104,7 @@ var _ = Describe("VirtualStage", func() {
 				route := configuration.Routes[HealthZRouteIDOuter]
 				checkMetadata(route.ResourceMetadata)
 
-				Expect(route.URI).To(Equal(apisixHealthzURI))
+				Expect(route.Uris).To(ContainElement(apisixHealthzURI))
 				Expect(route.Priority).To(Equal(-100))
 				Expect(route.Methods).To(ContainElement("GET"))
 				Expect(route.Status).To(Equal(entity.Status(1)))

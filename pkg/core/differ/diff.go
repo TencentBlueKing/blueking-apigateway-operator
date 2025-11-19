@@ -38,7 +38,8 @@ func NewConfigDiffer() *ConfigDiffer {
 	return &ConfigDiffer{}
 }
 
-// transformMap: A separate comparison transformer is needed for map types, as the value is an interface type and there are type inconsistencies with different serialization methods.
+// transformMap: A separate comparison transformer is needed for map types, as the value is an interface type
+// and there are type inconsistencies with different serialization methods.
 // e.g.: value may exist as map[any]any, map[string]any, or map[interface]any.
 func transformMap(mapType map[string]interface{}) map[string]interface{} {
 	mapTypeJson, _ := json.Marshal(mapType)
@@ -94,7 +95,7 @@ func (r *CmpReporter) Report(rs cmp.Result) {
 
 // Diff 对比两个 ApisixStageResource，返回需要 put 和 delete 的资源
 func (d *ConfigDiffer) Diff(
-	old, new *entity.ApisixStageResource,
+old, new *entity.ApisixStageResource,
 ) (put *entity.ApisixStageResource, delete *entity.ApisixStageResource) {
 	if old == nil {
 		return new, nil
@@ -112,7 +113,7 @@ func (d *ConfigDiffer) Diff(
 
 // DiffGlobal 对比全局资源配置
 func (d *ConfigDiffer) DiffGlobal(
-	old, new *entity.ApisixGlobalResource,
+old, new *entity.ApisixGlobalResource,
 ) (put *entity.ApisixGlobalResource, delete *entity.ApisixGlobalResource) {
 	if old == nil {
 		return new, nil
@@ -128,8 +129,8 @@ func (d *ConfigDiffer) DiffGlobal(
 
 // DiffRoutes 对比两个 Route map，返回需要 put 和 delete 的 Route
 func (d *ConfigDiffer) DiffRoutes(
-	old map[string]*entity.Route,
-	new map[string]*entity.Route,
+old map[string]*entity.Route,
+new map[string]*entity.Route,
 ) (putList map[string]*entity.Route, deleteList map[string]*entity.Route) {
 	oldResMap := make(map[string]*entity.Route)
 	putList = make(map[string]*entity.Route)
@@ -166,8 +167,8 @@ func (d *ConfigDiffer) DiffRoutes(
 
 // DiffServices 对比两个 Service map，返回需要 put 和 delete 的 Service
 func (d *ConfigDiffer) DiffServices(
-	old map[string]*entity.Service,
-	new map[string]*entity.Service,
+old map[string]*entity.Service,
+new map[string]*entity.Service,
 ) (putList map[string]*entity.Service, deleteList map[string]*entity.Service) {
 	oldResMap := make(map[string]*entity.Service)
 	putList = make(map[string]*entity.Service)
@@ -204,8 +205,8 @@ func (d *ConfigDiffer) DiffServices(
 
 // DiffPluginMetadatas 对比两个 PluginMetadata map，返回需要 put 和 delete 的 PluginMetadata
 func (d *ConfigDiffer) DiffPluginMetadatas(
-	old map[string]*entity.PluginMetadata,
-	new map[string]*entity.PluginMetadata,
+old map[string]*entity.PluginMetadata,
+new map[string]*entity.PluginMetadata,
 ) (putList map[string]*entity.PluginMetadata, deleteList map[string]*entity.PluginMetadata) {
 	oldResMap := make(map[string]*entity.PluginMetadata)
 	putList = make(map[string]*entity.PluginMetadata)
@@ -235,8 +236,8 @@ func (d *ConfigDiffer) DiffPluginMetadatas(
 
 // DiffSSLs 对比两个 SSL map，返回需要 put 和 delete 的 SSL
 func (d *ConfigDiffer) DiffSSLs(
-	old map[string]*entity.SSL,
-	new map[string]*entity.SSL,
+old map[string]*entity.SSL,
+new map[string]*entity.SSL,
 ) (putList map[string]*entity.SSL, deleteList map[string]*entity.SSL) {
 	oldResMap := make(map[string]*entity.SSL)
 	putList = make(map[string]*entity.SSL)

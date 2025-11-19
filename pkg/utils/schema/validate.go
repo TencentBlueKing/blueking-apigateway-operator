@@ -151,11 +151,13 @@ func getPlugins(conf interface{}) (map[string]interface{}, string) {
 		return confType.Plugins, "stream_schema"
 	case *entity.PluginMetadata:
 		log.Infof("type of conf: %#v", confType)
-		var pluginName string
-		for name := range confType.PluginMetadataConf {
-			pluginName = name
+		var config map[string]interface{}
+		rawConfig, _ := json.Marshal(confType.PluginMetadataConf)
+		err := json.Unmarshal(rawConfig, &config)
+		if err != nil {
+			return nil, ""
 		}
-		return map[string]interface{}{pluginName: confType.PluginMetadataConf}, "metadata_schema"
+		return config, "metadata_schema"
 	}
 	return nil, ""
 }
