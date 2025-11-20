@@ -910,12 +910,12 @@ func TestAPISIXJsonSchemaValidatorValidate(t *testing.T) {
 func TestValidateVarItem(t *testing.T) {
 	tests := []struct {
 		name       string
-		item       []interface{}
+		item       []any
 		shouldFail bool
 	}{
 		{
 			name: "Valid Triple",
-			item: []interface{}{
+			item: []any{
 				"arg_id",
 				"==",
 				"123",
@@ -924,7 +924,7 @@ func TestValidateVarItem(t *testing.T) {
 		},
 		{
 			name: "Valid Quadruple",
-			item: []interface{}{
+			item: []any{
 				"arg_id",
 				"!",
 				"==",
@@ -934,7 +934,7 @@ func TestValidateVarItem(t *testing.T) {
 		},
 		{
 			name: "Invalid Length",
-			item: []interface{}{
+			item: []any{
 				"arg_id",
 				"==",
 			},
@@ -942,7 +942,7 @@ func TestValidateVarItem(t *testing.T) {
 		},
 		{
 			name: "Invalid First Element",
-			item: []interface{}{
+			item: []any{
 				123,
 				"==",
 				"123",
@@ -951,7 +951,7 @@ func TestValidateVarItem(t *testing.T) {
 		},
 		{
 			name: "Invalid Quadruple Second Element",
-			item: []interface{}{
+			item: []any{
 				"arg_id",
 				"invalid",
 				"==",
@@ -961,7 +961,7 @@ func TestValidateVarItem(t *testing.T) {
 		},
 		{
 			name: "Invalid Operator",
-			item: []interface{}{
+			item: []any{
 				"arg_id",
 				"invalid_op",
 				"123",
@@ -970,7 +970,7 @@ func TestValidateVarItem(t *testing.T) {
 		},
 		{
 			name: "Empty Value",
-			item: []interface{}{
+			item: []any{
 				"arg_id",
 				"==",
 				nil,
@@ -994,18 +994,18 @@ func TestValidateVarItem(t *testing.T) {
 func TestCheckVars(t *testing.T) {
 	tests := []struct {
 		name       string
-		vars       []interface{}
+		vars       []any
 		shouldFail bool
 	}{
 		{
 			name: "Valid Vars",
-			vars: []interface{}{
-				[]interface{}{
+			vars: []any{
+				[]any{
 					"arg_id",
 					"==",
 					"123",
 				},
-				[]interface{}{
+				[]any{
 					"http_x_header",
 					"!",
 					"~~",
@@ -1016,20 +1016,20 @@ func TestCheckVars(t *testing.T) {
 		},
 		{
 			name:       "Empty Vars",
-			vars:       []interface{}{},
+			vars:       []any{},
 			shouldFail: false,
 		},
 		{
 			name: "Invalid Item Type",
-			vars: []interface{}{
+			vars: []any{
 				"invalid_item",
 			},
 			shouldFail: true,
 		},
 		{
 			name: "Invalid Var Item",
-			vars: []interface{}{
-				[]interface{}{
+			vars: []any{
+				[]any{
 					"arg_id",
 					"invalid_op",
 					"123",

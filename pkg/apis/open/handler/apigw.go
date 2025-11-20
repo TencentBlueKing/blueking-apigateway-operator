@@ -49,12 +49,22 @@ func (r *ResourceHandler) ApigwList(c *gin.Context) {
 			req.Resource.ID,
 		)
 		if err != nil {
-			utils.BaseErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("apigw list err:%+v", err.Error()), http.StatusOK)
+			utils.BaseErrorJSONResponse(
+				c,
+				utils.SystemError,
+				fmt.Sprintf("apigw list err:%+v", err.Error()),
+				http.StatusOK,
+			)
 			return
 		}
 		by, err := json.Marshal(apigwResource)
 		if err != nil {
-			utils.BaseErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("apigw list err:%+v", err.Error()), http.StatusOK)
+			utils.BaseErrorJSONResponse(
+				c,
+				utils.SystemError,
+				fmt.Sprintf("apigw list err:%+v", err.Error()),
+				http.StatusOK,
+			)
 			return
 		}
 		_ = json.Unmarshal(by, &resp)
@@ -63,12 +73,22 @@ func (r *ResourceHandler) ApigwList(c *gin.Context) {
 	}
 	apigwList, err := biz.ListApigwResources(c, r.committer, req.GatewayName, req.StageName)
 	if err != nil {
-		utils.BaseErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("apigw list err:%+v", err.Error()), http.StatusOK)
+		utils.BaseErrorJSONResponse(
+			c,
+			utils.SystemError,
+			fmt.Sprintf("apigw list err:%+v", err.Error()),
+			http.StatusOK,
+		)
 		return
 	}
 	by, err := json.Marshal(apigwList)
 	if err != nil {
-		utils.BaseErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("apigw list err:%+v", err.Error()), http.StatusOK)
+		utils.BaseErrorJSONResponse(
+			c,
+			utils.SystemError,
+			fmt.Sprintf("apigw list err:%+v", err.Error()),
+			http.StatusOK,
+		)
 		return
 	}
 	_ = json.Unmarshal(by, &resp)
@@ -84,7 +104,12 @@ func (r *ResourceHandler) ApigwStageResourceCount(c *gin.Context) {
 	}
 	count, err := biz.GetApigwResourceCount(c, r.committer, req.GatewayName, req.StageName)
 	if err != nil {
-		utils.BaseErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("apigw count:%+v", err.Error()), http.StatusOK)
+		utils.BaseErrorJSONResponse(
+			c,
+			utils.SystemError,
+			fmt.Sprintf("apigw count:%+v", err.Error()),
+			http.StatusOK,
+		)
 		return
 	}
 	output := serializer.ApigwListResourceCountResponse{Count: count}
@@ -100,7 +125,12 @@ func (r *ResourceHandler) ApigwStageCurrentVersion(c *gin.Context) {
 	}
 	versionInfo, err := biz.GetApigwStageCurrentVersionInfo(c, r.committer, req.GatewayName, req.StageName)
 	if err != nil {
-		utils.BaseErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("apigw version:%+v", err.Error()), http.StatusOK)
+		utils.BaseErrorJSONResponse(
+			c,
+			utils.SystemError,
+			fmt.Sprintf("apigw version:%+v", err.Error()),
+			http.StatusOK,
+		)
 		return
 	}
 	output := serializer.ApigwListCurrentVersionInfoResponse(versionInfo)

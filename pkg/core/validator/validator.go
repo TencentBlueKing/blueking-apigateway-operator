@@ -34,7 +34,11 @@ func ValidateAPISIXJsonSchema(version string, resourceType constant.APISIXResour
 	if err != nil {
 		return fmt.Errorf("to x version failed, err: %v", err)
 	}
-	validator, err := schema.NewAPISIXJsonSchemaValidator(apisixVersion, resourceType, "main."+resourceType.String())
+	validator, err := schema.NewAPISIXJsonSchemaValidator(
+		apisixVersion,
+		resourceType,
+		"main."+resourceType.String(),
+	)
 	if err != nil {
 		return err
 	}

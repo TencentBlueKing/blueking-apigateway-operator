@@ -21,8 +21,8 @@ package serializer
 
 // StageScopedApisixResources apisix resource
 type StageScopedApisixResources struct {
-	Routes         map[string]interface{} `json:"routes,omitempty"`
-	Services       map[string]interface{} `json:"services,omitempty"`
-	PluginMetadata map[string]interface{} `json:"plugin_metadata,omitempty"`
-	Ssl            map[string]interface{} `json:"ssl,omitempty"`
+	Routes         map[string]any `json:"routes,omitempty"`
+	Services       map[string]any `json:"services,omitempty"`
+	PluginMetadata map[string]any `json:"plugin_metadata,omitempty"`
+	Ssl            map[string]any `json:"ssl,omitempty"`
 }

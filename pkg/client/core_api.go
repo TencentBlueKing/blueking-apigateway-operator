@@ -48,7 +48,7 @@ type CoreAPIClient struct {
 // InitCoreAPIClient init core api client
 func InitCoreAPIClient(cfg *config.Config) {
 	coreOnce.Do(func() {
-		coreAPIClient = newCoreAPIClient(cfg.EventReporter.CoreAPIHost, cfg.Instance.ID, cfg.Instance.Secret)
+		coreAPIClient = newCoreAPIClient(cfg.EventReporter.CoreAPIHost, cfg.Auth.ID, cfg.Auth.Secret)
 	})
 }
 
@@ -58,7 +58,7 @@ func GetCoreAPIClient() *CoreAPIClient {
 }
 
 // NewCoreAPIClient New core_api client with instance_id and instance_secret
-func newCoreAPIClient(host string, instanceID string, instanceSecret string) *CoreAPIClient {
+func newCoreAPIClient(host, instanceID, instanceSecret string) *CoreAPIClient {
 	cli := gentleman.New()
 	cli.URL(host)
 

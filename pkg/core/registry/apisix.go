@@ -51,7 +51,8 @@ type ApisixEtcdRegistry struct {
 
 // NewApisixEtcdRegistry creates a new ApisixEtcdRegistry instance
 func NewApisixEtcdRegistry(client *clientv3.Client, prefix string,
-	syncTimeout time.Duration) (*ApisixEtcdRegistry, error) {
+	syncTimeout time.Duration,
+) (*ApisixEtcdRegistry, error) {
 	if !strings.HasSuffix(prefix, "/") {
 		prefix += "/"
 	}

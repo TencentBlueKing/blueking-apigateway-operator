@@ -35,4 +35,4 @@ type ApisixListResourceCountResponse struct {
 }
 
 // ApisixListCurrentVersionInfoResponse apisix 环境发布版本信息
-type ApisixListCurrentVersionInfoResponse map[string]interface{}
+type ApisixListCurrentVersionInfoResponse map[string]any

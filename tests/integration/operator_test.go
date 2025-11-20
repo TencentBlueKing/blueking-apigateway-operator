@@ -48,7 +48,7 @@ const (
 var _ = Describe("Operator Integration", func() {
 	time.Sleep(time.Second * 15)
 	var etcdCli *clientv3.Client
-	//var resourceCli *client.ResourceClient
+	// var resourceCli *client.ResourceClient
 	BeforeEach(func() {
 		cfg := clientv3.Config{
 			Endpoints:   []string{"localhost:2379"},
@@ -58,21 +58,21 @@ var _ = Describe("Operator Integration", func() {
 		etcdCli, err = clientv3.New(cfg)
 		Expect(err).NotTo(HaveOccurred())
 
-		//resourceCli = client.NewResourceClient(operatorURL, "DebugModel@bk")
+		// resourceCli = client.NewResourceClient(operatorURL, "DebugModel@bk")
 	})
 
-	AfterEach(func() {
-		_, err := etcdCli.Delete(context.Background(), "", clientv3.WithPrefix())
-		Expect(err).NotTo(HaveOccurred())
-		_ = etcdCli.Close()
-	})
+	//AfterEach(func() {
+	//	_, err := etcdCli.Delete(context.Background(), "", clientv3.WithPrefix())
+	//	Expect(err).NotTo(HaveOccurred())
+	//	_ = etcdCli.Close()
+	//})
 
 	Describe("test publish default resource", func() {
 		Context("test new agteway publish", func() {
 			It("should not error and the value should be equal to what was put", func() {
 				// load resources
 				resources := integration.GetBkDefaultResource()
-				//put route
+				// put route
 				for key, route := range resources.Routes {
 					rawConfig, _ := json.Marshal(route)
 					_, err := etcdCli.Put(context.Background(), key, string(rawConfig))
@@ -149,15 +149,17 @@ var _ = Describe("Operator Integration", func() {
 				//Expect(len(resourceInfo.Services)).To(Equal(testDataServiceAmount))
 
 				// assert apigw resource count
-				//				apigwGatewayResourceCount, err := resourceCli.ApigwStageResourceCount(&client.ApigwListRequest{
+				// 				apigwGatewayResourceCount, err :=
+				// resourceCli.ApigwStageResourceCount(&client.ApigwListRequest{
 				//					GatewayName: testGateway,
 				//					StageName:   testStage,
 				//				})
 				//				Expect(err).NotTo(HaveOccurred())
-				//				Expect(apigwGatewayResourceCount.Count).To(Equal(int64(testDataRoutesAmount)))
+				// 				Expect(apigwGatewayResourceCount.Count).To(Equal(int64(testDataRoutesAmount)))
 				//
 				//				// assert apigw current-version publish_id
-				//apigwGatewayStageVersion, err := resourceCli.ApigwStageCurrentVersion(&client.ApigwListRequest{
+				// apigwGatewayStageVersion, err :=
+				// resourceCli.ApigwStageCurrentVersion(&client.ApigwListRequest{
 				//	GatewayName: testGateway,
 				//	StageName:   testStage,
 				//})

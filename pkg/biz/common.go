@@ -36,7 +36,7 @@ func genResourceIDKey(gatewayName, stageName string, resourceID int64) string {
 }
 
 // genResourceNameKey 生成资源名称查询的 key
-func genResourceNameKey(gatewayName, stageName string, resourceName string) string {
+func genResourceNameKey(gatewayName, stageName, resourceName string) string {
 	key := toLowerDashCase(fmt.Sprintf("%s-%s-%s", gatewayName, stageName, resourceName))
 
 	// key 长度大于 64 需要转换

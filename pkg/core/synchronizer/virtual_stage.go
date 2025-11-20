@@ -74,24 +74,25 @@ func (s *VirtualStage) make404DefaultRoute() *entity.Route {
 		ResourceMetadata: s.makeRouteMetadata(NotFoundHandling),
 		URI:              "/*",
 		Priority:         -100,
-		Plugins: map[string]interface{}{
-			"bk-error-wrapper":     map[string]interface{}{},
-			"bk-not-found-handler": map[string]interface{}{},
-			"file-logger": map[string]interface{}{
+		Plugins: map[string]any{
+			"bk-error-wrapper":     map[string]any{},
+			"bk-not-found-handler": map[string]any{},
+			"file-logger": map[string]any{
 				"path": fileLoggerLogPath,
-			}},
+			},
+		},
 		Status: 1,
 	}
 }
 
 func (s *VirtualStage) makeOuterHealthzRoute() *entity.Route {
-	plugins := map[string]interface{}{
-		"limit-req": map[string]interface{}{
+	plugins := map[string]any{
+		"limit-req": map[string]any{
 			"rate":  float64(10),
 			"burst": float64(10),
 			"key":   "server_addr",
 		},
-		"mocking": map[string]interface{}{
+		"mocking": map[string]any{
 			"content_type":     "text/plain",
 			"response_example": "ok",
 		},
@@ -107,8 +108,8 @@ func (s *VirtualStage) makeOuterHealthzRoute() *entity.Route {
 	}
 }
 
-func (s *VirtualStage) makeExtraConfiguration() *entity.ApisixStageResource {
-	var configuration entity.ApisixStageResource
+func (s *VirtualStage) makeExtraConfiguration() *entity.ExtraApisixStageResource {
+	var configuration entity.ExtraApisixStageResource
 
 	if extraApisixResourcesPath == "" {
 		return &configuration
@@ -120,13 +121,12 @@ func (s *VirtualStage) makeExtraConfiguration() *entity.ApisixStageResource {
 		return &configuration
 	}
 	defer file.Close()
-
 	decoder := yaml.NewDecoder(file)
 	err = decoder.Decode(&configuration)
 	if err != nil {
-		s.logger.Error("parse resource path", "err", err, "path", extraApisixResourcesPath)
+		s.logger.Errorf("parse resource path: %v, decode resource failed: %v", extraApisixResourcesPath, err)
+		return &configuration
 	}
-
 	return &configuration
 }
 
@@ -134,7 +134,6 @@ func (s *VirtualStage) makeExtraConfiguration() *entity.ApisixStageResource {
 func (s *VirtualStage) MakeConfiguration() *entity.ApisixStageResource {
 	ret := entity.NewEmptyApisixConfiguration()
 	extraConfiguration := s.makeExtraConfiguration()
-
 	for _, service := range extraConfiguration.Services {
 		if service != nil && service.ID != "" {
 			service.Labels = s.Labels

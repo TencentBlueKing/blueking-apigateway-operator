@@ -13,8 +13,6 @@ $(LOCALBIN):
 GOLANGCI_LINT = $(LOCALBIN)/golangci-lint
 MOCKGEN = $(LOCALBIN)/mockgen
 GINKGO = $(LOCALBIN)/ginkgo
-GOLINES = $(LOCALBIN)/golines
-GOFUMPT = $(LOCALBIN)/gofumpt
 SETUP_ENVTEST = $(LOCALBIN)/setup-envtest
 
 ## Tool Versions
@@ -39,10 +37,6 @@ init: $(LOCALBIN)
 	GOBIN=$(LOCALBIN) go install github.com/golang/mock/mockgen@$(MOCKGEN_VERSION)
 	# for ginkgo
 	GOBIN=$(LOCALBIN) go install github.com/onsi/ginkgo/v2/ginkgo@$(GINKGO_VERSION)
-	# for gofumpt
-	GOBIN=$(LOCALBIN) go install mvdan.cc/gofumpt@latest
-	# for golines
-	GOBIN=$(LOCALBIN) go install github.com/segmentio/golines@latest
 	# for envtest
 	GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
 
@@ -53,20 +47,8 @@ $(BUILD_PATH):
 	mkdir -p $(BUILD_PATH)
 
 
-.PHONY:
-fmt: ## Run go fmt against code.
-	$(GOLANGCI_LINT) fmt  ./...
 
-.PHONY: gofumpt
-gofumpt: ## Run go fmt against code.
-	$(GOLINES) ./ -m 120 -w --base-formatter gofmt --no-reformat-tags
-	$(GOFUMPT) -l -w .
-
-.PHONY: vet
-vet: fmt ## Run go vet against code.
-	go vet ./...
-
-lint: vet
+lint:
 	$(GOLANGCI_LINT) run  ./...
 
 .PHONY: test
