@@ -27,6 +27,7 @@ import (
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 )
@@ -104,7 +105,7 @@ func (s *VirtualStage) makeOuterHealthzRoute() *entity.Route {
 		Priority:         -100,
 		Methods:          []string{http.MethodGet, http.MethodHead},
 		Plugins:          plugins,
-		Status:           1,
+		Status:           constant.StatusEnable,
 	}
 }
 

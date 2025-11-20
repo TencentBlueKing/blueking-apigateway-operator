@@ -119,4 +119,6 @@ const (
 	ApisixResourceTypePluginMetadata = "plugin_metadata"
 
 	SyncSleepSeconds = 5 * time.Second
+
+	StatusEnable = 1
 )

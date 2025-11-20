@@ -347,6 +347,7 @@ func (r *APIGWEtcdRegistry) ValueToStageResource(resp *clientv3.GetResponse) (*e
 				return nil, err
 			}
 			route.ResourceMetadata = resourceMetadata
+			route.Status = constant.StatusEnable
 			ret.Routes[route.GetID()] = &route
 		case constant.Service:
 			var service entity.Service
@@ -374,6 +375,7 @@ func (r *APIGWEtcdRegistry) ValueToStageResource(resp *clientv3.GetResponse) (*e
 				return nil, err
 			}
 			ssl.ResourceMetadata = resourceMetadata
+			ssl.Status = constant.StatusEnable
 			ret.SSLs[ssl.GetID()] = &ssl
 		}
 	}
