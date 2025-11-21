@@ -82,8 +82,6 @@ type Dashboard struct {
 type Apisix struct {
 	Etcd         Etcd
 	VirtualStage VirtualStage
-	// InnerPlugins 内置插件列表，这些插件无需进行schema校验
-	InnerPlugins []string
 }
 
 // Operator ...
@@ -211,73 +209,8 @@ func newDefaultConfig() *Config {
 			},
 			VirtualStage: VirtualStage{
 				FileLoggerLogPath: "/usr/local/apisix/logs/access.log",
-
-				VirtualGateway: "-",
-				VirtualStage:   "-",
-			},
-			InnerPlugins: []string{
-				// priority: 18880
-				"bk-legacy-invalid-params",
-				// priority: 18870 (will be deprecated)
-				"bk-opentelemetry",
-				// priority: 18860
-				"bk-not-found-handler",
-				// priority: 18850
-				"bk-request-id",
-				// priority: 18840
-				"bk-stage-context",
-				// priority: 18825
-				"bk-backend-context",
-				// priority: 18820
-				"bk-resource-context",
-				// priority: 18815 (will be deprecated)
-				"bk-status-rewrite",
-				// priority: 18810 (will be deprecated)
-				"bk-verified-user-exempted-apps",
-				// priority: 18809
-				"bk-real-ip",
-				// priority: 18800
-				"bk-log-context",
-				// priority: 18735
-				"bk-access-token-source",
-				// priority: 18730
-				"bk-auth-verify",
-				// priority: 17900
-				"bk-cors",
-				// priority: 17700
-				"bk-break-recursive-call",
-				// priority: 17680
-				"bk-auth-validate",
-				// priority: 17679
-				"bk-user-restriction",
-				// priority: 17675
-				"bk-tenant-verify",
-				// priority: 17674
-				"bk-tenant-validate",
-				// priority: 17670
-				"bk-jwt",
-				// priority: 17662
-				"bk-ip-restriction",
-				// priority: 17660 (disabled by default)
-				"bk-concurrency-limit",
-				// priority: 17651 (not used, but just keep in codebase)
-				"bk-stage-global-rate-limit",
-				// priority: 17640
-				"bk-permission",
-				// priority: 17450
-				"bk-delete-sensitive",
-				// priority: 17440
-				"bk-delete-cookie",
-				// priority: 17430
-				"bk-proxy-rewrite",
-				// priority: 17425
-				"bk-default-tenant",
-				// priority: 145
-				"bk-debug",
-				// priority: 0
-				"bk-error-wrapper",
-				"bk-repl-debugger",
-				"bk-response-check",
+				VirtualGateway:    "-",
+				VirtualStage:      "-",
 			},
 		},
 		EventReporter: EventReporter{

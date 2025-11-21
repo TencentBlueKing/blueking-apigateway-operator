@@ -445,15 +445,15 @@ func (v *APISIXJsonSchemaValidator) Validate(rawConfig json.RawMessage) error { 
 	}
 
 	for pluginName, pluginConf := range plugins {
-		// 如果是内置插件，直接跳过校验
-		if IsInnerPlugin(pluginName) {
-			continue
-		}
 		var schemaMap map[string]any
 		schemaValue := GetPluginSchema(v.version, pluginName, schemaType)
 		// 查询自定义插件
 		if schemaValue == nil && v.customizePluginSchemaMap != nil {
 			schemaValue = v.customizePluginSchemaMap[pluginName]
+		}
+		// 如果是内置插件,且找不到schema,直接跳过校验
+		if IsInnerPlugin(pluginName) && schemaValue == nil {
+			continue
 		}
 		if schemaValue == nil {
 			log.Errorf(

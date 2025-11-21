@@ -20,6 +20,7 @@ package schema
 
 import (
 	_ "embed"
+	"strings"
 	"sync"
 
 	"github.com/tidwall/gjson"
@@ -45,10 +46,7 @@ func InitInnerPlugins(plugins []string) {
 
 // IsInnerPlugin 检查插件是否为内置插件
 func IsInnerPlugin(pluginName string) bool {
-	if innerPluginsMap == nil {
-		return false
-	}
-	return innerPluginsMap[pluginName]
+	return strings.HasPrefix(pluginName, "bk_")
 }
 
 //go:embed 3.13/schema.json
