@@ -73,11 +73,9 @@ func normalizeRouteNodes(route *entity.Route) *entity.Route {
 	}
 	// Create a copy to avoid modifying the original
 	normalized := *route
-	if route.Upstream != nil {
-		normalized.Upstream = &entity.UpstreamDef{}
-		*normalized.Upstream = *route.Upstream
-		normalized.Upstream.Nodes = normalizeNodesValue(route.Upstream.Nodes)
-	}
+	normalized.Upstream = &entity.UpstreamDef{}
+	*normalized.Upstream = *route.Upstream
+	normalized.Upstream.Nodes = normalizeNodesValue(route.Upstream.Nodes)
 	return &normalized
 }
 
