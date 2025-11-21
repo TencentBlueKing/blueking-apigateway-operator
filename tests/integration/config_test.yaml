@@ -9,7 +9,7 @@ operator:
 dashboard:
   etcd:
     endpoints: "etcd:2379"
-    keyPrefix: "/bk-gateway-apigw/default"
+    keyPrefix: "/bk-gateway-apigw"
     username: ""
     password: ""
 

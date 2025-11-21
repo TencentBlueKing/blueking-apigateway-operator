@@ -21,32 +21,15 @@ package schema
 import (
 	_ "embed"
 	"strings"
-	"sync"
 
 	"github.com/tidwall/gjson"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 )
 
-// 内置的插件映射，这些插件无需进行schema校验
-var (
-	innerPluginsMap     map[string]bool
-	innerPluginsMapOnce sync.Once
-)
-
-// InitInnerPlugins 初始化内置插件映射
-func InitInnerPlugins(plugins []string) {
-	innerPluginsMapOnce.Do(func() {
-		innerPluginsMap = make(map[string]bool, len(plugins))
-		for _, plugin := range plugins {
-			innerPluginsMap[plugin] = true
-		}
-	})
-}
-
 // IsInnerPlugin 检查插件是否为内置插件
 func IsInnerPlugin(pluginName string) bool {
-	return strings.HasPrefix(pluginName, "bk_")
+	return strings.HasPrefix(pluginName, "bk-")
 }
 
 //go:embed 3.13/schema.json
