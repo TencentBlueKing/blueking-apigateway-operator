@@ -49,14 +49,10 @@ apisix:
     - "bk-access-token-source"
     # priority: 18730
     - "bk-auth-verify"
-    # priority: 18725
-    - "bk-username-required"
     # priority: 17900
     - "bk-cors"
     # priority: 17700
     - "bk-break-recursive-call"
-    # priority: 17690
-    - "bk-request-body-limit"
     # priority: 17680
     - "bk-auth-validate"
     # priority: 17679
@@ -71,16 +67,10 @@ apisix:
     - "bk-ip-restriction"
     # priority: 17660 (disabled by default)
     - "bk-concurrency-limit"
-    # priority: 17653
-    - "bk-resource-rate-limit"
-    # priority: 17652
-    - "bk-stage-rate-limit"
     # priority: 17651 (not used, but just keep in codebase)
     - "bk-stage-global-rate-limit"
     # priority: 17640
     - "bk-permission"
-    # priority: 17460
-    - "bk-traffic-label"
     # priority: 17450
     - "bk-delete-sensitive"
     # priority: 17440
@@ -89,21 +79,12 @@ apisix:
     - "bk-proxy-rewrite"
     # priority: 17425
     - "bk-default-tenant"
-    # priority: 17421
-    - "bk-stage-header-rewrite"
-    # priority: 17420
-    - "bk-resource-header-rewrite"
-    # priority: 17150
-    - "bk-mock"
-    # priority: 153
-    - "bk-response-check"
     # priority: 145
     - "bk-debug"
     # priority: 0
     - "bk-error-wrapper"
     - "bk-repl-debugger"
-    # 其他内置插件
-    - "prometheus"
+
   virtualStage:
     extraApisixResources: "/data/config/extra-resources.yaml"
 
