@@ -39,6 +39,7 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/eventreporter"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/trace"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils/schema"
 )
 
 var (
@@ -123,6 +124,8 @@ func gracefulShutdown(shutdownHookFuncOptions ...func()) {
 func preRun(cmd *cobra.Command, args []string) {
 	cmd.ParseFlags(args)
 	initConfig()
+	// init schema inner plugins
+	schema.InitInnerPlugins(globalConfig.Apisix.InnerPlugins)
 	initSentry()
 	initLog()
 	initClient()

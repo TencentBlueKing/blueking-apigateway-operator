@@ -20,6 +20,7 @@ package schema
 
 import (
 	_ "embed"
+	"sync"
 
 	"github.com/tidwall/gjson"
 
@@ -27,33 +28,27 @@ import (
 )
 
 // 内置的插件映射，这些插件无需进行schema校验
-var innerPluginsMap = map[string]bool{
-	"bk-jwt":                   true,
-	"bk-debug":                 true,
-	"bk-real-ip":               true,
-	"prometheus":               true,
-	"file-logger":              true,
-	"bk-permission":            true,
-	"bk-request-id":            true,
-	"bk-auth-verify":           true,
-	"bk-log-context":           true,
-	"bk-auth-validate":         true,
-	"bk-delete-cookie":         true,
-	"bk-error-wrapper":         true,
-	"bk-stage-context":         true,
-	"bk-default-tenant":        true,
-	"bk-response-check":        true,
-	"bk-backend-context":       true,
-	"bk-delete-sensitive":      true,
-	"bk-break-recursive-call":  true,
-	"bk-proxy-rewrite":         true,
-	"bk-status-rewrite":        true,
-	"bk-resource-context":      true,
-	"bk-concurrency-limit":     true,
-	"bk-opentelemetry":         true,
-	"bk-username-require":      true,
-	"stage-rate-limit":         true,
-	"bk-legacy-invalid-params": true,
+var (
+	innerPluginsMap     map[string]bool
+	innerPluginsMapOnce sync.Once
+)
+
+// InitInnerPlugins 初始化内置插件映射
+func InitInnerPlugins(plugins []string) {
+	innerPluginsMapOnce.Do(func() {
+		innerPluginsMap = make(map[string]bool, len(plugins))
+		for _, plugin := range plugins {
+			innerPluginsMap[plugin] = true
+		}
+	})
+}
+
+// IsInnerPlugin 检查插件是否为内置插件
+func IsInnerPlugin(pluginName string) bool {
+	if innerPluginsMap == nil {
+		return false
+	}
+	return innerPluginsMap[pluginName]
 }
 
 //go:embed 3.13/schema.json

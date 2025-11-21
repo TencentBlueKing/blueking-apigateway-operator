@@ -120,5 +120,6 @@ const (
 
 	SyncSleepSeconds = 5 * time.Second
 
+	// StatusEnable apisix资源启用状态,不能修改
 	StatusEnable = 1
 )

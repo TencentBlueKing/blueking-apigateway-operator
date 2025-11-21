@@ -446,7 +446,7 @@ func (v *APISIXJsonSchemaValidator) Validate(rawConfig json.RawMessage) error { 
 
 	for pluginName, pluginConf := range plugins {
 		// 如果是内置插件，直接跳过校验
-		if innerPluginsMap[pluginName] {
+		if IsInnerPlugin(pluginName) {
 			continue
 		}
 		var schemaMap map[string]any

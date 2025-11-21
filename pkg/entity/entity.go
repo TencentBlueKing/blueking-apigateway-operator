@@ -42,7 +42,7 @@ type ApisixResource interface {
 type ApisixStageResource struct {
 	Routes   map[string]*Route   `json:"routes,omitempty"  yaml:"routes"`
 	Services map[string]*Service `json:"services,omitempty" yaml:"services"`
-	SSLs     map[string]*SSL     `json:"ssls,omitempty" yaml:"SSLs"`
+	SSLs     map[string]*SSL     `json:"ssls,omitempty" yaml:"ssls"`
 }
 
 type ExtraApisixStageResource struct {
@@ -268,7 +268,7 @@ func (p *PluginMetadataConf) MarshalJSON() ([]byte, error) {
 
 // ServerInfo ...
 type ServerInfo struct {
-	ResourceMetadata `yaml:",inline" json:",inline"`
+	ResourceMetadata `yaml:",inline"`
 	LastReportTime   int64  `json:"last_report_time,omitempty" yaml:"last_report_time"`
 	UpTime           int64  `json:"up_time,omitempty" yaml:"up_time"`
 	BootTime         int64  `json:"boot_time,omitempty" yaml:"boot_time"`
@@ -346,7 +346,7 @@ type ResourceMetadata struct {
 	Name          string                  `json:"name,omitempty" yaml:"name"`
 	RetryCount    int64                   `json:"-" yaml:"-"`
 	Ctx           context.Context         `json:"-" yaml:"-"`
-	ApisixVersion string                  `json:"apisix_version,omitempty" yaml:"apisixVersion"`
+	ApisixVersion string                  `json:"apisix_version,omitempty" yaml:"apisix_version"`
 }
 
 // GetReleaseInfo returns the ReleaseInfo for the resource
