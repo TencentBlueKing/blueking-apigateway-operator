@@ -41,4 +41,4 @@ type ApigwListResourceCountResponse struct {
 }
 
 // ApigwListCurrentVersionInfoResponse apigw 环境发布版本信息
-type ApigwListCurrentVersionInfoResponse map[string]interface{}
+type ApigwListCurrentVersionInfoResponse map[string]any

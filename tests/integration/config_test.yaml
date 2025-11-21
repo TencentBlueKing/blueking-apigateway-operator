@@ -1,10 +1,6 @@
 debug: true
 
 operator:
-  withKube: false
-  withLeader: true
-  agentMode: true
-
   defaultGateway: "bk-default"
   defaultStage: "default"
   #write apisix etcd interval
@@ -13,7 +9,7 @@ operator:
 dashboard:
   etcd:
     endpoints: "etcd:2379"
-    keyPrefix: "/bk-gateway-apigw/default"
+    keyPrefix: "/bk-gateway-apigw"
     username: ""
     password: ""
 
@@ -23,7 +19,6 @@ apisix:
     keyPrefix: "/bk-gateway-apisix"
     username: ""
     password: ""
-  resourceStoreMode: "etcd"
   virtualStage:
     extraApisixResources: "/data/config/extra-resources.yaml"
 
@@ -49,7 +44,7 @@ httpServer:
   bindAddressV6: "[::]"
   bindPort: 6004
 # The authentication pwd used to access the API
-  authPassword: DebugModel@bk
+  authPassword: "xxxxx"
 
 logger:
   default:

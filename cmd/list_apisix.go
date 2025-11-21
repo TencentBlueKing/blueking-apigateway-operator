@@ -151,7 +151,7 @@ func (l *listApisixCommand) formatOutput(apisixListInfo client.ApisixListInfo, f
 	return nil
 }
 
-func (l *listApisixCommand) printResource(typeName string, fields map[string]interface{}) {
+func (l *listApisixCommand) printResource(typeName string, fields map[string]any) {
 	fmt.Printf("\t%s:\n", typeName)
 	if fields == nil {
 		return

@@ -78,7 +78,7 @@ func InitResourceClient(cfg *config.Config) {
 }
 
 // NewResourceClient New resource client with host and apiKey
-func NewResourceClient(host string, apiKey string) *ResourceClient {
+func NewResourceClient(host, apiKey string) *ResourceClient {
 	cli := gentleman.New()
 	cli.URL(host)
 	// set auth

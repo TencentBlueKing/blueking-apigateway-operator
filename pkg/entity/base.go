@@ -26,30 +26,30 @@ type GetBaseInfo interface {
 
 // GetPlugins 获取插件
 type GetPlugins interface {
-	GetPlugins() map[string]interface{}
+	GetPlugins() map[string]any
 }
 
 // GetPlugins 获取插件
-func (r *Route) GetPlugins() map[string]interface{} {
+func (r *Route) GetPlugins() map[string]any {
 	return r.Plugins
 }
 
 // GetPlugins 获取插件
-func (s *Service) GetPlugins() map[string]interface{} {
+func (s *Service) GetPlugins() map[string]any {
 	return s.Plugins
 }
 
 // GetPlugins 获取插件
-func (c *Consumer) GetPlugins() map[string]interface{} {
+func (c *Consumer) GetPlugins() map[string]any {
 	return c.Plugins
 }
 
 // GetPlugins 获取插件
-func (g *GlobalRule) GetPlugins() map[string]interface{} {
+func (g *GlobalRule) GetPlugins() map[string]any {
 	return g.Plugins
 }
 
 // GetPlugins 获取插件
-func (p *PluginConfig) GetPlugins() map[string]interface{} {
+func (p *PluginConfig) GetPlugins() map[string]any {
 	return p.Plugins
 }

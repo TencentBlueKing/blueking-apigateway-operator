@@ -48,12 +48,22 @@ func (r *ResourceHandler) ApisixList(c *gin.Context) {
 			req.Resource.ID,
 		)
 		if err != nil {
-			utils.BaseErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("apisix list err:%+v", err.Error()), http.StatusOK)
+			utils.BaseErrorJSONResponse(
+				c,
+				utils.SystemError,
+				fmt.Sprintf("apisix list err:%+v", err.Error()),
+				http.StatusOK,
+			)
 			return
 		}
 		by, err := json.Marshal(apisixResource)
 		if err != nil {
-			utils.BaseErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("apisix list err:%+v", err.Error()), http.StatusOK)
+			utils.BaseErrorJSONResponse(
+				c,
+				utils.SystemError,
+				fmt.Sprintf("apisix list err:%+v", err.Error()),
+				http.StatusOK,
+			)
 			return
 		}
 		_ = json.Unmarshal(by, &resp)
@@ -63,7 +73,12 @@ func (r *ResourceHandler) ApisixList(c *gin.Context) {
 	apisixList := biz.ListApisixResources(r.apisixEtcdStore, req.GatewayName, req.StageName)
 	by, err := json.Marshal(apisixList)
 	if err != nil {
-		utils.BaseErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("apisix list err:%+v", err.Error()), http.StatusOK)
+		utils.BaseErrorJSONResponse(
+			c,
+			utils.SystemError,
+			fmt.Sprintf("apisix list err:%+v", err.Error()),
+			http.StatusOK,
+		)
 		return
 	}
 	_ = json.Unmarshal(by, &resp)
@@ -79,7 +94,12 @@ func (r *ResourceHandler) ApisixStageResourceCount(c *gin.Context) {
 	}
 	count, err := biz.GetApisixResourceCount(r.apisixEtcdStore, req.GatewayName, req.StageName)
 	if err != nil {
-		utils.BaseErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("apisix count:%+v", err.Error()), http.StatusOK)
+		utils.BaseErrorJSONResponse(
+			c,
+			utils.SystemError,
+			fmt.Sprintf("apisix count:%+v", err.Error()),
+			http.StatusOK,
+		)
 		return
 	}
 	output := serializer.ApisixListResourceCountResponse{Count: count}
@@ -95,7 +115,12 @@ func (r *ResourceHandler) ApisixStageCurrentVersion(c *gin.Context) {
 	}
 	versionInfo, err := biz.GetApisixStageCurrentVersionInfo(r.apisixEtcdStore, req.GatewayName, req.StageName)
 	if err != nil {
-		utils.BaseErrorJSONResponse(c, utils.SystemError, fmt.Sprintf("apisix version:%+v", err.Error()), http.StatusOK)
+		utils.BaseErrorJSONResponse(
+			c,
+			utils.SystemError,
+			fmt.Sprintf("apisix version:%+v", err.Error()),
+			http.StatusOK,
+		)
 		return
 	}
 	output := serializer.ApisixListCurrentVersionInfoResponse(versionInfo)

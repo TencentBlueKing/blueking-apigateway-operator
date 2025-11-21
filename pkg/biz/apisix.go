@@ -98,7 +98,7 @@ func GetApisixStageCurrentVersionInfo(
 	store *store.ApisixEtcdStore,
 	gatewayName string,
 	stageName string,
-) (map[string]interface{}, error) {
+) (map[string]any, error) {
 	stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
 	apisixResources := store.Get(stageKey)
 
@@ -109,12 +109,12 @@ func GetApisixStageCurrentVersionInfo(
 	}
 
 	for _, plugin := range route.Plugins {
-		pluginData := plugin.(map[string]interface{})
+		pluginData := plugin.(map[string]any)
 		responseExample := pluginData["response_example"].(string)
 		if responseExample == "" {
 			continue
 		}
-		versionInfo := make(map[string]interface{})
+		versionInfo := make(map[string]any)
 		err := json.Unmarshal([]byte(responseExample), &versionInfo)
 		if err != nil {
 			return nil, errors.New("current-version unmarshal error: " + err.Error())

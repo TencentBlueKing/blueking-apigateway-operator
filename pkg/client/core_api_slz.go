@@ -25,11 +25,11 @@ import (
 
 // ReportEventReq add event request
 type ReportEventReq struct {
-	PublishID     string                 `json:"-"`
-	BkGatewayName string                 `json:"bk_gateway_name"`
-	BkStageName   string                 `json:"bk_stage_name"`
-	Name          constant.EventName     `json:"name"`
-	Status        constant.EventStatus   `json:"status"`
-	Detail        map[string]interface{} `json:"detail"`
-	Ts            int64                  `json:"ts"`
+	PublishID     string               `json:"-"`
+	BkGatewayName string               `json:"bk_gateway_name"`
+	BkStageName   string               `json:"bk_stage_name"`
+	Name          constant.EventName   `json:"name"`
+	Status        constant.EventStatus `json:"status"`
+	Detail        map[string]any       `json:"detail"`
+	Ts            int64                `json:"ts"`
 }

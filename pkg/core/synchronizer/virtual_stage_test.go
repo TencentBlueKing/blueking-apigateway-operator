@@ -104,7 +104,7 @@ var _ = Describe("VirtualStage", func() {
 				route := configuration.Routes[HealthZRouteIDOuter]
 				checkMetadata(route.ResourceMetadata)
 
-				Expect(route.URI).To(Equal(apisixHealthzURI))
+				Expect(route.Uris).To(ContainElement(apisixHealthzURI))
 				Expect(route.Priority).To(Equal(-100))
 				Expect(route.Methods).To(ContainElement("GET"))
 				Expect(route.Status).To(Equal(entity.Status(1)))
@@ -146,10 +146,25 @@ var _ = Describe("VirtualStage", func() {
 			})
 
 			writeExtraConfiguration := func() {
-				buf := &bytes.Buffer{}
+				// 将 ApisixStageResource (map) 转换为 ExtraApisixStageResource (slice)
+				extraConfig := &entity.ExtraApisixStageResource{
+					Routes:   make([]*entity.Route, 0, len(extraConfiguration.Routes)),
+					Services: make([]*entity.Service, 0, len(extraConfiguration.Services)),
+					SSLs:     make([]*entity.SSL, 0, len(extraConfiguration.SSLs)),
+				}
+				for _, route := range extraConfiguration.Routes {
+					extraConfig.Routes = append(extraConfig.Routes, route)
+				}
+				for _, service := range extraConfiguration.Services {
+					extraConfig.Services = append(extraConfig.Services, service)
+				}
+				for _, ssl := range extraConfiguration.SSLs {
+					extraConfig.SSLs = append(extraConfig.SSLs, ssl)
+				}
 
+				buf := &bytes.Buffer{}
 				encoder := yaml.NewEncoder(buf)
-				Expect(encoder.Encode(extraConfiguration)).To(BeNil())
+				Expect(encoder.Encode(extraConfig)).To(BeNil())
 
 				Expect(os.WriteFile(extraPath, buf.Bytes(), 0o644)).To(BeNil())
 			}

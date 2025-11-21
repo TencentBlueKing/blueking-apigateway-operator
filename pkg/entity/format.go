@@ -62,7 +62,7 @@ func mapKV2Node(key string, val float64) (*Node, error) {
 }
 
 // NodesFormat convert obj to []*Node
-func NodesFormat(obj interface{}) interface{} {
+func NodesFormat(obj any) any {
 	nodes := make([]*Node, 0)
 	switch objType := obj.(type) {
 	case map[string]float64:
@@ -76,9 +76,9 @@ func NodesFormat(obj interface{}) interface{} {
 			nodes = append(nodes, node)
 		}
 		return nodes
-	case map[string]interface{}:
+	case map[string]any:
 		log.Infof("nodes type: %v", objType)
-		value := obj.(map[string]interface{})
+		value := obj.(map[string]any)
 		for key, val := range value {
 			node, err := mapKV2Node(key, val.(float64))
 			if err != nil {
@@ -90,11 +90,11 @@ func NodesFormat(obj interface{}) interface{} {
 	case []*Node:
 		log.Infof("nodes type: %v", objType)
 		return obj
-	case []interface{}:
+	case []any:
 		log.Infof("nodes type []interface{}: %v", objType)
-		list := obj.([]interface{})
+		list := obj.([]any)
 		for _, v := range list {
-			val := v.(map[string]interface{})
+			val := v.(map[string]any)
 			node := &Node{
 				Host:   val["host"].(string),
 				Port:   int(val["port"].(float64)),
@@ -105,7 +105,7 @@ func NodesFormat(obj interface{}) interface{} {
 			}
 
 			if _, ok := val["metadata"]; ok {
-				node.Metadata = val["metadata"].(map[string]interface{})
+				node.Metadata = val["metadata"].(map[string]any)
 			}
 
 			nodes = append(nodes, node)

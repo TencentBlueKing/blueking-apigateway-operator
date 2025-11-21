@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   etcd:
-    image: docker.io/bitnami/etcd:3.5
+    image: bitnamilegacy/etcd:3.5.9-debian-11-r99
     environment:
       - ALLOW_NONE_AUTHENTICATION=yes
     ports:

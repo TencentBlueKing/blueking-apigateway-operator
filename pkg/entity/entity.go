@@ -40,9 +40,15 @@ type ApisixResource interface {
 
 // ApisixStageResource 网关环境资源配置
 type ApisixStageResource struct {
-	Routes   map[string]*Route   `json:"routes,omitempty"`
-	Services map[string]*Service `json:"services,omitempty"`
-	SSLs     map[string]*SSL     `json:"ssls,omitempty"`
+	Routes   map[string]*Route   `json:"routes,omitempty"  yaml:"routes"`
+	Services map[string]*Service `json:"services,omitempty" yaml:"services"`
+	SSLs     map[string]*SSL     `json:"ssls,omitempty" yaml:"ssls"`
+}
+
+type ExtraApisixStageResource struct {
+	Routes   []*Route   `json:"routes,omitempty" yaml:"routes"`
+	Services []*Service `json:"services,omitempty" yaml:"services"`
+	SSLs     []*SSL     `json:"ssls,omitempty" yaml:"ssls"`
 }
 
 // NewEmptyApisixConfiguration will build a new apisix configuration object
@@ -71,81 +77,81 @@ type Status uint8
 
 // Route ...
 type Route struct {
-	ResourceMetadata
-	URI             string                 `json:"uri,omitempty"`
-	Uris            []string               `json:"uris,omitempty"`
-	Priority        int                    `json:"priority,omitempty"`
-	Methods         []string               `json:"methods,omitempty"`
-	Host            string                 `json:"host,omitempty"`
-	Hosts           []string               `json:"hosts,omitempty"`
-	RemoteAddr      string                 `json:"remote_addr,omitempty"`
-	RemoteAddrs     []string               `json:"remote_addrs,omitempty"`
-	Vars            []interface{}          `json:"vars,omitempty"`
-	FilterFunc      string                 `json:"filter_func,omitempty"`
-	Script          interface{}            `json:"script,omitempty"`
-	ScriptID        interface{}            `json:"script_id,omitempty"`
-	Plugins         map[string]interface{} `json:"plugins,omitempty"`
-	PluginConfigID  interface{}            `json:"plugin_config_id,omitempty"`
-	Upstream        *UpstreamDef           `json:"upstream,omitempty"`
-	ServiceID       interface{}            `json:"service_id,omitempty"`
-	UpstreamID      interface{}            `json:"upstream_id,omitempty"`
-	ServiceProtocol string                 `json:"service_protocol,omitempty"`
-	EnableWebsocket bool                   `json:"enable_websocket,omitempty"`
-	Status          Status                 `json:"status"`
+	ResourceMetadata `yaml:",inline"`
+	URI              string         `json:"uri,omitempty" yaml:"uri"`
+	Uris             []string       `json:"uris,omitempty" yaml:"uris"`
+	Priority         int            `json:"priority,omitempty" yaml:"priority"`
+	Methods          []string       `json:"methods,omitempty" yaml:"methods"`
+	Host             string         `json:"host,omitempty" yaml:"host"`
+	Hosts            []string       `json:"hosts,omitempty" yaml:"hosts"`
+	RemoteAddr       string         `json:"remote_addr,omitempty" yaml:"remote_addr"`
+	RemoteAddrs      []string       `json:"remote_addrs,omitempty" yaml:"remote_addrs"`
+	Vars             []any          `json:"vars,omitempty" yaml:"vars"`
+	FilterFunc       string         `json:"filter_func,omitempty" yaml:"filter_func"`
+	Script           any            `json:"script,omitempty" yaml:"script"`
+	ScriptID         any            `json:"script_id,omitempty" yaml:"script_id"`
+	Plugins          map[string]any `json:"plugins,omitempty" yaml:"plugins"`
+	PluginConfigID   any            `json:"plugin_config_id,omitempty" yaml:"plugin_config_id"`
+	Upstream         *UpstreamDef   `json:"upstream,omitempty" yaml:"upstream"`
+	ServiceID        any            `json:"service_id,omitempty" yaml:"service_id"`
+	UpstreamID       any            `json:"upstream_id,omitempty" yaml:"upstream_id"`
+	ServiceProtocol  string         `json:"service_protocol,omitempty" yaml:"service_protocol"`
+	EnableWebsocket  bool           `json:"enable_websocket,omitempty" yaml:"enable_websocket"`
+	Status           Status         `json:"status" yaml:"status"`
 }
 
 // TimeoutValue ...
 type (
 	TimeoutValue float32
 	Timeout      struct {
-		Connect TimeoutValue `json:"connect,omitempty"`
-		Send    TimeoutValue `json:"send,omitempty"`
-		Read    TimeoutValue `json:"read,omitempty"`
+		Connect TimeoutValue `json:"connect,omitempty" yaml:"connect"`
+		Send    TimeoutValue `json:"send,omitempty" yaml:"send"`
+		Read    TimeoutValue `json:"read,omitempty" yaml:"read"`
 	}
 )
 
 // Node ...
 type Node struct {
-	Host     string      `json:"host,omitempty"`
-	Port     int         `json:"port,omitempty"`
-	Weight   int         `json:"weight"`
-	Metadata interface{} `json:"metadata,omitempty"`
-	Priority int         `json:"priority,omitempty"`
+	Host     string `json:"host,omitempty" yaml:"host"`
+	Port     int    `json:"port,omitempty" yaml:"port"`
+	Weight   int    `json:"weight" yaml:"weight"`
+	Metadata any    `json:"metadata,omitempty" yaml:"metadata"`
+	Priority int    `json:"priority,omitempty" yaml:"priority"`
 }
 
 // Healthy ...
 type Healthy struct {
-	Interval     int   `json:"interval,omitempty"`
-	HttpStatuses []int `json:"http_statuses,omitempty"`
-	Successes    int   `json:"successes,omitempty"`
+	Interval     int   `json:"interval,omitempty" yaml:"interval"`
+	HttpStatuses []int `json:"http_statuses,omitempty" yaml:"http_statuses"`
+	Successes    int   `json:"successes,omitempty" yaml:"successes"`
 }
 
 // UnHealthy ...
 type UnHealthy struct {
-	Interval     int   `json:"interval,omitempty"`
-	HTTPStatuses []int `json:"http_statuses,omitempty"`
-	TCPFailures  int   `json:"tcp_failures,omitempty"`
-	Timeouts     int   `json:"timeouts,omitempty"`
-	HTTPFailures int   `json:"http_failures,omitempty"`
+	Interval     int   `json:"interval,omitempty" yaml:"interval"`
+	HTTPStatuses []int `json:"http_statuses,omitempty" yaml:"http_statuses"`
+	TCPFailures  int   `json:"tcp_failures,omitempty" yaml:"tcp_failures"`
+	Timeouts     int   `json:"timeouts,omitempty" yaml:"timeouts"`
+	HTTPFailures int   `json:"http_failures,omitempty" yaml:"http_failures"`
 }
 
 // Active ...
 type Active struct {
-	Type                   string       `json:"type,omitempty"`
-	Timeout                TimeoutValue `json:"timeout,omitempty"`
-	Concurrency            int          `json:"concurrency,omitempty"`
-	Host                   string       `json:"host,omitempty"`
-	Port                   int          `json:"port,omitempty"`
-	HTTPPath               string       `json:"http_path,omitempty"`
-	HTTPSVerifyCertificate bool         `json:"https_verify_certificate,omitempty"`
-	Healthy                Healthy      `json:"healthy,omitempty"`
-	UnHealthy              UnHealthy    `json:"unhealthy,omitempty"`
-	ReqHeaders             []string     `json:"req_headers,omitempty"`
+	Type                   string       `json:"type,omitempty" yaml:"type"`
+	Timeout                TimeoutValue `json:"timeout,omitempty" yaml:"timeout"`
+	Concurrency            int          `json:"concurrency,omitempty" yaml:"concurrency"`
+	Host                   string       `json:"host,omitempty" yaml:"host"`
+	Port                   int          `json:"port,omitempty" yaml:"port"`
+	HTTPPath               string       `json:"http_path,omitempty" yaml:"http_path"`
+	HTTPSVerifyCertificate bool         `json:"https_verify_certificate,omitempty" yaml:"https_verify_certificate"`
+	Healthy                Healthy      `json:"healthy,omitempty" yaml:"healthy"`
+	UnHealthy              UnHealthy    `json:"unhealthy,omitempty" yaml:"unhealthy"`
+	ReqHeaders             []string     `json:"req_headers,omitempty" yaml:"req_headers"`
 }
 
 // Passive ...
 type Passive struct {
-	Type      string    `json:"type,omitempty"`
+	Type      string    `json:"type,omitempty" yaml:"type"`
 	Healthy   Healthy   `json:"healthy,omitempty"`
 	UnHealthy UnHealthy `json:"unhealthy,omitempty"`
 }
@@ -172,63 +178,63 @@ type UpstreamKeepalivePool struct {
 
 // UpstreamDef ...
 type UpstreamDef struct {
-	ResourceMetadata
-	Nodes         interface{}            `json:"nodes,omitempty"`
-	Retries       *int                   `json:"retries,omitempty"`
-	Timeout       *Timeout               `json:"timeout,omitempty"`
-	Type          string                 `json:"type,omitempty"`
-	Checks        interface{}            `json:"checks,omitempty"`
-	HashOn        string                 `json:"hash_on,omitempty"`
-	Key           string                 `json:"key,omitempty"`
-	Scheme        string                 `json:"scheme,omitempty"`
-	DiscoveryType string                 `json:"discovery_type,omitempty"`
-	DiscoveryArgs map[string]interface{} `json:"discovery_args,omitempty"`
-	PassHost      string                 `json:"pass_host,omitempty"`
-	UpstreamHost  string                 `json:"upstream_host,omitempty"`
-	ServiceName   string                 `json:"service_name,omitempty"`
-	TLS           *UpstreamTLS           `json:"tls,omitempty"`
-	KeepalivePool *UpstreamKeepalivePool `json:"keepalive_pool,omitempty"`
-	RetryTimeout  TimeoutValue           `json:"retry_timeout,omitempty"`
+	ResourceMetadata `yaml:",inline"`
+	Nodes            any                    `json:"nodes,omitempty" yaml:"nodes"`
+	Retries          *int                   `json:"retries,omitempty" yaml:"retries"`
+	Timeout          *Timeout               `json:"timeout,omitempty" yaml:"timeout"`
+	Type             string                 `json:"type,omitempty" yaml:"type"`
+	Checks           any                    `json:"checks,omitempty" yaml:"checks"`
+	HashOn           string                 `json:"hash_on,omitempty" yaml:"hash_on"`
+	Key              string                 `json:"key,omitempty" yaml:"key"`
+	Scheme           string                 `json:"scheme,omitempty" yaml:"scheme"`
+	DiscoveryType    string                 `json:"discovery_type,omitempty" yaml:"discovery_type"`
+	DiscoveryArgs    map[string]any         `json:"discovery_args,omitempty" yaml:"discovery_args"`
+	PassHost         string                 `json:"pass_host,omitempty" yaml:"pass_host"`
+	UpstreamHost     string                 `json:"upstream_host,omitempty" yaml:"upstream_host"`
+	ServiceName      string                 `json:"service_name,omitempty" yaml:"service_name"`
+	TLS              *UpstreamTLS           `json:"tls,omitempty" yaml:"tls"`
+	KeepalivePool    *UpstreamKeepalivePool `json:"keepalive_pool,omitempty" yaml:"keepalive_pool"`
+	RetryTimeout     TimeoutValue           `json:"retry_timeout,omitempty" yaml:"retry_timeout"`
 }
 
 // Upstream ...
 type Upstream struct {
-	UpstreamDef
+	UpstreamDef `yaml:",inline"`
 }
 
 // Consumer ...
 type Consumer struct {
-	Username string                 `json:"username"`
-	Desc     string                 `json:"desc,omitempty"`
-	Plugins  map[string]interface{} `json:"plugins,omitempty"`
-	Labels   map[string]string      `json:"labels,omitempty"`
-	GroupID  string                 `json:"group_id,omitempty"`
+	Username string            `json:"username"`
+	Desc     string            `json:"desc,omitempty"`
+	Plugins  map[string]any    `json:"plugins,omitempty"`
+	Labels   map[string]string `json:"labels,omitempty"`
+	GroupID  string            `json:"group_id,omitempty"`
 }
 
 // ConsumerGroup ...
 type ConsumerGroup struct {
-	Desc       string                 `json:"desc,omitempty"`
-	Plugins    map[string]interface{} `json:"plugins,omitempty"`
-	Labels     map[string]string      `json:"labels,omitempty"`
-	CreateTime int64                  `json:"create_time,omitempty"`
-	UpdateTime int64                  `json:"update_time,omitempty"`
+	Desc       string            `json:"desc,omitempty"`
+	Plugins    map[string]any    `json:"plugins,omitempty"`
+	Labels     map[string]string `json:"labels,omitempty"`
+	CreateTime int64             `json:"create_time,omitempty"`
+	UpdateTime int64             `json:"update_time,omitempty"`
 }
 
 // Service ...
 type Service struct {
-	ResourceMetadata
-	Upstream        *UpstreamDef           `json:"upstream,omitempty"`
-	UpstreamID      interface{}            `json:"upstream_id,omitempty"`
-	Plugins         map[string]interface{} `json:"plugins,omitempty"`
-	Script          string                 `json:"script,omitempty"`
-	EnableWebsocket bool                   `json:"enable_websocket,omitempty"`
-	Hosts           []string               `json:"hosts,omitempty"`
+	ResourceMetadata `yaml:",inline"`
+	Upstream         *UpstreamDef   `json:"upstream,omitempty" yaml:"upstream"`
+	UpstreamID       any            `json:"upstream_id,omitempty" yaml:"upstream_id"`
+	Plugins          map[string]any `json:"plugins,omitempty" yaml:"plugins"`
+	Script           string         `json:"script,omitempty" yaml:"script"`
+	EnableWebsocket  bool           `json:"enable_websocket,omitempty" yaml:"enable_websocket"`
+	Hosts            []string       `json:"hosts,omitempty" yaml:"hosts"`
 }
 
 // GlobalRule ...
 type GlobalRule struct {
-	ResourceMetadata
-	Plugins map[string]interface{} `json:"plugins"`
+	ResourceMetadata `yaml:",inline"`
+	Plugins          map[string]any `json:"plugins" yaml:"plugins"`
 }
 
 // PluginMetadataConf ...
@@ -262,45 +268,45 @@ func (p *PluginMetadataConf) MarshalJSON() ([]byte, error) {
 
 // ServerInfo ...
 type ServerInfo struct {
-	ResourceMetadata
-	LastReportTime int64  `json:"last_report_time,omitempty"`
-	UpTime         int64  `json:"up_time,omitempty"`
-	BootTime       int64  `json:"boot_time,omitempty"`
-	EtcdVersion    string `json:"etcd_version,omitempty"`
-	Hostname       string `json:"hostname,omitempty"`
-	Version        string `json:"version,omitempty"`
+	ResourceMetadata `yaml:",inline"`
+	LastReportTime   int64  `json:"last_report_time,omitempty" yaml:"last_report_time"`
+	UpTime           int64  `json:"up_time,omitempty" yaml:"up_time"`
+	BootTime         int64  `json:"boot_time,omitempty" yaml:"boot_time"`
+	EtcdVersion      string `json:"etcd_version,omitempty" yaml:"etcd_version"`
+	Hostname         string `json:"hostname,omitempty" yaml:"hostname"`
+	Version          string `json:"version,omitempty" yaml:"version"`
 }
 
 // PluginConfig ...
 type PluginConfig struct {
 	ResourceMetadata
-	Desc    string                 `json:"desc,omitempty"`
-	Plugins map[string]interface{} `json:"plugins"`
+	Desc    string         `json:"desc,omitempty"`
+	Plugins map[string]any `json:"plugins"`
 }
 
 // SSLClient ...
 type SSLClient struct {
-	CA               string   `json:"ca,omitempty"`
-	Depth            int      `json:"depth,omitempty"`
-	SkipMtlsUriRegex []string `json:"skip_mtls_uri_regex,omitempty"`
+	CA               string   `json:"ca,omitempty" yaml:"ca"`
+	Depth            int      `json:"depth,omitempty" yaml:"depth"`
+	SkipMtlsUriRegex []string `json:"skip_mtls_uri_regex,omitempty" yaml:"skip_mtls_uri_regex"`
 }
 
 // SSL ...
 type SSL struct {
-	ResourceMetadata
-	Cert          string     `json:"cert,omitempty"`
-	Key           string     `json:"key,omitempty"`
-	Sni           string     `json:"sni,omitempty"`
-	Snis          []string   `json:"snis,omitempty"`
-	Certs         []string   `json:"certs,omitempty"`
-	Type          string     `json:"type,omitempty"`
-	Keys          []string   `json:"keys,omitempty"`
-	ExpTime       int64      `json:"exptime,omitempty"`
-	Status        int        `json:"status"`
-	ValidityStart int64      `json:"validity_start,omitempty"`
-	ValidityEnd   int64      `json:"validity_end,omitempty"`
-	Client        *SSLClient `json:"client,omitempty"`
-	SSLProtocols  []string   `json:"ssl_protocols,omitempty"`
+	ResourceMetadata `yaml:",inline"`
+	Cert             string     `json:"cert,omitempty" yaml:"cert"`
+	Key              string     `json:"key,omitempty" yaml:"key"`
+	Sni              string     `json:"sni,omitempty" yaml:"sni"`
+	Snis             []string   `json:"snis,omitempty" yaml:"snis"`
+	Certs            []string   `json:"certs,omitempty" yaml:"certs"`
+	Type             string     `json:"type,omitempty" yaml:"type"`
+	Keys             []string   `json:"keys,omitempty" yaml:"keys"`
+	ExpTime          int64      `json:"exptime,omitempty" yaml:"exptime"`
+	Status           int        `json:"status" yaml:"status"`
+	ValidityStart    int64      `json:"validity_start,omitempty" yaml:"validity_start"`
+	ValidityEnd      int64      `json:"validity_end,omitempty" yaml:"validity_end"`
+	Client           *SSLClient `json:"client,omitempty" yaml:"client"`
+	SSLProtocols     []string   `json:"ssl_protocols,omitempty" yaml:"ssl_protocols"`
 }
 
 // Proto ...
@@ -312,35 +318,35 @@ type Proto struct {
 
 // StreamRouteProtocol ...
 type StreamRouteProtocol struct {
-	Name string                 `json:"name,omitempty"`
-	Conf map[string]interface{} `json:"conf,omitempty"`
+	Name string         `json:"name,omitempty"`
+	Conf map[string]any `json:"conf,omitempty"`
 }
 
 // StreamRoute ...
 type StreamRoute struct {
 	ResourceMetadata
-	RemoteAddr string                 `json:"remote_addr,omitempty"`
-	ServerAddr string                 `json:"server_addr,omitempty"`
-	ServerPort int                    `json:"server_port,omitempty"`
-	SNI        string                 `json:"sni,omitempty"`
-	UpstreamID interface{}            `json:"upstream_id,omitempty"`
-	Upstream   *UpstreamDef           `json:"upstream,omitempty"`
-	ServiceID  interface{}            `json:"service_id,omitempty"`
-	Plugins    map[string]interface{} `json:"plugins,omitempty"`
-	Protocol   *StreamRouteProtocol   `json:"protocol,omitempty"`
+	RemoteAddr string               `json:"remote_addr,omitempty" yaml:"remote_addr"`
+	ServerAddr string               `json:"server_addr,omitempty" yaml:"server_addr"`
+	ServerPort int                  `json:"server_port,omitempty" yaml:"server_port"`
+	SNI        string               `json:"sni,omitempty" yaml:"sni"`
+	UpstreamID any                  `json:"upstream_id,omitempty" yaml:"upstream_id"`
+	Upstream   *UpstreamDef         `json:"upstream,omitempty" yaml:"upstream"`
+	ServiceID  any                  `json:"service_id,omitempty" yaml:"service_id"`
+	Plugins    map[string]any       `json:"plugins,omitempty" yaml:"plugins"`
+	Protocol   *StreamRouteProtocol `json:"protocol,omitempty" yaml:"protocol"`
 }
 
 // ResourceMetadata describes the metadata of a resource object, which includes the
 // resource kind and name. It is used by the watch process of the APIGEtcdWWatcher type.
 type ResourceMetadata struct {
-	Labels        LabelInfo               `json:"labels,omitempty"`
-	APIVersion    string                  `json:"-"`
-	ID            string                  `json:"id,omitempty"`
-	Kind          constant.APISIXResource `json:"-"`
-	Name          string                  `json:"name,omitempty"`
-	RetryCount    int64                   `json:"-"`
-	Ctx           context.Context         `json:"-"`
-	ApisixVersion string                  `json:"apisix_version,omitempty"`
+	Labels        LabelInfo               `json:"labels,omitempty" yaml:"labels"`
+	APIVersion    string                  `json:"-" yaml:"-"`
+	ID            string                  `json:"id,omitempty" yaml:"id"`
+	Kind          constant.APISIXResource `json:"-" yaml:"-"`
+	Name          string                  `json:"name,omitempty" yaml:"name"`
+	RetryCount    int64                   `json:"-" yaml:"-"`
+	Ctx           context.Context         `json:"-" yaml:"-"`
+	ApisixVersion string                  `json:"apisix_version,omitempty" yaml:"apisix_version"`
 }
 
 // GetReleaseInfo returns the ReleaseInfo for the resource

@@ -38,13 +38,60 @@ func NewConfigDiffer() *ConfigDiffer {
 	return &ConfigDiffer{}
 }
 
-// transformMap: A separate comparison transformer is needed for map types, as the value is an interface type and there are type inconsistencies with different serialization methods.
+// transformMap: A separate comparison transformer is needed for map types, as the value is an interface type
+// and there are type inconsistencies with different serialization methods.
 // e.g.: value may exist as map[any]any, map[string]any, or map[interface]any.
-func transformMap(mapType map[string]interface{}) map[string]interface{} {
+func transformMap(mapType map[string]any) map[string]any {
 	mapTypeJson, _ := json.Marshal(mapType)
-	var newMap map[string]interface{}
+	var newMap map[string]any
 	_ = json.Unmarshal(mapTypeJson, &newMap)
 	return newMap
+}
+
+// normalizeNodesValue: Normalize Nodes field values through JSON serialization/deserialization
+// This handles type inconsistencies like map[string]any vs map[any]any, and int vs float64
+func normalizeNodesValue(v any) any {
+	if v == nil {
+		return nil
+	}
+	// Serialize to JSON and deserialize back to normalize types
+	jsonBytes, err := json.Marshal(v)
+	if err != nil {
+		return v
+	}
+	var normalized any
+	if err := json.Unmarshal(jsonBytes, &normalized); err != nil {
+		return v
+	}
+	return normalized
+}
+
+// normalizeRouteNodes: Normalize Nodes field in Route's Upstream
+func normalizeRouteNodes(route *entity.Route) *entity.Route {
+	if route == nil || route.Upstream == nil {
+		return route
+	}
+	// Create a copy to avoid modifying the original
+	normalized := *route
+	normalized.Upstream = &entity.UpstreamDef{}
+	*normalized.Upstream = *route.Upstream
+	normalized.Upstream.Nodes = normalizeNodesValue(route.Upstream.Nodes)
+	return &normalized
+}
+
+// normalizeServiceNodes: Normalize Nodes field in Service's Upstream
+func normalizeServiceNodes(service *entity.Service) *entity.Service {
+	if service == nil || service.Upstream == nil {
+		return service
+	}
+	// Create a copy to avoid modifying the original
+	normalized := *service
+	if service.Upstream != nil {
+		normalized.Upstream = &entity.UpstreamDef{}
+		*normalized.Upstream = *service.Upstream
+		normalized.Upstream.Nodes = normalizeNodesValue(service.Upstream.Nodes)
+	}
+	return &normalized
 }
 
 // ignoreApisixMetadata: ignore some members of apisixMetadata
@@ -95,7 +142,7 @@ func (r *CmpReporter) Report(rs cmp.Result) {
 // Diff 对比两个 ApisixStageResource，返回需要 put 和 delete 的资源
 func (d *ConfigDiffer) Diff(
 	old, new *entity.ApisixStageResource,
-) (put *entity.ApisixStageResource, delete *entity.ApisixStageResource) {
+) (put, delete *entity.ApisixStageResource) {
 	if old == nil {
 		return new, nil
 	}
@@ -113,7 +160,7 @@ func (d *ConfigDiffer) Diff(
 // DiffGlobal 对比全局资源配置
 func (d *ConfigDiffer) DiffGlobal(
 	old, new *entity.ApisixGlobalResource,
-) (put *entity.ApisixGlobalResource, delete *entity.ApisixGlobalResource) {
+) (put, delete *entity.ApisixGlobalResource) {
 	if old == nil {
 		return new, nil
 	}
@@ -130,7 +177,7 @@ func (d *ConfigDiffer) DiffGlobal(
 func (d *ConfigDiffer) DiffRoutes(
 	old map[string]*entity.Route,
 	new map[string]*entity.Route,
-) (putList map[string]*entity.Route, deleteList map[string]*entity.Route) {
+) (putList, deleteList map[string]*entity.Route) {
 	oldResMap := make(map[string]*entity.Route)
 	putList = make(map[string]*entity.Route)
 	deleteList = make(map[string]*entity.Route)
@@ -143,9 +190,13 @@ func (d *ConfigDiffer) DiffRoutes(
 			putList[key] = newRes
 			continue
 		}
+
+		// Normalize Nodes fields before comparison
+		normalizedOld := normalizeRouteNodes(oldRes)
+		normalizedNew := normalizeRouteNodes(newRes)
 		if !cmp.Equal(
-			oldRes,
-			newRes,
+			normalizedOld,
+			normalizedNew,
 			cmp.Transformer("transformerMap", transformMap),
 			ignoreApisixMetadataCmpOpt,
 			cmp.Reporter(&CmpReporter{
@@ -168,7 +219,7 @@ func (d *ConfigDiffer) DiffRoutes(
 func (d *ConfigDiffer) DiffServices(
 	old map[string]*entity.Service,
 	new map[string]*entity.Service,
-) (putList map[string]*entity.Service, deleteList map[string]*entity.Service) {
+) (putList, deleteList map[string]*entity.Service) {
 	oldResMap := make(map[string]*entity.Service)
 	putList = make(map[string]*entity.Service)
 	deleteList = make(map[string]*entity.Service)
@@ -181,9 +232,12 @@ func (d *ConfigDiffer) DiffServices(
 			putList[key] = newRes
 			continue
 		}
+		// Normalize Nodes fields before comparison
+		normalizedOld := normalizeServiceNodes(oldRes)
+		normalizedNew := normalizeServiceNodes(newRes)
 		if !cmp.Equal(
-			oldRes,
-			newRes,
+			normalizedOld,
+			normalizedNew,
 			cmp.Transformer("transformerMap", transformMap),
 			ignoreApisixMetadataCmpOpt,
 			cmp.Reporter(&CmpReporter{
@@ -206,7 +260,7 @@ func (d *ConfigDiffer) DiffServices(
 func (d *ConfigDiffer) DiffPluginMetadatas(
 	old map[string]*entity.PluginMetadata,
 	new map[string]*entity.PluginMetadata,
-) (putList map[string]*entity.PluginMetadata, deleteList map[string]*entity.PluginMetadata) {
+) (putList, deleteList map[string]*entity.PluginMetadata) {
 	oldResMap := make(map[string]*entity.PluginMetadata)
 	putList = make(map[string]*entity.PluginMetadata)
 	deleteList = make(map[string]*entity.PluginMetadata)
@@ -237,7 +291,7 @@ func (d *ConfigDiffer) DiffPluginMetadatas(
 func (d *ConfigDiffer) DiffSSLs(
 	old map[string]*entity.SSL,
 	new map[string]*entity.SSL,
-) (putList map[string]*entity.SSL, deleteList map[string]*entity.SSL) {
+) (putList, deleteList map[string]*entity.SSL) {
 	oldResMap := make(map[string]*entity.SSL)
 	putList = make(map[string]*entity.SSL)
 	deleteList = make(map[string]*entity.SSL)

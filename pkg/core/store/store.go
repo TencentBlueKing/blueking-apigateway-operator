@@ -69,7 +69,8 @@ type ApisixEtcdStore struct {
 
 // NewApisixEtcdStore ...
 func NewApisixEtcdStore(client *clientv3.Client, prefix string,
-	putInterval time.Duration, delInterval time.Duration, syncTimeout time.Duration) (*ApisixEtcdStore, error) {
+	putInterval, delInterval, syncTimeout time.Duration,
+) (*ApisixEtcdStore, error) {
 	s := &ApisixEtcdStore{
 		client:      client,
 		prefix:      strings.TrimRight(prefix, "/"),
@@ -337,7 +338,7 @@ func (s *ApisixEtcdStore) alterGlobal(
 }
 
 func (s *ApisixEtcdStore) batchPutResource(
-	ctx context.Context, resourceType string, resources interface{},
+	ctx context.Context, resourceType string, resources any,
 ) error {
 	resourceStore := s.registry[resourceType]
 
@@ -384,7 +385,7 @@ func (s *ApisixEtcdStore) batchPutResource(
 }
 
 func (s *ApisixEtcdStore) batchDeleteResource(
-	ctx context.Context, resourceType string, resources interface{},
+	ctx context.Context, resourceType string, resources any,
 ) error {
 	resourceStore := s.registry[resourceType]
 	resourceMap := reflect.ValueOf(resources).MapRange()
@@ -394,7 +395,13 @@ func (s *ApisixEtcdStore) batchDeleteResource(
 		key := resourceMap.Key().Interface().(string)
 		resource := resourceMap.Value().Interface().(entity.ApisixResource)
 
-		s.logger.Debugw("Delete resource from etcd", "resourceType", resourceType, "resourceID", resource.GetID())
+		s.logger.Debugw(
+			"Delete resource from etcd",
+			"resourceType",
+			resourceType,
+			"resourceID",
+			resource.GetID(),
+		)
 
 		_, err := s.client.Delete(ctx, resourceStore.Prefix+key)
 

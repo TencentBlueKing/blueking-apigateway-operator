@@ -394,11 +394,11 @@ var _ = Describe("configDiffer", func() {
 							Stage:   "test-stage",
 						},
 					},
-					Plugins: map[string]interface{}{
+					Plugins: map[string]any{
 						"proxy-rewrite": map[any]any{
 							"uri": "/test/v1",
 						},
-						"response-rewrite": map[interface{}]any{
+						"response-rewrite": map[any]any{
 							"uri": "/test/v1",
 						},
 					},
@@ -415,7 +415,7 @@ var _ = Describe("configDiffer", func() {
 							Stage:   "test-stage",
 						},
 					},
-					Plugins: map[string]interface{}{
+					Plugins: map[string]any{
 						"proxy-rewrite": map[string]any{
 							"uri": "/test/v1",
 						},

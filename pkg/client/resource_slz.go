@@ -21,10 +21,10 @@ package client
 
 // StageScopedApisixResources apisix resource
 type StageScopedApisixResources struct {
-	Routes         map[string]interface{} `json:"routes,omitempty"`
-	Services       map[string]interface{} `json:"services,omitempty"`
-	PluginMetadata map[string]interface{} `json:"plugin_metadata,omitempty"`
-	Ssl            map[string]interface{} `json:"ssl,omitempty"`
+	Routes         map[string]any `json:"routes,omitempty"`
+	Services       map[string]any `json:"services,omitempty"`
+	PluginMetadata map[string]any `json:"plugin_metadata,omitempty"`
+	Ssl            map[string]any `json:"ssl,omitempty"`
 }
 
 // ApigwListInfo apigw 资源列表
@@ -49,7 +49,7 @@ type ApigwListResourceCountResponse struct {
 }
 
 // ApigwListCurrentVersionInfoResponse apigw 环境发布版本信息
-type ApigwListCurrentVersionInfoResponse map[string]interface{}
+type ApigwListCurrentVersionInfoResponse map[string]any
 
 // ApisixListInfo apisix 资源列表
 type ApisixListInfo map[string]*StageScopedApisixResources
@@ -67,4 +67,4 @@ type ApisixListResourceCountResponse struct {
 }
 
 // ApisixListCurrentVersionInfoResponse apisix 环境发布版本信息
-type ApisixListCurrentVersionInfoResponse map[string]interface{}
+type ApisixListCurrentVersionInfoResponse map[string]any

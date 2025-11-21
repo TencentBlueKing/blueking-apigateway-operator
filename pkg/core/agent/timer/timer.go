@@ -89,7 +89,7 @@ func (t *ReleaseTimer) Update(releaseInfo *entity.ReleaseInfo) {
 // ListReleaseForCommit ...
 func (t *ReleaseTimer) ListReleaseForCommit() []*entity.ReleaseInfo {
 	releaseInfos := make([]*entity.ReleaseInfo, 0)
-	t.releaseTimer.Range(func(key, timerInterface interface{}) bool {
+	t.releaseTimer.Range(func(key, timerInterface any) bool {
 		timer := timerInterface.(*CacheTimer)
 		if time.Since(timer.ShouldCommitTime) > 0 || time.Since(timer.CachedTime) > forceUpdateTimeWindow {
 			releaseInfos = append(releaseInfos, timer.ReleaseInfo)

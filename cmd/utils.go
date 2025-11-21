@@ -26,7 +26,7 @@ import (
 	yaml "gopkg.in/yaml.v3"
 )
 
-func printJson(i interface{}) error {
+func printJson(i any) error {
 	by, err := json.Marshal(i)
 	if err != nil {
 		return err
@@ -35,12 +35,12 @@ func printJson(i interface{}) error {
 	return nil
 }
 
-func printYaml(i interface{}) error {
+func printYaml(i any) error {
 	by, err := json.Marshal(i)
 	if err != nil {
 		return err
 	}
-	tmp := make(map[string]interface{})
+	tmp := make(map[string]any)
 	if err := json.Unmarshal(by, &tmp); err != nil {
 		return err
 	}

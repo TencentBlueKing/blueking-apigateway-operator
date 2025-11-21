@@ -61,12 +61,16 @@ func NewCommitter(
 	releaseTimer *timer.ReleaseTimer,
 ) *Committer {
 	return &Committer{
-		apigwEtcdRegistry:       apigwEtcdRegistry,                      // Registry for resource management
-		commitResourceChan:      make(chan []*entity.ReleaseInfo),       // Channel for committing resource information
-		synchronizer:            synchronizer,                           // Configuration synchronizer
-		releaseTimer:            releaseTimer,                           // Timer for stage management
-		logger:                  logging.GetLogger().Named("committer"), // Logger instance named "committer"
-		gatewayStageChanMap:     make(map[string]chan struct{}),         // Map for storing gateway stage channels
+		apigwEtcdRegistry: apigwEtcdRegistry, // Registry for resource management
+		commitResourceChan: make(
+			chan []*entity.ReleaseInfo,
+		), // Channel for committing resource information
+		synchronizer: synchronizer,                           // Configuration synchronizer
+		releaseTimer: releaseTimer,                           // Timer for stage management
+		logger:       logging.GetLogger().Named("committer"), // Logger instance named "committer"
+		gatewayStageChanMap: make(
+			map[string]chan struct{},
+		), // Map for storing gateway stage channels
 		gatewayStageChanMapLock: &sync.RWMutex{},
 	}
 }
@@ -218,10 +222,15 @@ func (c *Committer) GetStageReleaseNativeApisixConfiguration(
 	// 直接从etcd获取原生apisix配置
 	resources, err := c.apigwEtcdRegistry.ListStageResources(si)
 	if err != nil {
-		c.logger.Error(err, "list resources failed", "stageInfo", si)
+		c.logger.Errorf("get native apisix[stage:%s] configuration failed: %v", si.GetStageKey(), err)
 		return nil, err
 	}
-	metric.ReportResourceCountHelper(si.GetGatewayName(), si.GetStageName(), resources, ReportResourceConvertedMetric)
+	metric.ReportResourceCountHelper(
+		si.GetGatewayName(),
+		si.GetStageName(),
+		resources,
+		ReportResourceConvertedMetric,
+	)
 	return resources, nil
 }
 
@@ -233,7 +242,7 @@ func (c *Committer) GetGlobalApisixConfiguration(
 	// 直接从etcd获取原生apisix配置
 	resources, err := c.apigwEtcdRegistry.ListGlobalResources(si)
 	if err != nil {
-		c.logger.Error(err, "list resources failed", "stageInfo", si)
+		c.logger.Errorf("get native apisix[global:%s] configuration failed: %v", si.GetStageKey(), err)
 		return nil, err
 	}
 	return resources, nil
