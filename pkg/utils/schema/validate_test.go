@@ -82,44 +82,6 @@ func TestNewResourceSchema(t *testing.T) {
 			shouldFail: false,
 		},
 		{
-			name:         "normal case with dataType=ETCD",
-			version:      constant.APISIXVersion313,
-			resourceType: constant.Route,
-			jsonPath:     "main.route",
-			config: `{
-			  "id": "bk.r.xxx",
-              "name": "route1",
-              "methods": [
-                "GET",
-                "POST"
-              ],
-              "enable_websocket": false,
-              "uris": [
-                "/test"
-              ],
-              "plugins": {
-                "authz-casbin": {
-                  "model": "path/to/model.conf",
-                  "policy": "path/to/policy.csv",
-                  "username": "admin"
-                }
-              },
-              "upstream": {
-                "scheme": "http",
-                "nodes": [
-                  {
-                    "host": "1.1.1.1",
-                    "port": 80,
-                    "weight": 1
-                  }
-                ],
-                "pass_host": "pass",
-                "type": "roundrobin"
-              }
-            }`,
-			shouldFail: false,
-		},
-		{
 			name:         "invalid schema path",
 			version:      constant.APISIXVersion313,
 			resourceType: constant.Route,
@@ -672,7 +634,7 @@ func TestAPISIXJsonSchemaValidatorValidate(t *testing.T) {
 			resource: constant.PluginMetadata,
 			jsonPath: "main.plugin_metadata",
 			config: `{
-              "name": "authz-casbin",
+              "id": "authz-casbin",
               "model": "rbac_model.conf",
               "policy": "rbac_policy.csv"
             }`,
@@ -948,12 +910,12 @@ func TestAPISIXJsonSchemaValidatorValidate(t *testing.T) {
 func TestValidateVarItem(t *testing.T) {
 	tests := []struct {
 		name       string
-		item       []interface{}
+		item       []any
 		shouldFail bool
 	}{
 		{
 			name: "Valid Triple",
-			item: []interface{}{
+			item: []any{
 				"arg_id",
 				"==",
 				"123",
@@ -962,7 +924,7 @@ func TestValidateVarItem(t *testing.T) {
 		},
 		{
 			name: "Valid Quadruple",
-			item: []interface{}{
+			item: []any{
 				"arg_id",
 				"!",
 				"==",
@@ -972,7 +934,7 @@ func TestValidateVarItem(t *testing.T) {
 		},
 		{
 			name: "Invalid Length",
-			item: []interface{}{
+			item: []any{
 				"arg_id",
 				"==",
 			},
@@ -980,7 +942,7 @@ func TestValidateVarItem(t *testing.T) {
 		},
 		{
 			name: "Invalid First Element",
-			item: []interface{}{
+			item: []any{
 				123,
 				"==",
 				"123",
@@ -989,7 +951,7 @@ func TestValidateVarItem(t *testing.T) {
 		},
 		{
 			name: "Invalid Quadruple Second Element",
-			item: []interface{}{
+			item: []any{
 				"arg_id",
 				"invalid",
 				"==",
@@ -999,7 +961,7 @@ func TestValidateVarItem(t *testing.T) {
 		},
 		{
 			name: "Invalid Operator",
-			item: []interface{}{
+			item: []any{
 				"arg_id",
 				"invalid_op",
 				"123",
@@ -1008,7 +970,7 @@ func TestValidateVarItem(t *testing.T) {
 		},
 		{
 			name: "Empty Value",
-			item: []interface{}{
+			item: []any{
 				"arg_id",
 				"==",
 				nil,
@@ -1032,18 +994,18 @@ func TestValidateVarItem(t *testing.T) {
 func TestCheckVars(t *testing.T) {
 	tests := []struct {
 		name       string
-		vars       []interface{}
+		vars       []any
 		shouldFail bool
 	}{
 		{
 			name: "Valid Vars",
-			vars: []interface{}{
-				[]interface{}{
+			vars: []any{
+				[]any{
 					"arg_id",
 					"==",
 					"123",
 				},
-				[]interface{}{
+				[]any{
 					"http_x_header",
 					"!",
 					"~~",
@@ -1054,20 +1016,20 @@ func TestCheckVars(t *testing.T) {
 		},
 		{
 			name:       "Empty Vars",
-			vars:       []interface{}{},
+			vars:       []any{},
 			shouldFail: false,
 		},
 		{
 			name: "Invalid Item Type",
-			vars: []interface{}{
+			vars: []any{
 				"invalid_item",
 			},
 			shouldFail: true,
 		},
 		{
 			name: "Invalid Var Item",
-			vars: []interface{}{
-				[]interface{}{
+			vars: []any{
+				[]any{
 					"arg_id",
 					"invalid_op",
 					"123",

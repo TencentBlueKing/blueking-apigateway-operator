@@ -151,7 +151,7 @@ func (l *listApigwCommand) formatOutput(apigwListInfo client.ApigwListInfo, form
 	return nil
 }
 
-func (l *listApigwCommand) printResource(typeName string, fields map[string]interface{}) {
+func (l *listApigwCommand) printResource(typeName string, fields map[string]any) {
 	fmt.Printf("\t%s:\n", typeName)
 	if fields == nil {
 		return

@@ -81,11 +81,7 @@ func (r *EtcdAgentRunner) init() {
 	// 2. init apigwEtcdRegistry
 	r.apigwEtcdRegistry = registry.NewAPIGWEtcdRegistry(r.client, r.cfg.Dashboard.Etcd.KeyPrefix)
 
-	// 3. init leader elector
-	if r.cfg.Operator.WithLeader {
-		r.leader, _ = leaderelection.NewEtcdLeaderElector(r.client, r.cfg.Dashboard.Etcd.KeyPrefix)
-	}
-
+	r.leader, _ = leaderelection.NewEtcdLeaderElector(r.client, r.cfg.Dashboard.Etcd.KeyPrefix)
 	// 4. init output
 	apisixEtcdStore, err := initApisixEtcdStore(r.cfg)
 	if err != nil {

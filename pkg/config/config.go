@@ -29,26 +29,12 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
-)
-
-// BKAPIGatewayLabelKeyGatewayName ...
-const (
-	BKAPIGatewayLabelKeyGatewayName      = "gateway.bk.tencent.com/gateway"
-	BKAPIGatewayLabelKeyGatewayStage     = "gateway.bk.tencent.com/stage"
-	BKAPIGatewayLabelKeyGatewayPublishID = "gateway.bk.tencent.com/publish_id"
-	BKAPIGatewayLabelKeyResourceName     = "gateway.bk.tencent.com/name"
-
-	BKAPIGatewaySubpathMatchParamName = "bk_api_subpath_match_param_name"
-
-	SecretCACertKey = "ca.crt"
-	SecretCertKey   = "tls.crt"
-	SecretKeyKey    = "tls.key"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils/envx"
 )
 
 const (
-	envPodName      = "BK_GATEWAY_POD_NAME"
-	envPodNamespace = "BK_GATEWAY_POD_NAMESPACE"
-	envPodIP        = "BK_GATEWAY_POD_IP"
+	envPodName = "BK_GATEWAY_POD_NAME"
+	envPodIP   = "BK_GATEWAY_POD_IP"
 )
 
 // ReleaseVersionResourceID 发布版本资源 ID
@@ -56,9 +42,8 @@ const ReleaseVersionResourceID = -1
 
 // InstanceName ...
 var (
-	InstanceName      string
-	InstanceNamespace string
-	InstanceIP        string
+	InstanceName string
+	InstanceIP   string
 
 	DefaultStageKey string
 	VirtualStageKey string
@@ -91,9 +76,6 @@ type VirtualStage struct {
 // Dashboard ...
 type Dashboard struct {
 	Etcd Etcd
-
-	PrefixPrepend      bool
-	ResourceBasePrefix string
 }
 
 // Apisix ...
@@ -104,10 +86,6 @@ type Apisix struct {
 
 // Operator ...
 type Operator struct {
-	WithKube   bool
-	WithLeader bool
-	AgentMode  bool
-
 	DefaultGateway string
 	DefaultStage   string
 
@@ -138,8 +116,8 @@ type Retry struct {
 	Interval time.Duration
 }
 
-// Instance ...
-type Instance struct {
+// Auth ...
+type Auth struct {
 	ID     string
 	Secret string
 }
@@ -151,17 +129,6 @@ type EventReporter struct {
 	VersionProbe       VersionProbe
 	EventBufferSize    int
 	ReporterBufferSize int
-}
-
-// KubeExtension ...
-type KubeExtension struct {
-	WorkNamespace string
-
-	LeaderElectionType          string
-	LeaderElectionName          string
-	LeaderElectionLeaseDuration int
-	LeaderElectionRenewDuration int
-	LeaderElectionRetryDuration int
 }
 
 // Etcd ...
@@ -217,9 +184,7 @@ type Config struct {
 	Apisix        Apisix
 	Operator      Operator
 	EventReporter EventReporter
-	Instance      Instance
-
-	KubeExtension KubeExtension
+	Auth          Auth
 
 	Logger  Logger
 	Sentry  Sentry
@@ -233,18 +198,10 @@ func newDefaultConfig() *Config {
 			BindPort:     6004,
 			AuthPassword: "DebugModel@bk",
 		},
-		KubeExtension: KubeExtension{
-			LeaderElectionType:          "leases",
-			LeaderElectionName:          "election.gateway.bk.tencent.com",
-			LeaderElectionLeaseDuration: 30,
-			LeaderElectionRenewDuration: 25,
-			LeaderElectionRetryDuration: 5, // retry_count= Ceil(RenewDeadline / RetryPeriod)
-		},
 		Dashboard: Dashboard{
 			Etcd: Etcd{
-				KeyPrefix: "/bk-gateway/default",
+				KeyPrefix: "/bk-gateway-apigw/default",
 			},
-			ResourceBasePrefix: "/api",
 		},
 		Apisix: Apisix{
 			Etcd: Etcd{
@@ -252,9 +209,8 @@ func newDefaultConfig() *Config {
 			},
 			VirtualStage: VirtualStage{
 				FileLoggerLogPath: "/usr/local/apisix/logs/access.log",
-
-				VirtualGateway: "-",
-				VirtualStage:   "-",
+				VirtualGateway:    "-",
+				VirtualStage:      "-",
 			},
 		},
 		EventReporter: EventReporter{
@@ -319,23 +275,9 @@ func Load(v *viper.Viper) (*Config, error) {
 }
 
 func (c *Config) init() {
-	instanceName := os.Getenv(envPodName)
-	instanceNamespace := os.Getenv(envPodNamespace)
-	instanceIP := os.Getenv(envPodIP)
-
-	if c.Operator.WithKube {
-		if len(instanceName) == 0 || len(instanceNamespace) == 0 {
-			fmt.Printf("%v or %v is empty", envPodName, envPodNamespace)
-			os.Exit(1)
-		}
-
-		InstanceName = instanceName
-		InstanceNamespace = instanceNamespace
-		InstanceIP = instanceIP
-	} else {
-		hname, _ := os.Hostname()
-		InstanceName = hname + "_" + utils.GetGeneratedUUID()
-	}
+	hostName, _ := os.Hostname()
+	InstanceName = envx.Get(envPodName, hostName+"_"+utils.GetGeneratedUUID())
+	InstanceIP = envx.Get(envPodIP, "127.0.0.1")
 
 	DefaultStageKey = GenStagePrimaryKey(c.Operator.DefaultGateway, c.Operator.DefaultStage)
 	VirtualStageKey = GenStagePrimaryKey(c.Apisix.VirtualStage.VirtualGateway, c.Apisix.VirtualStage.VirtualStage)
@@ -350,7 +292,7 @@ func (c *Config) init() {
 }
 
 // GenStagePrimaryKey build apisix configuration stage key from gateway name and stage name
-func GenStagePrimaryKey(gatewayName string, stageName string) string {
+func GenStagePrimaryKey(gatewayName, stageName string) string {
 	if len(gatewayName) == 0 && len(stageName) == 0 {
 		return DefaultStageKey
 	}

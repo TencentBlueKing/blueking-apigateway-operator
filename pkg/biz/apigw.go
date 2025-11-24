@@ -110,7 +110,7 @@ func GetApigwResource(
 	//		StageName:   stageName,
 	//	}
 	//	resourceNameKey := genResourceNameKey(gatewayName, stageName, resourceName)
-	//	apisixResources, _, err := committer.CliConvertEtcdResourceToApisixConfiguration(ctx, si, resourceNameKey)
+	// 	apisixResources, _, err := committer.CliConvertEtcdResourceToApisixConfiguration(ctx, si, resourceNameKey)
 	//	if err != nil {
 	//		return nil, err
 	//	}
@@ -140,7 +140,7 @@ func GetApigwStageCurrentVersionInfo(
 	committer *committer.Committer,
 	gatewayName string,
 	stageName string,
-) (map[string]interface{}, error) {
+) (map[string]any, error) {
 	// si := watcher.ReleaseInfo{
 	//	GatewayName: gatewayName,
 	//	StageName:   stageName,

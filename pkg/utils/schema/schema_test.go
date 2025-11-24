@@ -19,6 +19,7 @@
 package schema
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -46,7 +47,8 @@ func TestGetResourceSchema(t *testing.T) {
 
 	for _, tt := range tests {
 		for _, resource := range constant.ResourceTypeList {
-			t.Run(tt.name, func(t *testing.T) {
+			testName := fmt.Sprintf("%s/%s", tt.name, resource.String())
+			t.Run(testName, func(t *testing.T) {
 				result := GetResourceSchema(tt.version, resource.String())
 				if tt.shouldFail {
 					assert.Nil(t, result)
@@ -100,7 +102,8 @@ func TestGetPluginSchema(t *testing.T) {
 	// 查询所有版本的 schema
 	for version := range schemaVersionMap {
 		for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
+			testName := fmt.Sprintf("%s/%s", string(version), tt.name)
+			t.Run(testName, func(t *testing.T) {
 				result := GetPluginSchema(version, tt.pluginName, tt.schemaType)
 				if tt.shouldFail {
 					assert.Nil(t, result)

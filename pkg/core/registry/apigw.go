@@ -99,7 +99,9 @@ func (r *APIGWEtcdRegistry) Watch(ctx context.Context) <-chan *entity.ResourceMe
 			case event, ok := <-etcdWatchCh:
 				// reset watch channel if get error
 				if !ok {
-					r.logger.Error(nil, "Watch etcd registry failed: channel break, will recover from cached revision",
+					r.logger.Error(
+						nil,
+						"Watch etcd registry failed: channel break, will recover from cached revision",
 						"revision",
 						r.currentRevision,
 					)
@@ -115,14 +117,17 @@ func (r *APIGWEtcdRegistry) Watch(ctx context.Context) <-chan *entity.ResourceMe
 				if err != nil {
 					switch {
 					case errors.Is(err, v3rpc.ErrCompacted), errors.Is(err, v3rpc.ErrFutureRev):
-						r.logger.Error(event.Err(),
+						r.logger.Error(
+							event.Err(),
 							"Watch etcd registry failed unrecoverable, need full sync to recover",
 						)
 						return
 					default:
-						r.logger.Error(event.Err(),
+						r.logger.Error(
+							event.Err(),
 							"Watch etcd registry failed: other error, will recover from cached revision",
-							"revision", r.currentRevision,
+							"revision",
+							r.currentRevision,
 						)
 						time.Sleep(time.Second * 5)
 						needCreateChan = true
@@ -314,6 +319,10 @@ func (r *APIGWEtcdRegistry) ValueToStageResource(resp *clientv3.GetResponse) (*e
 			return nil, eris.Errorf("Etcd key segment by slash should larger or equal to 7")
 		}
 		resourceKind := constant.APISIXResource(matches[len(matches)-2])
+		// 跳过 bk-release 资源
+		if resourceKind == constant.BkRelease {
+			continue
+		}
 		if !constant.SupportResourceTypeMap[resourceKind] {
 			r.logger.Errorf("resource kind not support, key: %s", kv.Key)
 			continue
@@ -338,6 +347,7 @@ func (r *APIGWEtcdRegistry) ValueToStageResource(resp *clientv3.GetResponse) (*e
 				return nil, err
 			}
 			route.ResourceMetadata = resourceMetadata
+			route.Status = constant.StatusEnable
 			ret.Routes[route.GetID()] = &route
 		case constant.Service:
 			var service entity.Service
@@ -365,6 +375,7 @@ func (r *APIGWEtcdRegistry) ValueToStageResource(resp *clientv3.GetResponse) (*e
 				return nil, err
 			}
 			ssl.ResourceMetadata = resourceMetadata
+			ssl.Status = constant.StatusEnable
 			ret.SSLs[ssl.GetID()] = &ssl
 		}
 	}

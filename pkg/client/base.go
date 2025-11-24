@@ -48,7 +48,7 @@ func (c *baseClient) doHttpRequest(request *gentleman.Request, options ...Reques
 }
 
 // sendAndDecodeResp do http request and decode resp
-func sendAndDecodeResp(result interface{}) RequestOption {
+func sendAndDecodeResp(result any) RequestOption {
 	return func(request *gentleman.Request) error {
 		var resp *gentleman.Response
 		var err error

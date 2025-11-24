@@ -93,7 +93,7 @@ var _ = Describe("Format", func() {
 
 		Context("map[string]interface{} type", func() {
 			It("should correctly convert to Node list", func() {
-				input := map[string]interface{}{
+				input := map[string]any{
 					"127.0.0.1:8080": float64(10),
 					"192.168.1.1":    float64(20),
 				}
@@ -119,25 +119,30 @@ var _ = Describe("Format", func() {
 
 		Context("[]interface{} type", func() {
 			It("should correctly convert to Node list", func() {
-				input := []interface{}{
-					map[string]interface{}{
+				input := []any{
+					map[string]any{
 						"host":     "127.0.0.1",
 						"port":     float64(8080),
 						"weight":   float64(10),
 						"priority": float64(0),
 					},
-					map[string]interface{}{
+					map[string]any{
 						"host":   "192.168.1.1",
 						"port":   float64(0),
 						"weight": float64(20),
-						"metadata": map[string]interface{}{
+						"metadata": map[string]any{
 							"key": "value",
 						},
 					},
 				}
 				expected := []*Node{
 					{Host: "127.0.0.1", Port: 8080, Weight: 10, Priority: 0},
-					{Host: "192.168.1.1", Port: 0, Weight: 20, Metadata: map[string]interface{}{"key": "value"}},
+					{
+						Host:     "192.168.1.1",
+						Port:     0,
+						Weight:   20,
+						Metadata: map[string]any{"key": "value"},
+					},
 				}
 				result := NodesFormat(input)
 				Expect(result).To(Equal(expected))

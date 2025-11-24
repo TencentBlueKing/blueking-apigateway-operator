@@ -46,7 +46,7 @@ type reportEvent struct {
 	release *entity.ReleaseInfo
 	Event   constant.EventName
 	status  constant.EventStatus
-	detail  map[string]interface{}
+	detail  map[string]any
 	// event timestamp
 	ts int64
 }
@@ -134,7 +134,7 @@ func ReportParseConfigurationFailureEvent(ctx context.Context, release *entity.R
 		release: release,
 		Event:   constant.EventNameParseConfiguration,
 		status:  constant.EventStatusFailure,
-		detail:  map[string]interface{}{"err_msg": err.Error()},
+		detail:  map[string]any{"err_msg": err.Error()},
 		ts:      time.Now().Unix(),
 	}
 	addEvent(event)
@@ -233,7 +233,7 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, release *entity.Rel
 				release: release,
 				Event:   constant.EventNameLoadConfiguration,
 				status:  constant.EventStatusSuccess,
-				detail: map[string]interface{}{
+				detail: map[string]any{
 					"publish_id": versionInfo.PublishID,
 					"start_time": versionInfo.StartTime,
 				},
@@ -249,7 +249,7 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, release *entity.Rel
 					release: release,
 					Event:   constant.EventNameLoadConfiguration,
 					status:  constant.EventStatusFailure,
-					detail:  map[string]interface{}{"err_msg": err.Error()},
+					detail:  map[string]any{"err_msg": err.Error()},
 					ts:      time.Now().Unix(),
 				}
 				reporter.eventChain <- event
@@ -262,7 +262,7 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, release *entity.Rel
 				release: release,
 				Event:   constant.EventNameLoadConfiguration,
 				status:  constant.EventStatusFailure,
-				detail:  map[string]interface{}{"err_msg": "version publish probe timeout"},
+				detail:  map[string]any{"err_msg": "version publish probe timeout"},
 				ts:      time.Now().Unix(),
 			}
 			reporter.eventChain <- event
@@ -309,7 +309,13 @@ func (r *Reporter) reportEvent(event reportEvent) {
 	if err != nil && !strings.Contains(err.Error(), constant.EventDuplicatedErrMsg) {
 		logging.GetLogger().Errorf(
 			"report event  [name:%s,gateway:%s,release:%s,publish_id:%s,status:%s] fail:%v",
-			event.Event, eventReq.BkGatewayName, eventReq.BkStageName, eventReq.PublishID, event.status, err)
+			event.Event,
+			eventReq.BkGatewayName,
+			eventReq.BkStageName,
+			eventReq.PublishID,
+			event.status,
+			err,
+		)
 		return
 	}
 

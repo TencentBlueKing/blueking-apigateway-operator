@@ -80,7 +80,7 @@ func GetApisixClient() *ApisixClient {
 }
 
 // GetReleaseVersion get apisix release info
-func (a *ApisixClient) GetReleaseVersion(gatewayName string, stageName string,
+func (a *ApisixClient) GetReleaseVersion(gatewayName, stageName string,
 	publishID string,
 ) (*VersionRouteResp, error) {
 	request := a.client.Request()
@@ -112,7 +112,7 @@ func (a *ApisixClient) GetReleaseVersion(gatewayName string, stageName string,
 }
 
 // retryEvaluator retry strategy
-func retryEvaluator(gateway string, stage string, publishID int64, retryError *error,
+func retryEvaluator(gateway, stage string, publishID int64, retryError *error,
 	resp *VersionRouteResp,
 ) retry.EvalFunc {
 	return func(err error, res *http.Response, req *http.Request) error {
@@ -137,8 +137,12 @@ func retryEvaluator(gateway string, stage string, publishID int64, retryError *e
 			// 解析返回结果
 			result, readErr := io.ReadAll(res.Body)
 			if readErr != nil {
-				*retryError = fmt.Errorf("read configuration [gateway: %s,state: %s] version route body err: %w",
-					gateway, stage, readErr)
+				*retryError = fmt.Errorf(
+					"read configuration [gateway: %s,state: %s] version route body err: %w",
+					gateway,
+					stage,
+					readErr,
+				)
 				logging.GetLogger().Error(*retryError)
 				return *retryError
 			}
@@ -156,7 +160,11 @@ func retryEvaluator(gateway string, stage string, publishID int64, retryError *e
 				// 如果获取到的版本号比当前小，说明当前的版本还未加载完成
 				*retryError = fmt.Errorf(
 					"configuration [gateway: %s,stage: %s]  [current: %d, expected: %d] is not latest",
-					gateway, stage, resp.PublishID, publishID)
+					gateway,
+					stage,
+					resp.PublishID,
+					publishID,
+				)
 				logging.GetLogger().Info(*retryError)
 				return *retryError
 			}

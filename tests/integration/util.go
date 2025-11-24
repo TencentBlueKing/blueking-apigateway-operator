@@ -148,26 +148,26 @@ func (m *MetricsAdapter) GetResourceMetrics(metricsType string, labels []string)
 
 // GetResourceEventTriggeredCountMetric ResourceEventTriggeredCountMetric returns the resource event triggered
 // count metric
-func (m *MetricsAdapter) GetResourceEventTriggeredCountMetric(gateway string, stage string, resourceType string) int {
+func (m *MetricsAdapter) GetResourceEventTriggeredCountMetric(gateway, stage, resourceType string) int {
 	return m.GetResourceMetrics(ResourceEventTriggeredCountMetric, []string{gateway, stage, resourceType})
 }
 
 // GetResourceConvertedCountMetric ResourceConvertedCountMetric returns the resource event triggered count metric
-func (m *MetricsAdapter) GetResourceConvertedCountMetric(gateway string, stage string, resourceType string) int {
+func (m *MetricsAdapter) GetResourceConvertedCountMetric(gateway, stage, resourceType string) int {
 	return m.GetResourceMetrics(ResourceConvertedCountMetric, []string{gateway, stage, resourceType})
 }
 
 // GetResourceSyncCmpCountMetric ResourceSyncCmpCount returns the resource event triggered count metric
-func (m *MetricsAdapter) GetResourceSyncCmpCountMetric(gateway string, stage string, resourceType string) int {
+func (m *MetricsAdapter) GetResourceSyncCmpCountMetric(gateway, stage, resourceType string) int {
 	return m.GetResourceMetrics(ResourceSyncCmpCount, []string{gateway, stage, resourceType})
 }
 
 // GetResourceSyncCmpDiffCountMetric ResourceSyncCmpDiffCount returns the resource event triggered count metric
-func (m *MetricsAdapter) GetResourceSyncCmpDiffCountMetric(gateway string, stage string, resourceType string) int {
+func (m *MetricsAdapter) GetResourceSyncCmpDiffCountMetric(gateway, stage, resourceType string) int {
 	return m.GetResourceMetrics(ResourceSyncCmpDiffCount, []string{gateway, stage, resourceType})
 }
 
 // GetApisixOperationCountMetric ApisixOperationCountMetric returns the resource event triggered count metric
-func (m *MetricsAdapter) GetApisixOperationCountMetric(action string, result string, resourceType string) int {
+func (m *MetricsAdapter) GetApisixOperationCountMetric(action, result, resourceType string) int {
 	return m.GetResourceMetrics(ApisixOperationCountMetric, []string{action, result, resourceType})
 }

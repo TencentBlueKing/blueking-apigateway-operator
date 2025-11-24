@@ -1,10 +1,6 @@
 debug: true
 
 operator:
-  withKube: true
-  withLeader: true
-  agentMode: true
-
   defaultGateway: "bk-default"
   defaultStage: "default"
   #write apisix etcd interval
@@ -24,7 +20,7 @@ apisix:
     keyPrefix: "/bk-gateway-apisix"
     username: "root"
     password: "blueking"
-  resourceStoreMode: "etcd"
+
   virtualStage:
     extraApisixResources: "/data/config/extra-resources.yaml"
 
@@ -41,9 +37,10 @@ eventReporter:
   eventBufferSize: 300 # reporter eventChain size
   reporterBufferSize: 100 # control currency fo report to core API
 
-instance:
-  id: "coreapi"
-  secret: "coreapi"
+auth:
+  # should configured same as the apisix:conf/config.yaml bk_gateway.instance.{id, secret}
+  id: "faf44a48-59e9-f790-2412-e56c90551fb3"
+  secret: "358627d8-d3e8-4522-8f16-b5530776bbb8"
 
 httpServer:
   bindAddress: "0.0.0.0"
