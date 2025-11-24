@@ -82,7 +82,7 @@ func (s *VirtualStage) make404DefaultRoute() *entity.Route {
 				"path": fileLoggerLogPath,
 			},
 		},
-		Status: 1,
+		Status: constant.StatusEnable,
 	}
 }
 
