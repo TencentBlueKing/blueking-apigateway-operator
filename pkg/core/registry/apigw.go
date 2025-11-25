@@ -35,7 +35,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
-
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/validator"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
