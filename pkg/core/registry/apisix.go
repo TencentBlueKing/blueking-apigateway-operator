@@ -51,7 +51,7 @@ type ApisixEtcdRegistry struct {
 
 // NewApisixEtcdRegistry creates a new ApisixEtcdRegistry instance
 func NewApisixEtcdRegistry(client *clientv3.Client, prefix string,
-syncTimeout time.Duration,
+	syncTimeout time.Duration,
 ) (*ApisixEtcdRegistry, error) {
 	if !strings.HasSuffix(prefix, "/") {
 		prefix += "/"
@@ -118,7 +118,7 @@ func (e *ApisixEtcdRegistry) parseResource(key, value []byte) (resource entity.A
 		return nil, nil
 	}
 	if string(value) == constant.SkippedValueEtcdInitDir ||
-	string(value) == constant.SkippedValueEtcdEmptyObject {
+		string(value) == constant.SkippedValueEtcdEmptyObject {
 		return nil, nil
 	}
 
@@ -205,7 +205,6 @@ func (e *ApisixEtcdRegistry) incrSync() {
 			}
 			// handler event
 			for _, evt := range event.Events {
-				e.logger.Infof("Handle event:%v", evt)
 				err := e.handlerEvent(evt)
 				if err != nil {
 					e.logger.Errorf("Handle event failed:%v", err)

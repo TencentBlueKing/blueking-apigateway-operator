@@ -23,8 +23,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"go.uber.org/zap"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/agent/timer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/registry"
@@ -52,10 +53,10 @@ type EventAgent struct {
 
 // NewEventAgent ...
 func NewEventAgent(
-resourceRegistry *registry.APIGWEtcdRegistry,
-commitCh chan []*entity.ReleaseInfo,
-synchronizer *synchronizer.ApisixConfigSynchronizer,
-stageTimer *timer.ReleaseTimer,
+	resourceRegistry *registry.APIGWEtcdRegistry,
+	commitCh chan []*entity.ReleaseInfo,
+	synchronizer *synchronizer.ApisixConfigSynchronizer,
+	stageTimer *timer.ReleaseTimer,
 ) *EventAgent {
 	return &EventAgent{
 		apigwRegistry: resourceRegistry,

@@ -99,6 +99,8 @@ type Route struct {
 	EnableWebsocket  bool           `json:"enable_websocket,omitempty" yaml:"enable_websocket"`
 	Status           Status         `json:"status" yaml:"status"`
 	Timeout          *Timeout       `json:"timeout,omitempty" yaml:"timeout,omitempty"`
+	CreateTime       int64          `json:"create_time,omitempty" yaml:"create_time,omitempty"`
+	UpdateTime       int64          `json:"update_time,omitempty" yaml:"update_time,omitempty"`
 }
 
 // TimeoutValue ...
@@ -230,6 +232,8 @@ type Service struct {
 	Script           string         `json:"script,omitempty" yaml:"script"`
 	EnableWebsocket  bool           `json:"enable_websocket,omitempty" yaml:"enable_websocket"`
 	Hosts            []string       `json:"hosts,omitempty" yaml:"hosts"`
+	CreateTime       int64          `json:"create_time,omitempty" yaml:"create_time,omitempty"`
+	UpdateTime       int64          `json:"update_time,omitempty" yaml:"update_time,omitempty"`
 }
 
 // GlobalRule ...
