@@ -23,6 +23,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"go.uber.org/zap"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/agent/timer"
@@ -98,6 +99,11 @@ func (w *EventAgent) Run(ctx context.Context) {
 
 			// 更新stage的事件窗口, 发送特殊事件到innerLoopChan
 			// NOTE: 事件实际只是记录有哪个stage需要更新, 更新的单位为stage, 而不是细粒度的资源本身
+			// 处理bk-release事件,需要触发commit
+			if event.Kind == constant.BkRelease {
+				w.handleTicker(ctx)
+				continue
+			}
 			w.handleEvent(event)
 
 		case event := <-w.retryChan:
@@ -107,7 +113,6 @@ func (w *EventAgent) Run(ctx context.Context) {
 		// events commit
 		case <-ticker.C:
 			w.logger.Debugw("commit ticker trigger")
-
 			// 定时处理时间窗口已经超时的stage
 			w.handleTicker(ctx)
 

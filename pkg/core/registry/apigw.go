@@ -292,8 +292,9 @@ func (r *APIGWEtcdRegistry) ListStageResources(stageRelease *entity.ReleaseInfo)
 	}
 
 	if len(resp.Kvs) == 0 {
+		// 删除操作, 返回空资源
 		r.logger.Error(nil, "empty etcd value key: ", etcdKey)
-		return nil, eris.Errorf("empty etcd value")
+		return entity.NewEmptyApisixConfiguration(), nil
 	}
 	ret, err := r.ValueToStageResource(resp)
 	if err != nil {
@@ -396,9 +397,10 @@ func (r *APIGWEtcdRegistry) ListGlobalResources(releaseInfo *entity.ReleaseInfo)
 		return nil, err
 	}
 	if len(resp.Kvs) == 0 {
+		// 删除操作, 返回空资源
 		r.logger.Error(nil, "empty etcd value", "key", etcdKey)
 		metric.ReportRegistryAction(releaseInfo.Kind.String(), metric.ActionGet, metric.ResultFail, startedTime)
-		return nil, eris.Errorf("empty etcd value")
+		return entity.NewEmptyApisixGlobalResource(), nil
 	}
 	ret, err := r.ValueToGlobalResource(resp)
 	if err != nil {

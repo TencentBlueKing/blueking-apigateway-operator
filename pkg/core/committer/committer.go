@@ -126,9 +126,9 @@ func (c *Committer) commitGroup(ctx context.Context, releaseInfoList []*entity.R
 		if tempResourceInfo.IsGlobalResource() {
 			// Global 资源需要单独处理
 			utils.GoroutineWithRecovery(ctx, func() {
-				c.logger.Infof("begin commit global resource: %s", tempResourceInfo.GetID())
+				c.logger.Info("begin commit global resource")
 				c.commitGlobalResource(ctx, tempResourceInfo)
-				c.logger.Infof("end commit global resource: %s", tempResourceInfo.GetID())
+				c.logger.Info("end commit global resource")
 				wg.Done()
 			})
 		} else {
