@@ -98,7 +98,7 @@ type Route struct {
 	ServiceProtocol  string         `json:"service_protocol,omitempty" yaml:"service_protocol"`
 	EnableWebsocket  bool           `json:"enable_websocket,omitempty" yaml:"enable_websocket"`
 	Status           Status         `json:"status" yaml:"status"`
-	Timeout          Timeout        `json:"timeout,omitempty" yaml:"timeout"`
+	Timeout          *Timeout       `json:"timeout,omitempty" yaml:"timeout,omitempty"`
 }
 
 // TimeoutValue ...
