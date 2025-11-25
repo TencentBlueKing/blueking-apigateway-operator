@@ -35,6 +35,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
+
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/validator"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
@@ -226,7 +227,7 @@ func (r *APIGWEtcdRegistry) handleEvent(event *clientv3.Event) (*entity.Resource
 	return nil, fmt.Errorf("err unknown event type: %s", event.Type)
 }
 
-// extractResourceMetadata ...
+// extractResourceMetadata 解析etcd key和value，返回资源元数据，复杂度比较高：todo 优化
 func (r *APIGWEtcdRegistry) extractResourceMetadata(key string, value []byte) (entity.ResourceMetadata, error) {
 	// /{self.prefix}/{self.api_version}/gateway/{gateway_name}/{stage_name}/route/bk-default.default.-1
 

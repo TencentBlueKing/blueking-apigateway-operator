@@ -121,22 +121,22 @@ func (c *Committer) commitGroup(ctx context.Context, releaseInfoList []*entity.R
 	wg := &sync.WaitGroup{}
 	for _, resourceInfo := range releaseInfoList {
 		wg.Add(1)
-		tempResourceInfo := resourceInfo
+		tmpResourceInfo := resourceInfo
 		// 判断是否是 global 资源：PluginMetadata 且 Stage 为空
-		if tempResourceInfo.IsGlobalResource() {
+		if tmpResourceInfo.IsGlobalResource() {
 			// Global 资源需要单独处理
 			utils.GoroutineWithRecovery(ctx, func() {
 				c.logger.Info("begin commit global resource")
-				c.commitGlobalResource(ctx, tempResourceInfo)
+				c.commitGlobalResource(ctx, tmpResourceInfo)
 				c.logger.Info("end commit global resource")
 				wg.Done()
 			})
 		} else {
 			// Stage 资源按 gateway 维度串行处理
 			utils.GoroutineWithRecovery(ctx, func() {
-				c.logger.Infof("begin commit gateway channel: %s", tempResourceInfo.GetID())
-				c.commitGatewayStage(ctx, tempResourceInfo, wg)
-				c.logger.Infof("end commit gateway channel: %s", tempResourceInfo.GetID())
+				c.logger.Infof("begin commit gateway channel: %s", tmpResourceInfo.GetID())
+				c.commitGatewayStage(ctx, tmpResourceInfo, wg)
+				c.logger.Infof("end commit gateway channel: %s", tmpResourceInfo.GetID())
 			})
 		}
 	}
@@ -202,7 +202,7 @@ func (c *Committer) commitStage(ctx context.Context, si *entity.ReleaseInfo, sta
 	}
 	// eventrepoter.ReportApplyConfigurationSuccessEvent(ctx, stage) // 可以由事件之前的关系推断出来
 	eventreporter.ReportLoadConfigurationResultEvent(ctx, si)
-	c.logger.Infow("commit stage success", "stageInfo", si)
+	c.logger.Info("commit stage success", "stageInfo", si)
 }
 
 func (c *Committer) retryStage(si *entity.ReleaseInfo) {

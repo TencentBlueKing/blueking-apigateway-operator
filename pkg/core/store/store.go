@@ -348,10 +348,7 @@ func (s *ApisixEtcdStore) batchPutResource(
 		st := time.Now()
 		key := resourceIter.Key().Interface().(string)
 		resource := resourceIter.Value().Interface().(entity.ApisixResource)
-		oldSt := resource.GetCreateTime()
-		if oldSt != 0 {
-			resource.SetCreateTime(oldSt)
-		} else {
+		if resource.GetCreateTime() == 0 {
 			resource.SetCreateTime(st.Unix())
 		}
 		resource.SetUpdateTime(st.Unix())
