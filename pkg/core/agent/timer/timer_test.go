@@ -38,7 +38,7 @@ var _ = Describe("Timer", func() {
 		stageTimer = NewReleaseTimer()
 		stageInfo = entity.ReleaseInfo{
 			ResourceMetadata: entity.ResourceMetadata{
-				Labels: entity.LabelInfo{
+				Labels: &entity.LabelInfo{
 					Gateway:       "gateway",
 					Stage:         "stage",
 					PublishId:     "1",
