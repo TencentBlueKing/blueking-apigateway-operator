@@ -272,11 +272,10 @@ func (s *Service) GetUpdateTime() int64 {
 	return s.UpdateTime
 }
 
-// SetCreateTime ...
-// SetCreateTime sets the creation time for the route
+// SetCreateTime sets the creation time for the service
 // It takes an int64 parameter representing the timestamp
 func (s *Service) SetCreateTime(i int64) {
-	// Assign the provided timestamp to the CreateTime field of the Route
+	// Assign the provided timestamp to the CreateTime field of the Service
 	s.CreateTime = i
 }
 
