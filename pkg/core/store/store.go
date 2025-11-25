@@ -348,6 +348,15 @@ func (s *ApisixEtcdStore) batchPutResource(
 		st := time.Now()
 		key := resourceIter.Key().Interface().(string)
 		resource := resourceIter.Value().Interface().(entity.ApisixResource)
+		oldSt := resource.GetCreateTime()
+		if oldSt != 0 {
+			resource.SetCreateTime(oldSt)
+		} else {
+			resource.SetCreateTime(st.Unix())
+		}
+		resource.SetUpdateTime(st.Unix())
+		// remove unused fields
+		resource.ClearUnusedFields()
 		bytes, err := json.Marshal(resource)
 		if err != nil {
 			s.logger.Error(
