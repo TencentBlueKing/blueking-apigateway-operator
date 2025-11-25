@@ -23,8 +23,10 @@ import (
 	"context"
 	"time"
 
+	"go.etcd.io/etcd/api/v3/mvccpb"
 	"go.uber.org/zap"
 
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/agent/timer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/synchronizer"
@@ -98,6 +100,11 @@ func (w *EventAgent) Run(ctx context.Context) {
 
 			// 更新stage的事件窗口, 发送特殊事件到innerLoopChan
 			// NOTE: 事件实际只是记录有哪个stage需要更新, 更新的单位为stage, 而不是细粒度的资源本身
+			// 处理bk-release事件,需要触发commit
+			if event.Kind == constant.BkRelease {
+				w.handleTicker(ctx)
+				continue
+			}
 			w.handleEvent(event)
 
 		case event := <-w.retryChan:
@@ -131,6 +138,11 @@ func (w *EventAgent) createWatchChannel(ctx context.Context) (<-chan *entity.Res
 }
 
 func (w *EventAgent) handleEvent(event *entity.ResourceMetadata) {
+	// Note：跳过删除事件:删除事件的 release_info 信息还是上次的，无法获取到最新的 release_info
+	if event.Op == mvccpb.DELETE {
+		w.logger.Debugw("skip delete event", "event", event)
+		return
+	}
 	// trace
 	ctx, span := trace.StartTrace(event.Ctx, "agent.handleEvent")
 	event.Ctx = ctx

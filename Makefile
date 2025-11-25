@@ -47,6 +47,8 @@ $(BUILD_PATH):
 	mkdir -p $(BUILD_PATH)
 
 
+fmt:
+	$(GOLANGCI_LINT) fmt  ./...
 
 lint:
 	$(GOLANGCI_LINT) run  ./...

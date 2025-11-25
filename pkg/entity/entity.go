@@ -26,6 +26,7 @@ import (
 
 	"github.com/spf13/cast"
 	"github.com/tidwall/gjson"
+	"go.etcd.io/etcd/api/v3/mvccpb"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
@@ -36,6 +37,11 @@ type ApisixResource interface {
 	GetID() string
 	GetReleaseInfo() *ReleaseInfo
 	GetStageName() string
+	GetCreateTime() int64
+	GetUpdateTime() int64
+	SetCreateTime(int64)
+	SetUpdateTime(int64)
+	ClearUnusedFields()
 }
 
 // ApisixStageResource 网关环境资源配置
@@ -98,6 +104,29 @@ type Route struct {
 	ServiceProtocol  string         `json:"service_protocol,omitempty" yaml:"service_protocol"`
 	EnableWebsocket  bool           `json:"enable_websocket,omitempty" yaml:"enable_websocket"`
 	Status           Status         `json:"status" yaml:"status"`
+	Timeout          *Timeout       `json:"timeout,omitempty" yaml:"timeout,omitempty"`
+	CreateTime       int64          `json:"create_time,omitempty" yaml:"create_time,omitempty"`
+	UpdateTime       int64          `json:"update_time,omitempty" yaml:"update_time,omitempty"`
+}
+
+// GetCreateTime ...
+func (r *Route) GetCreateTime() int64 {
+	return r.CreateTime
+}
+
+// GetUpdateTime ...
+func (r *Route) GetUpdateTime() int64 {
+	return r.UpdateTime
+}
+
+// SetCreateTime ...
+func (r *Route) SetCreateTime(i int64) {
+	r.CreateTime = i
+}
+
+// SetUpdateTime ...
+func (r *Route) SetUpdateTime(i int64) {
+	r.UpdateTime = i
 }
 
 // TimeoutValue ...
@@ -229,6 +258,30 @@ type Service struct {
 	Script           string         `json:"script,omitempty" yaml:"script"`
 	EnableWebsocket  bool           `json:"enable_websocket,omitempty" yaml:"enable_websocket"`
 	Hosts            []string       `json:"hosts,omitempty" yaml:"hosts"`
+	CreateTime       int64          `json:"create_time,omitempty" yaml:"create_time,omitempty"`
+	UpdateTime       int64          `json:"update_time,omitempty" yaml:"update_time,omitempty"`
+}
+
+// GetCreateTime ...
+func (s *Service) GetCreateTime() int64 {
+	return s.CreateTime
+}
+
+// GetUpdateTime ...
+func (s *Service) GetUpdateTime() int64 {
+	return s.UpdateTime
+}
+
+// SetCreateTime sets the creation time for the service
+// It takes an int64 parameter representing the timestamp
+func (s *Service) SetCreateTime(i int64) {
+	// Assign the provided timestamp to the CreateTime field of the Service
+	s.CreateTime = i
+}
+
+// SetUpdateTime ...
+func (s *Service) SetUpdateTime(i int64) {
+	s.UpdateTime = i
 }
 
 // GlobalRule ...
@@ -339,14 +392,40 @@ type StreamRoute struct {
 // ResourceMetadata describes the metadata of a resource object, which includes the
 // resource kind and name. It is used by the watch process of the APIGEtcdWWatcher type.
 type ResourceMetadata struct {
-	Labels        LabelInfo               `json:"labels,omitempty" yaml:"labels"`
+	Labels        *LabelInfo              `json:"labels,omitempty" yaml:"labels"`
 	APIVersion    string                  `json:"-" yaml:"-"`
 	ID            string                  `json:"id,omitempty" yaml:"id"`
+	Op            mvccpb.Event_EventType  `json:"-" yaml:"-"`
 	Kind          constant.APISIXResource `json:"-" yaml:"-"`
 	Name          string                  `json:"name,omitempty" yaml:"name"`
 	RetryCount    int64                   `json:"-" yaml:"-"`
 	Ctx           context.Context         `json:"-" yaml:"-"`
 	ApisixVersion string                  `json:"apisix_version,omitempty" yaml:"apisix_version"`
+}
+
+// GetCreateTime returns the create time for the resource
+func (rm *ResourceMetadata) GetCreateTime() int64 {
+	return 0
+}
+
+// GetUpdateTime returns the update time for the resource
+func (rm *ResourceMetadata) GetUpdateTime() int64 {
+	return 0
+}
+
+// SetCreateTime sets the create time for the resource
+func (rm *ResourceMetadata) SetCreateTime(i int64) {
+}
+
+// SetUpdateTime sets the update time for the resource
+func (rm *ResourceMetadata) SetUpdateTime(i int64) {
+}
+
+// ClearUnusedFields clears the unused fields for the resource
+func (rm *ResourceMetadata) ClearUnusedFields() {
+	if rm.Labels != nil {
+		rm.Labels.PublishId = ""
+	}
 }
 
 // GetReleaseInfo returns the ReleaseInfo for the resource

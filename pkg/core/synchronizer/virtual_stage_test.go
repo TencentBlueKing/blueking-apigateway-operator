@@ -67,7 +67,7 @@ var _ = Describe("VirtualStage", func() {
 		stage = NewVirtualStage(apisixHealthzURI)
 	})
 
-	checkLabels := func(labels entity.LabelInfo) {
+	checkLabels := func(labels *entity.LabelInfo) {
 		Expect(labels.Gateway).To(Equal(gatewayName))
 		Expect(labels.Stage).To(Equal(stageName))
 	}

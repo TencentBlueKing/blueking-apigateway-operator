@@ -52,7 +52,7 @@ var _ = Describe("configDiffer", func() {
 					ResourceMetadata: entity.ResourceMetadata{
 						ID:   "test-ssl2",
 						Kind: constant.SSL,
-						Labels: entity.LabelInfo{
+						Labels: &entity.LabelInfo{
 							Gateway: "test-gateway",
 							Stage:   "test-stage2",
 						},
@@ -62,7 +62,7 @@ var _ = Describe("configDiffer", func() {
 					ResourceMetadata: entity.ResourceMetadata{
 						ID:   "test-ssl3",
 						Kind: constant.SSL,
-						Labels: entity.LabelInfo{
+						Labels: &entity.LabelInfo{
 							Gateway: "test-gateway",
 							Stage:   "test-stage3",
 						},
@@ -72,7 +72,7 @@ var _ = Describe("configDiffer", func() {
 					ResourceMetadata: entity.ResourceMetadata{
 						ID:   "test-ssl3",
 						Kind: constant.SSL,
-						Labels: entity.LabelInfo{
+						Labels: &entity.LabelInfo{
 							Gateway: "test-gateway",
 							Stage:   "test-stage4",
 						},
@@ -84,7 +84,7 @@ var _ = Describe("configDiffer", func() {
 					ResourceMetadata: entity.ResourceMetadata{
 						ID:   "test-ssl1",
 						Kind: constant.SSL,
-						Labels: entity.LabelInfo{
+						Labels: &entity.LabelInfo{
 							Gateway: "test-gateway",
 							Stage:   "test-stage1",
 						},
@@ -94,7 +94,7 @@ var _ = Describe("configDiffer", func() {
 					ResourceMetadata: entity.ResourceMetadata{
 						ID:   "test-ssl2",
 						Kind: constant.SSL,
-						Labels: entity.LabelInfo{
+						Labels: &entity.LabelInfo{
 							Gateway: "test-gateway",
 							Stage:   "test-stagexx",
 						},
@@ -104,7 +104,7 @@ var _ = Describe("configDiffer", func() {
 					ResourceMetadata: entity.ResourceMetadata{
 						ID:   "test-ssl3",
 						Kind: constant.SSL,
-						Labels: entity.LabelInfo{
+						Labels: &entity.LabelInfo{
 							Gateway: "test-gateway",
 							Stage:   "test-stage4",
 						},
@@ -212,7 +212,7 @@ var _ = Describe("configDiffer", func() {
 						ID:   "test-svc1",
 						Kind: constant.Service,
 						Name: "test-stage1",
-						Labels: entity.LabelInfo{
+						Labels: &entity.LabelInfo{
 							Gateway: "test-gateway",
 							Stage:   "test-stage1",
 						},
@@ -223,7 +223,7 @@ var _ = Describe("configDiffer", func() {
 						ID:   "test-svc2",
 						Kind: constant.Service,
 						Name: "test-stage2",
-						Labels: entity.LabelInfo{
+						Labels: &entity.LabelInfo{
 							Gateway: "test-gateway",
 							Stage:   "test-stage2",
 						},
@@ -234,7 +234,7 @@ var _ = Describe("configDiffer", func() {
 						ID:   "test-svc4",
 						Kind: constant.Service,
 						Name: "test-stage4",
-						Labels: entity.LabelInfo{
+						Labels: &entity.LabelInfo{
 							Gateway: "test-gateway",
 							Stage:   "test-stage4",
 						},
@@ -248,7 +248,7 @@ var _ = Describe("configDiffer", func() {
 						ID:   "test-svc1",
 						Kind: constant.Service,
 						Name: "test-stage1",
-						Labels: entity.LabelInfo{
+						Labels: &entity.LabelInfo{
 							Gateway: "test-gateway",
 							Stage:   "test-stage1",
 						},
@@ -259,7 +259,7 @@ var _ = Describe("configDiffer", func() {
 						ID:   "test-svc2",
 						Kind: constant.Service,
 						Name: "test-stagexx",
-						Labels: entity.LabelInfo{
+						Labels: &entity.LabelInfo{
 							Gateway: "test-gateway",
 							Stage:   "test-stagexx",
 						},
@@ -270,7 +270,7 @@ var _ = Describe("configDiffer", func() {
 						ID:   "test-svc3",
 						Kind: constant.Service,
 						Name: "test-stage3",
-						Labels: entity.LabelInfo{
+						Labels: &entity.LabelInfo{
 							Gateway: "test-gateway",
 							Stage:   "test-stage3",
 						},
@@ -301,7 +301,7 @@ var _ = Describe("configDiffer", func() {
 						ID:   "test-route",
 						Kind: constant.Route,
 						Name: "test-stage",
-						Labels: entity.LabelInfo{
+						Labels: &entity.LabelInfo{
 							Gateway: "test-gateway",
 							Stage:   "test-stage",
 						},
@@ -312,7 +312,7 @@ var _ = Describe("configDiffer", func() {
 						ID:   "test-route",
 						Kind: constant.Route,
 						Name: "test-stagexx",
-						Labels: entity.LabelInfo{
+						Labels: &entity.LabelInfo{
 							Gateway: "test-gateway",
 							Stage:   "test-stagexx",
 						},
@@ -323,7 +323,7 @@ var _ = Describe("configDiffer", func() {
 						ID:   "test-route",
 						Kind: constant.Route,
 						Name: "test-stage",
-						Labels: entity.LabelInfo{
+						Labels: &entity.LabelInfo{
 							Gateway: "test-gateway",
 							Stage:   "test-stage",
 						},
@@ -337,7 +337,7 @@ var _ = Describe("configDiffer", func() {
 						ID:   "test-route",
 						Kind: constant.Route,
 						Name: "test-stage",
-						Labels: entity.LabelInfo{
+						Labels: &entity.LabelInfo{
 							Gateway: "test-gateway",
 							Stage:   "test-stage",
 						},
@@ -348,7 +348,7 @@ var _ = Describe("configDiffer", func() {
 						ID:   "test-route",
 						Kind: constant.Route,
 						Name: "test-stage",
-						Labels: entity.LabelInfo{
+						Labels: &entity.LabelInfo{
 							Gateway: "test-gateway",
 							Stage:   "test-stage",
 						},
@@ -359,7 +359,7 @@ var _ = Describe("configDiffer", func() {
 						ID:   "test-route",
 						Kind: constant.Route,
 						Name: "test-stage",
-						Labels: entity.LabelInfo{
+						Labels: &entity.LabelInfo{
 							Gateway: "test-gateway",
 							Stage:   "test-stage",
 						},
@@ -389,7 +389,7 @@ var _ = Describe("configDiffer", func() {
 					ResourceMetadata: entity.ResourceMetadata{
 						ID:   "test-route",
 						Kind: constant.Route,
-						Labels: entity.LabelInfo{
+						Labels: &entity.LabelInfo{
 							Gateway: "test-gateway",
 							Stage:   "test-stage",
 						},
@@ -410,7 +410,7 @@ var _ = Describe("configDiffer", func() {
 					ResourceMetadata: entity.ResourceMetadata{
 						ID:   "test-route",
 						Kind: constant.Route,
-						Labels: entity.LabelInfo{
+						Labels: &entity.LabelInfo{
 							Gateway: "test-gateway",
 							Stage:   "test-stage",
 						},
@@ -450,7 +450,7 @@ var _ = Describe("configDiffer", func() {
 							ID:   "test-route1",
 							Kind: constant.Route,
 							Name: "test-stage",
-							Labels: entity.LabelInfo{
+							Labels: &entity.LabelInfo{
 								Gateway: "test-gateway",
 								Stage:   "test-stage",
 							},
@@ -461,7 +461,7 @@ var _ = Describe("configDiffer", func() {
 							ID:   "test-route2",
 							Kind: constant.Route,
 							Name: "test-stage",
-							Labels: entity.LabelInfo{
+							Labels: &entity.LabelInfo{
 								Gateway: "test-gateway",
 								Stage:   "test-stage",
 							},
@@ -474,7 +474,7 @@ var _ = Describe("configDiffer", func() {
 							ID:   "test-svc1",
 							Kind: constant.Service,
 							Name: "test-stage1",
-							Labels: entity.LabelInfo{
+							Labels: &entity.LabelInfo{
 								Gateway: "test-gateway",
 								Stage:   "test-stage1",
 							},
@@ -485,7 +485,7 @@ var _ = Describe("configDiffer", func() {
 							ID:   "test-svc2",
 							Kind: constant.Service,
 							Name: "test-stagexx",
-							Labels: entity.LabelInfo{
+							Labels: &entity.LabelInfo{
 								Gateway: "test-gateway",
 								Stage:   "test-stagexx",
 							},
@@ -497,7 +497,7 @@ var _ = Describe("configDiffer", func() {
 						ResourceMetadata: entity.ResourceMetadata{
 							ID:   "test-ssl1",
 							Kind: constant.SSL,
-							Labels: entity.LabelInfo{
+							Labels: &entity.LabelInfo{
 								Gateway: "test-gateway",
 								Stage:   "test-stage1",
 							},
@@ -507,7 +507,7 @@ var _ = Describe("configDiffer", func() {
 						ResourceMetadata: entity.ResourceMetadata{
 							ID:   "test-ssl2",
 							Kind: constant.SSL,
-							Labels: entity.LabelInfo{
+							Labels: &entity.LabelInfo{
 								Gateway: "test-gateway",
 								Stage:   "test-stage2",
 							},
@@ -523,7 +523,7 @@ var _ = Describe("configDiffer", func() {
 							ID:   "test-route1",
 							Kind: constant.Route,
 							Name: "test-stage",
-							Labels: entity.LabelInfo{
+							Labels: &entity.LabelInfo{
 								Gateway: "test-gateway",
 								Stage:   "test-stage",
 							},
@@ -534,7 +534,7 @@ var _ = Describe("configDiffer", func() {
 							ID:   "test-route3",
 							Kind: constant.Route,
 							Name: "test-stage",
-							Labels: entity.LabelInfo{
+							Labels: &entity.LabelInfo{
 								Gateway: "test-gateway",
 								Stage:   "test-stage",
 							},
@@ -547,7 +547,7 @@ var _ = Describe("configDiffer", func() {
 							ID:   "test-svc1",
 							Kind: constant.Service,
 							Name: "test-stage1",
-							Labels: entity.LabelInfo{
+							Labels: &entity.LabelInfo{
 								Gateway: "test-gateway",
 								Stage:   "test-stage1",
 							},
@@ -558,7 +558,7 @@ var _ = Describe("configDiffer", func() {
 							ID:   "test-svc3",
 							Kind: constant.Service,
 							Name: "test-stagexx",
-							Labels: entity.LabelInfo{
+							Labels: &entity.LabelInfo{
 								Gateway: "test-gateway",
 								Stage:   "test-stagexx",
 							},
@@ -570,7 +570,7 @@ var _ = Describe("configDiffer", func() {
 						ResourceMetadata: entity.ResourceMetadata{
 							ID:   "test-ssl1",
 							Kind: constant.SSL,
-							Labels: entity.LabelInfo{
+							Labels: &entity.LabelInfo{
 								Gateway: "test-gateway",
 								Stage:   "test-stage1",
 							},
@@ -580,7 +580,7 @@ var _ = Describe("configDiffer", func() {
 						ResourceMetadata: entity.ResourceMetadata{
 							ID:   "test-ssl3",
 							Kind: constant.SSL,
-							Labels: entity.LabelInfo{
+							Labels: &entity.LabelInfo{
 								Gateway: "test-gateway",
 								Stage:   "test-stage2",
 							},
