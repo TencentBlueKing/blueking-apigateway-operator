@@ -52,10 +52,10 @@ type EventAgent struct {
 
 // NewEventAgent ...
 func NewEventAgent(
-	resourceRegistry *registry.APIGWEtcdRegistry,
-	commitCh chan []*entity.ReleaseInfo,
-	synchronizer *synchronizer.ApisixConfigSynchronizer,
-	stageTimer *timer.ReleaseTimer,
+resourceRegistry *registry.APIGWEtcdRegistry,
+commitCh chan []*entity.ReleaseInfo,
+synchronizer *synchronizer.ApisixConfigSynchronizer,
+stageTimer *timer.ReleaseTimer,
 ) *EventAgent {
 	return &EventAgent{
 		apigwRegistry: resourceRegistry,
@@ -113,6 +113,7 @@ func (w *EventAgent) Run(ctx context.Context) {
 		// events commit
 		case <-ticker.C:
 			w.logger.Debugw("commit ticker trigger")
+
 			// 定时处理时间窗口已经超时的stage
 			w.handleTicker(ctx)
 
