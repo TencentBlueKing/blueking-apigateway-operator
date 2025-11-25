@@ -424,7 +424,9 @@ func (rm *ResourceMetadata) SetUpdateTime(i int64) {
 
 // ClearUnusedFields clears the unused fields for the resource
 func (rm *ResourceMetadata) ClearUnusedFields() {
-	rm.Labels.PublishId = ""
+	if rm.Labels != nil {
+		rm.Labels.PublishId = ""
+	}
 }
 
 // GetReleaseInfo returns the ReleaseInfo for the resource
