@@ -26,6 +26,7 @@ import (
 
 	"github.com/spf13/cast"
 	"github.com/tidwall/gjson"
+	"go.etcd.io/etcd/api/v3/mvccpb"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
@@ -344,9 +345,10 @@ type StreamRoute struct {
 // ResourceMetadata describes the metadata of a resource object, which includes the
 // resource kind and name. It is used by the watch process of the APIGEtcdWWatcher type.
 type ResourceMetadata struct {
-	Labels        LabelInfo               `json:"labels,omitempty" yaml:"labels"`
+	Labels        *LabelInfo              `json:"labels,omitempty" yaml:"labels"`
 	APIVersion    string                  `json:"-" yaml:"-"`
 	ID            string                  `json:"id,omitempty" yaml:"id"`
+	Op            mvccpb.Event_EventType  `json:"-" yaml:"-"`
 	Kind          constant.APISIXResource `json:"-" yaml:"-"`
 	Name          string                  `json:"name,omitempty" yaml:"name"`
 	RetryCount    int64                   `json:"-" yaml:"-"`

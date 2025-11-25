@@ -25,7 +25,6 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/agent/timer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/registry"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/synchronizer"
@@ -132,7 +131,7 @@ func (c *Committer) commitGroup(ctx context.Context, releaseInfoList []*entity.R
 				c.logger.Info("end commit global resource")
 				wg.Done()
 			})
-		} else if resourceInfo.Kind == constant.BkRelease {
+		} else {
 			// Stage 资源按 gateway 维度串行处理
 			utils.GoroutineWithRecovery(ctx, func() {
 				c.logger.Infof("begin commit gateway channel: %s", tempResourceInfo.GetID())

@@ -184,6 +184,7 @@ func (r *APIGWEtcdRegistry) handleEvent(event *clientv3.Event) (*entity.Resource
 			attribute.String("resource.kind", metadata.Kind.String()),
 		)
 		metadata.Ctx = eventCtx
+		metadata.Op = event.Type
 		return &metadata, nil
 	case clientv3.EventTypeDelete:
 		r.logger.Debugw(
@@ -219,6 +220,7 @@ func (r *APIGWEtcdRegistry) handleEvent(event *clientv3.Event) (*entity.Resource
 			return nil, err
 		}
 		metadata.Ctx = eventCtx
+		metadata.Op = event.Type
 		return &metadata, nil
 	}
 	return nil, fmt.Errorf("err unknown event type: %s", event.Type)

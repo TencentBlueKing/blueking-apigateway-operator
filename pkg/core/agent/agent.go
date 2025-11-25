@@ -23,6 +23,7 @@ import (
 	"context"
 	"time"
 
+	"go.etcd.io/etcd/api/v3/mvccpb"
 	"go.uber.org/zap"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
@@ -138,6 +139,10 @@ func (w *EventAgent) createWatchChannel(ctx context.Context) (<-chan *entity.Res
 }
 
 func (w *EventAgent) handleEvent(event *entity.ResourceMetadata) {
+	if event.Op == mvccpb.DELETE {
+		w.logger.Debugw("skip delete event", "event", event)
+		return
+	}
 	// trace
 	ctx, span := trace.StartTrace(event.Ctx, "agent.handleEvent")
 	event.Ctx = ctx
