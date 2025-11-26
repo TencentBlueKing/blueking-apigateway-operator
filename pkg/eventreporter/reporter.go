@@ -194,8 +194,7 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, release *entity.Rel
 	if release == nil || release.Labels.PublishId == "" {
 		return
 	}
-	publishID := cast.ToString(release.PublishId)
-	if publishID == constant.NoNeedReportPublishID || publishID == "" {
+	if release.IsNoNeedReport() {
 		logging.GetLogger().Debugf("event[release: %+v] is not need to report", release.Labels)
 		return
 	}
@@ -276,9 +275,7 @@ func addEvent(event reportEvent) {
 	if event.release == nil || event.release.Labels.PublishId == "" {
 		return
 	}
-	// filter not need report event
-	publishID := cast.ToString(event.release.PublishId)
-	if publishID == constant.NoNeedReportPublishID || publishID == "" {
+	if event.release.IsNoNeedReport() {
 		logging.GetLogger().Debugf("event[release: %+v] is not need to report", event.release.Labels)
 		return
 	}

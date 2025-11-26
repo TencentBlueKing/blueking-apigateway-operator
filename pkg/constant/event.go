@@ -38,8 +38,8 @@ const (
 	// special event not need resport
 	NoNeedReportPublishID = "-1"
 
-	// ApisixVersionRouteID
-	ApisixVersionRouteID = "-1"
+	// 删除网关事件
+	DeletePublishID = "-2"
 )
 
 type EventStatus string

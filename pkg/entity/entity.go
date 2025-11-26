@@ -499,6 +499,17 @@ type ReleaseInfo struct {
 	Ctx             context.Context `json:"-"`
 }
 
+func (ri *ReleaseInfo) String() string {
+	return fmt.Sprintf("%s:%d:%s:%s:%s",
+		ri.ID, ri.PublishId, ri.PublishTime, ri.ApisixVersion, ri.ResourceVersion)
+}
+
+// IsNoNeedReport check if the release info is no need report
+func (ri *ReleaseInfo) IsNoNeedReport() bool {
+	publishID := cast.ToString(ri.PublishId)
+	return publishID == constant.NoNeedReportPublishID || publishID == "" || publishID == constant.DeletePublishID
+}
+
 type LabelInfo struct {
 	Gateway       string `json:"gateway.bk.tencent.com/gateway,omitempty"`
 	Stage         string `json:"gateway.bk.tencent.com/stage,omitempty"`
