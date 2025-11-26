@@ -91,12 +91,12 @@ func (c *Committer) Run(ctx context.Context) {
 
 				if offset+segmentLength > len(resourceList) {
 					rawResource, _ := json.Marshal(resourceList[offset:])
+					c.commitGroup(ctx, resourceList[offset:])
 					c.logger.Infow(
 						"Commit resource group done",
 						"resourceList",
 						string(rawResource),
 					)
-					c.commitGroup(ctx, resourceList[offset:])
 					break
 				}
 				rawResource, _ := json.Marshal(resourceList[offset:(offset + segmentLength)])
