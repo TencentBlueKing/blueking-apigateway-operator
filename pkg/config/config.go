@@ -302,13 +302,13 @@ func GenStagePrimaryKey(gatewayName, stageName string) string {
 }
 
 // GenResourceIDKey 生成资源 ID 查询的 key
-func GenResourceIDKey(gatewayName string, stageName string, resourceID int64) string {
+func GenResourceIDKey(gatewayName, stageName string, resourceID int64) string {
 	// {gateway}.{stage}.{resourceID}
 	return fmt.Sprintf("%s.%s.%d", gatewayName, stageName, resourceID)
 }
 
 // GenApigwResourceNameKey 生成 apigw 资源名称查询的 key
-func GenApigwResourceNameKey(gatewayName string, stageName string, resourceName string) string {
+func GenApigwResourceNameKey(gatewayName, stageName, resourceName string) string {
 	// {gateway}.{stage}.{resourceName}
 	key := fmt.Sprintf("%s.%s.%s", gatewayName, stageName, resourceName)
 

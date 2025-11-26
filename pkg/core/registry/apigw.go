@@ -23,9 +23,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"strings"
 	"time"
+
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 
 	json "github.com/json-iterator/go"
 	"github.com/rotisserie/eris"
@@ -460,11 +461,20 @@ func (r *APIGWEtcdRegistry) ValueToGlobalResource(resp *clientv3.GetResponse) (*
 }
 
 // GetStageResourceByID 根据资源 ID 查询资源信息
-func (r *APIGWEtcdRegistry) GetStageResourceByID(resourceID int64, stageRelease *entity.ReleaseInfo) (*entity.ApisixStageResource, error) {
-	// /{self.prefix}/{self.api_version}/gateway/{gateway_name}/{stage_name}/{kind}/{gateway_name}.{stage_name}.{resource_id}
+func (r *APIGWEtcdRegistry) GetStageResourceByID(
+	resourceID int64,
+	stageRelease *entity.ReleaseInfo,
+) (*entity.ApisixStageResource, error) {
+	// /{prefix}/{api_version}/gateway/{gateway_name}/{stage_name}/{kind}/{gateway_name}.{stage_name}.{resource_id}
 	etcdKey := fmt.Sprintf(
 		constant.ApigwStageResourcePrefixFormat+"%s/%s",
-		r.keyPrefix, stageRelease.APIVersion, stageRelease.Labels.Gateway, stageRelease.Labels.Stage, stageRelease.Kind, config.GenResourceIDKey(stageRelease.Labels.Gateway, stageRelease.Labels.Stage, resourceID))
+		r.keyPrefix,
+		stageRelease.APIVersion,
+		stageRelease.Labels.Gateway,
+		stageRelease.Labels.Stage,
+		stageRelease.Kind,
+		config.GenResourceIDKey(stageRelease.Labels.Gateway, stageRelease.Labels.Stage, resourceID),
+	)
 	resp, err := r.etcdClient.Get(stageRelease.Ctx, etcdKey, clientv3.WithPrefix())
 	if err != nil {
 		r.logger.Error(err, "get etcd value failed", "key", stageRelease.GetID())
@@ -484,10 +494,15 @@ func (r *APIGWEtcdRegistry) GetStageResourceByID(resourceID int64, stageRelease 
 
 // Count 查询资源数量
 func (r *APIGWEtcdRegistry) Count(stageRelease *entity.ReleaseInfo) (int64, error) {
-	// /{self.prefix}/{self.api_version}/gateway/{gateway_name}/{stage_name}/route/bk-default.default.-1
+	// /{prefix}/{api_version}/gateway/{gateway_name}/{stage_name}/route/bk-default.default.-1
 	etcdKey := fmt.Sprintf(
 		constant.ApigwStageResourcePrefixFormat+"%s/",
-		r.keyPrefix, stageRelease.APIVersion, stageRelease.Labels.Gateway, stageRelease.Labels.Stage, stageRelease.Kind)
+		r.keyPrefix,
+		stageRelease.APIVersion,
+		stageRelease.Labels.Gateway,
+		stageRelease.Labels.Stage,
+		stageRelease.Kind,
+	)
 	resp, err := r.etcdClient.Get(stageRelease.Ctx, etcdKey, clientv3.WithPrefix(), clientv3.WithCountOnly())
 	if err != nil {
 		return 0, err
@@ -497,10 +512,15 @@ func (r *APIGWEtcdRegistry) Count(stageRelease *entity.ReleaseInfo) (int64, erro
 
 // StageReleaseVersion 查询环境版本信息
 func (r *APIGWEtcdRegistry) StageReleaseVersion(stageRelease *entity.ReleaseInfo) (*entity.ReleaseInfo, error) {
-	// /{self.prefix}/{self.api_version}/gateway/{gateway_name}/{stage_name}/_bk_release/bk.release.{gateway_name}.{stage_name}
+	// /{prefix}/{api_version}/gateway/{gateway_name}/{stage_name}/_bk_release/bk.release.{gateway_name}.{stage_name}
 	etcdKey := fmt.Sprintf(
 		constant.ApigwStageResourcePrefixFormat+constant.BkRelease.String()+"/%s",
-		r.keyPrefix, stageRelease.APIVersion, stageRelease.Labels.Gateway, stageRelease.Labels.Stage, stageRelease.GetReleaseID())
+		r.keyPrefix,
+		stageRelease.APIVersion,
+		stageRelease.Labels.Gateway,
+		stageRelease.Labels.Stage,
+		stageRelease.GetReleaseID(),
+	)
 	resp, err := r.etcdClient.Get(stageRelease.Ctx, etcdKey, clientv3.WithPrefix())
 	if err != nil {
 		r.logger.Error(err, "get etcd value failed", "key", stageRelease.GetID())
@@ -521,7 +541,7 @@ func (r *APIGWEtcdRegistry) StageReleaseVersion(stageRelease *entity.ReleaseInfo
 
 // ValueToStageReleaseInfo ...
 func (r *APIGWEtcdRegistry) ValueToStageReleaseInfo(resp *clientv3.GetResponse) (*entity.ReleaseInfo, error) {
-	// /{self.prefix}/{self.api_version}/gateway/{gateway_name}/{stage_name}/_bk_release/bk.release.{gateway_name}.{stage_name}
+	// /{prefix}/{api_version}/gateway/{gateway_name}/{stage_name}/_bk_release/bk.release.{gateway_name}.{stage_name}
 	var release *entity.ReleaseInfo
 	err := json.Unmarshal(resp.Kvs[0].Value, &release)
 	if err != nil {
