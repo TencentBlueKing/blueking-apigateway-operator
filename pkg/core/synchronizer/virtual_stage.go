@@ -36,6 +36,7 @@ import (
 const (
 	HealthZRouteIDOuter = "micro-gateway-operator-healthz-outer"
 	NotFoundHandling    = "micro-gateway-not-found-handling"
+	HEADRouteIDOuter    = "micro-gateway-head-handling"
 )
 
 // VirtualStage combine some builtin routes
@@ -103,7 +104,30 @@ func (s *VirtualStage) makeOuterHealthzRoute() *entity.Route {
 		ResourceMetadata: s.makeRouteMetadata(HealthZRouteIDOuter),
 		Uris:             []string{s.apisixHealthzURI},
 		Priority:         -100,
-		Methods:          []string{http.MethodGet, http.MethodHead},
+		Methods:          []string{http.MethodGet},
+		Plugins:          plugins,
+		Status:           constant.StatusEnable,
+	}
+}
+
+// makeOuterHEADRoute return the apisix configuration of outer HEAD route
+func (s *VirtualStage) makeOuterHEADRoute() *entity.Route {
+	plugins := map[string]any{
+		"limit-req": map[string]any{
+			"rate":  float64(10),
+			"burst": float64(10),
+			"key":   "server_addr",
+		},
+		"mocking": map[string]any{
+			"content_type":     "text/plain",
+			"response_example": "ok",
+		},
+	}
+	return &entity.Route{
+		ResourceMetadata: s.makeRouteMetadata(HEADRouteIDOuter),
+		URI:              "/*",
+		Priority:         -99,
+		Methods:          []string{http.MethodHead},
 		Plugins:          plugins,
 		Status:           constant.StatusEnable,
 	}
@@ -159,6 +183,7 @@ func (s *VirtualStage) MakeConfiguration() *entity.ApisixStageResource {
 	for _, fn := range []func() *entity.Route{
 		s.make404DefaultRoute,
 		s.makeOuterHealthzRoute,
+		s.makeOuterHEADRoute,
 	} {
 		route := fn()
 		ret.Routes[route.ID] = route

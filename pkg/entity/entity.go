@@ -445,6 +445,9 @@ func (rm *ResourceMetadata) GetID() string {
 
 // GetStageName returns the stage name from labels
 func (rm *ResourceMetadata) GetStageName() string {
+	if rm.Labels == nil {
+		return ""
+	}
 	return rm.Labels.Stage
 }
 
@@ -455,6 +458,9 @@ func (rm *ResourceMetadata) GetStageKey() string {
 
 // GetGatewayName returns the gateway name from labels
 func (rm *ResourceMetadata) GetGatewayName() string {
+	if rm.Labels == nil {
+		return ""
+	}
 	return rm.Labels.Gateway
 }
 
@@ -486,11 +492,11 @@ func (rm *ResourceMetadata) GetReleaseID() string {
 
 type ReleaseInfo struct {
 	ResourceMetadata
-	PublishId       int    `json:"publish_id"`
-	PublishTime     string `json:"publish_time"`
-	ApisixVersion   string `json:"apisix_version"`
-	ResourceVersion string `json:"resource_version"`
-	Ctx             context.Context
+	PublishId       int             `json:"publish_id,omitempty"`
+	PublishTime     string          `json:"publish_time,omitempty"`
+	ApisixVersion   string          `json:"apisix_version,omitempty"`
+	ResourceVersion string          `json:"resource_version,omitempty"`
+	Ctx             context.Context `json:"-"`
 }
 
 type LabelInfo struct {
