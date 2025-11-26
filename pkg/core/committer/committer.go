@@ -121,22 +121,22 @@ func (c *Committer) commitGroup(ctx context.Context, releaseInfoList []*entity.R
 	wg := &sync.WaitGroup{}
 	for _, resourceInfo := range releaseInfoList {
 		wg.Add(1)
-		tempResourceInfo := resourceInfo
+		tmpResourceInfo := resourceInfo
 		// 判断是否是 global 资源：PluginMetadata 且 Stage 为空
-		if tempResourceInfo.IsGlobalResource() {
+		if tmpResourceInfo.IsGlobalResource() {
 			// Global 资源需要单独处理
 			utils.GoroutineWithRecovery(ctx, func() {
-				c.logger.Infof("begin commit global resource: %s", tempResourceInfo.GetID())
-				c.commitGlobalResource(ctx, tempResourceInfo)
-				c.logger.Infof("end commit global resource: %s", tempResourceInfo.GetID())
+				c.logger.Info("begin commit global resource")
+				c.commitGlobalResource(ctx, tmpResourceInfo)
+				c.logger.Info("end commit global resource")
 				wg.Done()
 			})
 		} else {
 			// Stage 资源按 gateway 维度串行处理
 			utils.GoroutineWithRecovery(ctx, func() {
-				c.logger.Infof("begin commit gateway channel: %s", tempResourceInfo.GetID())
-				c.commitGatewayStage(ctx, tempResourceInfo, wg)
-				c.logger.Infof("end commit gateway channel: %s", tempResourceInfo.GetID())
+				c.logger.Infof("begin commit gateway channel: %s", tmpResourceInfo.GetID())
+				c.commitGatewayStage(ctx, tmpResourceInfo, wg)
+				c.logger.Infof("end commit gateway channel: %s", tmpResourceInfo.GetID())
 			})
 		}
 	}
@@ -202,7 +202,7 @@ func (c *Committer) commitStage(ctx context.Context, si *entity.ReleaseInfo, sta
 	}
 	// eventrepoter.ReportApplyConfigurationSuccessEvent(ctx, stage) // 可以由事件之前的关系推断出来
 	eventreporter.ReportLoadConfigurationResultEvent(ctx, si)
-	c.logger.Infow("commit stage success", "stageInfo", si)
+	c.logger.Info("commit stage success", "stageInfo", si)
 }
 
 func (c *Committer) retryStage(si *entity.ReleaseInfo) {
@@ -276,4 +276,53 @@ func (c *Committer) commitGlobalResource(ctx context.Context, si *entity.Release
 		return
 	}
 	c.logger.Infow("commit global resource success", "globalInfo", si)
+}
+
+// GetStageReleaseNativeApisixConfigurationByID 根据资源 ID 从 etcd 获取原生 apisix 配置
+func (c *Committer) GetStageReleaseNativeApisixConfigurationByID(
+	ctx context.Context,
+	resourceID int64,
+	si *entity.ReleaseInfo,
+) (*entity.ApisixStageResource, error) {
+	// 直接从etcd获取原生apisix配置
+	resources, err := c.apigwEtcdRegistry.GetStageResourceByID(resourceID, si)
+	if err != nil {
+		c.logger.Errorf("get native apisix[stage:%s] configuration failed: %v", si.GetStageKey(), err)
+		return nil, err
+	}
+	metric.ReportResourceCountHelper(
+		si.GetGatewayName(),
+		si.GetStageName(),
+		resources,
+		ReportResourceConvertedMetric,
+	)
+	return resources, nil
+}
+
+// GetResourceCount 获取资源数量
+func (c *Committer) GetResourceCount(
+	ctx context.Context,
+	si *entity.ReleaseInfo,
+) (int64, error) {
+	// 直接从etcd获取原生apisix配置
+	count, err := c.apigwEtcdRegistry.Count(si)
+	if err != nil {
+		c.logger.Errorf("get native apisix[stage:%s] configuration failed: %v", si.GetStageKey(), err)
+		return 0, err
+	}
+	return count, nil
+}
+
+// GetStageReleaseVersion 获取指定环境的发布版本信息
+func (c *Committer) GetStageReleaseVersion(
+	ctx context.Context,
+	si *entity.ReleaseInfo,
+) (*entity.ReleaseInfo, error) {
+	// 直接从etcd获取原生apisix配置
+	releaseVersionInfo, err := c.apigwEtcdRegistry.StageReleaseVersion(si)
+	if err != nil {
+		c.logger.Errorf("get native apisix[stage:%s] configuration failed: %v", si.GetStageKey(), err)
+		return nil, err
+	}
+	return releaseVersionInfo, nil
 }

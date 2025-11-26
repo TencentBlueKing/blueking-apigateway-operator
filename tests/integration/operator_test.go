@@ -51,7 +51,7 @@ var _ = Describe("Operator Integration", func() {
 	// var resourceCli *client.ResourceClient
 	BeforeEach(func() {
 		cfg := clientv3.Config{
-			Endpoints:   []string{"localhost:2379"},
+			Endpoints:   []string{"localhost:2479"},
 			DialTimeout: 5 * time.Second,
 		}
 		var err error
@@ -61,11 +61,11 @@ var _ = Describe("Operator Integration", func() {
 		// resourceCli = client.NewResourceClient(operatorURL, "DebugModel@bk")
 	})
 
-	//AfterEach(func() {
-	//	_, err := etcdCli.Delete(context.Background(), "", clientv3.WithPrefix())
-	//	Expect(err).NotTo(HaveOccurred())
-	//	_ = etcdCli.Close()
-	//})
+	AfterEach(func() {
+		_, err := etcdCli.Delete(context.Background(), "", clientv3.WithPrefix())
+		Expect(err).NotTo(HaveOccurred())
+		_ = etcdCli.Close()
+	})
 
 	Describe("test publish default resource", func() {
 		Context("test new agteway publish", func() {

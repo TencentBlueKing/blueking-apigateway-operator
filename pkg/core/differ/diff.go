@@ -48,6 +48,11 @@ func transformMap(mapType map[string]any) map[string]any {
 	return newMap
 }
 
+// ignoreCreateTimeAndUpdateTimeCmpOpt: 忽略typ 创建、更新时间
+var ignoreCreateTimeAndUpdateTimeCmpOptFunc = func(typ any) cmp.Option {
+	return cmpopts.IgnoreFields(typ, "CreateTime", "UpdateTime")
+}
+
 // normalizeNodesValue: Normalize Nodes field values through JSON serialization/deserialization
 // This handles type inconsistencies like map[string]any vs map[any]any, and int vs float64
 func normalizeNodesValue(v any) any {
@@ -96,7 +101,7 @@ func normalizeServiceNodes(service *entity.Service) *entity.Service {
 
 // ignoreApisixMetadata: ignore some members of apisixMetadata
 var ignoreApisixMetadataCmpOpt = cmpopts.IgnoreFields(entity.ResourceMetadata{},
-	"Labels", "Ctx", "RetryCount", "APIVersion", "Kind", "ApisixVersion",
+	"Labels", "Ctx", "RetryCount", "APIVersion", "Kind", "ApisixVersion", "Op",
 )
 
 // CmpReporter ...
@@ -204,6 +209,7 @@ func (d *ConfigDiffer) DiffRoutes(
 				Stage:        newRes.GetReleaseInfo().GetStageName(),
 				ResourceType: constant.ApisixResourceTypeRoutes,
 			}),
+			ignoreCreateTimeAndUpdateTimeCmpOptFunc(entity.Route{}),
 		) {
 			putList[key] = newRes
 		}
@@ -245,6 +251,7 @@ func (d *ConfigDiffer) DiffServices(
 				Stage:        newRes.GetReleaseInfo().GetStageName(),
 				ResourceType: constant.ApisixResourceTypeServices,
 			}),
+			ignoreCreateTimeAndUpdateTimeCmpOptFunc(entity.Service{}),
 		) {
 			putList[key] = newRes
 		}

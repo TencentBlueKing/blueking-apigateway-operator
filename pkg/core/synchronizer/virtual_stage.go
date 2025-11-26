@@ -49,7 +49,7 @@ type VirtualStage struct {
 // NewVirtualStage creates a new virtual stage
 func NewVirtualStage(apisixHealthzURI string) *VirtualStage {
 	metadata := entity.ResourceMetadata{
-		Labels: entity.LabelInfo{
+		Labels: &entity.LabelInfo{
 			Gateway: virtualGatewayName,
 			Stage:   virtualStageName,
 		},
@@ -82,7 +82,7 @@ func (s *VirtualStage) make404DefaultRoute() *entity.Route {
 				"path": fileLoggerLogPath,
 			},
 		},
-		Status: 1,
+		Status: constant.StatusEnable,
 	}
 }
 
