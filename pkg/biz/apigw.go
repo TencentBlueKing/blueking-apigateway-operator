@@ -21,7 +21,7 @@ package biz
 
 import (
 	"context"
-	"errors"
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/committer"
@@ -36,24 +36,26 @@ func GetApigwResourcesByStage(
 	stageName string,
 	isExcludeReleaseVersion bool,
 ) (*entity.ApisixStageResource, error) {
-	// si := entity.ReleaseStageInfo{
-	//	ResourceMetadata: entity.ResourceMetadata{
-	//		Labels: entity.Label{
-	//			Gateway: gatewayName,
-	//			Stage:   stageName,
-	//		},
-	//	},
-	//}
-	// apisixResources, _, err := committer.ConvertEtcdKVToApisixConfiguration(ctx, si)
-	// if err != nil {
-	//	return nil, err
-	//}
-	// if isExcludeReleaseVersion {
-	//	// 资源列表中排除 apigw-builtin-mock-release-version
-	//	resourceIDKey := genResourceIDKey(gatewayName, stageName, config.ReleaseVersionResourceID)
-	//	delete(apisixResources.Routes, resourceIDKey)
-	//}
-	return nil, nil
+	si := &entity.ReleaseInfo{
+		Ctx: ctx,
+		ResourceMetadata: entity.ResourceMetadata{
+			APIVersion: "v2",
+			Labels: &entity.LabelInfo{
+				Gateway: gatewayName,
+				Stage:   stageName,
+			},
+		},
+	}
+	apisixConf, err := committer.GetStageReleaseNativeApisixConfiguration(ctx, si)
+	if err != nil {
+		return nil, err
+	}
+	if isExcludeReleaseVersion {
+		// 资源列表中排除 builtin-mock-release-version
+		resourceIDKey := config.GenResourceIDKey(gatewayName, stageName, config.ReleaseVersionResourceID)
+		delete(apisixConf.Routes, resourceIDKey)
+	}
+	return apisixConf, nil
 }
 
 // GetApigwResourceCount 获取 apigw 指定环境的资源数量
@@ -63,15 +65,22 @@ func GetApigwResourceCount(
 	gatewayName string,
 	stageName string,
 ) (int64, error) {
-	// si := watcher.ReleaseInfo{
-	//	GatewayName: gatewayName,
-	//	StageName:   stageName,
-	//}
-	// count, err := committer.CliGetResourceCount(ctx, si)
-	// if err != nil {
-	//	return 0, err
-	//}
-	return 0, nil
+	si := &entity.ReleaseInfo{
+		Ctx: ctx,
+		ResourceMetadata: entity.ResourceMetadata{
+			APIVersion: "v2",
+			Kind:       constant.Route,
+			Labels: &entity.LabelInfo{
+				Gateway: gatewayName,
+				Stage:   stageName,
+			},
+		},
+	}
+	count, err := committer.GetResourceCount(ctx, si)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 // ListApigwResources 获取 apigw 指定环境的资源列表
@@ -100,38 +109,43 @@ func GetApigwResource(
 	resourceName string,
 	resourceID int64,
 ) (map[string]*entity.ApisixStageResource, error) {
-	// configMap := make(map[string]*entity.ApisixConfiguration)
-	// stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
-	//
-	//// by resourceName
-	// if resourceName != "" {
-	//	si := watcher.ReleaseInfo{
-	//		GatewayName: gatewayName,
-	//		StageName:   stageName,
-	//	}
-	//	resourceNameKey := genResourceNameKey(gatewayName, stageName, resourceName)
-	// 	apisixResources, _, err := committer.CliConvertEtcdResourceToApisixConfiguration(ctx, si, resourceNameKey)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	configMap[stageKey] = apisixResources
-	//	return configMap, nil
-	//}
-	//
-	//// by resourceID
-	// apisixResources, err := GetApigwResourcesByStage(ctx, committer, gatewayName, stageName, true)
-	// if err != nil {
-	//	return nil, err
-	//}
-	// resourceIDKey := genResourceIDKey(gatewayName, stageName, resourceID)
-	// for _, route := range apisixResources.Routes {
-	//	if resourceID != 0 && route.ID == resourceIDKey {
-	//		apisixResources.Routes = map[string]*entity.Route{route.ID: route}
-	//		configMap[stageKey] = apisixResources
-	//		return configMap, nil
-	//	}
-	//}
-	return nil, nil
+	configMap := make(map[string]*entity.ApisixStageResource)
+	stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
+
+	// by resourceName
+	if resourceName != "" {
+		resourceNameKey := config.GenApigwResourceNameKey(gatewayName, stageName, resourceName)
+		apisixResources, err := GetApigwResourcesByStage(ctx, committer, gatewayName, stageName, true)
+		if err != nil {
+			return nil, err
+		}
+		for _, route := range apisixResources.Routes {
+			if route.Name == resourceNameKey {
+				apisixResources.Routes = map[string]*entity.Route{route.ID: route}
+				configMap[stageKey] = apisixResources
+				return configMap, nil
+			}
+		}
+	}
+
+	// by resourceID
+	si := &entity.ReleaseInfo{
+		Ctx: ctx,
+		ResourceMetadata: entity.ResourceMetadata{
+			APIVersion: "v2",
+			Kind:       constant.Route,
+			Labels: &entity.LabelInfo{
+				Gateway: gatewayName,
+				Stage:   stageName,
+			},
+		},
+	}
+	apisixResources, err := committer.GetStageReleaseNativeApisixConfigurationByID(ctx, resourceID, si)
+	if err != nil {
+		return nil, err
+	}
+	configMap[stageKey] = apisixResources
+	return configMap, nil
 }
 
 // GetApigwStageCurrentVersionInfo 获取 apigw 指定环境的发布版本信息
@@ -140,39 +154,20 @@ func GetApigwStageCurrentVersionInfo(
 	committer *committer.Committer,
 	gatewayName string,
 	stageName string,
-) (map[string]any, error) {
-	// si := watcher.ReleaseInfo{
-	//	GatewayName: gatewayName,
-	//	StageName:   stageName,
-	//}
-	//
-	// resourceNameKey := genResourceNameKey(gatewayName, stageName, "apigw-builtin-mock-release-version")
-	// apisixResources, _, err := committer.CliConvertEtcdResourceToApisixConfiguration(ctx, si, resourceNameKey)
-	// if err != nil {
-	//	return nil, err
-	//}
-	//
-	// if len(apisixResources.Routes) == 0 {
-	//	return nil, errors.New("current-version not found")
-	//}
-	//
-	// resourceIDKey := genResourceIDKey(gatewayName, stageName, config.ReleaseVersionResourceID)
-	// plugins := apisixResources.Routes[resourceIDKey].Plugins
-	//
-	// for _, plugin := range plugins {
-	//	pluginData := plugin.(map[string]interface{})
-	//	responseExample := pluginData["response_example"].(string)
-	//	if responseExample == "" {
-	//		continue
-	//	}
-	//	versionInfo := make(map[string]interface{})
-	//	err := json.Unmarshal([]byte(responseExample), &versionInfo)
-	//	if err != nil {
-	//		return nil, errors.New("current-version unmarshal error: " + err.Error())
-	//	}
-	//
-	//	return versionInfo, nil
-	//}
-
-	return nil, errors.New("current-version not found")
+) (*entity.ReleaseInfo, error) {
+	si := &entity.ReleaseInfo{
+		Ctx: ctx,
+		ResourceMetadata: entity.ResourceMetadata{
+			APIVersion: "v2",
+			Labels: &entity.LabelInfo{
+				Gateway: gatewayName,
+				Stage:   stageName,
+			},
+		},
+	}
+	releaseVersionInfo, err := committer.GetStageReleaseVersion(ctx, si)
+	if err != nil {
+		return nil, err
+	}
+	return releaseVersionInfo, nil
 }

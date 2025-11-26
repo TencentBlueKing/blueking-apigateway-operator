@@ -19,6 +19,8 @@
 // Package serializer ...
 package serializer
 
+import "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
+
 // ApigwListInfo apigw 资源列表
 type ApigwListInfo map[string]*StageScopedApisixResources
 
@@ -41,4 +43,4 @@ type ApigwListResourceCountResponse struct {
 }
 
 // ApigwListCurrentVersionInfoResponse apigw 环境发布版本信息
-type ApigwListCurrentVersionInfoResponse map[string]any
+type ApigwListCurrentVersionInfoResponse *entity.ReleaseInfo

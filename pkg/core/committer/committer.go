@@ -277,3 +277,52 @@ func (c *Committer) commitGlobalResource(ctx context.Context, si *entity.Release
 	}
 	c.logger.Infow("commit global resource success", "globalInfo", si)
 }
+
+// GetStageReleaseNativeApisixConfigurationByID 根据资源 ID 从 etcd 获取原生 apisix 配置
+func (c *Committer) GetStageReleaseNativeApisixConfigurationByID(
+	ctx context.Context,
+	resourceID int64,
+	si *entity.ReleaseInfo,
+) (*entity.ApisixStageResource, error) {
+	// 直接从etcd获取原生apisix配置
+	resources, err := c.apigwEtcdRegistry.GetStageResourceByID(resourceID, si)
+	if err != nil {
+		c.logger.Errorf("get native apisix[stage:%s] configuration failed: %v", si.GetStageKey(), err)
+		return nil, err
+	}
+	metric.ReportResourceCountHelper(
+		si.GetGatewayName(),
+		si.GetStageName(),
+		resources,
+		ReportResourceConvertedMetric,
+	)
+	return resources, nil
+}
+
+// GetResourceCount 获取资源数量
+func (c *Committer) GetResourceCount(
+	ctx context.Context,
+	si *entity.ReleaseInfo,
+) (int64, error) {
+	// 直接从etcd获取原生apisix配置
+	count, err := c.apigwEtcdRegistry.Count(si)
+	if err != nil {
+		c.logger.Errorf("get native apisix[stage:%s] configuration failed: %v", si.GetStageKey(), err)
+		return 0, err
+	}
+	return count, nil
+}
+
+// GetStageReleaseVersion 获取指定环境的发布版本信息
+func (c *Committer) GetStageReleaseVersion(
+	ctx context.Context,
+	si *entity.ReleaseInfo,
+) (*entity.ReleaseInfo, error) {
+	// 直接从etcd获取原生apisix配置
+	releaseVersionInfo, err := c.apigwEtcdRegistry.StageReleaseVersion(si)
+	if err != nil {
+		c.logger.Errorf("get native apisix[stage:%s] configuration failed: %v", si.GetStageKey(), err)
+		return nil, err
+	}
+	return releaseVersionInfo, nil
+}
