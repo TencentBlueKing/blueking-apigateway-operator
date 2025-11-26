@@ -57,15 +57,15 @@ type Committer struct {
 
 // NewCommitter 创建Committer
 func NewCommitter(
-	apigwEtcdRegistry *registry.APIGWEtcdRegistry,
-	synchronizer *synchronizer.ApisixConfigSynchronizer,
-	releaseTimer *timer.ReleaseTimer,
+apigwEtcdRegistry *registry.APIGWEtcdRegistry,
+synchronizer *synchronizer.ApisixConfigSynchronizer,
+releaseTimer *timer.ReleaseTimer,
 ) *Committer {
 	return &Committer{
 		apigwEtcdRegistry: apigwEtcdRegistry, // Registry for resource management
 		commitResourceChan: make(
 			chan []*entity.ReleaseInfo,
-		), // Channel for committing resource information
+		),                                                    // Channel for committing resource information
 		synchronizer: synchronizer,                           // Configuration synchronizer
 		releaseTimer: releaseTimer,                           // Timer for stage management
 		logger:       logging.GetLogger().Named("committer"), // Logger instance named "committer"
@@ -160,9 +160,9 @@ func (c *Committer) commitGatewayStage(ctx context.Context, si *entity.ReleaseIn
 		c.gatewayStageChanMap[si.GetGatewayName()] = stageChan
 	}
 	c.gatewayStageChanMapLock.Unlock()
+	stageChan <- struct{}{}
 	utils.GoroutineWithRecovery(ctx, func() {
 		// Control stage writes for each gateway to be serial
-		stageChan <- struct{}{}
 		c.logger.Infof("begin commit stage channel: %s", si.GetReleaseID())
 		c.commitStage(ctx, si, stageChan)
 		c.logger.Infof("end commit stage channel: %s", si.GetReleaseID())
@@ -220,8 +220,8 @@ func (c *Committer) retryStage(si *entity.ReleaseInfo) {
 
 // GetStageReleaseNativeApisixConfiguration 直接从etcd获取原生apisix配置
 func (c *Committer) GetStageReleaseNativeApisixConfiguration(
-	ctx context.Context,
-	si *entity.ReleaseInfo,
+ctx context.Context,
+si *entity.ReleaseInfo,
 ) (*entity.ApisixStageResource, error) {
 	// 直接从etcd获取原生apisix配置
 	resources, err := c.apigwEtcdRegistry.ListStageResources(si)
@@ -240,8 +240,8 @@ func (c *Committer) GetStageReleaseNativeApisixConfiguration(
 
 // GetGlobalApisixConfiguration 直接从etcd获取原生全局apisix配置
 func (c *Committer) GetGlobalApisixConfiguration(
-	ctx context.Context,
-	si *entity.ReleaseInfo,
+ctx context.Context,
+si *entity.ReleaseInfo,
 ) (*entity.ApisixGlobalResource, error) {
 	// 直接从etcd获取原生apisix配置
 	resources, err := c.apigwEtcdRegistry.ListGlobalResources(si)
