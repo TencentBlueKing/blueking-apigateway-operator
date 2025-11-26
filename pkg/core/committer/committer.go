@@ -57,15 +57,15 @@ type Committer struct {
 
 // NewCommitter 创建Committer
 func NewCommitter(
-	apigwEtcdRegistry *registry.APIGWEtcdRegistry,
-	synchronizer *synchronizer.ApisixConfigSynchronizer,
-	releaseTimer *timer.ReleaseTimer,
+apigwEtcdRegistry *registry.APIGWEtcdRegistry,
+synchronizer *synchronizer.ApisixConfigSynchronizer,
+releaseTimer *timer.ReleaseTimer,
 ) *Committer {
 	return &Committer{
 		apigwEtcdRegistry: apigwEtcdRegistry, // Registry for resource management
 		commitResourceChan: make(
 			chan []*entity.ReleaseInfo,
-		), // Channel for committing resource information
+		),                                                    // Channel for committing resource information
 		synchronizer: synchronizer,                           // Configuration synchronizer
 		releaseTimer: releaseTimer,                           // Timer for stage management
 		logger:       logging.GetLogger().Named("committer"), // Logger instance named "committer"
@@ -83,7 +83,6 @@ func (c *Committer) Run(ctx context.Context) {
 		c.logger.Debugw("committer waiting for commit command")
 		select {
 		case resourceList := <-c.commitResourceChan:
-
 			c.logger.Infow("received commit command", "resourceList", len(resourceList))
 
 			// 分批处理resource，避免一次性处理过多resource
@@ -224,8 +223,8 @@ func (c *Committer) retryStage(si *entity.ReleaseInfo) {
 
 // GetStageReleaseNativeApisixConfiguration 直接从etcd获取原生apisix配置
 func (c *Committer) GetStageReleaseNativeApisixConfiguration(
-	ctx context.Context,
-	si *entity.ReleaseInfo,
+ctx context.Context,
+si *entity.ReleaseInfo,
 ) (*entity.ApisixStageResource, error) {
 	// 直接从etcd获取原生apisix配置
 	resources, err := c.apigwEtcdRegistry.ListStageResources(si)
@@ -244,8 +243,8 @@ func (c *Committer) GetStageReleaseNativeApisixConfiguration(
 
 // GetGlobalApisixConfiguration 直接从etcd获取原生全局apisix配置
 func (c *Committer) GetGlobalApisixConfiguration(
-	ctx context.Context,
-	si *entity.ReleaseInfo,
+ctx context.Context,
+si *entity.ReleaseInfo,
 ) (*entity.ApisixGlobalResource, error) {
 	// 直接从etcd获取原生apisix配置
 	resources, err := c.apigwEtcdRegistry.ListGlobalResources(si)
