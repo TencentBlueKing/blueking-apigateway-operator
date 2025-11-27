@@ -281,7 +281,7 @@ func (c *Committer) commitGlobalResource(ctx context.Context, si *entity.Release
 // GetStageReleaseNativeApisixConfigurationByID 根据资源 ID 从 etcd 获取原生 apisix 配置
 func (c *Committer) GetStageReleaseNativeApisixConfigurationByID(
 	ctx context.Context,
-	resourceID int64,
+	resourceID string,
 	si *entity.ReleaseInfo,
 ) (*entity.ApisixStageResource, error) {
 	// 直接从etcd获取原生apisix配置

@@ -20,8 +20,6 @@
 package config
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -299,40 +297,4 @@ func GenStagePrimaryKey(gatewayName, stageName string) string {
 		return DefaultStageKey
 	}
 	return fmt.Sprintf("bk.release.%s.%s", gatewayName, stageName)
-}
-
-// GenResourceIDKey 生成资源 ID 查询的 key
-func GenResourceIDKey(gatewayName, stageName string, resourceID int64) string {
-	// {gateway}.{stage}.{resourceID}
-	return fmt.Sprintf("%s.%s.%d", gatewayName, stageName, resourceID)
-}
-
-// GenApigwResourceNameKey 生成 apigw 资源名称查询的 key
-func GenApigwResourceNameKey(gatewayName, stageName, resourceName string) string {
-	// {gateway}.{stage}.{resourceName}
-	key := fmt.Sprintf("%s.%s.%s", gatewayName, stageName, resourceName)
-
-	// key 长度大于 100 需要截断
-	if len(key) > 100 {
-		return key[:100-3] + "..."
-	}
-	return key
-}
-
-func toLowerDashCase(s string) string {
-	return strings.ToLower(strings.ReplaceAll(s, "_", "-"))
-}
-
-// GenApisixResourceNameKey 生成 apisix 资源名称查询的 key
-func GenApisixResourceNameKey(gatewayName, stageName, resourceName string) string {
-	key := toLowerDashCase(fmt.Sprintf("%s-%s-%s", gatewayName, stageName, resourceName))
-
-	// key 长度大于 64 需要转换
-	if len(key) > 64 {
-		hash := md5.Sum([]byte(key[55:]))
-		hashStr := hex.EncodeToString(hash[:])[:8]
-
-		key = fmt.Sprintf("%s.%s", key[:55], hashStr)
-	}
-	return key
 }

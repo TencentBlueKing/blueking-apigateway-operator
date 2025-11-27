@@ -26,8 +26,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
-
 	json "github.com/json-iterator/go"
 	"github.com/rotisserie/eris"
 	"github.com/tidwall/sjson"
@@ -296,7 +294,7 @@ func (r *APIGWEtcdRegistry) ListStageResources(stageRelease *entity.ReleaseInfo)
 
 	if len(resp.Kvs) == 0 {
 		// 删除操作, 返回空资源
-		r.logger.Error(nil, "empty etcd value key: ", etcdKey)
+		r.logger.Errorf("empty etcd value key: %s", etcdKey)
 		return entity.NewEmptyApisixConfiguration(), nil
 	}
 	ret, err := r.ValueToStageResource(resp)
@@ -462,7 +460,7 @@ func (r *APIGWEtcdRegistry) ValueToGlobalResource(resp *clientv3.GetResponse) (*
 
 // GetStageResourceByID 根据资源 ID 查询资源信息
 func (r *APIGWEtcdRegistry) GetStageResourceByID(
-	resourceID int64,
+	resourceID string,
 	stageRelease *entity.ReleaseInfo,
 ) (*entity.ApisixStageResource, error) {
 	// /{prefix}/{api_version}/gateway/{gateway_name}/{stage_name}/{kind}/{gateway_name}.{stage_name}.{resource_id}
@@ -473,7 +471,7 @@ func (r *APIGWEtcdRegistry) GetStageResourceByID(
 		stageRelease.Labels.Gateway,
 		stageRelease.Labels.Stage,
 		stageRelease.Kind,
-		config.GenResourceIDKey(stageRelease.Labels.Gateway, stageRelease.Labels.Stage, resourceID),
+		resourceID,
 	)
 	resp, err := r.etcdClient.Get(stageRelease.Ctx, etcdKey, clientv3.WithPrefix())
 	if err != nil {
@@ -481,7 +479,7 @@ func (r *APIGWEtcdRegistry) GetStageResourceByID(
 		return nil, err
 	}
 	if len(resp.Kvs) == 0 {
-		r.logger.Error(nil, "empty etcd value key: ", etcdKey)
+		r.logger.Errorf("empty etcd value key: %s", etcdKey)
 		return nil, eris.Errorf("empty etcd value")
 	}
 	ret, err := r.ValueToStageResource(resp)
@@ -528,7 +526,7 @@ func (r *APIGWEtcdRegistry) StageReleaseVersion(stageRelease *entity.ReleaseInfo
 	}
 
 	if len(resp.Kvs) == 0 {
-		r.logger.Error(nil, "empty etcd value key: ", etcdKey)
+		r.logger.Errorf("empty etcd value key: %s", etcdKey)
 		return nil, eris.Errorf("empty etcd value")
 	}
 	ret, err := r.ValueToStageReleaseInfo(resp)

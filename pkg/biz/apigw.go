@@ -53,7 +53,7 @@ func GetApigwResourcesByStage(
 	}
 	if isExcludeReleaseVersion {
 		// 资源列表中排除 builtin-mock-release-version
-		resourceIDKey := config.GenResourceIDKey(gatewayName, stageName, config.ReleaseVersionResourceID)
+		resourceIDKey := GenResourceIDKey(gatewayName, stageName, config.ReleaseVersionResourceID)
 		delete(apisixConf.Routes, resourceIDKey)
 	}
 	return apisixConf, nil
@@ -115,15 +115,16 @@ func GetApigwResource(
 
 	// by resourceName
 	if resourceName != "" {
-		resourceNameKey := config.GenApigwResourceNameKey(gatewayName, stageName, resourceName)
+		resourceNameKey := GenApigwResourceNameKey(gatewayName, stageName, resourceName)
 		apisixResources, err := GetApigwResourcesByStage(ctx, committer, gatewayName, stageName, true)
 		if err != nil {
 			return nil, err
 		}
 		for _, route := range apisixResources.Routes {
 			if route.Name == resourceNameKey {
-				apisixResources.Routes = map[string]*entity.Route{route.ID: route}
-				configMap[stageKey] = apisixResources
+				configMap[stageKey] = &entity.ApisixStageResource{
+					Routes: map[string]*entity.Route{route.ID: route},
+				}
 				return configMap, nil
 			}
 		}
@@ -141,7 +142,10 @@ func GetApigwResource(
 			},
 		},
 	}
-	apisixResources, err := committer.GetStageReleaseNativeApisixConfigurationByID(ctx, resourceID, si)
+
+	apisixResources, err := committer.GetStageReleaseNativeApisixConfigurationByID(
+		ctx, GenResourceIDKey(gatewayName, stageName, resourceID), si,
+	)
 	if err != nil {
 		return nil, err
 	}
