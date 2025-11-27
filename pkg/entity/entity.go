@@ -395,6 +395,7 @@ type ResourceMetadata struct {
 	Labels        *LabelInfo              `json:"labels,omitempty" yaml:"labels"`
 	APIVersion    string                  `json:"-" yaml:"-"`
 	ID            string                  `json:"id,omitempty" yaml:"id"`
+	Key           string                  `json:"-" yaml:"-"`
 	Op            mvccpb.Event_EventType  `json:"-" yaml:"-"`
 	Kind          constant.APISIXResource `json:"-" yaml:"-"`
 	Name          string                  `json:"name,omitempty" yaml:"name"`
