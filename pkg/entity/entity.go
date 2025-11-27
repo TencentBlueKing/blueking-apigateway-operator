@@ -395,12 +395,22 @@ type ResourceMetadata struct {
 	Labels        *LabelInfo              `json:"labels,omitempty" yaml:"labels"`
 	APIVersion    string                  `json:"-" yaml:"-"`
 	ID            string                  `json:"id,omitempty" yaml:"id"`
+	Key           string                  `json:"-" yaml:"-"`
 	Op            mvccpb.Event_EventType  `json:"-" yaml:"-"`
 	Kind          constant.APISIXResource `json:"-" yaml:"-"`
 	Name          string                  `json:"name,omitempty" yaml:"name"`
 	RetryCount    int64                   `json:"-" yaml:"-"`
 	Ctx           context.Context         `json:"-" yaml:"-"`
 	ApisixVersion string                  `json:"apisix_version,omitempty" yaml:"apisix_version"`
+}
+
+// IsDeleteRelease checks if the resource is a delete release
+func (rm *ResourceMetadata) IsDeleteRelease() bool {
+	if rm.GetReleaseInfo() == nil {
+		return false
+	}
+	// 判断是是否是删除发布
+	return cast.ToString(rm.GetReleaseInfo().PublishId) == constant.DeletePublishID
 }
 
 // GetCreateTime returns the create time for the resource

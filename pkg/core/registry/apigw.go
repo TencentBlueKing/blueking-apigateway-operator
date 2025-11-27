@@ -72,6 +72,15 @@ func NewAPIGWEtcdRegistry(etcdClient *clientv3.Client, keyPrefix string) *APIGWE
 	return registry
 }
 
+// DeleteResourceByKey deletes resources with the given key
+func (r *APIGWEtcdRegistry) DeleteResourceByKey(key string) error {
+	_, err := r.etcdClient.Delete(
+		context.Background(),
+		key,
+	)
+	return err
+}
+
 // Watch creates and returns a channel that produces update events of resources.
 func (r *APIGWEtcdRegistry) Watch(ctx context.Context) <-chan *entity.ResourceMetadata {
 	watchCtx, cancel := context.WithCancel(ctx)
@@ -265,6 +274,7 @@ func (r *APIGWEtcdRegistry) extractResourceMetadata(key string, value []byte) (e
 	if resourceKind == constant.BkRelease && len(matches) == 7 {
 		ret.ID = matches[len(matches)-1]
 		ret.Kind = resourceKind
+		ret.Key = key
 		ret.Name = matches[len(matches)-1]
 		ret.APIVersion = matches[len(matches)-6]
 		return ret, nil

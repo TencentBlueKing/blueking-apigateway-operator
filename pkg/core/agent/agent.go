@@ -100,9 +100,18 @@ func (w *EventAgent) Run(ctx context.Context) {
 
 			// 更新stage的事件窗口, 发送特殊事件到innerLoopChan
 			// NOTE: 事件实际只是记录有哪个stage需要更新, 更新的单位为stage, 而不是细粒度的资源本身
-			// 处理bk-release事件,需要触发commit
-			if event.Kind == constant.BkRelease {
+			// 处理bk-release事件,需要触发commit,如果不是删除stage事件发布
+			if event.Kind == constant.BkRelease && !event.IsDeleteRelease() {
 				w.handleTicker(ctx)
+				continue
+			}
+			if event.Kind == constant.BkRelease && event.IsDeleteRelease() {
+				// 删除stage事件的releaseInfo需要提交到commitChan
+				w.commitChan <- []*entity.ReleaseInfo{event.GetReleaseInfo()}
+				// 同时删除上游的release数据
+				if err := w.apigwRegistry.DeleteResourceByKey(event.Key); err != nil {
+					w.logger.Errorw("delete release data failed", "key", event.Key, "err", err)
+				}
 				continue
 			}
 			w.handleEvent(event)
