@@ -21,6 +21,7 @@ package committer
 
 import (
 	"context"
+	"encoding/json"
 	"sync"
 
 	"go.uber.org/zap"
@@ -82,19 +83,25 @@ func (c *Committer) Run(ctx context.Context) {
 		c.logger.Debugw("committer waiting for commit command")
 		select {
 		case resourceList := <-c.commitResourceChan:
-			c.logger.Infow("received commit command", "resourceList", resourceList)
+			c.logger.Infow("received commit command", "resourceList", len(resourceList))
 
 			// 分批处理resource，避免一次性处理过多resource
 			segmentLength := 10
 			for offset := 0; offset < len(resourceList); offset += segmentLength {
+
 				if offset+segmentLength > len(resourceList) {
+					rawResource, _ := json.Marshal(resourceList[offset:])
 					c.commitGroup(ctx, resourceList[offset:])
+					c.logger.Infow(
+						"Commit resource group done",
+						"resourceList",
+						string(rawResource),
+					)
 					break
 				}
+				rawResource, _ := json.Marshal(resourceList[offset:(offset + segmentLength)])
 				c.commitGroup(ctx, resourceList[offset:(offset+segmentLength)])
-
-				c.logger.Infow("Commit resource group done", "resourceList",
-					resourceList[offset:(offset+segmentLength)])
+				c.logger.Infow("Commit resource group done", "resourceList", string(rawResource))
 			}
 
 		case <-ctx.Done():
@@ -153,9 +160,9 @@ func (c *Committer) commitGatewayStage(ctx context.Context, si *entity.ReleaseIn
 		c.gatewayStageChanMap[si.GetGatewayName()] = stageChan
 	}
 	c.gatewayStageChanMapLock.Unlock()
+	stageChan <- struct{}{}
 	utils.GoroutineWithRecovery(ctx, func() {
 		// Control stage writes for each gateway to be serial
-		stageChan <- struct{}{}
 		c.logger.Infof("begin commit stage channel: %s", si.GetReleaseID())
 		c.commitStage(ctx, si, stageChan)
 		c.logger.Infof("end commit stage channel: %s", si.GetReleaseID())
@@ -163,9 +170,6 @@ func (c *Committer) commitGatewayStage(ctx context.Context, si *entity.ReleaseIn
 }
 
 func (c *Committer) commitStage(ctx context.Context, si *entity.ReleaseInfo, stageChan chan struct{}) {
-	defer func() {
-		<-stageChan
-	}()
 	// trace
 	_, span := trace.StartTrace(si.Ctx, "committer.commitStage")
 	defer span.End()
@@ -201,13 +205,13 @@ func (c *Committer) commitStage(ctx context.Context, si *entity.ReleaseInfo, sta
 		return
 	}
 	// eventrepoter.ReportApplyConfigurationSuccessEvent(ctx, stage) // 可以由事件之前的关系推断出来
-	eventreporter.ReportLoadConfigurationResultEvent(ctx, si)
-	c.logger.Info("commit stage success", "stageInfo", si)
+	eventreporter.ReportLoadConfigurationResultEvent(ctx, si, stageChan)
+	c.logger.Infow("commit stage success", "stageInfo", si)
 }
 
 func (c *Committer) retryStage(si *entity.ReleaseInfo) {
 	if si.RetryCount >= maxStageRetryCount {
-		c.logger.Error("too many retries", "stageInfo", si)
+		c.logger.Errorw("too many retries", "stageInfo", si)
 		return
 	}
 	si.RetryCount++

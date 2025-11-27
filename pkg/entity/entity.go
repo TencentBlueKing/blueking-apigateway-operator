@@ -445,6 +445,9 @@ func (rm *ResourceMetadata) GetID() string {
 
 // GetStageName returns the stage name from labels
 func (rm *ResourceMetadata) GetStageName() string {
+	if rm.Labels == nil {
+		return ""
+	}
 	return rm.Labels.Stage
 }
 
@@ -455,6 +458,9 @@ func (rm *ResourceMetadata) GetStageKey() string {
 
 // GetGatewayName returns the gateway name from labels
 func (rm *ResourceMetadata) GetGatewayName() string {
+	if rm.Labels == nil {
+		return ""
+	}
 	return rm.Labels.Gateway
 }
 
@@ -486,11 +492,22 @@ func (rm *ResourceMetadata) GetReleaseID() string {
 
 type ReleaseInfo struct {
 	ResourceMetadata
-	PublishId       int    `json:"publish_id"`
-	PublishTime     string `json:"publish_time"`
-	ApisixVersion   string `json:"apisix_version"`
-	ResourceVersion string `json:"resource_version"`
-	Ctx             context.Context
+	PublishId       int             `json:"publish_id,omitempty"`
+	PublishTime     string          `json:"publish_time,omitempty"`
+	ApisixVersion   string          `json:"apisix_version,omitempty"`
+	ResourceVersion string          `json:"resource_version,omitempty"`
+	Ctx             context.Context `json:"-"`
+}
+
+func (ri *ReleaseInfo) String() string {
+	return fmt.Sprintf("%s:%d:%s:%s:%s",
+		ri.ID, ri.PublishId, ri.PublishTime, ri.ApisixVersion, ri.ResourceVersion)
+}
+
+// IsNoNeedReport check if the release info is no need report
+func (ri *ReleaseInfo) IsNoNeedReport() bool {
+	publishID := cast.ToString(ri.PublishId)
+	return publishID == constant.NoNeedReportPublishID || publishID == "" || publishID == constant.DeletePublishID
 }
 
 type LabelInfo struct {

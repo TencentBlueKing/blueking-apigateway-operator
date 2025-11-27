@@ -128,8 +128,8 @@ var _ = Describe("Operator Integration", func() {
 				// assert apisix operation count
 				Expect(metricsAdapter.GetApisixOperationCountMetric(
 					metric.ActionPut, metric.ResultSuccess, constant.ApisixResourceTypeRoutes),
-				// 2 micro-gateway-not-found-handling and healthz-outer
-				).To(Equal(testDataRoutesAmount + 2))
+				// 2 micro-gateway-not-found-handling and healthz-outer and head-outer
+				).To(Equal(testDataRoutesAmount + 3))
 
 				Expect(metricsAdapter.GetApisixOperationCountMetric(
 					metric.ActionPut, metric.ResultSuccess, constant.ApisixResourceTypeServices),

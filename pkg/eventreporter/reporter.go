@@ -189,13 +189,12 @@ func ReportLoadConfigurationDoingEvent(ctx context.Context, release *entity.Rele
 }
 
 // ReportLoadConfigurationResultEvent Report the detection result of apisix loading
-func ReportLoadConfigurationResultEvent(ctx context.Context, release *entity.ReleaseInfo) {
+func ReportLoadConfigurationResultEvent(ctx context.Context, release *entity.ReleaseInfo, stageChan chan struct{}) {
 	// filter not need report event
 	if release == nil || release.Labels.PublishId == "" {
 		return
 	}
-	publishID := cast.ToString(release.PublishId)
-	if publishID == constant.NoNeedReportPublishID || publishID == "" {
+	if release.IsNoNeedReport() {
 		logging.GetLogger().Debugf("event[release: %+v] is not need to report", release.Labels)
 		return
 	}
@@ -204,8 +203,8 @@ func ReportLoadConfigurationResultEvent(ctx context.Context, release *entity.Rel
 	utils.GoroutineWithRecovery(ctx, func() {
 		defer func() {
 			<-reporter.versionProbe.chain
+			<-stageChan
 		}()
-
 		// wait apisix rebuild finished then begin version probe
 		time.Sleep(reporter.versionProbe.waitTime)
 		eventReq := parseEventInfo(release)
@@ -276,9 +275,7 @@ func addEvent(event reportEvent) {
 	if event.release == nil || event.release.Labels.PublishId == "" {
 		return
 	}
-	// filter not need report event
-	publishID := cast.ToString(event.release.PublishId)
-	if publishID == constant.NoNeedReportPublishID || publishID == "" {
+	if event.release.IsNoNeedReport() {
 		logging.GetLogger().Debugf("event[release: %+v] is not need to report", event.release.Labels)
 		return
 	}

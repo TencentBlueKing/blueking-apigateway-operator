@@ -32,10 +32,11 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/logging"
 )
 
-// HealthZRouteIDInner ...
+// HealthZRouteIDInner ... 这几个路由都是外部系统需要的，切记不能修改和删除
 const (
 	HealthZRouteIDOuter = "micro-gateway-operator-healthz-outer"
 	NotFoundHandling    = "micro-gateway-not-found-handling"
+	HEADRouteIDOuter    = "data-plane-header-liveness"
 )
 
 // VirtualStage combine some builtin routes
@@ -103,7 +104,25 @@ func (s *VirtualStage) makeOuterHealthzRoute() *entity.Route {
 		ResourceMetadata: s.makeRouteMetadata(HealthZRouteIDOuter),
 		Uris:             []string{s.apisixHealthzURI},
 		Priority:         -100,
-		Methods:          []string{http.MethodGet, http.MethodHead},
+		Methods:          []string{http.MethodGet},
+		Plugins:          plugins,
+		Status:           constant.StatusEnable,
+	}
+}
+
+// makeOuterHEADRoute return the apisix configuration of outer HEAD route
+func (s *VirtualStage) makeOuterHEADRoute() *entity.Route {
+	plugins := map[string]any{
+		"mocking": map[string]any{
+			"content_type":     "text/plain",
+			"response_example": "ok",
+		},
+	}
+	return &entity.Route{
+		ResourceMetadata: s.makeRouteMetadata(HEADRouteIDOuter),
+		URI:              "/",
+		Priority:         -99,
+		Methods:          []string{http.MethodHead},
 		Plugins:          plugins,
 		Status:           constant.StatusEnable,
 	}
@@ -159,6 +178,7 @@ func (s *VirtualStage) MakeConfiguration() *entity.ApisixStageResource {
 	for _, fn := range []func() *entity.Route{
 		s.make404DefaultRoute,
 		s.makeOuterHealthzRoute,
+		s.makeOuterHEADRoute,
 	} {
 		route := fn()
 		ret.Routes[route.ID] = route
