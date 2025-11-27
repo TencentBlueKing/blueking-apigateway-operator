@@ -101,7 +101,7 @@ func normalizeServiceNodes(service *entity.Service) *entity.Service {
 
 // ignoreApisixMetadata: ignore some members of apisixMetadata
 var ignoreApisixMetadataCmpOpt = cmpopts.IgnoreFields(entity.ResourceMetadata{},
-	"Labels", "Ctx", "RetryCount", "APIVersion", "Kind", "ApisixVersion", "Op", "Key",
+	"Labels", "Ctx", "RetryCount", "APIVersion", "Kind", "ApisixVersion", "Op",
 )
 
 // CmpReporter ...
