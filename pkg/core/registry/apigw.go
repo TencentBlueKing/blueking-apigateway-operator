@@ -303,7 +303,7 @@ func (r *APIGWEtcdRegistry) ListStageResources(stageRelease *entity.ReleaseInfo)
 
 	if len(resp.Kvs) == 0 {
 		// 删除操作, 返回空资源
-		r.logger.Error(nil, "empty etcd value key: ", etcdKey)
+		r.logger.Errorf("empty etcd value key: %s", etcdKey)
 		return entity.NewEmptyApisixConfiguration(), nil
 	}
 	ret, err := r.ValueToStageResource(resp)
@@ -465,4 +465,101 @@ func (r *APIGWEtcdRegistry) ValueToGlobalResource(resp *clientv3.GetResponse) (*
 		}
 	}
 	return ret, nil
+}
+
+// GetStageResourceByID 根据资源 ID 查询资源信息
+func (r *APIGWEtcdRegistry) GetStageResourceByID(
+	resourceID string,
+	stageRelease *entity.ReleaseInfo,
+) (*entity.ApisixStageResource, error) {
+	// /{prefix}/{api_version}/gateway/{gateway_name}/{stage_name}/{kind}/{gateway_name}.{stage_name}.{resource_id}
+	etcdKey := fmt.Sprintf(
+		constant.ApigwStageResourcePrefixFormat+"%s/%s",
+		r.keyPrefix,
+		stageRelease.APIVersion,
+		stageRelease.Labels.Gateway,
+		stageRelease.Labels.Stage,
+		stageRelease.Kind,
+		resourceID,
+	)
+	resp, err := r.etcdClient.Get(stageRelease.Ctx, etcdKey, clientv3.WithPrefix())
+	if err != nil {
+		r.logger.Error(err, "get etcd value failed", "key", stageRelease.GetID())
+		return nil, err
+	}
+	if len(resp.Kvs) == 0 {
+		r.logger.Errorf("empty etcd value key: %s", etcdKey)
+		return nil, eris.Errorf("empty etcd value")
+	}
+	ret, err := r.ValueToStageResource(resp)
+	if err != nil {
+		r.logger.Error(err, "value to resource failed", "key", etcdKey)
+		return nil, err
+	}
+	return ret, nil
+}
+
+// Count 查询资源数量
+func (r *APIGWEtcdRegistry) Count(stageRelease *entity.ReleaseInfo) (int64, error) {
+	// /{prefix}/{api_version}/gateway/{gateway_name}/{stage_name}/route/bk-default.default.-1
+	etcdKey := fmt.Sprintf(
+		constant.ApigwStageResourcePrefixFormat+"%s/",
+		r.keyPrefix,
+		stageRelease.APIVersion,
+		stageRelease.Labels.Gateway,
+		stageRelease.Labels.Stage,
+		stageRelease.Kind,
+	)
+	resp, err := r.etcdClient.Get(stageRelease.Ctx, etcdKey, clientv3.WithPrefix(), clientv3.WithCountOnly())
+	if err != nil {
+		return 0, err
+	}
+	return resp.Count, nil
+}
+
+// StageReleaseVersion 查询环境版本信息
+func (r *APIGWEtcdRegistry) StageReleaseVersion(stageRelease *entity.ReleaseInfo) (*entity.ReleaseInfo, error) {
+	// /{prefix}/{api_version}/gateway/{gateway_name}/{stage_name}/_bk_release/bk.release.{gateway_name}.{stage_name}
+	etcdKey := fmt.Sprintf(
+		constant.ApigwStageResourcePrefixFormat+constant.BkRelease.String()+"/%s",
+		r.keyPrefix,
+		stageRelease.APIVersion,
+		stageRelease.Labels.Gateway,
+		stageRelease.Labels.Stage,
+		stageRelease.GetReleaseID(),
+	)
+	resp, err := r.etcdClient.Get(stageRelease.Ctx, etcdKey, clientv3.WithPrefix())
+	if err != nil {
+		r.logger.Error(err, "get etcd value failed", "key", stageRelease.GetID())
+		return nil, err
+	}
+
+	if len(resp.Kvs) == 0 {
+		r.logger.Errorf("empty etcd value key: %s", etcdKey)
+		return nil, eris.Errorf("empty etcd value")
+	}
+	ret, err := r.ValueToStageReleaseInfo(resp)
+	if err != nil {
+		r.logger.Error(err, "value to resource failed", "key", etcdKey)
+		return nil, err
+	}
+	return ret, nil
+}
+
+// ValueToStageReleaseInfo ...
+func (r *APIGWEtcdRegistry) ValueToStageReleaseInfo(resp *clientv3.GetResponse) (*entity.ReleaseInfo, error) {
+	// /{prefix}/{api_version}/gateway/{gateway_name}/{stage_name}/_bk_release/bk.release.{gateway_name}.{stage_name}
+	var release *entity.ReleaseInfo
+	err := json.Unmarshal(resp.Kvs[0].Value, &release)
+	if err != nil {
+		r.logger.Errorf("unmarshal etcd value failed:%v, key: %s", err, resp.Kvs[0].Key)
+		return nil, err
+	}
+	resourceMetadata, err := r.extractResourceMetadata(string(resp.Kvs[0].Key), resp.Kvs[0].Value)
+	if err != nil {
+		r.logger.Errorf("extract resource metadata failed:%v, key: %s", err, resp.Kvs[0].Key)
+		return nil, err
+	}
+	release.ResourceMetadata = resourceMetadata
+	return release, nil
 }

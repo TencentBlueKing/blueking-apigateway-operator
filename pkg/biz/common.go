@@ -26,17 +26,30 @@ import (
 	"strings"
 )
 
+// GenResourceIDKey 生成资源 ID 查询的 key
+func GenResourceIDKey(gatewayName, stageName string, resourceID int64) string {
+	// {gateway}.{stage}.{resourceID}
+	return fmt.Sprintf("%s.%s.%d", gatewayName, stageName, resourceID)
+}
+
+// GenApigwResourceNameKey 生成 apigw 资源名称查询的 key
+func GenApigwResourceNameKey(gatewayName, stageName, resourceName string) string {
+	// {gateway}.{stage}.{resourceName}
+	key := fmt.Sprintf("%s.%s.%s", gatewayName, stageName, resourceName)
+
+	// key 长度大于 100 需要截断
+	if len(key) > 100 {
+		return key[:100-3] + "..."
+	}
+	return key
+}
+
 func toLowerDashCase(s string) string {
 	return strings.ToLower(strings.ReplaceAll(s, "_", "-"))
 }
 
-// genResourceIDKey 生成资源 ID 查询的 key
-func genResourceIDKey(gatewayName, stageName string, resourceID int64) string {
-	return toLowerDashCase(fmt.Sprintf("%s.%s.%d", gatewayName, stageName, resourceID))
-}
-
-// genResourceNameKey 生成资源名称查询的 key
-func genResourceNameKey(gatewayName, stageName, resourceName string) string {
+// GenApisixResourceNameKey 生成 apisix 资源名称查询的 key
+func GenApisixResourceNameKey(gatewayName, stageName, resourceName string) string {
 	key := toLowerDashCase(fmt.Sprintf("%s-%s-%s", gatewayName, stageName, resourceName))
 
 	// key 长度大于 64 需要转换
