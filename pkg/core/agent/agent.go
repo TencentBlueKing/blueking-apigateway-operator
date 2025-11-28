@@ -108,10 +108,6 @@ func (w *EventAgent) Run(ctx context.Context) {
 			if event.Kind == constant.BkRelease && event.IsDeleteRelease() {
 				// 删除stage事件的releaseInfo需要提交到commitChan
 				w.commitChan <- []*entity.ReleaseInfo{event.GetReleaseInfo()}
-				// 同时删除上游的release数据
-				if err := w.apigwRegistry.DeleteResourceByKey(event.Key); err != nil {
-					w.logger.Errorw("delete release data failed", "key", event.Key, "err", err)
-				}
 				continue
 			}
 			w.handleEvent(event)

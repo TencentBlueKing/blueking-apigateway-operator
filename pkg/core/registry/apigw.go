@@ -274,7 +274,6 @@ func (r *APIGWEtcdRegistry) extractResourceMetadata(key string, value []byte) (e
 	if resourceKind == constant.BkRelease && len(matches) == 7 {
 		ret.ID = matches[len(matches)-1]
 		ret.Kind = resourceKind
-		ret.Key = key
 		ret.Name = matches[len(matches)-1]
 		ret.APIVersion = matches[len(matches)-6]
 		return ret, nil
