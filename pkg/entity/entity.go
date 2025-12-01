@@ -409,7 +409,8 @@ func (rm *ResourceMetadata) IsDeleteRelease() bool {
 		return false
 	}
 	// 判断是是否是删除发布
-	return cast.ToString(rm.GetReleaseInfo().PublishId) == constant.DeletePublishID
+	return rm.GetReleaseInfo().Op == mvccpb.DELETE &&
+		cast.ToString(rm.GetReleaseInfo().PublishId) == constant.DeletePublishID
 }
 
 // GetCreateTime returns the create time for the resource
