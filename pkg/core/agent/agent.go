@@ -144,7 +144,7 @@ func (w *EventAgent) createWatchChannel(ctx context.Context) (<-chan *entity.Res
 
 func (w *EventAgent) handleEvent(event *entity.ResourceMetadata) {
 	// Note：跳过删除事件:删除事件的 release_info 信息还是上次的，无法获取到最新的 release_info
-	if event.Op == mvccpb.DELETE {
+	if event.Op == mvccpb.DELETE && !event.IsGlobalResource() {
 		w.logger.Debugw("skip delete event", "event", event)
 		return
 	}

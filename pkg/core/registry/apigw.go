@@ -261,6 +261,11 @@ func (r *APIGWEtcdRegistry) extractResourceMetadata(key string, value []byte) (e
 		r.logger.Debugw("Extract resource info from etcdkey", "key", key, "resourceInfo", ret)
 	}()
 
+	if !constant.SupportEventResourceTypeMap[resourceKind] {
+		r.logger.Errorf("resource kind %s not support", resourceKind)
+		return ret, eris.Errorf("resource kind %s not support", resourceKind)
+	}
+
 	// /bk-gateway-apigw/v2/global/plugin_metadata/bk-concurrency-limit
 	if resourceKind == constant.PluginMetadata && len(matches) == 5 {
 		ret.ID = matches[len(matches)-1]
