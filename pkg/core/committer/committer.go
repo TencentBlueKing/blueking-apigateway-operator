@@ -57,15 +57,15 @@ type Committer struct {
 
 // NewCommitter 创建Committer
 func NewCommitter(
-apigwEtcdRegistry *registry.APIGWEtcdRegistry,
-synchronizer *synchronizer.ApisixConfigSynchronizer,
-releaseTimer *timer.ReleaseTimer,
+	apigwEtcdRegistry *registry.APIGWEtcdRegistry,
+	synchronizer *synchronizer.ApisixConfigSynchronizer,
+	releaseTimer *timer.ReleaseTimer,
 ) *Committer {
 	return &Committer{
 		apigwEtcdRegistry: apigwEtcdRegistry, // Registry for resource management
 		commitResourceChan: make(
 			chan []*entity.ReleaseInfo,
-		),                                                    // Channel for committing resource information
+		), // Channel for committing resource information
 		synchronizer: synchronizer,                           // Configuration synchronizer
 		releaseTimer: releaseTimer,                           // Timer for stage management
 		logger:       logging.GetLogger().Named("committer"), // Logger instance named "committer"
@@ -219,8 +219,8 @@ func (c *Committer) retryStage(si *entity.ReleaseInfo) {
 
 // GetStageReleaseNativeApisixConfiguration 直接从etcd获取原生apisix配置
 func (c *Committer) GetStageReleaseNativeApisixConfiguration(
-ctx context.Context,
-si *entity.ReleaseInfo,
+	ctx context.Context,
+	si *entity.ReleaseInfo,
 ) (*entity.ApisixStageResource, error) {
 	// 直接从etcd获取原生apisix配置
 	resources, err := c.apigwEtcdRegistry.ListStageResources(si)
@@ -239,8 +239,8 @@ si *entity.ReleaseInfo,
 
 // GetGlobalApisixConfiguration 直接从etcd获取原生全局apisix配置
 func (c *Committer) GetGlobalApisixConfiguration(
-ctx context.Context,
-si *entity.ReleaseInfo,
+	ctx context.Context,
+	si *entity.ReleaseInfo,
 ) (*entity.ApisixGlobalResource, error) {
 	// 直接从etcd获取原生apisix配置
 	resources, err := c.apigwEtcdRegistry.ListGlobalResources(si)
@@ -283,9 +283,9 @@ func (c *Committer) commitGlobalResource(ctx context.Context, si *entity.Release
 
 // GetStageReleaseNativeApisixConfigurationByID 根据资源 ID 从 etcd 获取原生 apisix 配置
 func (c *Committer) GetStageReleaseNativeApisixConfigurationByID(
-ctx context.Context,
-resourceID string,
-si *entity.ReleaseInfo,
+	ctx context.Context,
+	resourceID string,
+	si *entity.ReleaseInfo,
 ) (*entity.ApisixStageResource, error) {
 	// 直接从etcd获取原生apisix配置
 	resources, err := c.apigwEtcdRegistry.GetStageResourceByID(resourceID, si)
@@ -304,8 +304,8 @@ si *entity.ReleaseInfo,
 
 // GetResourceCount 获取资源数量
 func (c *Committer) GetResourceCount(
-ctx context.Context,
-si *entity.ReleaseInfo,
+	ctx context.Context,
+	si *entity.ReleaseInfo,
 ) (int64, error) {
 	// 直接从etcd获取原生apisix配置
 	count, err := c.apigwEtcdRegistry.Count(si)
@@ -318,8 +318,8 @@ si *entity.ReleaseInfo,
 
 // GetStageReleaseVersion 获取指定环境的发布版本信息
 func (c *Committer) GetStageReleaseVersion(
-ctx context.Context,
-si *entity.ReleaseInfo,
+	ctx context.Context,
+	si *entity.ReleaseInfo,
 ) (*entity.ReleaseInfo, error) {
 	// 直接从etcd获取原生apisix配置
 	releaseVersionInfo, err := c.apigwEtcdRegistry.StageReleaseVersion(si)
