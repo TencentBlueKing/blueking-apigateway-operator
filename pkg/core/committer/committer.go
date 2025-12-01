@@ -84,7 +84,6 @@ func (c *Committer) Run(ctx context.Context) {
 		select {
 		case resourceList := <-c.commitResourceChan:
 			c.logger.Infow("received commit command", "resourceList", len(resourceList))
-
 			// 分批处理resource，避免一次性处理过多resource
 			segmentLength := 10
 			for offset := 0; offset < len(resourceList); offset += segmentLength {
@@ -147,6 +146,7 @@ func (c *Committer) commitGroup(ctx context.Context, releaseInfoList []*entity.R
 		}
 	}
 	wg.Wait()
+	c.logger.Debugw("Commit resource group done", "resourceList", releaseInfoList)
 }
 
 // 按照gateway的维度串行更新etcd
