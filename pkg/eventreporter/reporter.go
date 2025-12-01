@@ -192,9 +192,11 @@ func ReportLoadConfigurationDoingEvent(ctx context.Context, release *entity.Rele
 func ReportLoadConfigurationResultEvent(ctx context.Context, release *entity.ReleaseInfo, stageChan chan struct{}) {
 	// filter not need report event
 	if release == nil || release.Labels.PublishId == "" {
+		<-stageChan
 		return
 	}
 	if release.IsNoNeedReport() {
+		<-stageChan
 		logging.GetLogger().Debugf("event[release: %+v] is not need to report", release.Labels)
 		return
 	}
