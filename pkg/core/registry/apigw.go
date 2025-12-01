@@ -261,6 +261,11 @@ func (r *APIGWEtcdRegistry) extractResourceMetadata(key string, value []byte) (e
 		r.logger.Debugw("Extract resource info from etcdkey", "key", key, "resourceInfo", ret)
 	}()
 
+	if !constant.SupportEventResourceTypeMap[resourceKind] {
+		r.logger.Errorf("resource kind %s not support", resourceKind)
+		return ret, eris.Errorf("resource kind %s not support", resourceKind)
+	}
+
 	// /bk-gateway-apigw/v2/global/plugin_metadata/bk-concurrency-limit
 	if resourceKind == constant.PluginMetadata && len(matches) == 5 {
 		ret.ID = matches[len(matches)-1]
@@ -469,8 +474,8 @@ func (r *APIGWEtcdRegistry) ValueToGlobalResource(resp *clientv3.GetResponse) (*
 
 // GetStageResourceByID 根据资源 ID 查询资源信息
 func (r *APIGWEtcdRegistry) GetStageResourceByID(
-	resourceID string,
-	stageRelease *entity.ReleaseInfo,
+resourceID string,
+stageRelease *entity.ReleaseInfo,
 ) (*entity.ApisixStageResource, error) {
 	// /{prefix}/{api_version}/gateway/{gateway_name}/{stage_name}/{kind}/{gateway_name}.{stage_name}.{resource_id}
 	etcdKey := fmt.Sprintf(

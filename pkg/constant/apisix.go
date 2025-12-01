@@ -50,6 +50,13 @@ const (
 	BkRelease      APISIXResource = "_bk_release"
 )
 
+var SupportEventResourceTypeMap = map[APISIXResource]bool{
+	Route:          true,
+	Service:        true,
+	PluginMetadata: true,
+	BkRelease:      true,
+}
+
 var SupportResourceTypeMap = map[APISIXResource]bool{
 	Route:          true,
 	Service:        true,
