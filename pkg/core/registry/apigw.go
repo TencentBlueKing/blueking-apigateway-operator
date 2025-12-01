@@ -474,8 +474,8 @@ func (r *APIGWEtcdRegistry) ValueToGlobalResource(resp *clientv3.GetResponse) (*
 
 // GetStageResourceByID 根据资源 ID 查询资源信息
 func (r *APIGWEtcdRegistry) GetStageResourceByID(
-resourceID string,
-stageRelease *entity.ReleaseInfo,
+	resourceID string,
+	stageRelease *entity.ReleaseInfo,
 ) (*entity.ApisixStageResource, error) {
 	// /{prefix}/{api_version}/gateway/{gateway_name}/{stage_name}/{kind}/{gateway_name}.{stage_name}.{resource_id}
 	etcdKey := fmt.Sprintf(

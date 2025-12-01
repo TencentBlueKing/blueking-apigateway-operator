@@ -53,10 +53,10 @@ type EventAgent struct {
 
 // NewEventAgent ...
 func NewEventAgent(
-resourceRegistry *registry.APIGWEtcdRegistry,
-commitCh chan []*entity.ReleaseInfo,
-synchronizer *synchronizer.ApisixConfigSynchronizer,
-stageTimer *timer.ReleaseTimer,
+	resourceRegistry *registry.APIGWEtcdRegistry,
+	commitCh chan []*entity.ReleaseInfo,
+	synchronizer *synchronizer.ApisixConfigSynchronizer,
+	stageTimer *timer.ReleaseTimer,
 ) *EventAgent {
 	return &EventAgent{
 		apigwRegistry: resourceRegistry,
