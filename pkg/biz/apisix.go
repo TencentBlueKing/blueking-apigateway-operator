@@ -67,13 +67,12 @@ func GetApisixResource(
 
 	// by resourceName
 	if resourceName != "" {
-		resourceNameKey := genResourceNameKey(gatewayName, stageName, resourceName)
+		resourceNameKey := GenApisixResourceNameKey(gatewayName, stageName, resourceName)
 		for _, route := range apisixResources.Routes {
 			if route.Name == resourceNameKey {
-				apisixResources.Routes = map[string]*entity.Route{
-					route.ID: route,
+				configMap[stageKey] = &entity.ApisixStageResource{
+					Routes: map[string]*entity.Route{route.ID: route},
 				}
-				configMap[stageKey] = apisixResources
 				return configMap, nil
 			}
 		}
@@ -81,15 +80,14 @@ func GetApisixResource(
 	}
 
 	// by resourceID
-	resourceIDKey := genResourceIDKey(gatewayName, stageName, resourceID)
+	resourceIDKey := GenResourceIDKey(gatewayName, stageName, resourceID)
 	route := apisixResources.Routes[resourceIDKey]
 	if route == nil {
 		return nil, fmt.Errorf("get apisix resource_id failed: %s not found", resourceIDKey)
 	}
-	apisixResources.Routes = map[string]*entity.Route{
-		resourceIDKey: route,
+	configMap[stageKey] = &entity.ApisixStageResource{
+		Routes: map[string]*entity.Route{resourceIDKey: route},
 	}
-	configMap[stageKey] = apisixResources
 	return configMap, nil
 }
 
@@ -102,7 +100,7 @@ func GetApisixStageCurrentVersionInfo(
 	stageKey := config.GenStagePrimaryKey(gatewayName, stageName)
 	apisixResources := store.Get(stageKey)
 
-	resourceIDKey := genResourceIDKey(gatewayName, stageName, config.ReleaseVersionResourceID)
+	resourceIDKey := GenResourceIDKey(gatewayName, stageName, config.ReleaseVersionResourceID)
 	route := apisixResources.Routes[resourceIDKey]
 	if route == nil {
 		return nil, errors.New("current-version not found")
