@@ -19,12 +19,14 @@
 // Package client ...
 package client
 
+import "github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
+
 // StageScopedApisixResources apisix resource
 type StageScopedApisixResources struct {
-	Routes         map[string]any `json:"routes,omitempty"`
-	Services       map[string]any `json:"services,omitempty"`
-	PluginMetadata map[string]any `json:"plugin_metadata,omitempty"`
-	Ssl            map[string]any `json:"ssl,omitempty"`
+	Routes         map[string]entity.Route          `json:"routes,omitempty"`
+	Services       map[string]entity.Service        `json:"services,omitempty"`
+	PluginMetadata map[string]entity.PluginMetadata `json:"plugin_metadata,omitempty"`
+	Ssl            map[string]entity.SSL            `json:"ssl,omitempty"`
 }
 
 // ApigwListInfo apigw 资源列表
