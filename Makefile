@@ -74,7 +74,7 @@ docker-build: ## Build docker image with the manager.
 	docker build -t ${IMG} .
 
 
-integration:
+integration: docker-build
 ifeq ($(DOCKER_COMPOSE),)
 	$(error "Neither 'docker compose' nor 'docker-compose' found. Please install Docker Compose.")
 endif
