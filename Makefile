@@ -15,6 +15,9 @@ MOCKGEN = $(LOCALBIN)/mockgen
 GINKGO = $(LOCALBIN)/ginkgo
 SETUP_ENVTEST = $(LOCALBIN)/setup-envtest
 
+## Docker Compose command detection (supports both 'docker compose' and 'docker-compose')
+DOCKER_COMPOSE := $(shell if docker compose version >/dev/null 2>&1; then echo "docker compose"; elif command -v docker-compose >/dev/null 2>&1; then echo "docker-compose"; else echo ""; fi)
+
 ## Tool Versions
 GOLANGCI_LINT_VERSION ?= v2.1.5
 MOCKGEN_VERSION ?= v1.6.0
@@ -71,7 +74,10 @@ docker-build: ## Build docker image with the manager.
 	docker build -t ${IMG} .
 
 
-integration: docker-build
-	cd tests/integration && docker compose down && docker compose up -d && ginkgo -ldflags="-s=false" -gcflags="-l";docker compose down
+integration:
+ifeq ($(DOCKER_COMPOSE),)
+	$(error "Neither 'docker compose' nor 'docker-compose' found. Please install Docker Compose.")
+endif
+	cd tests/integration && $(DOCKER_COMPOSE) down && $(DOCKER_COMPOSE) up -d --wait && $(GINKGO) -ldflags="-s=false" -gcflags="-l"; $(DOCKER_COMPOSE) down
 
 

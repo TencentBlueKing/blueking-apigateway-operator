@@ -53,12 +53,13 @@ const (
 var stageKey = config.GenStagePrimaryKey(testGateway, testStage)
 
 var _ = Describe("Operator Integration", func() {
-	time.Sleep(time.Second * 15)
+	// Wait for operator to be ready before running tests
+	time.Sleep(time.Second * 10)
 	var etcdCli *clientv3.Client
 	var resourceCli *client.ResourceClient
 	BeforeEach(func() {
 		cfg := clientv3.Config{
-			Endpoints:   []string{"localhost:2379"},
+			Endpoints:   []string{"localhost:2479"},
 			DialTimeout: 5 * time.Second,
 		}
 		var err error
