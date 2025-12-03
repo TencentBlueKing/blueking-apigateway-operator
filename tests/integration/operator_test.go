@@ -58,7 +58,7 @@ var _ = Describe("Operator Integration", func() {
 	var resourceCli *client.ResourceClient
 	BeforeEach(func() {
 		cfg := clientv3.Config{
-			Endpoints:   []string{"localhost:2479"},
+			Endpoints:   []string{"localhost:2379"},
 			DialTimeout: 5 * time.Second,
 		}
 		var err error

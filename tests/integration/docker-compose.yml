@@ -6,7 +6,7 @@ services:
     environment:
       - ALLOW_NONE_AUTHENTICATION=yes
     ports:
-      - "2479:2379"
+      - "2379:2379"
       - "2480:2380"
   operator:
     image: bk-micro-gateway-operator:development
