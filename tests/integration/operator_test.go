@@ -58,7 +58,7 @@ var _ = Describe("Operator Integration", func() {
 	var resourceCli *client.ResourceClient
 	BeforeEach(func() {
 		cfg := clientv3.Config{
-			Endpoints:   []string{"localhost:2379"},
+			Endpoints:   []string{"localhost:2479"},
 			DialTimeout: 5 * time.Second,
 		}
 		var err error
@@ -134,7 +134,7 @@ var _ = Describe("Operator Integration", func() {
 				// assert apisix operation count
 				Expect(metricsAdapter.GetApisixOperationCountMetric(
 					metric.ActionPut, metric.ResultSuccess, constant.ApisixResourceTypeRoutes),
-				// 2 micro-gateway-not-found-handling and healthz-outer and head-outer
+					// 2 micro-gateway-not-found-handling and healthz-outer and head-outer
 				).To(Equal(testDataRoutesAmount + 3))
 
 				Expect(metricsAdapter.GetApisixOperationCountMetric(
