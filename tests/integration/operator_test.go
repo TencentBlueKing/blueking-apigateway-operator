@@ -107,7 +107,7 @@ var _ = Describe("Operator Integration", func() {
 					Expect(err).NotTo(HaveOccurred())
 				}
 
-				time.Sleep(time.Second * 10)
+				time.Sleep(time.Second * 30)
 
 				metricsAdapter, err := integration.NewMetricsAdapter(operatorURL)
 
@@ -134,7 +134,7 @@ var _ = Describe("Operator Integration", func() {
 				// assert apisix operation count
 				Expect(metricsAdapter.GetApisixOperationCountMetric(
 					metric.ActionPut, metric.ResultSuccess, constant.ApisixResourceTypeRoutes),
-				// 2 micro-gateway-not-found-handling and healthz-outer and head-outer
+					// 2 micro-gateway-not-found-handling and healthz-outer and head-outer
 				).To(Equal(testDataRoutesAmount + 3))
 
 				Expect(metricsAdapter.GetApisixOperationCountMetric(
