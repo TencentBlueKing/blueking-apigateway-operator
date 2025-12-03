@@ -46,8 +46,8 @@ const (
 	operatorURL           = "http://127.0.0.1:6004"
 	publishID             = 1
 	delPublishID          = 2
-	delRouteKey           = "bk-default.default.2"
-	versionProbeRouteKey  = "bk-default.default.-1"
+	delRouteKey           = "/bk-gateway-apigw/v2/gateway/bk-default/default/route/bk-default.default.2"
+	versionProbeRouteKey  = "/bk-gateway-apigw/v2/gateway/bk-default/default/route/bk-default.default.-1"
 )
 
 var stageKey = config.GenStagePrimaryKey(testGateway, testStage)
@@ -73,7 +73,7 @@ var _ = Describe("Operator Integration", func() {
 		_ = etcdCli.Close()
 	})
 
-	Describe("test publish default resource", func() {
+	Describe("test publish and update default resource", func() {
 		Context("test new apigateway publish", func() {
 			It("should not error and the value should be equal to what was put", func() {
 				// load resources
@@ -134,7 +134,7 @@ var _ = Describe("Operator Integration", func() {
 				// assert apisix operation count
 				Expect(metricsAdapter.GetApisixOperationCountMetric(
 					metric.ActionPut, metric.ResultSuccess, constant.ApisixResourceTypeRoutes),
-					// 2 micro-gateway-not-found-handling and healthz-outer and head-outer
+				// 2 micro-gateway-not-found-handling and healthz-outer and head-outer
 				).To(Equal(testDataRoutesAmount + 3))
 
 				Expect(metricsAdapter.GetApisixOperationCountMetric(
@@ -210,15 +210,15 @@ var _ = Describe("Operator Integration", func() {
 						Expect(diff).To(BeEmpty())
 					}
 				}
-			})
-		})
 
-		Context("test update publish", func() {
-			It("should not error and the value should be equal to what was put", func() {
-				// load base resources
-				resources := integration.GetBkDefaultResource()
+				// del route
+				_, err = etcdCli.Delete(context.Background(), delRouteKey)
+				Expect(err).NotTo(HaveOccurred())
 				// put route
 				for key, route := range resources.Routes {
+					if key == delRouteKey {
+						continue
+					}
 					if key == versionProbeRouteKey {
 						route.Plugins["bk-mock"] = map[string]any{
 							"response_status": 200,
@@ -230,8 +230,8 @@ var _ = Describe("Operator Integration", func() {
 								"Content-Type": "application/json",
 							},
 						}
-						continue
 					}
+					route.Labels.PublishId = fmt.Sprintf("%d", delPublishID)
 					rawConfig, _ := json.Marshal(route)
 					_, err := etcdCli.Put(context.Background(), key, string(rawConfig))
 					Expect(err).NotTo(HaveOccurred())
@@ -239,59 +239,26 @@ var _ = Describe("Operator Integration", func() {
 
 				// put service
 				for key, service := range resources.Services {
+					service.Labels.PublishId = fmt.Sprintf("%d", delPublishID)
 					rawConfig, _ := json.Marshal(service)
 					_, err := etcdCli.Put(context.Background(), key, string(rawConfig))
 					Expect(err).NotTo(HaveOccurred())
 				}
 
-				// put global rule
-				globalResource := integration.GetBkDefaultGlobalResource()
-				for key, pluginMetadata := range globalResource.PluginMetadata {
-					rawConfig, _ := json.Marshal(pluginMetadata)
-					_, err := etcdCli.Put(context.Background(), key, string(rawConfig))
-					Expect(err).NotTo(HaveOccurred())
-				}
-				// put stage release
-				stageRelease := integration.GetBkDefaultStageRelease()
-				for key, release := range stageRelease {
-					rawConfig, _ := json.Marshal(release)
-					_, err := etcdCli.Put(context.Background(), key, string(rawConfig))
-					Expect(err).NotTo(HaveOccurred())
-				}
-
-				time.Sleep(time.Second * 10)
-
-				// del route
-				_, err := etcdCli.Delete(context.Background(), delRouteKey)
-				Expect(err).NotTo(HaveOccurred())
-
 				// add del route release
 				// put stage release
 				for key, release := range stageRelease {
 					release.PublishId = delPublishID
+					release.Labels.PublishId = fmt.Sprintf("%d", delPublishID)
 					rawConfig, _ := json.Marshal(release)
 					_, err := etcdCli.Put(context.Background(), key, string(rawConfig))
 					Expect(err).NotTo(HaveOccurred())
 				}
 
-				time.Sleep(time.Second * 10)
+				time.Sleep(time.Second * 40)
 
-				// assert apigw resource and apisix resource
-				gatewayResourcesMap, err := resourceCli.ApigwList(&client.ApigwListRequest{
-					GatewayName: testGateway,
-					StageName:   testStage,
-				})
-				Expect(err).NotTo(HaveOccurred())
-
-				resourceInfo, ok := gatewayResourcesMap[stageKey]
-
-				Expect(ok).To(BeTrue())
-
-				Expect(len(resourceInfo.Routes)).To(Equal(testDataRoutesAmount - 1))
-				Expect(len(resourceInfo.Services)).To(Equal(testDataServiceAmount))
-				time.Sleep(time.Second * 10)
 				// assert apisix current-version publish_id
-				apisixResourceVersion, err := resourceCli.ApisixStageCurrentVersion(
+				apisixResourceVersion, err = resourceCli.ApisixStageCurrentVersion(
 					&client.ApisixListRequest{
 						GatewayName: testGateway,
 						StageName:   testStage,
@@ -299,6 +266,16 @@ var _ = Describe("Operator Integration", func() {
 				)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(apisixResourceVersion["publish_id"]).To(Equal(float64(delPublishID)))
+
+				apisixResourceListMap, err := resourceCli.ApisixList(&client.ApisixListRequest{
+					GatewayName: testGateway,
+					StageName:   testStage,
+				})
+				Expect(err).NotTo(HaveOccurred())
+				for _, resource := range apisixResourceListMap {
+					Expect(len(resource.Routes)).To(Equal(testDataRoutesAmount - 1))
+					Expect(len(resource.Services)).To(Equal(testDataServiceAmount))
+				}
 			})
 		})
 	})

@@ -164,6 +164,19 @@ func ReportApplyConfigurationDoingEvent(ctx context.Context, release *entity.Rel
 	addEvent(event)
 }
 
+// ReportApplyConfigurationFailureEvent will report failure event when apply configuration failed
+func ReportApplyConfigurationFailureEvent(ctx context.Context, release *entity.ReleaseInfo, err error) {
+	event := reportEvent{
+		ctx:     ctx,
+		release: release,
+		Event:   constant.EventNameApplyConfiguration,
+		status:  constant.EventStatusFailure,
+		detail:  map[string]any{"err_msg": err.Error()},
+		ts:      time.Now().Unix(),
+	}
+	addEvent(event)
+}
+
 // ReportApplyConfigurationSuccessEvent will report success event when apply configuration successfully
 func ReportApplyConfigurationSuccessEvent(ctx context.Context, release *entity.ReleaseInfo) {
 	event := reportEvent{

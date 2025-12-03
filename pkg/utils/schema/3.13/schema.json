@@ -3576,296 +3576,6 @@
       "scope": "resource",
       "version": 0.1
     },
-    "api-breaker": {
-      "priority": 1005,
-      "schema": {
-        "type": "object",
-        "properties": {
-          "break_response_code": {
-            "type": "integer",
-            "minimum": 200,
-            "maximum": 599
-          },
-          "break_response_body": {
-            "type": "string"
-          },
-          "break_response_headers": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "key": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "value": {
-                  "type": "string",
-                  "minLength": 1
-                }
-              },
-              "required": [
-                "key",
-                "value"
-              ]
-            }
-          },
-          "max_breaker_sec": {
-            "type": "integer",
-            "minimum": 3,
-            "default": 300
-          },
-          "unhealthy": {
-            "type": "object",
-            "properties": {
-              "http_statuses": {
-                "type": "array",
-                "minItems": 1,
-                "items": {
-                  "type": "integer",
-                  "minimum": 500,
-                  "maximum": 599
-                },
-                "uniqueItems": true,
-                "default": [
-                  500
-                ]
-              },
-              "failures": {
-                "type": "integer",
-                "minimum": 1,
-                "default": 3
-              }
-            },
-            "default": {
-              "http_statuses": [
-                500
-              ],
-              "failures": 3
-            }
-          },
-          "healthy": {
-            "type": "object",
-            "properties": {
-              "http_statuses": {
-                "type": "array",
-                "minItems": 1,
-                "items": {
-                  "type": "integer",
-                  "minimum": 200,
-                  "maximum": 499
-                },
-                "uniqueItems": true,
-                "default": [
-                  200
-                ]
-              },
-              "successes": {
-                "type": "integer",
-                "minimum": 1,
-                "default": 3
-              }
-            },
-            "default": {
-              "http_statuses": [
-                200
-              ],
-              "successes": 3
-            }
-          }
-        },
-        "required": [
-          "break_response_code"
-        ]
-      },
-      "scope": "resource",
-      "version": 0.1
-    },
-    "request-validation": {
-      "priority": 2800,
-      "schema": {
-        "type": "object",
-        "properties": {
-          "header_schema": {
-            "type": "object"
-          },
-          "body_schema": {
-            "type": "object"
-          },
-          "rejected_code": {
-            "type": "integer",
-            "minimum": 200,
-            "maximum": 599,
-            "default": 400
-          },
-          "rejected_msg": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          }
-        },
-        "anyOf": [
-          {
-            "required": [
-              "header_schema"
-            ]
-          },
-          {
-            "required": [
-              "body_schema"
-            ]
-          }
-        ]
-      },
-      "scope": "resource",
-      "version": 0.1
-    },
-    "fault-injection": {
-      "priority": 11000,
-      "schema": {
-        "type": "object",
-        "properties": {
-          "abort": {
-            "type": "object",
-            "properties": {
-              "http_status": {
-                "type": "integer",
-                "minimum": 200
-              },
-              "body": {
-                "type": "string",
-                "minLength": 0
-              },
-              "percentage": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 100
-              },
-              "vars": {
-                "type": "array",
-                "maxItems": 20,
-                "items": {
-                  "type": "array"
-                }
-              }
-            },
-            "required": [
-              "http_status"
-            ]
-          },
-          "delay": {
-            "type": "object",
-            "properties": {
-              "duration": {
-                "type": "number",
-                "minimum": 0
-              },
-              "percentage": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 100
-              },
-              "vars": {
-                "type": "array",
-                "maxItems": 20,
-                "items": {
-                  "type": "array"
-                }
-              }
-            },
-            "required": [
-              "duration"
-            ]
-          }
-        },
-        "minProperties": 1
-      },
-      "scope": "resource",
-      "version": 0.1
-    },
-    "response-rewrite": {
-      "priority": 899,
-      "schema": {
-        "$comment": "this is a mark for our injected plugin schema",
-        "type": "object",
-        "properties": {
-          "status_code": {
-            "type": "string",
-            "description": "new status code for response"
-          },
-          "body": {
-            "type": "string",
-            "description": "new body for response"
-          },
-          "body_base64": {
-            "type": "boolean",
-            "description": "whether new body for response need base64 decode before return",
-            "default": false
-          },
-          "headers": {
-            "type": "object",
-            "description": "new headers for response",
-            "properties": {
-              "add": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "pattern": "^[^:]+:[^:]*[^/]$"
-                }
-              },
-              "set": {
-                "type": "object",
-                "patternProperties": {
-                  "^[^:]+$": {
-                    "oneOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "number"
-                      }
-                    ]
-                  }
-                }
-              },
-              "remove": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "pattern": "^[^:]+$"
-                }
-              }
-            }
-          },
-          "vars": {
-            "type": "array",
-            "maxItems": 20,
-            "items": {
-              "type": "array"
-            }
-          }
-        }
-      },
-      "scope": "resource",
-      "version": 0.1
-    },
-    "redirect": {
-      "priority": 900,
-      "schema": {
-        "$comment": "this is a mark for our injected plugin schema",
-        "type": "object",
-        "properties": {
-          "uri": {
-            "type": "string",
-            "pattern": "^(\\\\\\$[0-9a-zA-Z_]+|\\$\\{[0-9a-zA-Z_]+\\}|\\$[0-9a-zA-Z_]+|\\$|[^$\\\\]+)*$"
-          },
-          "ret_code": {
-            "type": "integer"
-          }
-        }
-      },
-      "scope": "resource",
-      "version": 0.1
-    },
     "bk-access-token-source": {
       "priority": 18735,
       "schema": {
@@ -4006,6 +3716,540 @@
         }
       },
       "scope": "global",
+      "version": 0.1
+    },
+    "response-rewrite": {
+      "priority": 899,
+      "schema": {
+        "$comment": "this is a mark for our injected plugin schema",
+        "dependencies": {
+          "body": {
+            "not": {
+              "required": [
+                "filters"
+              ]
+            }
+          },
+          "filters": {
+            "not": {
+              "required": [
+                "body"
+              ]
+            }
+          }
+        },
+        "properties": {
+          "_meta": {
+            "properties": {
+              "disable": {
+                "type": "boolean"
+              },
+              "error_response": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object"
+                  }
+                ]
+              },
+              "filter": {
+                "description": "filter determines whether the plugin needs to be executed at runtime",
+                "type": "array"
+              },
+              "priority": {
+                "description": "priority of plugins by customized order",
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          },
+          "body": {
+            "description": "new body for response",
+            "type": "string"
+          },
+          "body_base64": {
+            "default": false,
+            "description": "whether new body for response need base64 decode before return",
+            "type": "boolean"
+          },
+          "filters": {
+            "description": "a group of filters that modify response bodyby replacing one specified string by another",
+            "items": {
+              "description": "filter that modifies response body",
+              "properties": {
+                "options": {
+                  "default": "jo",
+                  "description": "regex options",
+                  "type": "string"
+                },
+                "regex": {
+                  "description": "match pattern on response body",
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "replace": {
+                  "description": "regex substitution content",
+                  "type": "string"
+                },
+                "scope": {
+                  "default": "once",
+                  "description": "regex substitution range",
+                  "enum": [
+                    "global",
+                    "once"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "regex",
+                "replace"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "headers": {
+            "anyOf": [
+              {
+                "minProperties": 1,
+                "patternProperties": {
+                  "^[^:]+$": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  }
+                },
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "add": {
+                    "items": {
+                      "pattern": "^[^:]+:[^:]+[^/]$",
+                      "type": "string"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                  },
+                  "remove": {
+                    "items": {
+                      "pattern": "^[^:]+$",
+                      "type": "string"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                  },
+                  "set": {
+                    "minProperties": 1,
+                    "patternProperties": {
+                      "^[^:]+$": {
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "object"
+                  }
+                }
+              }
+            ],
+            "description": "new headers for response"
+          },
+          "status_code": {
+            "description": "new status code for response",
+            "maximum": 598,
+            "minimum": 200,
+            "type": "integer"
+          },
+          "vars": {
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "version": 0.1
+    },
+    "redirect": {
+      "priority": 900,
+      "schema": {
+        "$comment": "this is a mark for our injected plugin schema",
+        "oneOf": [
+          {
+            "required": [
+              "uri"
+            ]
+          },
+          {
+            "required": [
+              "regex_uri"
+            ]
+          },
+          {
+            "required": [
+              "http_to_https"
+            ]
+          }
+        ],
+        "properties": {
+          "_meta": {
+            "properties": {
+              "disable": {
+                "type": "boolean"
+              },
+              "error_response": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object"
+                  }
+                ]
+              },
+              "filter": {
+                "description": "filter determines whether the plugin needs to be executed at runtime",
+                "type": "array"
+              },
+              "priority": {
+                "description": "priority of plugins by customized order",
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          },
+          "append_query_string": {
+            "default": false,
+            "type": "boolean"
+          },
+          "encode_uri": {
+            "default": false,
+            "type": "boolean"
+          },
+          "http_to_https": {
+            "type": "boolean"
+          },
+          "regex_uri": {
+            "description": "params for generating new uri that substitute from client uri, first param is regular expression, the second one is uri template",
+            "items": {
+              "description": "regex uri",
+              "type": "string"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "ret_code": {
+            "default": 302,
+            "minimum": 200,
+            "type": "integer"
+          },
+          "uri": {
+            "minLength": 2,
+            "pattern": "(\\\\\\$[0-9a-zA-Z_]+)|\\$\\{([0-9a-zA-Z_]+)\\}|\\$([0-9a-zA-Z_]+)|(\\$|[^$\\\\]+)",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "version": 0.1
+    },
+    "api-breaker": {
+      "priority": 1005,
+      "schema": {
+        "$comment": "this is a mark for our injected plugin schema",
+        "properties": {
+          "_meta": {
+            "properties": {
+              "disable": {
+                "type": "boolean"
+              },
+              "error_response": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object"
+                  }
+                ]
+              },
+              "filter": {
+                "description": "filter determines whether the plugin needs to be executed at runtime",
+                "type": "array"
+              },
+              "priority": {
+                "description": "priority of plugins by customized order",
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          },
+          "break_response_body": {
+            "type": "string"
+          },
+          "break_response_code": {
+            "maximum": 599,
+            "minimum": 200,
+            "type": "integer"
+          },
+          "break_response_headers": {
+            "items": {
+              "properties": {
+                "key": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "value": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "value"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "healthy": {
+            "default": {
+              "http_statuses": [
+                200
+              ],
+              "successes": 3
+            },
+            "properties": {
+              "http_statuses": {
+                "default": [
+                  200
+                ],
+                "items": {
+                  "maximum": 499,
+                  "minimum": 200,
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "type": "array",
+                "uniqueItems": true
+              },
+              "successes": {
+                "default": 3,
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          },
+          "max_breaker_sec": {
+            "default": 300,
+            "minimum": 3,
+            "type": "integer"
+          },
+          "unhealthy": {
+            "default": {
+              "failures": 3,
+              "http_statuses": [
+                500
+              ]
+            },
+            "properties": {
+              "failures": {
+                "default": 3,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "http_statuses": {
+                "default": [
+                  500
+                ],
+                "items": {
+                  "maximum": 599,
+                  "minimum": 500,
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "type": "array",
+                "uniqueItems": true
+              }
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "break_response_code"
+        ],
+        "type": "object"
+      },
+      "version": 0.1
+    },
+    "request-validation": {
+      "priority": 2800,
+      "schema": {
+        "$comment": "this is a mark for our injected plugin schema",
+        "anyOf": [
+          {
+            "required": [
+              "header_schema"
+            ]
+          },
+          {
+            "required": [
+              "body_schema"
+            ]
+          }
+        ],
+        "properties": {
+          "_meta": {
+            "properties": {
+              "disable": {
+                "type": "boolean"
+              },
+              "error_response": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object"
+                  }
+                ]
+              },
+              "filter": {
+                "description": "filter determines whether the plugin needs to be executed at runtime",
+                "type": "array"
+              },
+              "priority": {
+                "description": "priority of plugins by customized order",
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          },
+          "body_schema": {
+            "type": "object"
+          },
+          "header_schema": {
+            "type": "object"
+          },
+          "rejected_code": {
+            "default": 400,
+            "maximum": 599,
+            "minimum": 200,
+            "type": "integer"
+          },
+          "rejected_msg": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "validation",
+      "version": 0.1
+    },
+    "fault-injection": {
+      "priority": 11000,
+      "schema": {
+        "$comment": "this is a mark for our injected plugin schema",
+        "minProperties": 1,
+        "properties": {
+          "_meta": {
+            "properties": {
+              "disable": {
+                "type": "boolean"
+              },
+              "error_response": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object"
+                  }
+                ]
+              },
+              "filter": {
+                "description": "filter determines whether the plugin needs to be executed at runtime",
+                "type": "array"
+              },
+              "priority": {
+                "description": "priority of plugins by customized order",
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          },
+          "abort": {
+            "properties": {
+              "body": {
+                "minLength": 0,
+                "type": "string"
+              },
+              "http_status": {
+                "minimum": 200,
+                "type": "integer"
+              },
+              "percentage": {
+                "maximum": 100,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "vars": {
+                "items": {
+                  "type": "array"
+                },
+                "maxItems": 20,
+                "type": "array"
+              }
+            },
+            "required": [
+              "http_status"
+            ],
+            "type": "object"
+          },
+          "delay": {
+            "properties": {
+              "duration": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "percentage": {
+                "maximum": 100,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "vars": {
+                "items": {
+                  "type": "array"
+                },
+                "maxItems": 20,
+                "type": "array"
+              }
+            },
+            "required": [
+              "duration"
+            ],
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
       "version": 0.1
     },
     "authz-casbin": {
