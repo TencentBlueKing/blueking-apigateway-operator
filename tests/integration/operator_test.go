@@ -65,7 +65,7 @@ var _ = Describe("Operator Integration", func() {
 		var err error
 		etcdCli, err = clientv3.New(cfg)
 		Expect(err).NotTo(HaveOccurred())
-		resourceCli = client.NewResourceClient(operatorURL, "DebugModel@bk")
+		resourceCli = client.NewResourceClient(operatorURL, "xxxxx")
 	})
 
 	AfterEach(func() {

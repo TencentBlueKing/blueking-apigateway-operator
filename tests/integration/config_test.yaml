@@ -42,7 +42,7 @@ httpServer:
   bindAddressV6: "[::]"
   bindPort: 6004
 # The authentication pwd used to access the API
-  authPassword: DebugModel@bk
+  authPassword: "xxxxx"
 
 logger:
   default:
