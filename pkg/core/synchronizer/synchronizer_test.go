@@ -303,8 +303,8 @@ var _ = Describe("ApisixConfigSynchronizer with EmbedEtcd", func() {
 			Expect(resp1.Kvs).To(HaveLen(1))
 			revision1 := resp1.Kvs[0].ModRevision
 
-			// Wait a bit to ensure different timestamp if written
-			time.Sleep(50 * time.Millisecond)
+			// Wait for registry watch to process the events and update cache
+			time.Sleep(200 * time.Millisecond)
 
 			// Second sync with same configuration (need to reset create/update time)
 			stageConfig2 := &entity.ApisixStageResource{
