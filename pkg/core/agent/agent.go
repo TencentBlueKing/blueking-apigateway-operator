@@ -165,7 +165,7 @@ func (w *EventAgent) handleEvent(event *entity.ResourceMetadata) {
 
 func (w *EventAgent) handleTicker(ctx context.Context) {
 	resourceList := w.resourceTimer.ListReleaseForCommit()
-	w.logger.Debugw("resources to be committed", "resourceList",
+	w.logger.Infow("timer trigger resources to be committed", "resourceList",
 		resourceList)
 	if len(resourceList) != 0 {
 		w.commitChan <- resourceList

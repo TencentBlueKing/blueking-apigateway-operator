@@ -389,13 +389,13 @@ func (v *APISIXJsonSchemaValidator) Validate(rawConfig json.RawMessage) error { 
 	resourceIdentification := GetResourceIdentification(rawConfig)
 	ret, err := v.schema.Validate(gojsonschema.NewBytesLoader(rawConfig))
 	if err != nil {
-		log.Errorf("schema validate failed: %s, s: %v, obj: %s", err, v.schema, rawConfig)
+		log.Errorf("schema validate failed: %s, config: %s", err, rawConfig)
 		return fmt.Errorf("资源: %s schema 验证失败: %s", resourceIdentification, err)
 	}
 
 	if !ret.Valid() {
 		errString := GetSchemaValidateFailed(ret)
-		log.Errorf("schema validate failed:s: %v, obj: %s，err: %s", v.schemaDef, rawConfig, errString)
+		log.Errorf("schema validate failed:s: %v, config: %s，err: %s", err, rawConfig, errString)
 		return fmt.Errorf("资源: %s schema 验证失败: %s", resourceIdentification, errString)
 	}
 

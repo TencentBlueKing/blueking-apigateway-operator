@@ -183,6 +183,8 @@ func (c *Committer) commitStage(ctx context.Context, si *entity.ReleaseInfo, sta
 		c.retryStage(si)
 		span.RecordError(err)
 		eventreporter.ReportParseConfigurationFailureEvent(ctx, si, err)
+		// 释放channel
+		<-stageChan
 		return
 	} else {
 		eventreporter.ReportParseConfigurationSuccessEvent(ctx, si)
@@ -201,6 +203,9 @@ func (c *Committer) commitStage(ctx context.Context, si *entity.ReleaseInfo, sta
 		// retry
 		c.retryStage(si)
 		span.RecordError(err)
+		eventreporter.ReportApplyConfigurationFailureEvent(ctx, si, err)
+		// 释放channel
+		<-stageChan
 		return
 	}
 	// eventrepoter.ReportApplyConfigurationSuccessEvent(ctx, stage) // 可以由事件之前的关系推断出来

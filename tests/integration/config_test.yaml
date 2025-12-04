@@ -5,20 +5,18 @@ operator:
   defaultStage: "default"
   #write apisix etcd interval
   etcdPutInterval: "100ms"
+  #delete apisix etcd interval
+  etcdDelInterval: "15s"
 
 dashboard:
   etcd:
     endpoints: "etcd:2379"
     keyPrefix: "/bk-gateway-apigw"
-    username: ""
-    password: ""
 
 apisix:
   etcd:
     endpoints: "etcd:2379"
     keyPrefix: "/bk-gateway-apisix"
-    username: ""
-    password: ""
   virtualStage:
     extraApisixResources: "/data/config/extra-resources.yaml"
 
@@ -48,11 +46,11 @@ httpServer:
 
 logger:
   default:
-    level: info
+    level: debug
     writer: os
     settings: {name: stdout}
   controller:
-    level: info
+    level: debug
     writer: os
     settings: {name: stdout}
     # writer: file

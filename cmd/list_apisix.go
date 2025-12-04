@@ -21,6 +21,7 @@ package cmd
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -151,12 +152,20 @@ func (l *listApisixCommand) formatOutput(apisixListInfo client.ApisixListInfo, f
 	return nil
 }
 
-func (l *listApisixCommand) printResource(typeName string, fields map[string]any) {
+func (l *listApisixCommand) printResource(typeName string, fields any) {
 	fmt.Printf("\t%s:\n", typeName)
 	if fields == nil {
 		return
 	}
-	for id := range fields {
-		fmt.Printf("\t\t%s\n", id)
+
+	// 使用反射来处理任意类型的 map[string]T
+	rv := reflect.ValueOf(fields)
+	if rv.Kind() != reflect.Map {
+		return
+	}
+
+	// 遍历 map 的 keys
+	for _, key := range rv.MapKeys() {
+		fmt.Printf("\t\t%s\n", key.String())
 	}
 }

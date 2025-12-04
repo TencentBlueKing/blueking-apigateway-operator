@@ -63,6 +63,40 @@
         }
       },
       "service_id": "bk-default.default.2-1"
+    },
+    "/bk-gateway-apigw/v2/gateway/bk-default/default/route/bk-default.default.2": {
+      "id": "bk-default.default.2",
+      "labels": {
+        "gateway.bk.tencent.com/gateway": "bk-default",
+        "gateway.bk.tencent.com/stage": "default",
+        "gateway.bk.tencent.com/apisix-version": "3.13"
+      },
+      "name": "bk-default.default.demo",
+      "uris": [
+        "/api/bk-default/default/demo",
+        "/api/bk-default/default/demo/"
+      ],
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "plugins": {
+        "bk-resource-context": {
+          "bk_resource_id": 2,
+          "bk_resource_name": "demo",
+          "bk_resource_auth": {
+            "verified_app_required": false,
+            "verified_user_required": false,
+            "resource_perm_required": false,
+            "skip_user_verification": false
+          }
+        },
+        "bk-proxy-rewrite": {
+          "uri": "/demo",
+          "method": "GET"
+        }
+      },
+      "service_id": "bk-default.default.2-2"
     }
   },
   "services": {
@@ -73,7 +107,7 @@
         "gateway.bk.tencent.com/gateway": "bk-default",
         "gateway.bk.tencent.com/stage": "default",
         "gateway.bk.tencent.com/apisix-version": "3.13",
-        "gateway.bk.tencent.com/publish-id": "-1",
+        "gateway.bk.tencent.com/publish-id": "1",
         "gateway.bk.tencent.com/backend-id": "1"
       },
       "name": "bk-default.default.default",
