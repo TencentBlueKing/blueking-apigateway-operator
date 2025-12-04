@@ -450,6 +450,9 @@ var _ = Describe("ApisixConfigSynchronizer with EmbedEtcd", func() {
 			}
 			Expect(routeCount).To(Equal(2))
 
+			// Wait for registry watch to process the events and update cache
+			time.Sleep(200 * time.Millisecond)
+
 			// New config with only 1 route (route-4b removed)
 			stageConfig2 := &entity.ApisixStageResource{
 				Routes: map[string]*entity.Route{
@@ -601,6 +604,9 @@ var _ = Describe("ApisixConfigSynchronizer with EmbedEtcd", func() {
 			resp, err = client.Get(ctx, "/apisix/routes/stage2-route")
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(resp.Kvs).To(HaveLen(1))
+
+			// Wait for registry watch to process the events and update cache
+			time.Sleep(200 * time.Millisecond)
 
 			// Now sync stage2 with empty config to remove it
 			emptyConfig := &entity.ApisixStageResource{
@@ -827,8 +833,8 @@ var _ = Describe("ApisixConfigSynchronizer with EmbedEtcd", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(resp.Kvs).To(HaveLen(1))
 
-			// Wait for cache to sync
-			time.Sleep(50 * time.Millisecond)
+			// Wait for registry watch to process the events and update cache
+			time.Sleep(200 * time.Millisecond)
 
 			// Sync with empty config
 			emptyConfig := &entity.ApisixGlobalResource{
