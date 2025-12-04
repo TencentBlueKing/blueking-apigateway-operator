@@ -661,7 +661,9 @@ var _ = Describe("ApisixConfigSynchronizer with EmbedEtcd", func() {
 			Expect(resp1.Kvs).To(HaveLen(1))
 			revision1 := resp1.Kvs[0].ModRevision
 
-			time.Sleep(50 * time.Millisecond)
+			// Wait for registry watch to process the event and update cache
+			// The registry uses async watch to update its internal cache
+			time.Sleep(200 * time.Millisecond)
 
 			// Second sync with same config
 			globalConfig2 := &entity.ApisixGlobalResource{
@@ -742,6 +744,9 @@ var _ = Describe("ApisixConfigSynchronizer with EmbedEtcd", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(resp.Kvs).To(HaveLen(1))
 
+			// Wait for registry watch to process the events and update cache
+			time.Sleep(200 * time.Millisecond)
+
 			// New config with only plugin-a
 			globalConfig2 := &entity.ApisixGlobalResource{
 				PluginMetadata: map[string]*entity.PluginMetadata{
@@ -821,6 +826,9 @@ var _ = Describe("ApisixConfigSynchronizer with EmbedEtcd", func() {
 			resp, err := client.Get(ctx, "/apisix/plugin_metadata/to-be-removed")
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(resp.Kvs).To(HaveLen(1))
+
+			// Wait for cache to sync
+			time.Sleep(50 * time.Millisecond)
 
 			// Sync with empty config
 			emptyConfig := &entity.ApisixGlobalResource{
