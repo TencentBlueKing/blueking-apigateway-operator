@@ -168,7 +168,34 @@ func (c *Committer) commitGatewayStage(ctx context.Context, si *entity.ReleaseIn
 	})
 }
 
+// CleanupGatewayChannel removes the channel for a gateway that is no longer needed
+// This should be called when a gateway is deleted to prevent memory leaks
+func (c *Committer) CleanupGatewayChannel(gatewayName string) {
+	c.gatewayStageChanMapLock.Lock()
+	defer c.gatewayStageChanMapLock.Unlock()
+	if stageChan, ok := c.gatewayStageChanMap[gatewayName]; ok {
+		// Drain the channel before deleting
+		select {
+		case <-stageChan:
+		default:
+		}
+		delete(c.gatewayStageChanMap, gatewayName)
+		c.logger.Infof("cleaned up gateway channel: %s", gatewayName)
+	}
+}
+
 func (c *Committer) commitStage(ctx context.Context, si *entity.ReleaseInfo, stageChan chan struct{}) {
+	// Ensure stageChan is always released, even if panic occurs
+	stageChannelReleased := false
+	defer func() {
+		if !stageChannelReleased {
+			select {
+			case <-stageChan:
+			default:
+			}
+		}
+	}()
+
 	// trace
 	_, span := trace.StartTrace(si.Ctx, "committer.commitStage")
 	defer span.End()
@@ -185,10 +212,10 @@ func (c *Committer) commitStage(ctx context.Context, si *entity.ReleaseInfo, sta
 		eventreporter.ReportParseConfigurationFailureEvent(ctx, si, err)
 		// 释放channel
 		<-stageChan
+		stageChannelReleased = true
 		return
-	} else {
-		eventreporter.ReportParseConfigurationSuccessEvent(ctx, si)
 	}
+	eventreporter.ReportParseConfigurationSuccessEvent(ctx, si)
 	eventreporter.ReportApplyConfigurationDoingEvent(ctx, si)
 
 	span.AddEvent("committer.Sync")
@@ -206,9 +233,12 @@ func (c *Committer) commitStage(ctx context.Context, si *entity.ReleaseInfo, sta
 		eventreporter.ReportApplyConfigurationFailureEvent(ctx, si, err)
 		// 释放channel
 		<-stageChan
+		stageChannelReleased = true
 		return
 	}
 	// eventrepoter.ReportApplyConfigurationSuccessEvent(ctx, stage) // 可以由事件之前的关系推断出来
+	// Mark as released since ReportLoadConfigurationResultEvent will handle it
+	stageChannelReleased = true
 	eventreporter.ReportLoadConfigurationResultEvent(ctx, si, stageChan)
 	c.logger.Infow("commit stage success", "stageInfo", si)
 }

@@ -65,12 +65,19 @@ type ApisixEtcdStore struct {
 	syncTimeout time.Duration
 
 	lock *sync.RWMutex
+
+	// ctx for controlling the lifecycle of registry goroutines
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
 // NewApisixEtcdStore ...
-func NewApisixEtcdStore(client *clientv3.Client, prefix string,
+func NewApisixEtcdStore(ctx context.Context, client *clientv3.Client, prefix string,
 	putInterval, delInterval, syncTimeout time.Duration,
 ) (*ApisixEtcdStore, error) {
+	// Create a cancellable context for managing registry lifecycles
+	storeCtx, cancel := context.WithCancel(ctx)
+
 	s := &ApisixEtcdStore{
 		client:      client,
 		prefix:      strings.TrimRight(prefix, "/"),
@@ -81,17 +88,33 @@ func NewApisixEtcdStore(client *clientv3.Client, prefix string,
 		delInterval: delInterval,
 		syncTimeout: syncTimeout,
 		lock:        &sync.RWMutex{},
+		ctx:         storeCtx,
+		cancel:      cancel,
 	}
 	s.Init()
 
 	s.logger.Infow("Create etcd config store", "prefix", prefix)
 
 	if len(s.registry) != len(apisixResourceTypes) {
+		cancel() // Clean up context on error
 		s.logger.Error("Create etcd config store failed")
 		return nil, fmt.Errorf("create etcd config store failed")
 	}
 
 	return s, nil
+}
+
+// Close stops all registry goroutines and releases resources
+func (s *ApisixEtcdStore) Close() {
+	if s.cancel != nil {
+		s.cancel()
+	}
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	for _, reg := range s.registry {
+		reg.Close()
+	}
+	s.logger.Infow("ApisixEtcdStore closed", "prefix", s.prefix)
 }
 
 // Init initializes the etcd config store
@@ -105,7 +128,7 @@ func (s *ApisixEtcdStore) Init() {
 		utils.GoroutineWithRecovery(context.Background(), func() {
 			defer wg.Done()
 			apisixEtcdRegistry, err := registry.NewApisixEtcdRegistry(
-				s.client, s.prefix+"/"+tempResourceType+"/", s.syncTimeout)
+				s.ctx, s.client, s.prefix+"/"+tempResourceType+"/", s.syncTimeout)
 			if err != nil {
 				s.logger.Errorw("Create resource store failed", "resourceType", tempResourceType)
 				return
