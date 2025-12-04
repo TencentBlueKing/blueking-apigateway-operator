@@ -77,35 +77,6 @@ func (as *ApisixConfigSynchronizer) Sync(
 	return nil
 }
 
-// RemoveNotExistStage remove stages that do not exist
-func (as *ApisixConfigSynchronizer) RemoveNotExistStage(ctx context.Context, existStageKeys []string) error {
-	as.flushMux.Lock()
-	defer as.flushMux.Unlock()
-
-	existStageConfig := as.store.GetAll()
-
-	keySet := make(map[string]struct{})
-	for _, key := range existStageKeys {
-		keySet[key] = struct{}{}
-	}
-	for key := range existStageConfig {
-		// virtual stage is not in existStageKeys, it maintained by operator, so we should skip here
-		if key == cfg.VirtualStageKey {
-			continue
-		}
-
-		if _, ok := keySet[key]; !ok {
-			err := as.store.Alter(ctx, key, entity.NewEmptyApisixConfiguration())
-			if err != nil {
-				as.logger.Errorw("Remove not exist stage failed", "key", key, "err", err)
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
 // SyncGlobal 同步全局资源配置到 apisix etcd
 func (as *ApisixConfigSynchronizer) SyncGlobal(
 	ctx context.Context,

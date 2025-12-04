@@ -75,13 +75,20 @@ func (t *ReleaseTimer) Update(releaseInfo *entity.ReleaseInfo) {
 		timer = &CacheTimer{ReleaseInfo: releaseInfo}
 		timer.Reset(eventsWaitingTimeWindow)
 	} else {
-		timer = timerInterface.(*CacheTimer)
-		// end old releaseInfo trace
-		_, span := trace.StartTrace(timer.ReleaseInfo.Ctx, "timer.Replace")
-		span.End()
+		var typeOk bool
+		timer, typeOk = timerInterface.(*CacheTimer)
+		if !typeOk {
+			// Handle unexpected type - create new timer
+			timer = &CacheTimer{ReleaseInfo: releaseInfo}
+			timer.Reset(eventsWaitingTimeWindow)
+		} else {
+			// end old releaseInfo trace
+			_, span := trace.StartTrace(timer.ReleaseInfo.Ctx, "timer.Replace")
+			span.End()
 
-		timer.ReleaseInfo = releaseInfo
-		timer.Update(eventsWaitingTimeWindow)
+			timer.ReleaseInfo = releaseInfo
+			timer.Update(eventsWaitingTimeWindow)
+		}
 	}
 	t.releaseTimer.Store(cacheKey, timer)
 }
@@ -90,7 +97,12 @@ func (t *ReleaseTimer) Update(releaseInfo *entity.ReleaseInfo) {
 func (t *ReleaseTimer) ListReleaseForCommit() []*entity.ReleaseInfo {
 	releaseInfos := make([]*entity.ReleaseInfo, 0)
 	t.releaseTimer.Range(func(key, timerInterface any) bool {
-		timer := timerInterface.(*CacheTimer)
+		timer, ok := timerInterface.(*CacheTimer)
+		if !ok {
+			// Skip invalid entries and clean them up
+			t.releaseTimer.Delete(key)
+			return true
+		}
 		if time.Since(timer.ShouldCommitTime) > 0 || time.Since(timer.CachedTime) > forceUpdateTimeWindow {
 			releaseInfos = append(releaseInfos, timer.ReleaseInfo)
 			t.releaseTimer.Delete(key)

@@ -16,27 +16,16 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package timer ...
-package timer
+package store
 
 import (
-	"time"
+	"testing"
 
-	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/config"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-var (
-	forceUpdateTimeWindow   = 10 * time.Second
-	eventsWaitingTimeWindow = 2 * time.Second
-)
-
-// Init ...
-func Init(cfg *config.Config) {
-	forceUpdateTimeWindow = cfg.Operator.AgentForceUpdateTimeWindow
-	eventsWaitingTimeWindow = cfg.Operator.AgentEventsWaitingTimeWindow
-}
-
-// SetEventsWaitingTimeWindow sets the events waiting time window (for testing)
-func SetEventsWaitingTimeWindow(d time.Duration) {
-	eventsWaitingTimeWindow = d
+func TestStore(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Store Suite")
 }

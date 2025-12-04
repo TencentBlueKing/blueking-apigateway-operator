@@ -44,8 +44,6 @@ type EventAgent struct {
 
 	resourceTimer *timer.ReleaseTimer
 
-	retryChan chan *entity.ResourceMetadata
-
 	keepAliveChan <-chan struct{} // for leader election
 
 	logger *zap.SugaredLogger
@@ -63,7 +61,6 @@ func NewEventAgent(
 		commitChan:    commitCh,
 		synchronizer:  synchronizer,
 		resourceTimer: stageTimer,
-		retryChan:     make(chan *entity.ResourceMetadata, 100),
 		logger:        logging.GetLogger().Named("event-agent"),
 	}
 }
@@ -78,6 +75,7 @@ func (w *EventAgent) Run(ctx context.Context) {
 	watchCh, watchCancel := w.createWatchChannel(ctx)
 
 	ticker := time.NewTicker(commitTimeWindow) // 窗口定时器
+	defer ticker.Stop()
 	for {
 		select {
 		// event receive
@@ -112,10 +110,6 @@ func (w *EventAgent) Run(ctx context.Context) {
 			}
 			w.handleEvent(event)
 
-		case event := <-w.retryChan:
-			w.logger.Debugw("retry channel event trigger", "event", event)
-
-			w.handleEvent(event)
 		// events commit
 		case <-ticker.C:
 			w.logger.Debugw("commit ticker trigger")

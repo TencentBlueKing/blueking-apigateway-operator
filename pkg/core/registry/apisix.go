@@ -46,34 +46,52 @@ type ApisixEtcdRegistry struct {
 	syncTimeout     time.Duration
 	currentRevision int64
 
+	// ctx for controlling the lifecycle of incrSync goroutine
+	ctx    context.Context
+	cancel context.CancelFunc
+
 	logger *zap.SugaredLogger
 }
 
 // NewApisixEtcdRegistry creates a new ApisixEtcdRegistry instance
-func NewApisixEtcdRegistry(client *clientv3.Client, prefix string,
+func NewApisixEtcdRegistry(ctx context.Context, client *clientv3.Client, prefix string,
 	syncTimeout time.Duration,
 ) (*ApisixEtcdRegistry, error) {
 	if !strings.HasSuffix(prefix, "/") {
 		prefix += "/"
 	}
 
+	// Create a cancellable context for the incrSync goroutine
+	registryCtx, cancel := context.WithCancel(ctx)
+
 	apisixEtcdRegistry := &ApisixEtcdRegistry{
 		client:      client,
 		Prefix:      prefix,
 		logger:      logging.GetLogger().Named("etcd-resource-store"),
 		syncTimeout: syncTimeout,
+		ctx:         registryCtx,
+		cancel:      cancel,
 	}
 
 	apisixEtcdRegistry.logger.Infow("Create etcd resource store", "Prefix", prefix)
 
 	err := apisixEtcdRegistry.fullSync(context.Background(), syncTimeout)
 	if err != nil {
+		cancel() // Clean up context on error
 		apisixEtcdRegistry.logger.Error(err, "full sync failed")
 		return nil, fmt.Errorf("init local resource store Prefix: %s error: %w", apisixEtcdRegistry.Prefix, err)
 	}
 	go apisixEtcdRegistry.incrSync()
 
 	return apisixEtcdRegistry, nil
+}
+
+// Close stops the incrSync goroutine and releases resources
+func (e *ApisixEtcdRegistry) Close() {
+	if e.cancel != nil {
+		e.cancel()
+		e.logger.Infow("ApisixEtcdRegistry closed", "Prefix", e.Prefix)
+	}
 }
 
 func (e *ApisixEtcdRegistry) fullSync(ctx context.Context, syncTimeout time.Duration) error {
@@ -166,11 +184,19 @@ func (e *ApisixEtcdRegistry) parseResource(key, value []byte) (resource entity.A
 
 // nolint: staticcheck
 func (e *ApisixEtcdRegistry) incrSync() {
-	c, cancel := context.WithCancel(context.TODO())
-	defer cancel()
+	c, cancel := context.WithCancel(e.ctx)
 	var ch clientv3.WatchChan
 	needCreateChan := true
 	for {
+		// Check if registry context is cancelled
+		select {
+		case <-e.ctx.Done():
+			e.logger.Infow("incrSync stopped due to context cancellation", "Prefix", e.Prefix)
+			cancel()
+			return
+		default:
+		}
+
 		if needCreateChan {
 			ch = e.client.Watch(
 				clientv3.WithRequireLeader(c),
@@ -183,6 +209,10 @@ func (e *ApisixEtcdRegistry) incrSync() {
 		}
 
 		select {
+		case <-e.ctx.Done():
+			e.logger.Infow("incrSync stopped due to context cancellation", "Prefix", e.Prefix)
+			cancel()
+			return
 		case event, ok := <-ch:
 			if !ok || event.Err() != nil {
 				e.logger.Error(event.Err(), "Watch event failed")
@@ -200,7 +230,7 @@ func (e *ApisixEtcdRegistry) incrSync() {
 				// reset channel
 				needCreateChan = true
 				cancel()
-				c, cancel = context.WithCancel(context.TODO())
+				c, cancel = context.WithCancel(e.ctx)
 				break
 			}
 			// handler event

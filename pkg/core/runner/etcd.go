@@ -55,20 +55,29 @@ type EtcdAgentRunner struct {
 	cfg *config.Config
 
 	logger *zap.SugaredLogger
+
+	// ctx for managing the lifecycle of background goroutines
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
 // NewEtcdAgentRunner ...
-func NewEtcdAgentRunner(cfg *config.Config) *EtcdAgentRunner {
+func NewEtcdAgentRunner(ctx context.Context, cfg *config.Config) *EtcdAgentRunner {
 	client, err := initOperatorEtcdClient(cfg)
 	if err != nil {
 		fmt.Println(err, "Error creating apigwEtcdRegistry etcd client")
 		os.Exit(1)
 	}
 
+	// Create a cancellable context for managing background goroutines
+	runnerCtx, cancel := context.WithCancel(ctx)
+
 	r := &EtcdAgentRunner{
 		client: client,
 		cfg:    cfg,
 		logger: logging.GetLogger().Named("etcd-agent-runner"),
+		ctx:    runnerCtx,
+		cancel: cancel,
 	}
 	r.init()
 	return r
@@ -83,7 +92,7 @@ func (r *EtcdAgentRunner) init() {
 
 	r.leader, _ = leaderelection.NewEtcdLeaderElector(r.client, r.cfg.Dashboard.Etcd.KeyPrefix)
 	// 4. init output
-	apisixEtcdStore, err := initApisixEtcdStore(r.cfg)
+	apisixEtcdStore, err := initApisixEtcdStore(r.ctx, r.cfg)
 	if err != nil {
 		fmt.Println(err, "Error creating etcd apisixEtcdstore")
 		os.Exit(1)
@@ -107,6 +116,17 @@ func (r *EtcdAgentRunner) init() {
 		r.synchronizer,
 		stageTimer,
 	)
+}
+
+// Close releases all resources and stops background goroutines
+func (r *EtcdAgentRunner) Close() {
+	if r.cancel != nil {
+		r.cancel()
+	}
+	if r.apisixEtcdstore != nil {
+		r.apisixEtcdstore.Close()
+	}
+	r.logger.Info("EtcdAgentRunner closed")
 }
 
 // Run ...
