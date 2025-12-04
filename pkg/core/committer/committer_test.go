@@ -25,6 +25,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/core/agent/timer"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
 )
@@ -516,6 +517,213 @@ var _ = Describe("Committer", func() {
 
 			// Verify it's still the original channel by checking capacity
 			Expect(cap(currentChan)).To(Equal(cap(originalChan)))
+		})
+	})
+
+	Describe("Global Resource", func() {
+		It("should identify global resource correctly", func() {
+			// Global resource: Kind is PluginMetadata and Stage is empty
+			globalRelease := &entity.ReleaseInfo{
+				ResourceMetadata: entity.ResourceMetadata{
+					ID:   "global-plugin-metadata",
+					Kind: constant.PluginMetadata,
+					Labels: &entity.LabelInfo{
+						Gateway: "",
+						Stage:   "",
+					},
+				},
+			}
+			Expect(globalRelease.IsGlobalResource()).To(BeTrue())
+
+			// Non-global resource: has Stage
+			stageRelease := &entity.ReleaseInfo{
+				ResourceMetadata: entity.ResourceMetadata{
+					ID:   "stage-resource",
+					Kind: constant.PluginMetadata,
+					Labels: &entity.LabelInfo{
+						Gateway: "gateway",
+						Stage:   "prod",
+					},
+				},
+			}
+			Expect(stageRelease.IsGlobalResource()).To(BeFalse())
+
+			// Non-global resource: Kind is not PluginMetadata
+			routeRelease := &entity.ReleaseInfo{
+				ResourceMetadata: entity.ResourceMetadata{
+					ID:   "route-resource",
+					Kind: constant.Route,
+					Labels: &entity.LabelInfo{
+						Gateway: "",
+						Stage:   "",
+					},
+				},
+			}
+			Expect(routeRelease.IsGlobalResource()).To(BeFalse())
+		})
+
+		It("should send global resource to commit channel", func() {
+			globalRelease := &entity.ReleaseInfo{
+				ResourceMetadata: entity.ResourceMetadata{
+					ID:   "global-plugin-metadata-1",
+					Kind: constant.PluginMetadata,
+					Labels: &entity.LabelInfo{
+						Gateway: "",
+						Stage:   "",
+					},
+				},
+			}
+
+			go func() {
+				committer.ForceCommit(context.Background(), []*entity.ReleaseInfo{globalRelease})
+			}()
+
+			select {
+			case received := <-committer.GetCommitChan():
+				Expect(received).To(HaveLen(1))
+				Expect(received[0].IsGlobalResource()).To(BeTrue())
+				Expect(received[0].ID).To(Equal("global-plugin-metadata-1"))
+			case <-time.After(time.Second):
+				Fail("timeout waiting for commit channel")
+			}
+		})
+
+		It("should handle mixed global and stage resources", func() {
+			releases := []*entity.ReleaseInfo{
+				// Global resource
+				{
+					ResourceMetadata: entity.ResourceMetadata{
+						ID:   "global-plugin-1",
+						Kind: constant.PluginMetadata,
+						Labels: &entity.LabelInfo{
+							Gateway: "",
+							Stage:   "",
+						},
+					},
+				},
+				// Stage resource
+				{
+					ResourceMetadata: entity.ResourceMetadata{
+						ID:   "gateway-a-stage-prod",
+						Kind: constant.Route,
+						Labels: &entity.LabelInfo{
+							Gateway: "gateway-a",
+							Stage:   "prod",
+						},
+					},
+					PublishId: 1,
+				},
+				// Another global resource
+				{
+					ResourceMetadata: entity.ResourceMetadata{
+						ID:   "global-plugin-2",
+						Kind: constant.PluginMetadata,
+						Labels: &entity.LabelInfo{
+							Gateway: "",
+							Stage:   "",
+						},
+					},
+				},
+				// Another stage resource
+				{
+					ResourceMetadata: entity.ResourceMetadata{
+						ID:   "gateway-b-stage-test",
+						Kind: constant.Route,
+						Labels: &entity.LabelInfo{
+							Gateway: "gateway-b",
+							Stage:   "test",
+						},
+					},
+					PublishId: 2,
+				},
+			}
+
+			go func() {
+				committer.ForceCommit(context.Background(), releases)
+			}()
+
+			select {
+			case received := <-committer.GetCommitChan():
+				Expect(received).To(HaveLen(4))
+
+				// Count global vs stage resources
+				globalCount := 0
+				stageCount := 0
+				for _, r := range received {
+					if r.IsGlobalResource() {
+						globalCount++
+					} else {
+						stageCount++
+					}
+				}
+				Expect(globalCount).To(Equal(2))
+				Expect(stageCount).To(Equal(2))
+			case <-time.After(time.Second):
+				Fail("timeout waiting for commit channel")
+			}
+		})
+
+		It("should not create gateway channel for global resource", func() {
+			// Global resources should not create gateway channels
+			globalRelease := &entity.ReleaseInfo{
+				ResourceMetadata: entity.ResourceMetadata{
+					ID:   "global-only-plugin",
+					Kind: constant.PluginMetadata,
+					Labels: &entity.LabelInfo{
+						Gateway: "",
+						Stage:   "",
+					},
+				},
+			}
+
+			// Before ForceCommit, no gateway channels should exist for empty gateway name
+			committer.gatewayStageChanMapLock.RLock()
+			_, hasEmptyGateway := committer.gatewayStageChanMap[""]
+			initialLen := len(committer.gatewayStageChanMap)
+			committer.gatewayStageChanMapLock.RUnlock()
+			Expect(hasEmptyGateway).To(BeFalse())
+
+			go func() {
+				committer.ForceCommit(context.Background(), []*entity.ReleaseInfo{globalRelease})
+			}()
+
+			// Consume from channel
+			select {
+			case <-committer.GetCommitChan():
+				// After ForceCommit, still no gateway channel for empty gateway
+				// (because global resources use commitGlobalResource, not commitGatewayStage)
+				committer.gatewayStageChanMapLock.RLock()
+				_, hasEmptyGatewayAfter := committer.gatewayStageChanMap[""]
+				finalLen := len(committer.gatewayStageChanMap)
+				committer.gatewayStageChanMapLock.RUnlock()
+				Expect(hasEmptyGatewayAfter).To(BeFalse())
+				Expect(finalLen).To(Equal(initialLen))
+			case <-time.After(time.Second):
+				Fail("timeout waiting for commit channel")
+			}
+		})
+
+		It("should handle retryStage for global resource", func() {
+			globalRelease := &entity.ReleaseInfo{
+				ResourceMetadata: entity.ResourceMetadata{
+					ID:   "global-retry-plugin",
+					Kind: constant.PluginMetadata,
+					Labels: &entity.LabelInfo{
+						Gateway: "",
+						Stage:   "",
+					},
+					RetryCount: 0,
+				},
+			}
+
+			// retryStage should work for global resources too
+			committer.retryStage(globalRelease)
+			Expect(globalRelease.RetryCount).To(Equal(int64(1)))
+
+			// Should respect max retry count
+			globalRelease.RetryCount = maxStageRetryCount
+			committer.retryStage(globalRelease)
+			Expect(globalRelease.RetryCount).To(Equal(int64(maxStageRetryCount)))
 		})
 	})
 })
