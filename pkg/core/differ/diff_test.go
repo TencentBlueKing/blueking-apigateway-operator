@@ -608,4 +608,141 @@ var _ = Describe("configDiffer", func() {
 			})
 		})
 	})
+
+	Describe("diffGlobal", func() {
+		var (
+			newConf *entity.ApisixGlobalResource
+			oldConf *entity.ApisixGlobalResource
+		)
+		BeforeEach(func() {
+			differ = NewConfigDiffer()
+			newConf = &entity.ApisixGlobalResource{
+				PluginMetadata: map[string]*entity.PluginMetadata{
+					"plugin1": {
+						ResourceMetadata: entity.ResourceMetadata{
+							ID:   "plugin1",
+							Kind: constant.PluginMetadata,
+						},
+						PluginMetadataConf: entity.PluginMetadataConf{
+							"plugin1": json.RawMessage(
+								`{"id":"plugin1","config":"value1"}`,
+							),
+						},
+					},
+					"plugin2": {
+						ResourceMetadata: entity.ResourceMetadata{
+							ID:   "plugin2",
+							Kind: constant.PluginMetadata,
+						},
+						PluginMetadataConf: entity.PluginMetadataConf{
+							"plugin2": json.RawMessage(
+								`{"id":"plugin2","config":"value2-changed"}`,
+							),
+						},
+					},
+				},
+			}
+
+			oldConf = &entity.ApisixGlobalResource{
+				PluginMetadata: map[string]*entity.PluginMetadata{
+					"plugin1": {
+						ResourceMetadata: entity.ResourceMetadata{
+							ID:   "plugin1",
+							Kind: constant.PluginMetadata,
+						},
+						PluginMetadataConf: entity.PluginMetadataConf{
+							"plugin1": json.RawMessage(
+								`{"id":"plugin1","config":"value1"}`,
+							),
+						},
+					},
+					"plugin2": {
+						ResourceMetadata: entity.ResourceMetadata{
+							ID:   "plugin2",
+							Kind: constant.PluginMetadata,
+						},
+						PluginMetadataConf: entity.PluginMetadataConf{
+							"plugin2": json.RawMessage(
+								`{"id":"plugin2","config":"value2"}`,
+							),
+						},
+					},
+					"plugin3": {
+						ResourceMetadata: entity.ResourceMetadata{
+							ID:   "plugin3",
+							Kind: constant.PluginMetadata,
+						},
+						PluginMetadataConf: entity.PluginMetadataConf{
+							"plugin3": json.RawMessage(
+								`{"id":"plugin3","config":"value3"}`,
+							),
+						},
+					},
+				},
+			}
+		})
+
+		Context("Test diffGlobal", func() {
+			It("should return correct put and delete for global resources", func() {
+				put, del := differ.DiffGlobal(oldConf, newConf)
+
+				// plugin1 unchanged, plugin2 changed (put), plugin3 deleted
+				Expect(len(put.PluginMetadata)).To(Equal(1))
+				Expect(put.PluginMetadata).To(HaveKey("plugin2"))
+
+				Expect(len(del.PluginMetadata)).To(Equal(1))
+				Expect(del.PluginMetadata).To(HaveKey("plugin3"))
+			})
+
+			It("should return new config when old is nil", func() {
+				put, del := differ.DiffGlobal(nil, newConf)
+
+				Expect(put).To(Equal(newConf))
+				Expect(del).To(BeNil())
+			})
+
+			It("should return old config as delete when new is nil", func() {
+				put, del := differ.DiffGlobal(oldConf, nil)
+
+				Expect(put).To(BeNil())
+				Expect(del).To(Equal(oldConf))
+			})
+
+			It("should handle empty global resources", func() {
+				emptyOld := &entity.ApisixGlobalResource{
+					PluginMetadata: make(map[string]*entity.PluginMetadata),
+				}
+				emptyNew := &entity.ApisixGlobalResource{
+					PluginMetadata: make(map[string]*entity.PluginMetadata),
+				}
+
+				put, del := differ.DiffGlobal(emptyOld, emptyNew)
+
+				Expect(len(put.PluginMetadata)).To(Equal(0))
+				Expect(len(del.PluginMetadata)).To(Equal(0))
+			})
+
+			It("should add all new plugins when old is empty", func() {
+				emptyOld := &entity.ApisixGlobalResource{
+					PluginMetadata: make(map[string]*entity.PluginMetadata),
+				}
+
+				put, del := differ.DiffGlobal(emptyOld, newConf)
+
+				Expect(len(put.PluginMetadata)).To(Equal(2))
+				Expect(len(del.PluginMetadata)).To(Equal(0))
+			})
+
+			It("should delete all old plugins when new is empty", func() {
+				emptyNew := &entity.ApisixGlobalResource{
+					PluginMetadata: make(map[string]*entity.PluginMetadata),
+				}
+
+				put, del := differ.DiffGlobal(oldConf, emptyNew)
+
+				Expect(len(put.PluginMetadata)).To(Equal(0))
+				Expect(len(del.PluginMetadata)).To(Equal(3))
+			})
+		})
+	})
 })
