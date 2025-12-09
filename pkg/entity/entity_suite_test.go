@@ -16,11 +16,16 @@
  * to the current version of the project delivered to anyone in the future.
  */
 
-// Package client ...
-package client
+package entity
 
-// VersionRouteResp is a response with the publish_id and start_time
-type VersionRouteResp struct {
-	PublishID int64  `json:"publish_id"`
-	StartTime string `json:"start_time"` // dashboard 生成虚拟路由时间
+import (
+	"testing"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+)
+
+func TestEntity(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Entity Suite")
 }

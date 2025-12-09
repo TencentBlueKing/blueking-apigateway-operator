@@ -105,7 +105,7 @@ func (ele *EtcdLeaderElector) elect() {
 		log.Printf("Try to be leader id: %s\n", ele.instanceID)
 		err := ele.election.Campaign(ele.ctx, ele.instanceID)
 		if err != nil {
-			ele.logger.Error(err, "Leader election compaign returns error", "id", ele.instanceID)
+			ele.logger.Error(err, "Leader election campaign returns error", "id", ele.instanceID)
 			time.Sleep(time.Second * 5)
 			continue
 		}
