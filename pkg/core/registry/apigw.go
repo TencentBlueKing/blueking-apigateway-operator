@@ -235,7 +235,7 @@ func (r *APIGWEtcdRegistry) handleEvent(event *clientv3.Event) (*entity.Resource
 	return nil, fmt.Errorf("err unknown event type: %s", event.Type)
 }
 
-// extractResourceMetadata 解析etcd key和value，返回资源元数据，复杂度比较高：todo 优化
+// extractResourceMetadata 解析 etcd key 和 value，返回资源元数据，复杂度比较高：todo 优化
 func (r *APIGWEtcdRegistry) extractResourceMetadata(key string, value []byte) (entity.ResourceMetadata, error) {
 	// /{self.prefix}/{self.api_version}/gateway/{gateway_name}/{stage_name}/route/bk-default.default.-1
 
@@ -307,7 +307,7 @@ func (r *APIGWEtcdRegistry) ListStageResources(stageRelease *entity.ReleaseInfo)
 	}
 
 	if len(resp.Kvs) == 0 {
-		// 删除操作, 返回空资源
+		// 删除操作，返回空资源
 		r.logger.Errorf("empty etcd value key: %s", etcdKey)
 		return entity.NewEmptyApisixConfiguration(), nil
 	}
@@ -348,8 +348,8 @@ func (r *APIGWEtcdRegistry) ValueToStageResource(resp *clientv3.GetResponse) (*e
 			r.logger.Errorf("extract resource metadata failed:%v, key: %s", err, kv.Key)
 			return nil, err
 		}
-		// 校验配置schema
-		err = validator.ValidateAPISIXJsonSchema(resourceMetadata.Labels.ApisixVersion, resourceKind, kv.Value)
+		// 校验配置 schema
+		err = validator.ValidateApisixJsonSchema(resourceMetadata.Labels.ApisixVersion, resourceKind, kv.Value)
 		if err != nil {
 			r.logger.Errorf("validate apisix json schema failed:%v, key: %s", err, kv.Key)
 			return nil, err
@@ -412,7 +412,7 @@ func (r *APIGWEtcdRegistry) ListGlobalResources(releaseInfo *entity.ReleaseInfo)
 		return nil, err
 	}
 	if len(resp.Kvs) == 0 {
-		// 删除操作, 返回空资源
+		// 删除操作，返回空资源
 		r.logger.Error(nil, "empty etcd value", "key", etcdKey)
 		metric.ReportRegistryAction(releaseInfo.Kind.String(), metric.ActionGet, metric.ResultFail, startedTime)
 		return entity.NewEmptyApisixGlobalResource(), nil
@@ -452,7 +452,7 @@ func (r *APIGWEtcdRegistry) ValueToGlobalResource(resp *clientv3.GetResponse) (*
 			return nil, err
 		}
 		// Validate configuration schema
-		err = validator.ValidateAPISIXJsonSchema(resourceMetadata.ApisixVersion, resourceKind, kv.Value)
+		err = validator.ValidateApisixJsonSchema(resourceMetadata.ApisixVersion, resourceKind, kv.Value)
 		if err != nil {
 			r.logger.Error(err, "validate apisix json schema failed", "key", string(kv.Key))
 			return nil, err

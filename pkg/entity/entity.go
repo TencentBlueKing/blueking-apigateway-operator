@@ -299,7 +299,7 @@ type PluginMetadata struct {
 	PluginMetadataConf
 }
 
-// UnmarshalJSON 解析PluginMetadataConf
+// UnmarshalJSON 解析 PluginMetadataConf
 func (p *PluginMetadataConf) UnmarshalJSON(conf []byte) error {
 	pluginName := gjson.GetBytes(conf, "id").String()
 	if pluginName == "" {
@@ -309,7 +309,7 @@ func (p *PluginMetadataConf) UnmarshalJSON(conf []byte) error {
 	return nil
 }
 
-// MarshalJSON 将PluginMetadataConf转换为json
+// MarshalJSON 将 PluginMetadataConf 转换为 json
 func (p *PluginMetadataConf) MarshalJSON() ([]byte, error) {
 	for key, conf := range *p {
 		if key != "" {
@@ -390,7 +390,7 @@ type StreamRoute struct {
 }
 
 // ResourceMetadata describes the metadata of a resource object, which includes the
-// resource kind and name. It is used by the watch process of the APIGEtcdWWatcher type.
+// resource kind and name. It is used by the watch process of the ApigwEtcdWatcher type.
 type ResourceMetadata struct {
 	Labels        *LabelInfo              `json:"labels,omitempty" yaml:"labels"`
 	APIVersion    string                  `json:"-" yaml:"-"`
@@ -403,6 +403,72 @@ type ResourceMetadata struct {
 	ApisixVersion string                  `json:"apisix_version,omitempty" yaml:"apisix_version"`
 }
 
+// GetID returns the resource ID
+func (rm *ResourceMetadata) GetID() string {
+	return rm.ID
+}
+
+// GetGatewayName returns the gateway name from labels
+func (rm *ResourceMetadata) GetGatewayName() string {
+	if rm.Labels == nil {
+		return ""
+	}
+	return rm.Labels.Gateway
+}
+
+// GetStageName returns the stage name from labels
+func (rm *ResourceMetadata) GetStageName() string {
+	if rm.Labels == nil {
+		return ""
+	}
+	return rm.Labels.Stage
+}
+
+// GetStageKey returns the stage key from labels
+func (rm *ResourceMetadata) GetStageKey() string {
+	return config.GenStagePrimaryKey(rm.GetGatewayName(), rm.GetStageName())
+}
+
+// IsEmpty check if the metadata object is empty
+func (rm *ResourceMetadata) IsEmpty() bool {
+	if rm == nil {
+		return true
+	}
+	// FIXME: there would be more global resources in the future, we need to add more, refactor this to a
+	// IsGlobalKind function?
+	// PluginMetadata 是全局资源，不依赖于 gateway 和 stage
+	if rm.Kind == constant.PluginMetadata {
+		return false
+	}
+	return rm.Labels.Gateway == "" && rm.Labels.Stage == ""
+}
+
+// IsGlobalResource check if the metadata object is global
+func (rm *ResourceMetadata) IsGlobalResource() bool {
+	// FIXME: there would be more global resources in the future, we need to add more, refactor this to a
+	// IsGlobalKind function?
+	return rm.Kind == constant.PluginMetadata && rm.GetStageName() == ""
+}
+
+// GetReleaseID returns the release ID for the resource
+func (rm *ResourceMetadata) GetReleaseID() string {
+	// stage 相关资源都是按照 stage 维度来管理的
+	if rm.Kind != constant.PluginMetadata {
+		return config.GenStagePrimaryKey(rm.Labels.Gateway, rm.Labels.Stage)
+	}
+	return rm.ID
+}
+
+// GetReleaseInfo returns the ReleaseInfo for the resource
+func (rm *ResourceMetadata) GetReleaseInfo() *ReleaseInfo {
+	return &ReleaseInfo{
+		ResourceMetadata: *rm,
+		PublishId:        cast.ToInt(rm.Labels.PublishId),
+		ApisixVersion:    rm.Labels.ApisixVersion,
+		Ctx:              rm.Ctx,
+	}
+}
+
 // IsDeleteRelease checks if the resource is a delete release
 func (rm *ResourceMetadata) IsDeleteRelease() bool {
 	if rm.GetReleaseInfo() == nil {
@@ -411,6 +477,13 @@ func (rm *ResourceMetadata) IsDeleteRelease() bool {
 	// 判断是是否是删除发布
 	return rm.GetReleaseInfo().Op == mvccpb.PUT &&
 		cast.ToString(rm.GetReleaseInfo().PublishId) == constant.DeletePublishID
+}
+
+// ClearUnusedFields clears the unused fields for the resource
+func (rm *ResourceMetadata) ClearUnusedFields() {
+	if rm.Labels != nil {
+		rm.Labels.PublishId = ""
+	}
 }
 
 // GetCreateTime returns the create time for the resource
@@ -429,75 +502,6 @@ func (rm *ResourceMetadata) SetCreateTime(i int64) {
 
 // SetUpdateTime sets the update time for the resource
 func (rm *ResourceMetadata) SetUpdateTime(i int64) {
-}
-
-// ClearUnusedFields clears the unused fields for the resource
-func (rm *ResourceMetadata) ClearUnusedFields() {
-	if rm.Labels != nil {
-		rm.Labels.PublishId = ""
-	}
-}
-
-// GetReleaseInfo returns the ReleaseInfo for the resource
-func (rm *ResourceMetadata) GetReleaseInfo() *ReleaseInfo {
-	return &ReleaseInfo{
-		ResourceMetadata: *rm,
-		PublishId:        cast.ToInt(rm.Labels.PublishId),
-		ApisixVersion:    rm.Labels.ApisixVersion,
-		Ctx:              rm.Ctx,
-	}
-}
-
-// GetID returns the resource ID
-func (rm *ResourceMetadata) GetID() string {
-	return rm.ID
-}
-
-// GetStageName returns the stage name from labels
-func (rm *ResourceMetadata) GetStageName() string {
-	if rm.Labels == nil {
-		return ""
-	}
-	return rm.Labels.Stage
-}
-
-// GetStageKey returns the stage key from labels
-func (rm *ResourceMetadata) GetStageKey() string {
-	return config.GenStagePrimaryKey(rm.GetGatewayName(), rm.GetStageName())
-}
-
-// GetGatewayName returns the gateway name from labels
-func (rm *ResourceMetadata) GetGatewayName() string {
-	if rm.Labels == nil {
-		return ""
-	}
-	return rm.Labels.Gateway
-}
-
-// IsEmpty check if the metadata object is empty
-func (rm *ResourceMetadata) IsEmpty() bool {
-	if rm == nil {
-		return true
-	}
-	// PluginMetadata 是全局资源，不依赖于 gateway 和 stage
-	if rm.Kind == constant.PluginMetadata {
-		return false
-	}
-	return rm.Labels.Gateway == "" && rm.Labels.Stage == ""
-}
-
-// IsGlobalResource check if the metadata object is global
-func (rm *ResourceMetadata) IsGlobalResource() bool {
-	return rm.Kind == constant.PluginMetadata && rm.GetStageName() == ""
-}
-
-// GetReleaseID returns the release ID for the resource
-func (rm *ResourceMetadata) GetReleaseID() string {
-	// stage相关资源都是按照stage维度来管理的
-	if rm.Kind != constant.PluginMetadata {
-		return config.GenStagePrimaryKey(rm.Labels.Gateway, rm.Labels.Stage)
-	}
-	return rm.ID
 }
 
 type ReleaseInfo struct {

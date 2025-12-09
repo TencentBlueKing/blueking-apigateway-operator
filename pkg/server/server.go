@@ -41,7 +41,7 @@ import (
 // Server ...
 type Server struct {
 	LeaderElector     *leaderelection.EtcdLeaderElector
-	apigwEtcdregistry *registry.APIGWEtcdRegistry
+	apigwEtcdRegistry *registry.APIGWEtcdRegistry
 	committer         *committer.Committer
 	apisixEtcdStore   *store.ApisixEtcdStore
 
@@ -59,7 +59,7 @@ func NewServer(
 ) *Server {
 	return &Server{
 		LeaderElector:     leaderElector,
-		apigwEtcdregistry: apigwEtcdRegistry,
+		apigwEtcdRegistry: apigwEtcdRegistry,
 		apisixEtcdStore:   apisixEtcdStore,
 		committer:         committer,
 		logger:            logging.GetLogger().Named("server"),
@@ -78,7 +78,7 @@ func (s *Server) RegisterMetric(gatherer prometheus.Gatherer) {
 
 // Run ...
 func (s *Server) Run(ctx context.Context, config *config.Config) error {
-	router := NewRouter(s.LeaderElector, s.apigwEtcdregistry, s.committer, s.apisixEtcdStore, s.mux, config)
+	router := NewRouter(s.LeaderElector, s.apigwEtcdRegistry, s.committer, s.apisixEtcdStore, s.mux, config)
 	// run http server
 	var addr, addrv6 string
 	if config.HttpServer.BindAddressV6 != "" {
@@ -87,13 +87,16 @@ func (s *Server) Run(ctx context.Context, config *config.Config) error {
 		)
 		go MustServeHTTP(ctx, addrv6, "tcp6", router)
 	}
-	if config.Debug {
+
+	// register pprof router, not only for debug mode
+	{
 		pprofRouter := router.Group("/debug/pprof")
 		pprofRouter.Use(gin.BasicAuth(gin.Accounts{
 			constant.ApiAuthAccount: config.HttpServer.AuthPassword,
 		}))
 		pprof.Register(router)
 	}
+
 	if config.HttpServer.BindAddress != "" {
 		addr = config.HttpServer.BindAddress + ":" + strconv.Itoa(
 			config.HttpServer.BindPort,
