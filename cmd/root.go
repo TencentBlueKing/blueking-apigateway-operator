@@ -73,6 +73,7 @@ func rootRun(cmd *cobra.Command, args []string) {
 	eventreporter.Start(rootCtx)
 
 	// 只支持etcd模式，直接使用etcd运行器
-	agentRunner := runner.NewEtcdAgentRunner(globalConfig)
+	agentRunner := runner.NewEtcdAgentRunner(rootCtx, globalConfig)
+	defer agentRunner.Close()
 	agentRunner.Run(rootCtx)
 }

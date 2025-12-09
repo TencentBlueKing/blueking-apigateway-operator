@@ -20,11 +20,13 @@
 package timer
 
 import (
+	"context"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 
+	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/constant"
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/entity"
 )
 
@@ -44,7 +46,8 @@ var _ = Describe("Timer", func() {
 					PublishId:     "1",
 					ApisixVersion: "2.13.1",
 				},
-				ID: "gateway-stage",
+				ID:  "gateway-stage",
+				Ctx: context.Background(),
 			},
 
 			PublishId:       1,
@@ -77,5 +80,145 @@ var _ = Describe("Timer", func() {
 		stageList := stageTimer.ListReleaseForCommit()
 		gomega.Expect(stageList).To(gomega.HaveLen(1))
 		gomega.Expect(stageList[0].ID).To(gomega.Equal(stageInfo.ID))
+	})
+
+	Describe("CacheTimer", func() {
+		It("should reset timer correctly", func() {
+			cacheTimer := &CacheTimer{ReleaseInfo: &stageInfo}
+			cacheTimer.Reset(100 * time.Millisecond)
+
+			gomega.Expect(cacheTimer.CachedTime).NotTo(gomega.BeZero())
+			gomega.Expect(cacheTimer.ShouldCommitTime).NotTo(gomega.BeZero())
+			gomega.Expect(cacheTimer.ShouldCommitTime.After(cacheTimer.CachedTime)).To(gomega.BeTrue())
+		})
+
+		It("should update timer correctly", func() {
+			cacheTimer := &CacheTimer{ReleaseInfo: &stageInfo}
+			cacheTimer.Reset(100 * time.Millisecond)
+			oldCommitTime := cacheTimer.ShouldCommitTime
+
+			time.Sleep(10 * time.Millisecond)
+			cacheTimer.Update(100 * time.Millisecond)
+
+			gomega.Expect(cacheTimer.ShouldCommitTime.After(oldCommitTime)).To(gomega.BeTrue())
+		})
+	})
+
+	Describe("ReleaseTimer", func() {
+		It("should handle global resource with PluginMetadata kind", func() {
+			globalInfo := entity.ReleaseInfo{
+				ResourceMetadata: entity.ResourceMetadata{
+					Labels: &entity.LabelInfo{
+						Gateway: "",
+						Stage:   "",
+					},
+					ID:   "plugin-metadata-1",
+					Kind: constant.PluginMetadata,
+					Ctx:  context.Background(),
+				},
+			}
+
+			stageTimer.Update(&globalInfo)
+
+			time.Sleep(200 * time.Millisecond)
+
+			stageList := stageTimer.ListReleaseForCommit()
+			gomega.Expect(stageList).To(gomega.HaveLen(1))
+		})
+
+		It("should handle multiple releases", func() {
+			stageInfo1 := entity.ReleaseInfo{
+				ResourceMetadata: entity.ResourceMetadata{
+					Labels: &entity.LabelInfo{
+						Gateway: "gateway1",
+						Stage:   "stage1",
+					},
+					ID:  "gateway1-stage1",
+					Ctx: context.Background(),
+				},
+			}
+			stageInfo2 := entity.ReleaseInfo{
+				ResourceMetadata: entity.ResourceMetadata{
+					Labels: &entity.LabelInfo{
+						Gateway: "gateway2",
+						Stage:   "stage2",
+					},
+					ID:  "gateway2-stage2",
+					Ctx: context.Background(),
+				},
+			}
+
+			stageTimer.Update(&stageInfo1)
+			stageTimer.Update(&stageInfo2)
+
+			time.Sleep(200 * time.Millisecond)
+
+			stageList := stageTimer.ListReleaseForCommit()
+			gomega.Expect(stageList).To(gomega.HaveLen(2))
+		})
+
+		It("should replace existing release info on update", func() {
+			stageInfo1 := entity.ReleaseInfo{
+				ResourceMetadata: entity.ResourceMetadata{
+					Labels: &entity.LabelInfo{
+						Gateway: "gateway",
+						Stage:   "stage",
+					},
+					ID:  "gateway-stage",
+					Ctx: context.Background(),
+				},
+				PublishId: 1,
+			}
+			stageInfo2 := entity.ReleaseInfo{
+				ResourceMetadata: entity.ResourceMetadata{
+					Labels: &entity.LabelInfo{
+						Gateway: "gateway",
+						Stage:   "stage",
+					},
+					ID:  "gateway-stage",
+					Ctx: context.Background(),
+				},
+				PublishId: 2,
+			}
+
+			stageTimer.Update(&stageInfo1)
+			stageTimer.Update(&stageInfo2)
+
+			time.Sleep(200 * time.Millisecond)
+
+			stageList := stageTimer.ListReleaseForCommit()
+			gomega.Expect(stageList).To(gomega.HaveLen(1))
+			gomega.Expect(stageList[0].PublishId).To(gomega.Equal(2))
+		})
+
+		It("should handle invalid type in sync.Map gracefully", func() {
+			// Store an invalid type directly
+			stageTimer.releaseTimer.Store("invalid-key", "invalid-value")
+
+			// Should not panic and should clean up invalid entry
+			stageList := stageTimer.ListReleaseForCommit()
+			gomega.Expect(stageList).To(gomega.HaveLen(0))
+
+			// Verify invalid entry was cleaned up
+			_, exists := stageTimer.releaseTimer.Load("invalid-key")
+			gomega.Expect(exists).To(gomega.BeFalse())
+		})
+
+		It("should force commit after forceUpdateTimeWindow", func() {
+			// Set a very long waiting window but short force update window
+			eventsWaitingTimeWindow = 10 * time.Second
+			forceUpdateTimeWindow = 50 * time.Millisecond
+
+			stageTimer.Update(&stageInfo)
+
+			// Wait for force update window
+			time.Sleep(100 * time.Millisecond)
+
+			stageList := stageTimer.ListReleaseForCommit()
+			gomega.Expect(stageList).To(gomega.HaveLen(1))
+
+			// Reset
+			forceUpdateTimeWindow = 30 * time.Second
+		})
 	})
 })
