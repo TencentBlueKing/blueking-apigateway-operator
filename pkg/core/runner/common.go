@@ -20,6 +20,7 @@
 package runner
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -34,13 +35,19 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils"
 )
 
-func initApisixEtcdStore(cfg *config.Config) (apisixStore *store.ApisixEtcdStore, err error) {
+func initApisixEtcdStore(ctx context.Context, cfg *config.Config) (apisixStore *store.ApisixEtcdStore, err error) {
 	client, err := initApisixEtcdClient(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("init etcd client failed: %w", err)
 	}
-	apisixStore, err = store.NewApisixEtcdStore(client, cfg.Apisix.Etcd.KeyPrefix, cfg.Operator.EtcdPutInterval,
-		cfg.Operator.EtcdDelInterval, cfg.Operator.EtcdSyncTimeout)
+	apisixStore, err = store.NewApisixEtcdStore(
+		ctx,
+		client,
+		cfg.Apisix.Etcd.KeyPrefix,
+		cfg.Operator.EtcdPutInterval,
+		cfg.Operator.EtcdDelInterval,
+		cfg.Operator.EtcdSyncTimeout,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("init etcd apisixEtcdstore failed: %w", err)
 	}

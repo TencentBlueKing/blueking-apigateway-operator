@@ -147,7 +147,7 @@ func (r *CmpReporter) Report(rs cmp.Result) {
 // Diff 对比两个 ApisixStageResource，返回需要 put 和 delete 的资源
 func (d *ConfigDiffer) Diff(
 	old, new *entity.ApisixStageResource,
-) (put, delete *entity.ApisixStageResource) {
+) (put, toDelete *entity.ApisixStageResource) {
 	if old == nil {
 		return new, nil
 	}
@@ -155,17 +155,17 @@ func (d *ConfigDiffer) Diff(
 		return nil, old
 	}
 	put = &entity.ApisixStageResource{}
-	delete = &entity.ApisixStageResource{}
-	put.Routes, delete.Routes = d.DiffRoutes(old.Routes, new.Routes)
-	put.Services, delete.Services = d.DiffServices(old.Services, new.Services)
-	put.SSLs, delete.SSLs = d.DiffSSLs(old.SSLs, new.SSLs)
-	return put, delete
+	toDelete = &entity.ApisixStageResource{}
+	put.Routes, toDelete.Routes = d.DiffRoutes(old.Routes, new.Routes)
+	put.Services, toDelete.Services = d.DiffServices(old.Services, new.Services)
+	put.SSLs, toDelete.SSLs = d.DiffSSLs(old.SSLs, new.SSLs)
+	return put, toDelete
 }
 
 // DiffGlobal 对比全局资源配置
 func (d *ConfigDiffer) DiffGlobal(
 	old, new *entity.ApisixGlobalResource,
-) (put, delete *entity.ApisixGlobalResource) {
+) (put, toDelete *entity.ApisixGlobalResource) {
 	if old == nil {
 		return new, nil
 	}
@@ -173,9 +173,9 @@ func (d *ConfigDiffer) DiffGlobal(
 		return nil, old
 	}
 	put = &entity.ApisixGlobalResource{}
-	delete = &entity.ApisixGlobalResource{}
-	put.PluginMetadata, delete.PluginMetadata = d.DiffPluginMetadatas(old.PluginMetadata, new.PluginMetadata)
-	return put, delete
+	toDelete = &entity.ApisixGlobalResource{}
+	put.PluginMetadata, toDelete.PluginMetadata = d.DiffPluginMetadatas(old.PluginMetadata, new.PluginMetadata)
+	return put, toDelete
 }
 
 // DiffRoutes 对比两个 Route map，返回需要 put 和 delete 的 Route
