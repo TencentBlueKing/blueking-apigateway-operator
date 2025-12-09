@@ -27,8 +27,8 @@ import (
 	"github.com/TencentBlueKing/blueking-apigateway-operator/pkg/utils/schema"
 )
 
-// ValidateAPISIXJsonSchema validates the APISIX configuration against the JSON schema.
-func ValidateAPISIXJsonSchema(version string, resourceType constant.APISIXResource, config []byte) error {
+// ValidateApisixJsonSchema validates the APISIX configuration against the JSON schema.
+func ValidateApisixJsonSchema(version string, resourceType constant.APISIXResource, config []byte) error {
 	// 校验资源配置
 	apisixVersion, err := utils.ToXVersion(version)
 	if err != nil {

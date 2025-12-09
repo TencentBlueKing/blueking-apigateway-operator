@@ -55,7 +55,7 @@ type Committer struct {
 	gatewayStageChanMapLock *sync.RWMutex
 }
 
-// NewCommitter 创建Committer
+// NewCommitter 创建 Committer
 func NewCommitter(
 	apigwEtcdRegistry *registry.APIGWEtcdRegistry,
 	synchronizer *synchronizer.ApisixConfigSynchronizer,
@@ -78,13 +78,13 @@ func NewCommitter(
 
 // Run ...
 func (c *Committer) Run(ctx context.Context) {
-	// 分批次处理需要同步的resource
+	// 分批次处理需要同步的 resource
 	for {
 		c.logger.Debugw("committer waiting for commit command")
 		select {
 		case resourceList := <-c.commitResourceChan:
 			c.logger.Infow("received commit command", "resourceList", len(resourceList))
-			// 分批处理resource，避免一次性处理过多resource
+			// 分批处理 resource，避免一次性处理过多 resource
 			segmentLength := 10
 			for offset := 0; offset < len(resourceList); offset += segmentLength {
 				if offset+segmentLength > len(resourceList) {
@@ -109,7 +109,7 @@ func (c *Committer) Run(ctx context.Context) {
 	}
 }
 
-// GetCommitChan 获取提交channel
+// GetCommitChan 获取提交 channel
 func (c *Committer) GetCommitChan() chan []*entity.ReleaseInfo {
 	return c.commitResourceChan
 }
@@ -149,7 +149,7 @@ func (c *Committer) commitGroup(ctx context.Context, releaseInfoList []*entity.R
 	c.logger.Debugw("Commit resource group done", "resourceList", releaseInfoList)
 }
 
-// 按照gateway的维度串行更新etcd
+// 按照 gateway 的维度串行更新 etcd
 func (c *Committer) commitGatewayStage(ctx context.Context, si *entity.ReleaseInfo, wg *sync.WaitGroup) {
 	defer wg.Done()
 	c.gatewayStageChanMapLock.Lock()
@@ -202,7 +202,7 @@ func (c *Committer) commitStage(ctx context.Context, si *entity.ReleaseInfo, sta
 
 	span.AddEvent("committer.GetNativeApisixConfiguration")
 	eventreporter.ReportParseConfigurationDoingEvent(ctx, si)
-	// 直接从etcd获取原生apisix配置，无需转换
+	// 直接从 etcd 获取原生 apisix 配置，无需转换
 	apisixConf, err := c.GetStageReleaseNativeApisixConfiguration(ctx, si)
 	if err != nil {
 		c.logger.Error(err, "get native apisix configuration failed", "stageInfo", si)
@@ -210,7 +210,7 @@ func (c *Committer) commitStage(ctx context.Context, si *entity.ReleaseInfo, sta
 		c.retryStage(si)
 		span.RecordError(err)
 		eventreporter.ReportParseConfigurationFailureEvent(ctx, si, err)
-		// 释放channel
+		// 释放 channel
 		<-stageChan
 		stageChannelReleased = true
 		return
@@ -231,7 +231,7 @@ func (c *Committer) commitStage(ctx context.Context, si *entity.ReleaseInfo, sta
 		c.retryStage(si)
 		span.RecordError(err)
 		eventreporter.ReportApplyConfigurationFailureEvent(ctx, si, err)
-		// 释放channel
+		// 释放 channel
 		<-stageChan
 		stageChannelReleased = true
 		return
@@ -252,12 +252,12 @@ func (c *Committer) retryStage(si *entity.ReleaseInfo) {
 	c.releaseTimer.Update(si)
 }
 
-// GetStageReleaseNativeApisixConfiguration 直接从etcd获取原生apisix配置
+// GetStageReleaseNativeApisixConfiguration 直接从 etcd 获取原生 apisix 配置
 func (c *Committer) GetStageReleaseNativeApisixConfiguration(
 	ctx context.Context,
 	si *entity.ReleaseInfo,
 ) (*entity.ApisixStageResource, error) {
-	// 直接从etcd获取原生apisix配置
+	// 直接从 etcd 获取原生 apisix 配置
 	resources, err := c.apigwEtcdRegistry.ListStageResources(si)
 	if err != nil {
 		c.logger.Errorf("get native apisix[stage:%s] configuration failed: %v", si.GetStageKey(), err)
@@ -272,12 +272,12 @@ func (c *Committer) GetStageReleaseNativeApisixConfiguration(
 	return resources, nil
 }
 
-// GetGlobalApisixConfiguration 直接从etcd获取原生全局apisix配置
+// GetGlobalApisixConfiguration 直接从 etcd 获取原生全局 apisix 配置
 func (c *Committer) GetGlobalApisixConfiguration(
 	ctx context.Context,
 	si *entity.ReleaseInfo,
 ) (*entity.ApisixGlobalResource, error) {
-	// 直接从etcd获取原生apisix配置
+	// 直接从 etcd 获取原生 apisix 配置
 	resources, err := c.apigwEtcdRegistry.ListGlobalResources(si)
 	if err != nil {
 		c.logger.Errorf("get native apisix[global:%s] configuration failed: %v", si.GetStageKey(), err)
@@ -292,7 +292,7 @@ func (c *Committer) commitGlobalResource(ctx context.Context, si *entity.Release
 	defer span.End()
 
 	span.AddEvent("committer.GetGlobalApisixConfiguration")
-	// 直接从etcd获取原生全局apisix配置，无需转换
+	// 直接从 etcd 获取原生全局 apisix 配置，无需转换
 	apisixGlobalConf, err := c.GetGlobalApisixConfiguration(ctx, si)
 	if err != nil {
 		c.logger.Error(err, "get native global apisix configuration failed", "globalInfo", si)
@@ -322,7 +322,7 @@ func (c *Committer) GetStageReleaseNativeApisixConfigurationByID(
 	resourceID string,
 	si *entity.ReleaseInfo,
 ) (*entity.ApisixStageResource, error) {
-	// 直接从etcd获取原生apisix配置
+	// 直接从 etcd 获取原生 apisix 配置
 	resources, err := c.apigwEtcdRegistry.GetStageResourceByID(resourceID, si)
 	if err != nil {
 		c.logger.Errorf("get native apisix[stage:%s] configuration failed: %v", si.GetStageKey(), err)
@@ -342,7 +342,7 @@ func (c *Committer) GetResourceCount(
 	ctx context.Context,
 	si *entity.ReleaseInfo,
 ) (int64, error) {
-	// 直接从etcd获取原生apisix配置
+	// 直接从 etcd 获取原生 apisix 配置
 	count, err := c.apigwEtcdRegistry.Count(si)
 	if err != nil {
 		c.logger.Errorf("get native apisix[stage:%s] configuration failed: %v", si.GetStageKey(), err)
@@ -356,7 +356,7 @@ func (c *Committer) GetStageReleaseVersion(
 	ctx context.Context,
 	si *entity.ReleaseInfo,
 ) (*entity.ReleaseInfo, error) {
-	// 直接从etcd获取原生apisix配置
+	// 直接从 etcd 获取原生 apisix 配置
 	releaseVersionInfo, err := c.apigwEtcdRegistry.StageReleaseVersion(si)
 	if err != nil {
 		c.logger.Errorf("get native apisix[stage:%s] configuration failed: %v", si.GetStageKey(), err)
