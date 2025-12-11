@@ -58,10 +58,10 @@ type Committer struct {
 // NewCommitter 创建 Committer
 // commitChanSize: buffer size for commit resource channel, use 0 for unbuffered (not recommended)
 func NewCommitter(
-	apigwEtcdRegistry *registry.APIGWEtcdRegistry,
-	synchronizer *synchronizer.ApisixConfigSynchronizer,
-	releaseTimer *timer.ReleaseTimer,
-	commitChanSize int,
+apigwEtcdRegistry *registry.APIGWEtcdRegistry,
+synchronizer *synchronizer.ApisixConfigSynchronizer,
+releaseTimer *timer.ReleaseTimer,
+commitChanSize int,
 ) *Committer {
 	// Ensure minimum buffer size to avoid blocking
 	if commitChanSize <= 0 {
@@ -72,7 +72,7 @@ func NewCommitter(
 		commitResourceChan: make(
 			chan []*entity.ReleaseInfo,
 			commitChanSize,
-		), // Buffered channel for committing resource information
+		),                                                    // Buffered channel for committing resource information
 		synchronizer: synchronizer,                           // Configuration synchronizer
 		releaseTimer: releaseTimer,                           // Timer for stage management
 		logger:       logging.GetLogger().Named("committer"), // Logger instance named "committer"
@@ -161,12 +161,12 @@ func (c *Committer) commitGatewayStage(ctx context.Context, si *entity.ReleaseIn
 	// NOTE: wg.Done() is called inside the goroutine, not here!
 	// This ensures WaitGroup only completes after the actual work is done.
 	c.gatewayStageChanMapLock.Lock()
-	defer c.gatewayStageChanMapLock.Unlock()
 	stageChan, ok := c.gatewayStageChanMap[si.GetGatewayName()]
 	if !ok {
 		stageChan = make(chan struct{}, 1)
 		c.gatewayStageChanMap[si.GetGatewayName()] = stageChan
 	}
+	c.gatewayStageChanMapLock.Unlock()
 	stageChan <- struct{}{}
 	utils.GoroutineWithRecovery(ctx, func() {
 		defer wg.Done() // Move wg.Done() here to ensure it's called after work completes
@@ -263,8 +263,8 @@ func (c *Committer) retryStage(si *entity.ReleaseInfo) {
 
 // GetStageReleaseNativeApisixConfiguration 直接从 etcd 获取原生 apisix 配置
 func (c *Committer) GetStageReleaseNativeApisixConfiguration(
-	ctx context.Context,
-	si *entity.ReleaseInfo,
+ctx context.Context,
+si *entity.ReleaseInfo,
 ) (*entity.ApisixStageResource, error) {
 	// 直接从 etcd 获取原生 apisix 配置
 	resources, err := c.apigwEtcdRegistry.ListStageResources(si)
@@ -283,8 +283,8 @@ func (c *Committer) GetStageReleaseNativeApisixConfiguration(
 
 // GetGlobalApisixConfiguration 直接从 etcd 获取原生全局 apisix 配置
 func (c *Committer) GetGlobalApisixConfiguration(
-	ctx context.Context,
-	si *entity.ReleaseInfo,
+ctx context.Context,
+si *entity.ReleaseInfo,
 ) (*entity.ApisixGlobalResource, error) {
 	// 直接从 etcd 获取原生 apisix 配置
 	resources, err := c.apigwEtcdRegistry.ListGlobalResources(si)
@@ -327,9 +327,9 @@ func (c *Committer) commitGlobalResource(ctx context.Context, si *entity.Release
 
 // GetStageReleaseNativeApisixConfigurationByID 根据资源 ID 从 etcd 获取原生 apisix 配置
 func (c *Committer) GetStageReleaseNativeApisixConfigurationByID(
-	ctx context.Context,
-	resourceID string,
-	si *entity.ReleaseInfo,
+ctx context.Context,
+resourceID string,
+si *entity.ReleaseInfo,
 ) (*entity.ApisixStageResource, error) {
 	// 直接从 etcd 获取原生 apisix 配置
 	resources, err := c.apigwEtcdRegistry.GetStageResourceByID(resourceID, si)
@@ -348,8 +348,8 @@ func (c *Committer) GetStageReleaseNativeApisixConfigurationByID(
 
 // GetResourceCount 获取资源数量
 func (c *Committer) GetResourceCount(
-	ctx context.Context,
-	si *entity.ReleaseInfo,
+ctx context.Context,
+si *entity.ReleaseInfo,
 ) (int64, error) {
 	// 直接从 etcd 获取原生 apisix 配置
 	count, err := c.apigwEtcdRegistry.Count(si)
@@ -362,8 +362,8 @@ func (c *Committer) GetResourceCount(
 
 // GetStageReleaseVersion 获取指定环境的发布版本信息
 func (c *Committer) GetStageReleaseVersion(
-	ctx context.Context,
-	si *entity.ReleaseInfo,
+ctx context.Context,
+si *entity.ReleaseInfo,
 ) (*entity.ReleaseInfo, error) {
 	// 直接从 etcd 获取原生 apisix 配置
 	releaseVersionInfo, err := c.apigwEtcdRegistry.StageReleaseVersion(si)
