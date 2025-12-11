@@ -41,10 +41,17 @@ import (
 var _ = Describe("APIGWEtcdRegistry", func() {
 	Describe("NewAPIGWEtcdRegistry", func() {
 		It("should create a new registry with correct fields", func() {
-			registry := NewAPIGWEtcdRegistry(nil, "/bk-gateway")
+			registry := NewAPIGWEtcdRegistry(nil, "/bk-gateway", 0)
 			Expect(registry).NotTo(BeNil())
 			Expect(registry.keyPrefix).To(Equal("/bk-gateway"))
 			Expect(registry.logger).NotTo(BeNil())
+			// Default buffer size should be 1000 when 0 is passed
+			Expect(registry.watchEventChanSize).To(Equal(1000))
+		})
+
+		It("should use custom buffer size when provided", func() {
+			registry := NewAPIGWEtcdRegistry(nil, "/bk-gateway", 500)
+			Expect(registry.watchEventChanSize).To(Equal(500))
 		})
 	})
 
@@ -178,7 +185,11 @@ var _ = Describe("APIGWEtcdRegistry", func() {
 })
 
 // Helper function to create ReleaseInfo for tests
-func createReleaseInfo(ctx context.Context, apiVersion, gateway, stage string, kind constant.APISIXResource) *entity.ReleaseInfo {
+func createReleaseInfo(
+	ctx context.Context,
+	apiVersion, gateway, stage string,
+	kind constant.APISIXResource,
+) *entity.ReleaseInfo {
 	return &entity.ReleaseInfo{
 		ResourceMetadata: entity.ResourceMetadata{
 			APIVersion: apiVersion,
@@ -213,7 +224,7 @@ var _ = Describe("APIGWEtcdRegistry with EmbedEtcd", func() {
 		etcd, client, err = startTestEtcd()
 		Expect(err).ShouldNot(HaveOccurred())
 
-		registry = NewAPIGWEtcdRegistry(client, "/bk-gateway-apigw")
+		registry = NewAPIGWEtcdRegistry(client, "/bk-gateway-apigw", 1000)
 	})
 
 	AfterEach(func() {
@@ -256,7 +267,13 @@ var _ = Describe("APIGWEtcdRegistry with EmbedEtcd", func() {
 
 	Describe("ListStageResources", func() {
 		It("should return empty resources when no data exists", func() {
-			releaseInfo := createReleaseInfo(ctx, "v2", "non-existent-gateway", "non-existent-stage", constant.Route)
+			releaseInfo := createReleaseInfo(
+				ctx,
+				"v2",
+				"non-existent-gateway",
+				"non-existent-stage",
+				constant.Route,
+			)
 
 			resources, err := registry.ListStageResources(releaseInfo)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -281,7 +298,10 @@ var _ = Describe("APIGWEtcdRegistry with EmbedEtcd", func() {
 		It("should count resources correctly", func() {
 			// Prepare test data
 			for i := 0; i < 3; i++ {
-				routeKey := fmt.Sprintf("/bk-gateway-apigw/v2/gateway/test-gateway/test-stage/route/route%d", i)
+				routeKey := fmt.Sprintf(
+					"/bk-gateway-apigw/v2/gateway/test-gateway/test-stage/route/route%d",
+					i,
+				)
 				routeValue := map[string]any{
 					"id":   fmt.Sprintf("route%d", i),
 					"name": fmt.Sprintf("route%d", i),

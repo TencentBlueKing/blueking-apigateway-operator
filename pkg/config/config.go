@@ -100,6 +100,12 @@ type Operator struct {
 	EtcdDelInterval time.Duration
 	// etcd sync timeout
 	EtcdSyncTimeout time.Duration
+
+	// Channel buffer sizes for avoiding blocking
+	// CommitResourceChanSize is the buffer size for commit resource channel between EventAgent and Committer
+	CommitResourceChanSize int
+	// WatchEventChanSize is the buffer size for watch event channel from etcd registry
+	WatchEventChanSize int
 }
 
 // VersionProbe ...
@@ -237,6 +243,10 @@ func newDefaultConfig() *Config {
 			EtcdPutInterval:              50 * time.Millisecond,
 			EtcdDelInterval:              16 * time.Second,
 			EtcdSyncTimeout:              60 * time.Second,
+
+			// Default channel buffer sizes
+			CommitResourceChanSize: 100,
+			WatchEventChanSize:     100,
 		},
 		Sentry: Sentry{
 			ReportLevel: 2,
