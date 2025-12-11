@@ -38,7 +38,7 @@ var _ = Describe("Committer", func() {
 
 	BeforeEach(func() {
 		releaseTimer = timer.NewReleaseTimer()
-		committer = NewCommitter(nil, nil, releaseTimer)
+		committer = NewCommitter(nil, nil, releaseTimer, 100)
 	})
 
 	Describe("NewCommitter", func() {

@@ -56,16 +56,23 @@ type Committer struct {
 }
 
 // NewCommitter 创建 Committer
+// commitChanSize: buffer size for commit resource channel, use 0 for unbuffered (not recommended)
 func NewCommitter(
 	apigwEtcdRegistry *registry.APIGWEtcdRegistry,
 	synchronizer *synchronizer.ApisixConfigSynchronizer,
 	releaseTimer *timer.ReleaseTimer,
+	commitChanSize int,
 ) *Committer {
+	// Ensure minimum buffer size to avoid blocking
+	if commitChanSize <= 0 {
+		commitChanSize = 100 // default buffer size
+	}
 	return &Committer{
 		apigwEtcdRegistry: apigwEtcdRegistry, // Registry for resource management
 		commitResourceChan: make(
 			chan []*entity.ReleaseInfo,
-		), // Channel for committing resource information
+			commitChanSize,
+		), // Buffered channel for committing resource information
 		synchronizer: synchronizer,                           // Configuration synchronizer
 		releaseTimer: releaseTimer,                           // Timer for stage management
 		logger:       logging.GetLogger().Named("committer"), // Logger instance named "committer"
@@ -151,7 +158,8 @@ func (c *Committer) commitGroup(ctx context.Context, releaseInfoList []*entity.R
 
 // 按照 gateway 的维度串行更新 etcd
 func (c *Committer) commitGatewayStage(ctx context.Context, si *entity.ReleaseInfo, wg *sync.WaitGroup) {
-	defer wg.Done()
+	// NOTE: wg.Done() is called inside the goroutine, not here!
+	// This ensures WaitGroup only completes after the actual work is done.
 	c.gatewayStageChanMapLock.Lock()
 	stageChan, ok := c.gatewayStageChanMap[si.GetGatewayName()]
 	if !ok {
@@ -161,6 +169,7 @@ func (c *Committer) commitGatewayStage(ctx context.Context, si *entity.ReleaseIn
 	c.gatewayStageChanMapLock.Unlock()
 	stageChan <- struct{}{}
 	utils.GoroutineWithRecovery(ctx, func() {
+		defer wg.Done() // Move wg.Done() here to ensure it's called after work completes
 		// Control stage writes for each gateway to be serial
 		c.logger.Infof("begin commit stage channel: %s", si.GetReleaseID())
 		c.commitStage(ctx, si, stageChan)
