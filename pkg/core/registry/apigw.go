@@ -51,18 +51,27 @@ type APIGWEtcdRegistry struct {
 	keyPrefix string
 
 	currentRevision int64
+
+	// watchEventChanSize is the buffer size for watch event channel
+	watchEventChanSize int
 }
 
 // NewAPIGWEtcdRegistry creates a new APIGWEtcdRegistry instance with the given etcd client and key prefix
 // Parameters:
 //   - etcdClient: A pointer to an etcd client instance
 //   - keyPrefix: A string representing the prefix for etcd keys
+//   - watchEventChanSize: Buffer size for watch event channel (0 will use default 1000)
 //
 // Returns:
 //   - A pointer to the newly created APIGWEtcdRegistry instance
-func NewAPIGWEtcdRegistry(etcdClient *clientv3.Client, keyPrefix string) *APIGWEtcdRegistry {
+func NewAPIGWEtcdRegistry(etcdClient *clientv3.Client, keyPrefix string, watchEventChanSize int) *APIGWEtcdRegistry {
+	// Ensure minimum buffer size to avoid blocking
+	if watchEventChanSize <= 0 {
+		watchEventChanSize = 100 // default buffer size
+	}
 	registry := &APIGWEtcdRegistry{
-		etcdClient: etcdClient,
+		etcdClient:         etcdClient,
+		watchEventChanSize: watchEventChanSize,
 	}
 	// Initialize logger for the registry with a specific name
 	registry.logger = logging.GetLogger().Named("registry")
@@ -84,11 +93,13 @@ func (r *APIGWEtcdRegistry) DeleteResourceByKey(key string) error {
 // Watch creates and returns a channel that produces update events of resources.
 func (r *APIGWEtcdRegistry) Watch(ctx context.Context) <-chan *entity.ResourceMetadata {
 	watchCtx, cancel := context.WithCancel(ctx)
-	retCh := make(chan *entity.ResourceMetadata)
+	// Use buffered channel to avoid blocking the watcher goroutine
+	retCh := make(chan *entity.ResourceMetadata, r.watchEventChanSize)
 	var etcdWatchCh clientv3.WatchChan
 	needCreateChan := true
 	go func() {
 		defer func() {
+			cancel() // Ensure watchCtx is cancelled when goroutine exits
 			r.currentRevision = 0
 			close(retCh)
 		}()

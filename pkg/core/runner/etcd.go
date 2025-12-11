@@ -88,7 +88,11 @@ func (r *EtcdAgentRunner) init() {
 	metric.InitMetric(prometheus.DefaultRegisterer)
 
 	// 2. init apigwEtcdRegistry
-	r.apigwEtcdRegistry = registry.NewAPIGWEtcdRegistry(r.client, r.cfg.Dashboard.Etcd.KeyPrefix)
+	r.apigwEtcdRegistry = registry.NewAPIGWEtcdRegistry(
+		r.client,
+		r.cfg.Dashboard.Etcd.KeyPrefix,
+		r.cfg.Operator.WatchEventChanSize,
+	)
 
 	r.leader, _ = leaderelection.NewEtcdLeaderElector(r.client, r.cfg.Dashboard.Etcd.KeyPrefix)
 	// 4. init output
@@ -106,6 +110,7 @@ func (r *EtcdAgentRunner) init() {
 		r.apigwEtcdRegistry,
 		r.synchronizer,
 		stageTimer,
+		r.cfg.Operator.CommitResourceChanSize,
 	)
 	commitChan := r.committer.GetCommitChan()
 
