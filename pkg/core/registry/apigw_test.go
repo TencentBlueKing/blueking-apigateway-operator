@@ -186,9 +186,9 @@ var _ = Describe("APIGWEtcdRegistry", func() {
 
 // Helper function to create ReleaseInfo for tests
 func createReleaseInfo(
-ctx context.Context,
-apiVersion, gateway, stage string,
-kind constant.APISIXResource,
+	ctx context.Context,
+	apiVersion, gateway, stage string,
+	kind constant.APISIXResource,
 ) *entity.ReleaseInfo {
 	return &entity.ReleaseInfo{
 		ResourceMetadata: entity.ResourceMetadata{
