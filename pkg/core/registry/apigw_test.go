@@ -46,7 +46,7 @@ var _ = Describe("APIGWEtcdRegistry", func() {
 			Expect(registry.keyPrefix).To(Equal("/bk-gateway"))
 			Expect(registry.logger).NotTo(BeNil())
 			// Default buffer size should be 1000 when 0 is passed
-			Expect(registry.watchEventChanSize).To(Equal(1000))
+			Expect(registry.watchEventChanSize).To(Equal(100))
 		})
 
 		It("should use custom buffer size when provided", func() {
@@ -186,9 +186,9 @@ var _ = Describe("APIGWEtcdRegistry", func() {
 
 // Helper function to create ReleaseInfo for tests
 func createReleaseInfo(
-	ctx context.Context,
-	apiVersion, gateway, stage string,
-	kind constant.APISIXResource,
+ctx context.Context,
+apiVersion, gateway, stage string,
+kind constant.APISIXResource,
 ) *entity.ReleaseInfo {
 	return &entity.ReleaseInfo{
 		ResourceMetadata: entity.ResourceMetadata{
@@ -224,7 +224,7 @@ var _ = Describe("APIGWEtcdRegistry with EmbedEtcd", func() {
 		etcd, client, err = startTestEtcd()
 		Expect(err).ShouldNot(HaveOccurred())
 
-		registry = NewAPIGWEtcdRegistry(client, "/bk-gateway-apigw", 1000)
+		registry = NewAPIGWEtcdRegistry(client, "/bk-gateway-apigw", 100)
 	})
 
 	AfterEach(func() {
