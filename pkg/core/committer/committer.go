@@ -161,12 +161,12 @@ func (c *Committer) commitGatewayStage(ctx context.Context, si *entity.ReleaseIn
 	// NOTE: wg.Done() is called inside the goroutine, not here!
 	// This ensures WaitGroup only completes after the actual work is done.
 	c.gatewayStageChanMapLock.Lock()
+	defer c.gatewayStageChanMapLock.Unlock()
 	stageChan, ok := c.gatewayStageChanMap[si.GetGatewayName()]
 	if !ok {
 		stageChan = make(chan struct{}, 1)
 		c.gatewayStageChanMap[si.GetGatewayName()] = stageChan
 	}
-	c.gatewayStageChanMapLock.Unlock()
 	stageChan <- struct{}{}
 	utils.GoroutineWithRecovery(ctx, func() {
 		defer wg.Done() // Move wg.Done() here to ensure it's called after work completes

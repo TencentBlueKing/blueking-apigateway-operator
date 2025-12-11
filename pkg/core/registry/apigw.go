@@ -66,7 +66,7 @@ type APIGWEtcdRegistry struct {
 //   - A pointer to the newly created APIGWEtcdRegistry instance
 func NewAPIGWEtcdRegistry(etcdClient *clientv3.Client, keyPrefix string, watchEventChanSize int) *APIGWEtcdRegistry {
 	// Ensure minimum buffer size to avoid blocking
-	if watchEventChanSize == 0 {
+	if watchEventChanSize <= 0 {
 		watchEventChanSize = 100 // default buffer size
 	}
 	registry := &APIGWEtcdRegistry{
