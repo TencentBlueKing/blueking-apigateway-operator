@@ -229,9 +229,11 @@ func (v *APISIXJsonSchemaValidator) checkUpstream(upstream *entity.UpstreamDef) 
 		nodes, ok := entity.NodesFormat(upstream.Nodes).([]*entity.Node)
 		if !ok {
 			return fmt.Errorf("当 `pass_host` 为 `node` 时, upstreams 节点不支持值 %v", nodes)
-		} else if len(nodes) != 1 {
-			return fmt.Errorf("当 `pass_host` 为 `node` 时, 目前仅支持 `node` 模式下的单节点")
 		}
+		// https://github.com/apache/apisix/pull/4208/files 已经支持多节点在pass_host为node模式下
+		// } else if len(nodes) != 1 {
+		//	return fmt.Errorf("当 `pass_host` 为 `node` 时, 目前仅支持 `node` 模式下的单节点")
+		//}
 	}
 
 	if upstream.PassHost == "rewrite" && upstream.UpstreamHost == "" {
