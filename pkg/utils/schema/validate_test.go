@@ -1151,15 +1151,7 @@ func TestAPISIXJsonSchemaValidatorCheckUpstream(t *testing.T) {
 			shouldFail: false,
 		},
 		{
-			name: "Invalid Empty Node",
-			upstream: &entity.UpstreamDef{
-				PassHost: "node",
-				Nodes:    []*entity.Node{},
-			},
-			shouldFail: true,
-		},
-		{
-			name: "Invalid Node Count",
+			name: "Valid Multiple Nodes with PassHost node",
 			upstream: &entity.UpstreamDef{
 				PassHost: "node",
 				Nodes: []*entity.Node{
@@ -1167,18 +1159,7 @@ func TestAPISIXJsonSchemaValidatorCheckUpstream(t *testing.T) {
 					{Host: "127.0.0.2", Port: 80, Weight: 1},
 				},
 			},
-			shouldFail: true,
-		},
-		{
-			name: "Invalid Node Count",
-			upstream: &entity.UpstreamDef{
-				PassHost: "node",
-				Nodes: []*entity.Node{
-					{Host: "127.0.0.1", Port: 80, Weight: 1},
-					{Host: "127.0.0.2", Port: 80, Weight: 1},
-				},
-			},
-			shouldFail: true,
+			shouldFail: false,
 		},
 		{
 			name: "Rewrite PassHost with NonEmpty UpstreamHost",
@@ -1204,6 +1185,19 @@ func TestAPISIXJsonSchemaValidatorCheckUpstream(t *testing.T) {
 				UpstreamHost: "example.com",
 			},
 			shouldFail: true,
+		},
+		{
+			name: "PassHost node with multiple nodes in map format",
+			upstream: &entity.UpstreamDef{
+				PassHost: "node",
+				Scheme:   "https",
+				Type:     "roundrobin",
+				Nodes: map[string]float64{
+					"httpbin.org:443":  1,
+					"mock.api7.ai:443": 1,
+				},
+			},
+			shouldFail: false,
 		},
 	}
 
