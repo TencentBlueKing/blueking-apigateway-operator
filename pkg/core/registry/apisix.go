@@ -114,7 +114,8 @@ func (e *ApisixEtcdRegistry) fullSync(ctx context.Context, syncTimeout time.Dura
 	for i := range ret.Kvs {
 		resource, err := e.parseResource(ret.Kvs[i].Key, ret.Kvs[i].Value)
 		if err != nil {
-			e.logger.Error(err, "Parse resource from etcd failed")
+			e.logger.Errorf("Parse resource [key=%s,value=%s] from etcd failed: %v",
+				ret.Kvs[i].Key, ret.Kvs[i].Value, err)
 			continue
 		}
 
@@ -159,7 +160,8 @@ func (e *ApisixEtcdRegistry) parseResource(key, value []byte) (resource entity.A
 		var metadata entity.ResourceMetadata
 		err = json.Unmarshal(value, &metadata)
 		if err != nil {
-			e.logger.Error("Unmarshal resource from etcd failed")
+			e.logger.Errorf("Unmarshal resource [key=%s,value=%s] from etcd failed: %v",
+				key, value, err)
 			return nil, fmt.Errorf("unmarshal resource from etcd failed: %w", err)
 		}
 		resource = &entity.PluginMetadata{
@@ -175,7 +177,8 @@ func (e *ApisixEtcdRegistry) parseResource(key, value []byte) (resource entity.A
 	if resourceType != constant.ApisixResourceTypePluginMetadata {
 		err = json.Unmarshal(value, resource)
 		if err != nil {
-			e.logger.Error("Unmarshal resource from etcd failed")
+			e.logger.Errorf("Unmarshal resource [key=%s,value=%s] from etcd failed: %v",
+				key, value, err)
 			return nil, fmt.Errorf("unmarshal resource from etcd failed: %w", err)
 		}
 	}
@@ -215,7 +218,12 @@ func (e *ApisixEtcdRegistry) incrSync() {
 			return
 		case event, ok := <-ch:
 			if !ok || event.Err() != nil {
-				e.logger.Error(event.Err(), "Watch event failed")
+				e.logger.Errorf(
+					"Watch event failed: %v, prefix: %s, revision: %d",
+					event.Err(),
+					e.Prefix,
+					e.currentRevision,
+				)
 
 				time.Sleep(constant.SyncSleepSeconds)
 
@@ -237,7 +245,12 @@ func (e *ApisixEtcdRegistry) incrSync() {
 			for _, evt := range event.Events {
 				err := e.handlerEvent(evt)
 				if err != nil {
-					e.logger.Errorf("Handle event failed:%v", err)
+					e.logger.Errorf(
+						"Handle event failed: %v, prefix: %s, revision: %d",
+						err,
+						e.Prefix,
+						e.currentRevision,
+					)
 					continue
 				}
 			}
@@ -256,7 +269,8 @@ func (e *ApisixEtcdRegistry) handlerEvent(event *clientv3.Event) error {
 			return err
 		}
 		if resource == nil {
-			return errors.New("resource is nil")
+			return fmt.Errorf("parse resource[key=%s,value=%s] from etcd failed: resource is nil",
+				event.Kv.Key, event.Kv.Value)
 		}
 
 		e.logger.Debugw(
@@ -278,7 +292,8 @@ func (e *ApisixEtcdRegistry) handlerEvent(event *clientv3.Event) error {
 		}
 
 		if resource == nil {
-			return errors.New("resource is nil")
+			return fmt.Errorf("parse resource[key=%s,value=%s] from etcd failed: resource is nil",
+				event.PrevKv.Key, event.PrevKv.Value)
 		}
 
 		e.logger.Debugw(
