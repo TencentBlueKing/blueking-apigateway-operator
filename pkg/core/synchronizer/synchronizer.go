@@ -65,7 +65,7 @@ func (as *ApisixConfigSynchronizer) Sync(
 	as.flushMux.Lock()
 	defer as.flushMux.Unlock()
 
-	as.logger.Debug("flush changes")
+	as.logger.Debugw("flush changes", "key", key, "config", config)
 	err := as.store.Alter(ctx, key, config)
 	if err != nil {
 		as.logger.Errorw("Failed to sync stage", "err", err, "key", key, "content", config)
@@ -84,7 +84,7 @@ func (as *ApisixConfigSynchronizer) SyncGlobal(
 ) error {
 	as.flushMux.Lock()
 	defer as.flushMux.Unlock()
-	as.logger.Debug("flush global changes")
+	as.logger.Debugw("flush global changes", "config", config)
 	err := as.store.AlterGlobal(ctx, config)
 	if err != nil {
 		as.logger.Errorw("Failed to sync global resource", "err", err, "content", config)
@@ -92,7 +92,7 @@ func (as *ApisixConfigSynchronizer) SyncGlobal(
 	}
 	metric.ReportStageConfigSyncMetric("global", "global")
 
-	as.logger.Debug("flush virtual stage")
+	as.logger.Debugw("flush virtual stage", "key", cfg.VirtualStageKey)
 	virtualStage := NewVirtualStage(as.apisixHealthzURI)
 	err = as.store.Alter(ctx, cfg.VirtualStageKey, virtualStage.MakeConfiguration())
 	if err != nil {
