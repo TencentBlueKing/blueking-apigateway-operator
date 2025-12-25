@@ -273,8 +273,8 @@ func (r *APIGWEtcdRegistry) extractResourceMetadata(key string, value []byte) (e
 	}()
 
 	if !constant.SupportEventResourceTypeMap[resourceKind] {
-		r.logger.Errorf("resource kind %s not support", resourceKind)
-		return ret, eris.Errorf("resource kind %s not support", resourceKind)
+		r.logger.Errorf("resource kind %s not support, key: %s", resourceKind, key)
+		return ret, eris.Errorf("resource kind %s not support, key: %s", resourceKind, key)
 	}
 
 	// /bk-gateway-apigw/v2/global/plugin_metadata/bk-concurrency-limit
@@ -313,18 +313,18 @@ func (r *APIGWEtcdRegistry) ListStageResources(stageRelease *entity.ReleaseInfo)
 		r.keyPrefix, stageRelease.APIVersion, stageRelease.Labels.Gateway, stageRelease.Labels.Stage)
 	resp, err := r.etcdClient.Get(stageRelease.Ctx, etcdKey, clientv3.WithPrefix())
 	if err != nil {
-		r.logger.Error(err, "get etcd value failed", "key", stageRelease.GetID())
+		r.logger.Error(err, "get etcd value failed", "key", etcdKey, "stageRelease", stageRelease.GetID())
 		return nil, err
 	}
 
 	if len(resp.Kvs) == 0 {
 		// 删除操作，返回空资源
-		r.logger.Errorf("empty etcd value key: %s", etcdKey)
+		r.logger.Errorf("empty etcd value, key: %s, stageRelease: %s", etcdKey, stageRelease.GetID())
 		return entity.NewEmptyApisixConfiguration(), nil
 	}
 	ret, err := r.ValueToStageResource(resp)
 	if err != nil {
-		r.logger.Error(err, "value to resource failed", "key", etcdKey)
+		r.logger.Error(err, "value to resource failed", "key", etcdKey, "stageRelease", stageRelease.GetID())
 		return nil, err
 	}
 	return ret, nil
@@ -343,7 +343,10 @@ func (r *APIGWEtcdRegistry) ValueToStageResource(resp *clientv3.GetResponse) (*e
 		}
 		if len(matches) < 7 {
 			r.logger.Errorf("Etcd key segment by slash should larger or equal to 7, key: %s", kv.Key)
-			return nil, eris.Errorf("Etcd key segment by slash should larger or equal to 7")
+			return nil, eris.Errorf(
+				"Etcd key segment by slash should larger or equal to 7, key: %s",
+				kv.Key,
+			)
 		}
 		resourceKind := constant.APISIXResource(matches[len(matches)-2])
 		// 跳过 bk-release 资源
@@ -356,13 +359,13 @@ func (r *APIGWEtcdRegistry) ValueToStageResource(resp *clientv3.GetResponse) (*e
 		}
 		resourceMetadata, err := r.extractResourceMetadata(string(kv.Key), kv.Value)
 		if err != nil {
-			r.logger.Errorf("extract resource metadata failed:%v, key: %s", err, kv.Key)
+			r.logger.Errorf("extract resource metadata failed: %v, key: %s", err, kv.Key)
 			return nil, err
 		}
 		// 校验配置 schema
 		err = validator.ValidateApisixJsonSchema(resourceMetadata.Labels.ApisixVersion, resourceKind, kv.Value)
 		if err != nil {
-			r.logger.Errorf("validate apisix json schema failed:%v, key: %s", err, kv.Key)
+			r.logger.Errorf("validate apisix json schema failed: %v, key: %s", err, kv.Key)
 			return nil, err
 		}
 		switch resourceKind {
@@ -370,7 +373,7 @@ func (r *APIGWEtcdRegistry) ValueToStageResource(resp *clientv3.GetResponse) (*e
 			var route entity.Route
 			err := json.Unmarshal(kv.Value, &route)
 			if err != nil {
-				r.logger.Errorf("unmarshal etcd value failed:%v, key: %s", err, kv.Key)
+				r.logger.Errorf("unmarshal etcd value failed: %v, key: %s", err, kv.Key)
 				return nil, err
 			}
 			route.ResourceMetadata = resourceMetadata
@@ -380,7 +383,7 @@ func (r *APIGWEtcdRegistry) ValueToStageResource(resp *clientv3.GetResponse) (*e
 			var service entity.Service
 			err := json.Unmarshal(kv.Value, &service)
 			if err != nil {
-				r.logger.Errorf("unmarshal etcd value failed:%v, key: %s", err, kv.Key)
+				r.logger.Errorf("unmarshal etcd value failed: %v, key: %s", err, kv.Key)
 				return nil, err
 			}
 			service.ResourceMetadata = resourceMetadata
@@ -398,7 +401,7 @@ func (r *APIGWEtcdRegistry) ValueToStageResource(resp *clientv3.GetResponse) (*e
 			var ssl entity.SSL
 			err := json.Unmarshal(kv.Value, &ssl)
 			if err != nil {
-				r.logger.Errorf("unmarshal etcd value failed:%v, key: %s", err, kv.Key)
+				r.logger.Errorf("unmarshal etcd value failed: %v, key: %s", err, kv.Key)
 				return nil, err
 			}
 			ssl.ResourceMetadata = resourceMetadata
