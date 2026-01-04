@@ -55,6 +55,7 @@ linters:
   exclusions:
     generated: lax
     paths:
+      - vendor$
       - third_party$
       - builtin$
       - tests/integration/*.go
@@ -132,6 +133,7 @@ formatters:
   exclusions:
     generated: lax
     paths:
+      - vendor$
       - third_party$
       - tests/integration/*.go
       - builtin$
