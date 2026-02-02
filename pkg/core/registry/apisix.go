@@ -268,9 +268,10 @@ func (e *ApisixEtcdRegistry) handlerEvent(event *clientv3.Event) error {
 				event.Kv.Key, event.Kv.Value, err)
 			return err
 		}
+
+		// skip empty resource on constant.SkippedValueEtcdInitDir or constant.SkippedValueEtcdEmptyObject
 		if resource == nil {
-			return fmt.Errorf("parse resource[key=%s,value=%s] from etcd failed: resource is nil",
-				event.Kv.Key, event.Kv.Value)
+			return nil
 		}
 
 		e.logger.Debugw(
