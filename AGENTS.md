@@ -346,7 +346,7 @@ tracing:
 
 ## HTTP API Endpoints
 
-All `/v1/open/*` endpoints require BasicAuth (account: `admin`, password from `http_server.auth_password` config).
+All `/v1/open/*` endpoints require BasicAuth (account: `bk-apigateway`, password from `httpServer.authPassword` config).
 
 - **GET /ping** - Health check
 - **GET /healthz** - Health check
