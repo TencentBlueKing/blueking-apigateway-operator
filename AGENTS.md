@@ -178,6 +178,68 @@ Control Plane (etcd)
    - Written by ApisixConfigSynchronizer
    - Default key prefix: `/apisix` (configurable)
 
+### etcd Key Structure and Gateway/Stage Mapping
+
+Resources are stored in two etcd instances with distinct key formats. Understanding these formats is critical to avoid prefix-collision bugs.
+
+#### Control Plane etcd Keys
+
+Stage-scoped resources use path-based keys with `/` separators:
+
+```
+/{key_prefix}/{api_version}/gateway/{gateway_name}/{stage_name}/{resource_type}/{resource_id}
+```
+
+Format constant (`pkg/constant/apisix.go`):
+```go
+ApigwStageResourcePrefixFormat = "%s/%s/gateway/%s/%s/"
+```
+
+Examples:
+- Route: `/bk-gateway-apigw/default/v2/gateway/my-gw/prod/route/my-gw.prod.123`
+- BkRelease: `/bk-gateway-apigw/default/v2/gateway/my-gw/prod/_bk_release/bk.release.my-gw.prod`
+
+Global resources (e.g., PluginMetadata) use a separate path without gateway/stage:
+```
+/{key_prefix}/{api_version}/global/{resource_type}/{resource_id}
+```
+
+**Prefix safety**: The trailing `/` after `{stage_name}` in `ApigwStageResourcePrefixFormat` ensures that etcd prefix queries for gateway `ab` (prefix `/.../gateway/ab/`) will NOT match keys for gateway `abc` (which live under `/.../gateway/abc/`). The same protection applies to stage names.
+
+#### Data Plane (APISIX) etcd Keys
+
+APISIX resources are stored flat under their resource type:
+```
+/{key_prefix}/{resource_type_plural}/{resource_id}
+```
+
+Examples:
+- Route: `/apisix/routes/my-gw.prod.123`
+- Service: `/apisix/services/my-gw.prod.456`
+- SSL: `/apisix/ssls/my-gw.prod.789`
+- PluginMetadata: `/apisix/plugin_metadata/bk-concurrency-limit`
+
+The Data Plane does NOT use gateway/stage in the key path. Instead, resource ownership is determined by the `labels` field inside the JSON value (`labels.gateway.bk.tencent.com/gateway` and `labels.gateway.bk.tencent.com/stage`), matched via exact string comparison — never prefix matching.
+
+#### Key Generation Functions
+
+| Function | Location | Format | Purpose |
+|----------|----------|--------|---------|
+| `GenStagePrimaryKey` | `pkg/config/config.go` | `bk.release.{gateway}.{stage}` | Stage identifier for Data Plane cache lookup (exact match) |
+| `GenResourceIDKey` | `pkg/biz/common.go` | `{gateway}.{stage}.{resourceID}` | Control Plane resource ID |
+| `GenApigwResourceNameKey` | `pkg/biz/common.go` | `{gateway}.{stage}.{resourceName}` | Control Plane resource name key (truncated at 100 chars) |
+| `GenApisixResourceNameKey` | `pkg/biz/common.go` | `{gateway}-{stage}-{resourceName}` | APISIX resource name key (lowercase, dashes, md5-hashed if >64 chars) |
+
+#### Prefix-Collision Safety Summary
+
+All operations that could theoretically cause prefix collision are protected:
+
+| Layer | Mechanism | Safe? |
+|-------|-----------|-------|
+| Control Plane etcd queries | Path separator `/` after each segment (`/.../gateway/{gw}/{stage}/`) | Yes — `/ab/` does not match `/abc/` |
+| Data Plane cache lookup | Exact string comparison on `GenStagePrimaryKey` result | Yes — `bk.release.ab.prod` ≠ `bk.release.abc.prod` |
+| Data Plane etcd put/delete | Exact key operations, no `WithPrefix()` | Yes — per-resource exact key |
+
 ### Resource Types
 
 Actively supported (`SupportResourceTypeMap`):
