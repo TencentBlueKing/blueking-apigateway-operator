@@ -261,7 +261,11 @@ func (s *ApisixEtcdStore) alterByStage(
 		if len(deleteConf.Services) > 0 {
 			// sleep delInterval to avoid resource data inconsistency
 			time.Sleep(s.delInterval)
-			if err = s.batchDeleteResource(ctx, constant.ApisixResourceTypeServices, deleteConf.Services); err != nil {
+			if err = s.batchDeleteResource(
+				ctx,
+				constant.ApisixResourceTypeServices,
+				deleteConf.Services,
+			); err != nil {
 				return fmt.Errorf("batch delete service failed: %w", err)
 			}
 		}
@@ -329,7 +333,11 @@ func (s *ApisixEtcdStore) alterGlobal(
 	var putFlag, delFlag bool
 	// put resources
 	if putConf != nil && len(putConf.PluginMetadata) > 0 {
-		if err = s.batchPutResource(ctx, constant.ApisixResourceTypePluginMetadata, putConf.PluginMetadata); err != nil {
+		if err = s.batchPutResource(
+			ctx,
+			constant.ApisixResourceTypePluginMetadata,
+			putConf.PluginMetadata,
+		); err != nil {
 			return fmt.Errorf("batch put global plugin metadata failed: %w", err)
 		}
 		putFlag = true
