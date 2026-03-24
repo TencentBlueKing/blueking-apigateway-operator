@@ -32,7 +32,7 @@ func ValidateApisixJsonSchema(version string, resourceType constant.APISIXResour
 	// 校验资源配置
 	apisixVersion, err := utils.ToXVersion(version)
 	if err != nil {
-		return fmt.Errorf("to x version failed, err: %v", err)
+		return fmt.Errorf("to x version failed, err: %w", err)
 	}
 	validator, err := schema.NewAPISIXJsonSchemaValidator(
 		apisixVersion,
@@ -44,7 +44,7 @@ func ValidateApisixJsonSchema(version string, resourceType constant.APISIXResour
 	}
 	err = validator.Validate(config)
 	if err != nil {
-		return fmt.Errorf("validate apisix json schema failed, err: %v", err)
+		return fmt.Errorf("validate apisix json schema failed, err: %w", err)
 	}
 	return nil
 }

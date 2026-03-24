@@ -95,7 +95,10 @@ func (c *Committer) Run(ctx context.Context) {
 			segmentLength := 10
 			for offset := 0; offset < len(resourceList); offset += segmentLength {
 				if offset+segmentLength > len(resourceList) {
-					rawResource, _ := json.Marshal(resourceList[offset:])
+					rawResource, err := json.Marshal(resourceList[offset:])
+					if err != nil {
+						c.logger.Errorw("marshal resource list failed", "err", err)
+					}
 					c.commitGroup(ctx, resourceList[offset:])
 					c.logger.Infow(
 						"Commit resource group done",
@@ -104,7 +107,10 @@ func (c *Committer) Run(ctx context.Context) {
 					)
 					break
 				}
-				rawResource, _ := json.Marshal(resourceList[offset:(offset + segmentLength)])
+				rawResource, err := json.Marshal(resourceList[offset:(offset + segmentLength)])
+				if err != nil {
+					c.logger.Errorw("marshal resource list failed", "err", err)
+				}
 				c.commitGroup(ctx, resourceList[offset:(offset+segmentLength)])
 				c.logger.Infow("Commit resource group done", "resourceList", string(rawResource))
 			}

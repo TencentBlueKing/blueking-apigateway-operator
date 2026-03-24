@@ -43,7 +43,7 @@ func init() {
 	rootCmd.Flags().StringVarP(&cfgFile, "config", "c", "", "config file (default is config.yml;required)")
 	rootCmd.PersistentFlags().Bool("viper", true, "Use Viper for configuration")
 
-	rootCmd.MarkFlagRequired("config")
+	_ = rootCmd.MarkFlagRequired("config")
 	viper.SetDefault("author", "blueking-paas")
 }
 

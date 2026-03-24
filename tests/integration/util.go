@@ -20,6 +20,7 @@
 package integration
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"os"
@@ -105,11 +106,15 @@ func GetBkDefaultStageRelease() map[string]entity.ReleaseInfo {
 
 // NewMetricsAdapter creates a new MetricsAdapter
 func NewMetricsAdapter(host string) (*MetricsAdapter, error) {
-	resp, err := http.Get(host + "/metrics")
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, host+"/metrics", nil)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = resp.Body.Close() }()
 	// 创建一个解析器
 	parser := expfmt.TextParser{}
 	// 使用解析器解析metrics 数据

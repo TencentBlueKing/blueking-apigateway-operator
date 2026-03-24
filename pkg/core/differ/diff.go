@@ -20,6 +20,8 @@
 package differ
 
 import (
+	"maps"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	json "github.com/json-iterator/go"
@@ -186,9 +188,7 @@ func (d *ConfigDiffer) DiffRoutes(
 	oldResMap := make(map[string]*entity.Route)
 	putList = make(map[string]*entity.Route)
 	deleteList = make(map[string]*entity.Route)
-	for key, oldRes := range old {
-		oldResMap[key] = oldRes
-	}
+	maps.Copy(oldResMap, old)
 	for key, newRes := range new {
 		oldRes, ok := oldResMap[key]
 		if !ok {
@@ -215,9 +215,7 @@ func (d *ConfigDiffer) DiffRoutes(
 		}
 		delete(oldResMap, key)
 	}
-	for key, oldRes := range oldResMap {
-		deleteList[key] = oldRes
-	}
+	maps.Copy(deleteList, oldResMap)
 	return putList, deleteList
 }
 
@@ -229,9 +227,7 @@ func (d *ConfigDiffer) DiffServices(
 	oldResMap := make(map[string]*entity.Service)
 	putList = make(map[string]*entity.Service)
 	deleteList = make(map[string]*entity.Service)
-	for key, oldRes := range old {
-		oldResMap[key] = oldRes
-	}
+	maps.Copy(oldResMap, old)
 	for key, newRes := range new {
 		oldRes, ok := oldResMap[key]
 		if !ok {
@@ -257,9 +253,7 @@ func (d *ConfigDiffer) DiffServices(
 		}
 		delete(oldResMap, key)
 	}
-	for key, oldRes := range oldResMap {
-		deleteList[key] = oldRes
-	}
+	maps.Copy(deleteList, oldResMap)
 	return putList, deleteList
 }
 
@@ -271,9 +265,7 @@ func (d *ConfigDiffer) DiffPluginMetadatas(
 	oldResMap := make(map[string]*entity.PluginMetadata)
 	putList = make(map[string]*entity.PluginMetadata)
 	deleteList = make(map[string]*entity.PluginMetadata)
-	for key, oldRes := range old {
-		oldResMap[key] = oldRes
-	}
+	maps.Copy(oldResMap, old)
 	for key, newRes := range new {
 		oldRes, ok := oldResMap[key]
 		if !ok {
@@ -288,9 +280,7 @@ func (d *ConfigDiffer) DiffPluginMetadatas(
 		}
 		delete(oldResMap, key)
 	}
-	for key, oldRes := range oldResMap {
-		deleteList[key] = oldRes
-	}
+	maps.Copy(deleteList, oldResMap)
 	return putList, deleteList
 }
 
@@ -302,9 +292,7 @@ func (d *ConfigDiffer) DiffSSLs(
 	oldResMap := make(map[string]*entity.SSL)
 	putList = make(map[string]*entity.SSL)
 	deleteList = make(map[string]*entity.SSL)
-	for key, oldRes := range old {
-		oldResMap[key] = oldRes
-	}
+	maps.Copy(oldResMap, old)
 	for key, newRes := range new {
 		oldRes, ok := oldResMap[key]
 		if !ok {
@@ -323,8 +311,6 @@ func (d *ConfigDiffer) DiffSSLs(
 		}
 		delete(oldResMap, key)
 	}
-	for key, oldRes := range oldResMap {
-		deleteList[key] = oldRes
-	}
+	maps.Copy(deleteList, oldResMap)
 	return putList, deleteList
 }

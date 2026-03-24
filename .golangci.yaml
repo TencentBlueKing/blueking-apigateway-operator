@@ -117,18 +117,6 @@ issues:
   #
   # Default: false
   new: false
-  # Show only new issues created after the best common ancestor (merge-base against HEAD).
-  # Default: ""
-  new-from-merge-base: master
-  # Show only new issues created after git revision `REV`.
-  # Default: ""
-  new-from-rev: HEAD
-  # Show only new issues created in git patch with set file path.
-  # Default: ""
-  new-from-patch: ""
-  # Show issues in any part of update files (requires new-from-rev or new-from-patch).
-  # Default: false
-  whole-files: true
   # Fix found issues (if it's supported by the linter).
   # Default: false
   fix: false

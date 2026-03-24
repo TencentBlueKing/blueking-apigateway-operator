@@ -64,10 +64,9 @@ func mapKV2Node(key string, val float64) (*Node, error) {
 // NodesFormat convert obj to []*Node
 func NodesFormat(obj any) any {
 	nodes := make([]*Node, 0)
-	switch objType := obj.(type) {
+	switch value := obj.(type) {
 	case map[string]float64:
-		log.Infof("nodes type: %v", objType)
-		value := obj.(map[string]float64)
+		log.Infof("nodes type: %v", value)
 		for key, val := range value {
 			node, err := mapKV2Node(key, val)
 			if err != nil {
@@ -77,10 +76,13 @@ func NodesFormat(obj any) any {
 		}
 		return nodes
 	case map[string]any:
-		log.Infof("nodes type: %v", objType)
-		value := obj.(map[string]any)
+		log.Infof("nodes type: %v", value)
 		for key, val := range value {
-			node, err := mapKV2Node(key, val.(float64))
+			fval, ok := val.(float64)
+			if !ok {
+				return obj
+			}
+			node, err := mapKV2Node(key, fval)
 			if err != nil {
 				return obj
 			}
@@ -88,24 +90,28 @@ func NodesFormat(obj any) any {
 		}
 		return nodes
 	case []*Node:
-		log.Infof("nodes type: %v", objType)
+		log.Infof("nodes type: %v", value)
 		return obj
 	case []any:
-		log.Infof("nodes type []interface{}: %v", objType)
-		list := obj.([]any)
-		for _, v := range list {
-			val := v.(map[string]any)
+		log.Infof("nodes type []interface{}: %v", value)
+		for _, v := range value {
+			val, ok := v.(map[string]any)
+			if !ok {
+				return obj
+			}
+			host, _ := val["host"].(string)
+			portF, _ := val["port"].(float64)
+			weightF, _ := val["weight"].(float64)
 			node := &Node{
-				Host:   val["host"].(string),
-				Port:   int(val["port"].(float64)),
-				Weight: int(val["weight"].(float64)),
+				Host:   host,
+				Port:   int(portF),
+				Weight: int(weightF),
 			}
-			if _, ok := val["priority"]; ok {
-				node.Priority = int(val["priority"].(float64))
+			if p, ok := val["priority"].(float64); ok {
+				node.Priority = int(p)
 			}
-
-			if _, ok := val["metadata"]; ok {
-				node.Metadata = val["metadata"].(map[string]any)
+			if m, ok := val["metadata"].(map[string]any); ok {
+				node.Metadata = m
 			}
 
 			nodes = append(nodes, node)

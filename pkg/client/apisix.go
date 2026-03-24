@@ -121,7 +121,9 @@ func retryEvaluator(gateway, stage string, publishID int64, retryError *error,
 		}
 		// The http Client and Transport guarantee that Body is always non-nil
 		// So this has to be closed or there could be a coroutine leak
-		defer res.Body.Close()
+		defer func() {
+			_ = res.Body.Close()
+		}()
 
 		if res.StatusCode >= http.StatusInternalServerError || res.StatusCode == http.StatusTooManyRequests {
 			return retry.ErrServer

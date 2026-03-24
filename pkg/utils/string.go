@@ -19,14 +19,11 @@
 // Package utils ...
 package utils
 
+import "slices"
+
 // StringInSlice see if a string is in a string slice
 func StringInSlice(target string, strs []string) bool {
-	for _, str := range strs {
-		if target == str {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(strs, target)
 }
 
 // TruncateBytes ...
