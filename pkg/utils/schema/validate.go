@@ -24,6 +24,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/apache/apisix-ingress-controller/pkg/log"
 	"github.com/tidwall/gjson"
@@ -95,7 +96,7 @@ func NewResourceSchema(
 	schemaObj, err := jsonLoader.LoadJSON()
 	if err != nil {
 		log.Warnf("schema validate failed: schema json decode failed, path: %s, %v", jsonPath, err)
-		return "", nil, fmt.Errorf("schema 验证失败: schema json decode 失败, 路径: %s, %v", jsonPath, err)
+		return "", nil, fmt.Errorf("schema 验证失败: schema json decode 失败, 路径: %s, %w", jsonPath, err)
 	}
 	schemaMap, ok := schemaObj.(map[string]any)
 	if !ok {
@@ -152,8 +153,11 @@ func getPlugins(conf any) (map[string]any, string) {
 	case *entity.PluginMetadata:
 		log.Infof("type of conf: %#v", confType)
 		var config map[string]any
-		rawConfig, _ := json.Marshal(confType.PluginMetadataConf)
-		err := json.Unmarshal(rawConfig, &config)
+		rawConfig, err := json.Marshal(confType.PluginMetadataConf)
+		if err != nil {
+			return nil, ""
+		}
+		err = json.Unmarshal(rawConfig, &config)
 		if err != nil {
 			return nil, ""
 		}
@@ -201,13 +205,13 @@ func (v *APISIXJsonSchemaValidator) cHashKeySchemaCheck(upstream *entity.Upstrea
 	// Create a new schema validator from the schema definition
 	s, err := gojsonschema.NewSchema(gojsonschema.NewStringLoader(schemaDef))
 	if err != nil {
-		return fmt.Errorf("schema 验证失败: %s", err)
+		return fmt.Errorf("schema 验证失败: %w", err)
 	}
 
 	// Validate the upstream key against the schema
 	ret, err := s.Validate(gojsonschema.NewGoLoader(upstream.Key))
 	if err != nil {
-		return fmt.Errorf("schema 验证失败: %s", err)
+		return fmt.Errorf("schema 验证失败: %w", err)
 	}
 
 	// If validation fails, return detailed error information
@@ -273,10 +277,8 @@ func (v *APISIXJsonSchemaValidator) checkUpstream(upstream *entity.UpstreamDef) 
 }
 
 func checkRemoteAddr(remoteAddrs []string) error {
-	for _, remoteAddr := range remoteAddrs {
-		if remoteAddr == "" {
-			return fmt.Errorf("schema 验证失败: 无效字段 remote_addrs")
-		}
+	if slices.Contains(remoteAddrs, "") {
+		return fmt.Errorf("schema 验证失败: 无效字段 remote_addrs")
 	}
 	return nil
 }
@@ -325,12 +327,12 @@ func checkVars(vars []any) error {
 		return nil
 	}
 	for i, item := range vars {
-		// 检查是否为数组
-		if _, ok := item.([]any); !ok {
+		arr, ok := item.([]any)
+		if !ok {
 			return errors.New(" vars数组的值对象必须也是列表")
 		}
-		if err := validateVarItem(item.([]any)); err != nil {
-			return fmt.Errorf("第 %d 项错误: %v", i+1, err)
+		if err := validateVarItem(arr); err != nil {
+			return fmt.Errorf("第 %d 项错误: %w", i+1, err)
 		}
 	}
 	return nil
@@ -339,7 +341,7 @@ func checkVars(vars []any) error {
 func (v *APISIXJsonSchemaValidator) checkConf(reqBody any) error {
 	switch bodyType := reqBody.(type) {
 	case *entity.Route:
-		route := reqBody.(*entity.Route)
+		route := bodyType
 		log.Infof("type of reqBody: %#v", bodyType)
 		if err := v.checkUpstream(route.Upstream); err != nil {
 			return err
@@ -354,12 +356,12 @@ func (v *APISIXJsonSchemaValidator) checkConf(reqBody any) error {
 		}
 
 	case *entity.Service:
-		service := reqBody.(*entity.Service)
+		service := bodyType
 		if err := v.checkUpstream(service.Upstream); err != nil {
 			return err
 		}
 	case *entity.Upstream:
-		upstream := reqBody.(*entity.Upstream)
+		upstream := bodyType
 		if err := v.checkUpstream(&upstream.UpstreamDef); err != nil {
 			return err
 		}
@@ -392,7 +394,7 @@ func (v *APISIXJsonSchemaValidator) Validate(rawConfig json.RawMessage) error { 
 	ret, err := v.schema.Validate(gojsonschema.NewBytesLoader(rawConfig))
 	if err != nil {
 		log.Errorf("schema validate failed: %s, config: %s", err, rawConfig)
-		return fmt.Errorf("资源: %s schema 验证失败: %s", resourceIdentification, err)
+		return fmt.Errorf("资源: %s schema 验证失败: %w", resourceIdentification, err)
 	}
 
 	if !ret.Valid() {
@@ -466,7 +468,12 @@ func (v *APISIXJsonSchemaValidator) Validate(rawConfig json.RawMessage) error { 
 			return fmt.Errorf("资源:%s schema 验证失败: 未找到 schema, 路径: %s",
 				resourceIdentification, "plugins."+pluginName)
 		}
-		schemaMap = schemaValue.(map[string]any)
+		var ok bool
+		schemaMap, ok = schemaValue.(map[string]any)
+		if !ok {
+			return fmt.Errorf("资源:%s schema 验证失败: schema 格式错误, 路径: %s",
+				resourceIdentification, "plugins."+pluginName)
+		}
 		schemaByte, err := json.Marshal(schemaMap)
 		if err != nil {
 			log.Warnf(
@@ -475,7 +482,7 @@ func (v *APISIXJsonSchemaValidator) Validate(rawConfig json.RawMessage) error { 
 				err,
 			)
 			return fmt.Errorf(
-				"资源: %s schema 验证失败: schema json encode 失败, 路径: %s, %v",
+				"资源: %s schema 验证失败: schema json encode 失败, 路径: %s, %w",
 				resourceIdentification, "plugins."+pluginName,
 				err,
 			)
@@ -484,12 +491,16 @@ func (v *APISIXJsonSchemaValidator) Validate(rawConfig json.RawMessage) error { 
 		s, err := gojsonschema.NewSchema(gojsonschema.NewBytesLoader(schemaByte))
 		if err != nil {
 			log.Errorf("init schema[pluginName:%s] validate failed: %s", pluginName, err)
-			return fmt.Errorf("资源:%s 插件:%s schema 验证失败: %s", resourceIdentification, pluginName,
+			return fmt.Errorf("资源:%s 插件:%s schema 验证失败: %w", resourceIdentification, pluginName,
 				err)
 		}
 
 		// check property disable, if is bool, remove from json schema checking
-		conf := pluginConf.(map[string]any)
+		conf, ok := pluginConf.(map[string]any)
+		if !ok {
+			return fmt.Errorf("资源:%s schema 验证失败: 插件配置格式错误, 插件: %s",
+				resourceIdentification, pluginName)
+		}
 		var exchange bool
 		disable, ok := conf["disable"]
 		if ok {
@@ -503,7 +514,7 @@ func (v *APISIXJsonSchemaValidator) Validate(rawConfig json.RawMessage) error { 
 		ret, err := s.Validate(gojsonschema.NewGoLoader(conf))
 		if err != nil {
 			log.Errorf("schema validate failed: %s", err)
-			return fmt.Errorf("资源:%s 插件:%s schema 验证失败: %s", resourceIdentification, pluginName,
+			return fmt.Errorf("资源:%s 插件:%s schema 验证失败: %w", resourceIdentification, pluginName,
 				err)
 		}
 

@@ -19,7 +19,7 @@ SETUP_ENVTEST = $(LOCALBIN)/setup-envtest
 DOCKER_COMPOSE := $(shell if docker compose version >/dev/null 2>&1; then echo "docker compose"; elif command -v docker-compose >/dev/null 2>&1; then echo "docker-compose"; else echo ""; fi)
 
 ## Tool Versions
-GOLANGCI_LINT_VERSION ?= v2.1.5
+GOLANGCI_LINT_VERSION ?= v2.11.4
 MOCKGEN_VERSION ?= v1.6.0
 GINKGO_VERSION ?= v2.27.2
 
@@ -54,7 +54,7 @@ fmt:
 	$(GOLANGCI_LINT) fmt  ./...
 
 lint:
-	$(GOLANGCI_LINT) run  ./...
+	$(GOLANGCI_LINT) run --fix ./...
 
 .PHONY: test
 test: ## Run tests.

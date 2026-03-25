@@ -144,7 +144,9 @@ func (r *EtcdAgentRunner) Run(ctx context.Context) {
 		r.committer,
 	)
 	httpServer.RegisterMetric(prometheus.DefaultGatherer)
-	httpServer.Run(ctx, r.cfg)
+	if err := httpServer.Run(ctx, r.cfg); err != nil {
+		r.logger.Errorw("http server run failed", "err", err)
+	}
 
 	// 2. waiting leader election
 	var keepAliveChan <-chan struct{} = make(chan struct{})

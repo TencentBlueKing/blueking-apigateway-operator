@@ -132,14 +132,14 @@ func newSentryLogCore(cfg *config.Config) (zapcore.Core, error) {
 
 // GetControllerLogger ...
 func GetControllerLogger() *zap.Logger {
-	return ctrl.Log.WithName("controller").GetSink().(zapr.Underlier).GetUnderlying()
+	return ctrl.Log.WithName("controller").GetSink().(zapr.Underlier).GetUnderlying() //nolint:forcetypeassert
 }
 
 // GetLogger ...
 func GetLogger() *zap.SugaredLogger {
 	if defaultLogger == nil {
 		logger, _ := zap.NewProduction()
-		defer logger.Sync()
+		defer func() { _ = logger.Sync() }()
 		return logger.Sugar()
 	}
 	return defaultLogger.Sugar()

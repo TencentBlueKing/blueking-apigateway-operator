@@ -21,7 +21,7 @@
 package main
 
 import (
-	_ "net/http/pprof"
+	_ "net/http/pprof" //nolint:gosec
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 

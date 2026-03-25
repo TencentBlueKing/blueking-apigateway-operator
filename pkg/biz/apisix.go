@@ -107,8 +107,18 @@ func GetApisixStageCurrentVersionInfo(
 	}
 
 	for _, plugin := range route.Plugins {
-		pluginData := plugin.(map[string]any)
-		responseExample := pluginData["response_example"].(string)
+		pluginData, ok := plugin.(map[string]any)
+		if !ok {
+			continue
+		}
+		responseExampleAny, exists := pluginData["response_example"]
+		if !exists {
+			continue
+		}
+		responseExample, ok := responseExampleAny.(string)
+		if !ok {
+			continue
+		}
 		if responseExample == "" {
 			continue
 		}

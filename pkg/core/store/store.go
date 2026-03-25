@@ -146,15 +146,15 @@ func (s *ApisixEtcdStore) Get(stageKey string) *entity.ApisixStageResource {
 	ret := entity.NewEmptyApisixConfiguration()
 	routes := s.registry[constant.ApisixResourceTypeRoutes].GetStageResources(stageKey)
 	for key, val := range routes {
-		ret.Routes[key] = val.(*entity.Route)
+		ret.Routes[key] = val.(*entity.Route) //nolint:forcetypeassert
 	}
 	services := s.registry[constant.ApisixResourceTypeServices].GetStageResources(stageKey)
 	for key, val := range services {
-		ret.Services[key] = val.(*entity.Service)
+		ret.Services[key] = val.(*entity.Service) //nolint:forcetypeassert
 	}
 	ssls := s.registry[constant.ApisixResourceTypeSSL].GetStageResources(stageKey)
 	for key, val := range ssls {
-		ret.SSLs[key] = val.(*entity.SSL)
+		ret.SSLs[key] = val.(*entity.SSL) //nolint:forcetypeassert
 	}
 	return ret
 }
@@ -168,7 +168,7 @@ func (s *ApisixEtcdStore) GetAll() map[string]*entity.ApisixStageResource {
 		if _, ok := configMap[stageName]; !ok {
 			configMap[stageName] = entity.NewEmptyApisixConfiguration()
 		}
-		configMap[stageName].Routes[key] = route.(*entity.Route)
+		configMap[stageName].Routes[key] = route.(*entity.Route) //nolint:forcetypeassert
 	}
 
 	serviceMap := s.registry[constant.ApisixResourceTypeServices].GetAllResources()
@@ -177,7 +177,7 @@ func (s *ApisixEtcdStore) GetAll() map[string]*entity.ApisixStageResource {
 		if _, ok := configMap[stageName]; !ok {
 			configMap[stageName] = entity.NewEmptyApisixConfiguration()
 		}
-		configMap[stageName].Services[key] = service.(*entity.Service)
+		configMap[stageName].Services[key] = service.(*entity.Service) //nolint:forcetypeassert
 	}
 
 	sslMap := s.registry[constant.ApisixResourceTypeSSL].GetAllResources()
@@ -186,7 +186,7 @@ func (s *ApisixEtcdStore) GetAll() map[string]*entity.ApisixStageResource {
 		if _, ok := configMap[stageName]; !ok {
 			configMap[stageName] = entity.NewEmptyApisixConfiguration()
 		}
-		configMap[stageName].SSLs[key] = ssl.(*entity.SSL)
+		configMap[stageName].SSLs[key] = ssl.(*entity.SSL) //nolint:forcetypeassert
 	}
 	return configMap
 }
@@ -261,7 +261,11 @@ func (s *ApisixEtcdStore) alterByStage(
 		if len(deleteConf.Services) > 0 {
 			// sleep delInterval to avoid resource data inconsistency
 			time.Sleep(s.delInterval)
-			if err = s.batchDeleteResource(ctx, constant.ApisixResourceTypeServices, deleteConf.Services); err != nil {
+			if err = s.batchDeleteResource(
+				ctx,
+				constant.ApisixResourceTypeServices,
+				deleteConf.Services,
+			); err != nil {
 				return fmt.Errorf("batch delete service failed: %w", err)
 			}
 		}
@@ -292,7 +296,7 @@ func (s *ApisixEtcdStore) GetGlobal() *entity.ApisixGlobalResource {
 	for key, pm := range pmMap {
 		// Global 资源没有 stage 标签，stage 为空字符串
 		if pm.GetStageName() == "" {
-			ret.PluginMetadata[key] = pm.(*entity.PluginMetadata)
+			ret.PluginMetadata[key] = pm.(*entity.PluginMetadata) //nolint:forcetypeassert
 		}
 	}
 	return ret
@@ -329,7 +333,11 @@ func (s *ApisixEtcdStore) alterGlobal(
 	var putFlag, delFlag bool
 	// put resources
 	if putConf != nil && len(putConf.PluginMetadata) > 0 {
-		if err = s.batchPutResource(ctx, constant.ApisixResourceTypePluginMetadata, putConf.PluginMetadata); err != nil {
+		if err = s.batchPutResource(
+			ctx,
+			constant.ApisixResourceTypePluginMetadata,
+			putConf.PluginMetadata,
+		); err != nil {
 			return fmt.Errorf("batch put global plugin metadata failed: %w", err)
 		}
 		putFlag = true
@@ -369,8 +377,8 @@ func (s *ApisixEtcdStore) batchPutResource(
 	for resourceIter.Next() {
 		// set create time from cache resource
 		st := time.Now()
-		key := resourceIter.Key().Interface().(string)
-		resource := resourceIter.Value().Interface().(entity.ApisixResource)
+		key := resourceIter.Key().Interface().(string)                       //nolint:forcetypeassert
+		resource := resourceIter.Value().Interface().(entity.ApisixResource) //nolint:forcetypeassert
 		if resource.GetCreateTime() == 0 {
 			resource.SetCreateTime(st.Unix())
 		}
@@ -421,8 +429,8 @@ func (s *ApisixEtcdStore) batchDeleteResource(
 	for resourceMap.Next() {
 		st := time.Now()
 
-		key := resourceMap.Key().Interface().(string)
-		resource := resourceMap.Value().Interface().(entity.ApisixResource)
+		key := resourceMap.Key().Interface().(string)                       //nolint:forcetypeassert
+		resource := resourceMap.Value().Interface().(entity.ApisixResource) //nolint:forcetypeassert
 
 		s.logger.Debugw(
 			"Delete resource from etcd",

@@ -1,6 +1,6 @@
 module github.com/TencentBlueKing/blueking-apigateway-operator
 
-go 1.24.4
+go 1.25.5
 
 require (
 	github.com/apache/apisix-ingress-controller v1.8.4

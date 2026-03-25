@@ -296,8 +296,10 @@ func (c *Config) init() {
 	c.Dashboard.Etcd.KeyPrefix = strings.TrimSuffix(c.Dashboard.Etcd.KeyPrefix, "/")
 
 	if c.Debug {
-		by, _ := json.Marshal(c)
-		fmt.Println(string(by))
+		by, err := json.Marshal(c)
+		if err == nil {
+			fmt.Println(string(by))
+		}
 	}
 }
 

@@ -96,7 +96,9 @@ func initLog() {
 }
 
 func initTracing() {
-	trace.InitTrace(globalConfig.Tracing, config.InstanceName)
+	if err := trace.InitTrace(globalConfig.Tracing, config.InstanceName); err != nil {
+		logger.Errorw("failed to init tracing", "err", err)
+	}
 }
 
 func gracefulShutdown(shutdownHookFuncOptions ...func()) {
@@ -121,7 +123,7 @@ func gracefulShutdown(shutdownHookFuncOptions ...func()) {
 }
 
 func preRun(cmd *cobra.Command, args []string) {
-	cmd.ParseFlags(args)
+	_ = cmd.ParseFlags(args)
 	initConfig()
 	initSentry()
 	initLog()

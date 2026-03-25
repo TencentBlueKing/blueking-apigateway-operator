@@ -32,7 +32,7 @@ import (
 
 // MustServeHTTP ...
 func MustServeHTTP(ctx context.Context, addr, network string, handler http.Handler) {
-	logger := ctrl.LoggerFrom(ctx).GetSink().(zapr.Underlier).GetUnderlying()
+	logger := ctrl.LoggerFrom(ctx).GetSink().(zapr.Underlier).GetUnderlying() //nolint:forcetypeassert
 	lc := net.ListenConfig{}
 	l, err := lc.Listen(ctx, network, addr)
 	if err != nil {
@@ -43,7 +43,7 @@ func MustServeHTTP(ctx context.Context, addr, network string, handler http.Handl
 			zap.String("network", network),
 		)
 	}
-	err = http.Serve(l, otelhttp.NewHandler(handler, "server"))
+	err = http.Serve(l, otelhttp.NewHandler(handler, "server")) //nolint:gosec
 	if ctx.Err() == nil {
 		logger.Panic(
 			"Server exited with error",

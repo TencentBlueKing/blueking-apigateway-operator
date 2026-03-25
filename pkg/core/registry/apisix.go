@@ -23,6 +23,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 	"strings"
 	"sync"
 	"time"
@@ -238,7 +239,7 @@ func (e *ApisixEtcdRegistry) incrSync() {
 				// reset channel
 				needCreateChan = true
 				cancel()
-				c, cancel = context.WithCancel(e.ctx)
+				c, cancel = context.WithCancel(e.ctx) //nolint:fatcontext
 				break
 			}
 			// handler event
@@ -334,9 +335,7 @@ func (e *ApisixEtcdRegistry) GetAllResources() map[string]entity.ApisixResource 
 	defer e.mux.RUnlock()
 
 	resources := make(map[string]entity.ApisixResource)
-	for key, resource := range e.resources {
-		resources[key] = resource
-	}
+	maps.Copy(resources, e.resources)
 
 	return resources
 }

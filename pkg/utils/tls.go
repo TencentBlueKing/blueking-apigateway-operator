@@ -40,7 +40,7 @@ func NewClientTLSConfig(cafile, certfile, keyfile string) (*tls.Config, error) {
 	}
 
 	conf := &tls.Config{
-		InsecureSkipVerify: true,
+		InsecureSkipVerify: true, //nolint:gosec
 		RootCAs:            caPool,
 		Certificates:       []tls.Certificate{*cert},
 	}

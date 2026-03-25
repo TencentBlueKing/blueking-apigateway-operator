@@ -57,14 +57,14 @@ func (l *listApigwCommand) Init() {
 	cmd.Flags().StringP("write-out", "w", "json", "response write out format (simple, json, yaml)")
 	cmd.Flags().Bool("count", false, "gateway resources count")
 	cmd.Flags().Bool("current-version", false, "gateway stage version")
-	cmd.MarkFlagRequired("gateway_name")
-	cmd.MarkFlagRequired("stage_name")
+	_ = cmd.MarkFlagRequired("gateway_name")
+	_ = cmd.MarkFlagRequired("stage_name")
 	cmd.MarkFlagsMutuallyExclusive("resource_id", "resource_name")
 
 	cmd.Flags().StringVarP(&cfgFile, "config", "c", "", "config file (default is config.yml;required)")
 	cmd.PersistentFlags().Bool("viper", true, "Use Viper for configuration")
 
-	cmd.MarkFlagRequired("config")
+	_ = cmd.MarkFlagRequired("config")
 	viper.SetDefault("author", "blueking-paas")
 
 	rootCmd.AddCommand(cmd)

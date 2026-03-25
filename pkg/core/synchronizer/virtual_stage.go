@@ -140,7 +140,11 @@ func (s *VirtualStage) makeExtraConfiguration() *entity.ExtraApisixStageResource
 		s.logger.Errorw("open resource path", "err", err, "path", extraApisixResourcesPath)
 		return &configuration
 	}
-	defer file.Close()
+	defer func() {
+		if err := file.Close(); err != nil {
+			s.logger.Errorw("failed to close file", "err", err, "path", extraApisixResourcesPath)
+		}
+	}()
 	decoder := yaml.NewDecoder(file)
 	err = decoder.Decode(&configuration)
 	if err != nil {

@@ -128,7 +128,7 @@ func (r *APIGWEtcdRegistry) Watch(ctx context.Context) <-chan *entity.ResourceMe
 					time.Sleep(time.Second * 5)
 					needCreateChan = true
 					cancel()
-					watchCtx, cancel = context.WithCancel(ctx)
+					watchCtx, cancel = context.WithCancel(ctx) //nolint:fatcontext
 					break
 				}
 

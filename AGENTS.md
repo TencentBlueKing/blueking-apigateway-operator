@@ -6,7 +6,7 @@ BlueKing API Gateway Operator is a Kubernetes operator that bridges the Control 
 
 **Key Design**: This is NOT a traditional Kubernetes CRD-based operator. It primarily uses etcd for both watching Control Plane changes and writing Data Plane configurations.
 
-**Tech Stack**: Go 1.24, Cobra CLI, Gin HTTP framework, etcd v3, Ginkgo/Gomega testing, Zap logging, OpenTelemetry tracing, Prometheus metrics.
+**Tech Stack**: Go 1.25, Cobra CLI, Gin HTTP framework, etcd v3, Ginkgo/Gomega testing, Zap logging, OpenTelemetry tracing, Prometheus metrics.
 
 ## Common Commands
 
@@ -504,6 +504,12 @@ diff apigw.json apisix.json
 5. Test locally or run `make integration`
 6. Commit changes with descriptive message
 7. Create PR following CONTRIBUTING guidelines
+
+## After Code Changes
+
+Always run `make lint` and `make test` after making code changes and fix any issues before considering the work done.
+
+When asked to "make a PR", create the pull request targeting `upstream/master`.
 
 ## Related Projects
 
