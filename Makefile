@@ -22,6 +22,7 @@ DOCKER_COMPOSE := $(shell if docker compose version >/dev/null 2>&1; then echo "
 GOLANGCI_LINT_VERSION ?= v2.11.4
 MOCKGEN_VERSION ?= v1.6.0
 GINKGO_VERSION ?= v2.27.2
+SETUP_ENVTEST_VERSION ?= v0.0.0-20260305142021-f9589b9f2b9d
 
 
 # Setting SHELL to bash allows bash commands to be executed by recipes.
@@ -41,7 +42,7 @@ init: $(LOCALBIN)
 	# for ginkgo
 	GOBIN=$(LOCALBIN) go install github.com/onsi/ginkgo/v2/ginkgo@$(GINKGO_VERSION)
 	# for envtest
-	GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
+	GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@$(SETUP_ENVTEST_VERSION)
 
 
 all: build
@@ -79,5 +80,4 @@ ifeq ($(DOCKER_COMPOSE),)
 	$(error "Neither 'docker compose' nor 'docker-compose' found. Please install Docker Compose.")
 endif
 	cd tests/integration && $(DOCKER_COMPOSE) down && $(DOCKER_COMPOSE) up -d --wait && $(GINKGO) -ldflags="-s=false" -gcflags="-l"; $(DOCKER_COMPOSE) down
-
 
