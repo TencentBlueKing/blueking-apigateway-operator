@@ -8,6 +8,24 @@ BlueKing API Gateway Operator is a Kubernetes operator that bridges the Control 
 
 **Tech Stack**: Go 1.25, Cobra CLI, Gin HTTP framework, etcd v3, Ginkgo/Gomega testing, Zap logging, OpenTelemetry tracing, Prometheus metrics.
 
+## Environment Activation
+
+Activate the Go runtime from the repository root before running Go, lint, or test commands:
+
+```bash
+source .envrc
+```
+
+The expected runtime is `go1.25.5`, matching the `go.mod` directive. Verify activation with:
+
+```bash
+which go
+go version
+go env GOROOT GOVERSION
+```
+
+`which go` and `GOROOT` should both point at the same GVM `go1.25.5` installation. If `.envrc` is missing or activation still leaves a mixed toolchain, stop and ask for the correct runtime setup before running `make lint` or `make test`.
+
 ## Common Commands
 
 ### Setup and Dependencies
