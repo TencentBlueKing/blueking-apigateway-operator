@@ -5,6 +5,9 @@
 
 简体中文 | [English](README_EN.md)
 
+> 2026-05-25 已归档，挪到 https://github.com/TencentBlueKing/blueking-apigateway 项目中 src/operator 作为子项目；从 release/1.22 开始的镜像由新仓库构建。
+
+
 ## 概览
 
 蓝鲸 API 网关（API Gateway），是一种高性能、高可用的 API 托管服务，可以帮助开发者创建、发布、维护、监控和保护 API， 以快速、低成本、低风险地对外开放蓝鲸应用或其他系统的数据或服务
